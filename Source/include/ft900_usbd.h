@@ -495,7 +495,7 @@ void USBD_detach(void);
     @brief     Check if the device is connected to a host (or external power source).
     @details   Checks the VBUS detect line for a host connected.
  **/
-int8_t USBD_is_connected();
+int8_t USBD_is_connected(void);
 
 /**
     @brief     Connect to a USB host.
