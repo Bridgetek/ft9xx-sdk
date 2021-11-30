@@ -538,7 +538,7 @@ int ethernet_read(size_t *blen, uint8_t *buf)
         return 0;
     }
 
-    dst = (uint32_t*)buf;
+    dst = __builtin_assume_aligned(buf, sizeof(uint32_t));
 
     /* Store the current interrupt mask and then disable all interrupts.
      * Note: This is safe to call from within an ISR.
@@ -632,7 +632,7 @@ int ethernet_write(uint8_t *buf, size_t blen)
     size += 3;
     size &= (~3L);
 
-    src = (uint32_t*)buf;
+    src = __builtin_assume_aligned(buf, sizeof(uint32_t));
     data_reg = &ETH->ETH_DATA;
 
     CRITICAL_SECTION_BEGIN

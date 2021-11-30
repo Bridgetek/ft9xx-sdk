@@ -58,6 +58,7 @@
 #include <ft900_usb_dfu.h>
 #include <ft900_usbd.h>
 #include <ft900_usbd_dfu.h>
+#include <ft900_startup_dfu.h>
 
 //#define STARTUP_UART_OUTPUT
 #ifdef STARTUP_UART_OUTPUT

@@ -605,6 +605,9 @@ int8_t USBH_CDCACM_set_control_line_state(USBH_CDCACM_context *ctx, USB_CDC_cont
 {
     int32_t status;
     USB_device_request devReq;
+	// Control line state is a 16 bit value sent in wValue.
+	uint16_t cpState;
+	memcpy(&cpState, state, sizeof(uint16_t));
 
     if (ctx->acmCapabilities & USB_CDC_ACM_CAPABILITIES_LINE_STATE_CODING)
     {
@@ -612,8 +615,8 @@ int8_t USBH_CDCACM_set_control_line_state(USBH_CDCACM_context *ctx, USB_CDC_cont
 		devReq.bmRequestType = USB_BMREQUESTTYPE_DIR_HOST_TO_DEV |
 				USB_BMREQUESTTYPE_CLASS | USB_BMREQUESTTYPE_RECIPIENT_INTERFACE;
 		devReq.wIndex = ctx->controlInterfaceNumber;
-		devReq.wValue = *((uint16_t *)state);
-		devReq.wLength = sizeof(USB_CDC_control_line_state);
+		devReq.wValue = cpState;
+		devReq.wLength = 0;
 
 		status = USBH_device_setup_transfer(ctx->hControlDevice, &devReq, NULL, 500);
 
