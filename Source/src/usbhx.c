@@ -55,6 +55,7 @@
 
 #include <ft900_usb.h>
 #include <ft900_usbh.h>
+#include <ft900_usbhx.h>
 
 /* CONSTANTS ***********************************************************************/
 
@@ -223,7 +224,7 @@ int8_t USBHX_find_by_class(USBH_device_handle *phDev, USBH_interface_handle *phI
     return status;
 }
 
-USBH_STATE USBHX_root_enumerate_wait(void)
+USBH_STATE USBHX_enumerate_wait(void)
 {
     USBH_STATE connect;
 
@@ -292,37 +293,37 @@ static int8_t usbhx_enumerate_parse_config_desc_64(USBH_device_handle hDev, uint
 	return usbhx_enumerate_parse_config_desc(hDev, type, index, offset, len, buf, buf0);
 }
 
-int8_t usbhx_enumerate_parse_config_desc_128(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
+static int8_t usbhx_enumerate_parse_config_desc_128(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
 {
 	uint8_t buf0[128];
 	return usbhx_enumerate_parse_config_desc(hDev, type, index, offset, len, buf, buf0);
 }
 
-int8_t usbhx_enumerate_parse_config_desc_256(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
+static int8_t usbhx_enumerate_parse_config_desc_256(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
 {
 	uint8_t buf0[256];
 	return usbhx_enumerate_parse_config_desc(hDev, type, index, offset, len, buf, buf0);
 }
 
-int8_t usbhx_enumerate_parse_config_desc_512(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
+static int8_t usbhx_enumerate_parse_config_desc_512(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
 {
 	uint8_t buf0[512];
 	return usbhx_enumerate_parse_config_desc(hDev, type, index, offset, len, buf, buf0);
 }
 
-int8_t usbhx_enumerate_parse_config_desc_1024(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
+static int8_t usbhx_enumerate_parse_config_desc_1024(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
 {
 	uint8_t buf0[1024];
 	return usbhx_enumerate_parse_config_desc(hDev, type, index, offset, len, buf, buf0);
 }
 
-int8_t usbhx_enumerate_parse_config_desc_2048(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
+static int8_t usbhx_enumerate_parse_config_desc_2048(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
 {
 	uint8_t buf0[2048];
 	return usbhx_enumerate_parse_config_desc(hDev, type, index, offset, len, buf, buf0);
 }
 
-int8_t usbhx_enumerate_parse_config_desc_4096(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
+static int8_t usbhx_enumerate_parse_config_desc_4096(USBH_device_handle hDev, uint8_t type, uint8_t index, uint16_t offset, uint16_t len, uint8_t *buf)
 {
 	uint8_t buf0[4096];
 	return usbhx_enumerate_parse_config_desc(hDev, type, index, offset, len, buf, buf0);

@@ -391,7 +391,7 @@ static inline uint32_t usbh_read_periodic_list(uint32_t offset)
 
 /** @brief Interrupt handler for USB Host stack.
  */
-void ISR_usbh(void)
+static void ISR_usbh(void)
 {
 #ifdef USBH_USE_INTERRUPTS
 	uint32_t intStatus;
@@ -950,7 +950,7 @@ static void usbh_update_transactions(USBH_xfer **list)
  * endpoints to the next smaller power of 2. e.g. 10 mS will actually poll at
  * 8 mS.
  */
-static void usbh_periodic_init()
+static void usbh_periodic_init(void)
 {
 	uint32_t i;
 	uint32_t reg;
@@ -1031,7 +1031,7 @@ static void usbh_periodic_init()
 
 /** @brief Asynchronous List initialisation.
  */
-static void usbh_asynch_init()
+static void usbh_asynch_init(void)
 {
 	usbh_async_ep_list = usbh_alloc_endpoint();
 	usbh_async_ep_list->enumValue = -1;
@@ -3206,7 +3206,7 @@ static int8_t usbh_hub_port_remove(USBH_device *hubDev, uint8_t hubPort)
 	return status;
 }
 
-static void usbh_update_periodic_tree()
+static void usbh_update_periodic_tree(void)
 {
 	// Device address
 	uint32_t i;
@@ -4534,7 +4534,7 @@ static void usbh_free_hc_buffer(void *hc_buf, uint32_t size)
 }
 
 // Clear 8KB HC shared memory
-static void usbh_hc_memclear()
+static void usbh_hc_memclear(void)
 {
 	uint32_t i;
 

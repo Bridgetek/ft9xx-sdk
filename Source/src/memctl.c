@@ -50,6 +50,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <ft900.h>
+
 /* CONSTANTS ***********************************************************************/
 
 /**
@@ -405,8 +407,10 @@ void __attribute__((optimize("O0"))) memcpy_pm2dat( void *dest, const __flash__ 
     endLen = newLen & 0x03;
 
     // Pick the initial long destination word to copy to
-    pLongDest = (uint32_t*) ( pDest + destCnt );
+    pLongDest = (uint32_t*) __builtin_assume_aligned(( pDest + destCnt ), sizeof(uint32_t));
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-align"
     // Pick the initial source word to start our algorithm at
     if ( srcCnt <= destCnt )
     {
@@ -418,6 +422,7 @@ void __attribute__((optimize("O0"))) memcpy_pm2dat( void *dest, const __flash__ 
         // Set pSrc to the start of the first full word
         pLongSrc = (__flash__ uint32_t*) ( pSrc + srcCnt - 4 );
     }
+#pragma GCC diagnostic pop
 
     // There are 4 different longWord copy methods
     methodSelect = ( srcCnt - destCnt ) & 0x03;
@@ -551,7 +556,7 @@ void memcpy_dat2flash_reboot(uint32_t dst, void *src, size_t s)
  *
  */
 
-void memcpy_pm2flash(uint32_t dst, void *src, size_t s)
+void memcpy_pm2flash(uint32_t dst, const void *src, size_t s)
 {
 	if(s == 0) return; /* Invalid */
 

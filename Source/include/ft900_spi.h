@@ -145,6 +145,12 @@ typedef enum
  */
 int8_t spi_init(ft900_spi_regs_t* dev, spi_dir_t dir, spi_clock_mode_t clock_mode, uint16_t div);
 
+/** @brief Enable the SPI device
+ *  @param dev the device to use
+ *  @returns 0 on a success or -1 for a failure
+ */
+int8_t spi_enable(ft900_spi_regs_t* dev);
+
 /** @brief Disable the SPI device
  *  @param dev the device to use
  *  @returns 0 on a success or -1 for a failure

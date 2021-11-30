@@ -81,7 +81,7 @@ uint8_t isHighSpeed;		/**< Variable to indicate if high speed mode is enabled */
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
-static uint8_t i2c_wait_for()
+static uint8_t i2c_wait_for(void)
 {
 	// Noops added because i2cm driver was failing on -02 optimization (works with -O0)
   // It takes some time for the BUSY bit to be set. The NOOPs delay the wait-till-not-busy check 
@@ -108,7 +108,7 @@ void i2cm_init(I2CM_speed_mode mode, uint32_t i2c_clk_speed)
 
 	isHighSpeed = 0;	/* high speed mode is not enabled by default */
 
-	/* Set I2CM clock frequency by writing to I2CM_TIMER_PERIOD – Timer Period Register (address offset: 0x03).
+	/* Set I2CM clock frequency by writing to I2CM_TIMER_PERIOD ï¿½ Timer Period Register (address offset: 0x03).
 	 * Frequency scaler (TIMER_PRD)is used in Standard/Fast/Fast-plus modes to calculate the I2C clock period (SCL_PRD).
 	 *
 	 * In Standard speed mode:

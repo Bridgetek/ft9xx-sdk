@@ -2334,7 +2334,7 @@ SDHOST_STATUS sdhost_abort(void) {
 #define CHECK_FUNCTION_HS_MODE      (uint32_t)(0x00FFFFF1)
 
 
-SDHOST_STATUS sdhost_send_wide_data_cmd(uint8_t cmd_id, uint32_t arg, uint8_t* pData, uint16_t blk_size)
+static SDHOST_STATUS sdhost_send_wide_data_cmd(uint8_t cmd_id, uint32_t arg, uint8_t* pData, uint16_t blk_size)
 {
     uint16_t cmd;
     uint16_t transfer_mode;
@@ -2451,7 +2451,7 @@ SDHOST_STATUS sdhost_send_wide_data_cmd(uint8_t cmd_id, uint32_t arg, uint8_t* p
 
 }
 
-bool sdhost_cmd6(void)
+static bool sdhost_cmd6(void)
 {
 
     uint16_t timeout;

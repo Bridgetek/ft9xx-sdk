@@ -157,7 +157,7 @@ static const uint32_t oid_supported_list[] = {
 /* @brief Encapsulated command buffer.
  * @details The incoming command is stored here.
  */
-static uint8_t rndis_command[RNDIS_ENCAPSULATED_COMMAND_LEN];
+static uint8_t rndis_command[RNDIS_ENCAPSULATED_COMMAND_LEN] __attribute__ ((aligned (4)));
 /* @brief Encapsulated command buffer length.
  * @details The length of the command in the command buffer. If it is zero then
  * there is no current command to process.
@@ -166,7 +166,7 @@ static volatile uint16_t rndis_commandLen;
 /* @brief Encapsulated response buffer.
  * @details The outgoing response is stored here.
  */
-static uint8_t rndis_response[RNDIS_ENCAPSULATED_COMMAND_LEN];
+static uint8_t rndis_response[RNDIS_ENCAPSULATED_COMMAND_LEN] __attribute__ ((aligned (4)));
 /* @brief Encapsulated response buffer length.
  * @details The length of the response in the response buffer. If it is zero then
  * there is no current response to return to the host.
@@ -176,8 +176,8 @@ static volatile uint16_t rndis_responseLen;
  * @details A response packet containing a status indicating the type of
  * connection change is built to be sent to the host.
  */
-static uint8_t rndis_connection[sizeof(struct rndis_indicate_status_msg) + 4];
-static uint8_t rndis_speed_change[sizeof(struct rndis_indicate_status_msg) + 4];
+static uint8_t rndis_connection[sizeof(struct rndis_indicate_status_msg) + 4] __attribute__ ((aligned (4)));
+static uint8_t rndis_speed_change[sizeof(struct rndis_indicate_status_msg) + 4] __attribute__ ((aligned (4)));
 /* @brief Connection change status buffer length.
  * @details The length of the reponse in the connection change status buffer.
  * If it is zero then there is no current response to return to the host.
@@ -290,12 +290,12 @@ struct rndis_stats {
 // RNDIS functions.
 static uint32_t rndis_query_handler(uint32_t OID, uint8_t *set, uint32_t setLen, struct rndis_query_cmplt *resp);
 static uint32_t rndis_set_handler(uint32_t OID, uint8_t *set, uint32_t setLen, struct rndis_set_cmplt *resp);
-static void rndis_handle_command();
-static void rndis_notification();
+static void rndis_handle_command(void);
+static void rndis_notification(void);
 
 static void rndis_send_status(uint32_t status)
 {
-	struct rndis_indicate_status_msg *resp = (struct rndis_indicate_status_msg *)rndis_connection;
+	struct rndis_indicate_status_msg *resp = (struct rndis_indicate_status_msg *) __builtin_assume_aligned(rndis_connection, sizeof(uint32_t));
 
 	resp->MessageType = REMOTE_NDIS_INDICATE_STATUS_MSG;
 	resp->MessageLength = sizeof(struct rndis_indicate_status_msg);
@@ -307,10 +307,10 @@ static void rndis_send_status(uint32_t status)
 	rndis_notificationAvailableConnection = 1;
 }
 
-static void rndis_send_speed_change()
+static void rndis_send_speed_change(void)
 {
-	struct rndis_indicate_status_msg *resp = (struct rndis_indicate_status_msg *)rndis_speed_change;
-	uint32_t *pPayload = (uint32_t *)&rndis_speed_change[sizeof(struct rndis_indicate_status_msg)];
+	struct rndis_indicate_status_msg *resp = (struct rndis_indicate_status_msg *) __builtin_assume_aligned(rndis_speed_change, sizeof(uint32_t));
+	uint32_t *pPayload = (uint32_t *) __builtin_assume_aligned(&rndis_speed_change[sizeof(struct rndis_indicate_status_msg)], sizeof(uint32_t));
 
 	resp->MessageType = REMOTE_NDIS_INDICATE_STATUS_MSG;
 	resp->MessageLength = sizeof(struct rndis_indicate_status_msg) + 4;
@@ -324,10 +324,10 @@ static void rndis_send_speed_change()
 	rndis_notificationAvailableChange = 1;
 }
 
-static void rndis_handle_command()
+static void rndis_handle_command(void)
 {
-	union rndis_msg *msg = (union rndis_msg *)rndis_command;
-	union rndis_msg *resp = (union rndis_msg *)rndis_response;
+	union rndis_msg *msg = (union rndis_msg *)__builtin_assume_aligned(rndis_command, sizeof(uint32_t));
+	union rndis_msg *resp = (union rndis_msg *)__builtin_assume_aligned(rndis_response, sizeof(uint32_t));
 
 #ifdef RNDIS_COMMAND_DEBUG
 	tfp_printf("CMD: ");
@@ -816,7 +816,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 	return status;
 }
 
-static void rndis_update_packet_filter()
+static void rndis_update_packet_filter(void)
 {
     if (rndis_packet_filter != 0)
 	{
@@ -854,7 +854,7 @@ static void rndis_update_packet_filter()
 static uint32_t rndis_set_handler(uint32_t OID, uint8_t *set, uint32_t setLen, struct rndis_set_cmplt *resp)
 {
 	uint32_t status = RNDIS_STATUS_NOT_SUPPORTED;
-	uint32_t *pSet32 = (uint32_t *)set;
+	uint32_t *pSet32 = (uint32_t *)__builtin_assume_aligned(set, sizeof(uint32_t));
 
 	// Not currently used.
 	(void)setLen;
@@ -937,7 +937,7 @@ struct rndis_notification_msg {
 		uint32_t reserved;
 };
 
-static void rndis_notification()
+static void rndis_notification(void)
 {
 	static const struct rndis_notification_msg	responseAvail = { RNDIS_RESPONSE_AVAILABLE, 0};
 
@@ -977,7 +977,7 @@ void USBD_RNDIS_timer(void)
 int8_t USBD_RNDIS_encap_command(size_t length)
 {
 	// Receive encapsulated command.
-	length = USBD_transfer_ep0(USBD_DIR_OUT, rndis_command, length, length);
+	length = USBD_transfer_ep0(USBD_DIR_OUT, __builtin_assume_aligned(rndis_command, sizeof(uint32_t)), length, length);
 	rndis_commandLen = length;
 	USBD_transfer_ep0(USBD_DIR_IN, NULL, 0, 0);
 
@@ -993,7 +993,7 @@ int8_t USBD_RNDIS_encap_response(size_t length)
 		{
 			rndis_responseLen = length;
 		}
-		USBD_transfer_ep0(USBD_DIR_IN, rndis_response, rndis_responseLen, length);
+		USBD_transfer_ep0(USBD_DIR_IN, __builtin_assume_aligned(rndis_response, sizeof(uint32_t)), rndis_responseLen, length);
 		rndis_responseLen = 0;
 		rndis_notificationAvailableResp = 0;
 	}
@@ -1003,7 +1003,7 @@ int8_t USBD_RNDIS_encap_response(size_t length)
 		{
 			rndis_connectionLen = length;
 		}
-		USBD_transfer_ep0(USBD_DIR_IN, rndis_connection, rndis_connectionLen, length);
+		USBD_transfer_ep0(USBD_DIR_IN, __builtin_assume_aligned(rndis_connection, sizeof(uint32_t)), rndis_connectionLen, length);
 		rndis_connectionLen = 0;
 		rndis_notificationAvailableConnection = 0;
 	}
@@ -1013,7 +1013,7 @@ int8_t USBD_RNDIS_encap_response(size_t length)
 		{
 			rndis_speed_changeLen = length;
 		}
-		USBD_transfer_ep0(USBD_DIR_IN, rndis_speed_change, rndis_speed_changeLen, length);
+		USBD_transfer_ep0(USBD_DIR_IN, __builtin_assume_aligned(rndis_speed_change, sizeof(uint32_t)), rndis_speed_changeLen, length);
 		rndis_speed_changeLen = 0;
 		rndis_notificationAvailableChange = 0;
 	}

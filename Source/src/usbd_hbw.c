@@ -99,12 +99,14 @@ int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t length)
 
 /* API FUNCTIONS ************************************************************/
 
+#ifdef USBD_HBW_ISOCHRONOUS_AUTOHEADER
 void USBD_HBW_send_end_of_frame(void)
 {
 	//Preserve endpoint number hooked and
 	//Set SEQDATA_END bit
     USBD_HBW->ctrl3 = ((USBD_HBW->ctrl3) & MASK_USBD_HBW_CTRL3_ENDP_NUM) | MASK_USBD_HBW_CTRL3_SEQDATA_END;
 }
+#endif
 
 int8_t USBD_HBW_is_space_avail(void)
 {
