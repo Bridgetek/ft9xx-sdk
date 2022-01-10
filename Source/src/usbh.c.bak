@@ -1129,10 +1129,7 @@ static int8_t usbh_ep_list_add(USBH_endpoint *epThis, USBH_endpoint *epListHead,
 		epEnd = epEnd->list_next;
 	}
 
-	if (epEnd->type != USBH_EP_INT)
-	{
-		EHCI_MEM(hc_this_qh->next) |= MASK_EHCI_QUEUE_HEAD_TERMINATE;
-	}
+	EHCI_MEM(hc_this_qh->next) |= MASK_EHCI_QUEUE_HEAD_TERMINATE;
 
 	if (/*(epEnd != NULL) &&*/ (epPrev != NULL))
 	{
@@ -1153,7 +1150,6 @@ static int8_t usbh_ep_list_add(USBH_endpoint *epThis, USBH_endpoint *epListHead,
 				if (epThis->type == USBH_EP_INT)
 				{
 					EHCI_MEM(hc_this_qh->next) |= MASK_EHCI_QUEUE_HEAD_TERMINATE;
-					EHCI_MEM(hc_prev_qh->next) &= (~MASK_EHCI_QUEUE_HEAD_TERMINATE);
 				}
 			}
 
@@ -2870,22 +2866,14 @@ static uint8_t usbh_clear_hub_port_feature(USBH_device *hubDev, uint8_t hubPort,
 
 	if (hubDev != NULL)
 	{
-		if (feature == USB_HUB_CLASS_FEATURE_PORT_RESET)
-		{
-			// ClearPortFeature(PORT_RESET) not to be used on hubs.
-			status = USBH_OK;
-		}
-		else
-		{
-			devReq.bRequest = USB_HUB_REQUEST_CODE_CLEAR_FEATURE;
-			devReq.bmRequestType = USB_BMREQUESTTYPE_DIR_HOST_TO_DEV |
-					USB_BMREQUESTTYPE_CLASS | USB_BMREQUESTTYPE_RECIPIENT_PORT;
-			devReq.wIndex = hubPort;
-			devReq.wValue = feature;
-			devReq.wLength = 0;
+		devReq.bRequest = USB_HUB_REQUEST_CODE_CLEAR_FEATURE;
+		devReq.bmRequestType = USB_BMREQUESTTYPE_DIR_HOST_TO_DEV |
+				USB_BMREQUESTTYPE_CLASS | USB_BMREQUESTTYPE_RECIPIENT_PORT;
+		devReq.wIndex = hubPort;
+		devReq.wValue = feature;
+		devReq.wLength = 0;
 
-			status = usbh_setup_transfer(hubDev->endpoint0, &devReq, 0, 0, 500);
-		}
+		status = usbh_setup_transfer(hubDev->endpoint0, &devReq, 0, 0, 500);
 	}
 	else
 	{
@@ -3112,24 +3100,6 @@ static int8_t usbh_hub_port_update(USBH_device *hubDev, uint8_t hubPort, uint8_t
 		}
 
 		connectStatus = portStatus.currentConnectStatus;
-	}
-
-	// Note: Clear any other change requests which are pending.
-	if (portStatus.portEnabledChange)
-	{
-		usbh_clear_hub_port_feature(hubDev, hubPort, USB_HUB_CLASS_FEATURE_C_PORT_ENABLE);
-	}
-	if (portStatus.portSuspendChange)
-	{
-		usbh_clear_hub_port_feature(hubDev, hubPort, USB_HUB_CLASS_FEATURE_C_PORT_SUSPEND);
-	}
-	if (portStatus.portOverCurrentChange)
-	{
-		usbh_clear_hub_port_feature(hubDev, hubPort, USB_HUB_CLASS_FEATURE_C_PORT_OVER_CURRENT);
-	}
-	if (portStatus.portResetChange)
-	{
-		usbh_clear_hub_port_feature(hubDev, hubPort, USB_HUB_CLASS_FEATURE_C_PORT_RESET);
 	}
 
 	if (connectChange)
