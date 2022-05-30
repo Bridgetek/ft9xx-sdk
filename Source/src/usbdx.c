@@ -70,9 +70,9 @@
 #define USBDINE(x, ...)		LOGE(x, ##__VA_ARGS__)
 #endif /* FEATURE_USBDIN_DEBUG */
 
-#ifndef NDEBUG
+#ifndef USBDX_NDEBUG
 static bool in_usbd_isr;
-#endif /* !NDEBUG */
+#endif /* !USBDX_NDEBUG */
 
 /**
  @brief Decode of USB_ENDPOINT_SIZE definitions into actual endpoint
@@ -80,15 +80,15 @@ static bool in_usbd_isr;
 static const uint16_t usbd_ep_size_bytes[D2XX_TOTAL_NUM_SIZES] =
 { 8, 16, 32, 64, 128, 256, 512, 1024 };
  **/
-#define usbd_ep_size_bytes(x)		(8 << (x))
+#define usbdx_ep_size_bytes(x)		(8 << (x))
 
-static inline bool usbd_is_pipe_ready(const struct pipe *pp)
+static inline bool usbdx_is_pipe_ready(const struct USBDX_pipe *pp)
 {
 	return !!(USBD_EP_SR_REG(pp->id) &
 		((pp->ep & 0x80) ? MASK_USBD_EPxSR_INPRDY : MASK_USBD_EPxSR_OPRDY));
 }
 
-static inline void usbd_in_request(uint8_t pipe,
+static inline void usbdx_in_request(uint8_t pipe,
 		const uint8_t *buffer, uint16_t len)
 {
 	volatile uint8_t *data_reg = (uint8_t *)&(USBD->ep[pipe].epxfifo);
@@ -99,16 +99,16 @@ static inline void usbd_in_request(uint8_t pipe,
 	assert((uint32_t)buffer % 4 == 0);
 	if (aligned) {
 		__asm__ volatile ("streamout.l %0,%1,%2" : :
-				"r"(data_reg), "r"(buffer), "r"(aligned));
+				"r"(data_reg), "r"(buffer), "r"(aligned): "memory");
 	}
 	if (left) {
 		__asm__ volatile ("streamout.b %0,%1,%2" : :
-				"r"(data_reg), "r"(buffer + aligned), "r"(left));
+				"r"(data_reg), "r"(buffer + aligned), "r"(left): "memory");
 	}
 	USBD_EP_SR_REG(pipe) = MASK_USBD_EPxSR_INPRDY;
 }
 
-static inline uint16_t usbd_out_request(uint8_t pipe, uint8_t *buffer)
+static inline uint16_t usbdx_out_request(uint8_t pipe, uint8_t *buffer)
 {
 	volatile uint8_t *data_reg = (uint8_t *)&(USBD->ep[pipe].epxfifo);
 	uint16_t len = USBD_EP_CNT_REG(pipe);
@@ -119,64 +119,64 @@ static inline uint16_t usbd_out_request(uint8_t pipe, uint8_t *buffer)
 	assert((uint32_t)buffer % 4 == 0);
 	if (aligned) {
 		__asm__ volatile ("streamin.l %0,%1,%2" : :
-				"r"(buffer), "r"(data_reg), "r"(aligned));
+				"r"(buffer), "r"(data_reg), "r"(aligned): "memory");
 	}
 	if (left) {
 		__asm__ volatile ("streamin.b %0,%1,%2" : :
-				"r"(buffer + aligned), "r"(data_reg), "r"(left));
+				"r"(buffer + aligned), "r"(data_reg), "r"(left): "memory");
 	}
 	USBD_EP_SR_REG(pipe) = MASK_USBD_EPxSR_OPRDY;
 	return len;
 }
 
-static inline void usbd_in_transfer(const struct pipe* pp, struct urb *urb)
+static inline void usbdx_in_transfer(const struct USBDX_pipe* pp, struct USBDX_urb *urb)
 {
-	uint16_t len = urb_get_app_consumed(urb);
+	uint16_t len = usbdx_urb_get_app_consumed(urb);
 
-	usbd_in_request(pp->id, urb->start, len);
+	usbdx_in_request(pp->id, urb->start, len);
 	urb->ptr = urb->start;
 	USBDIND("PP%d IN%d len:%d\r\n", pp->id, pp->usbd_urb->id, len);
 }
 
-static inline void usbd_out_transfer(const struct pipe* pp, struct urb *urb)
+static inline void usbdx_out_transfer(const struct USBDX_pipe* pp, struct USBDX_urb *urb)
 {
-	urb->end = urb->start + usbd_out_request(pp->id, urb->start);
+	urb->end = urb->start + usbdx_out_request(pp->id, urb->start);
 	urb->ptr = urb->start;
 	USBDOUTD("PP%d OUT%d len:%d\r\n",
-			pp->id, pp->usbd_urb->id, urb_get_app_to_process(urb));
+			pp->id, pp->usbd_urb->id, usbdx_urb_get_app_to_process(urb));
 }
 
-static inline void usbd_release_urb(struct pipe *pp, struct urb *urb)
+static inline void usbdx_release_urb(struct USBDX_pipe *pp, struct USBDX_urb *urb)
 {
 	urb->owned_by_usbd = false;
 	pp->usbd_urb = pp->usbd_urb->next;
 }
 
-static inline void usbd_transfer(struct pipe* pp, struct urb *urb)
+static inline void usbdx_transfer(struct USBDX_pipe* pp, struct USBDX_urb *urb)
 {
 	if (pp->ep & 0x80) {
-		usbd_in_transfer(pp, urb);
+		usbdx_in_transfer(pp, urb);
 	} else
-		usbd_out_transfer(pp, urb);
-	usbd_release_urb(pp, urb);
+		usbdx_out_transfer(pp, urb);
+	usbdx_release_urb(pp, urb);
 }
 
-static inline struct urb *usbd_get_usbd_urb(struct pipe* pp)
+static inline struct USBDX_urb *usbdx_get_usbd_urb(struct USBDX_pipe* pp)
 {
 	return pp->usbd_urb;
 }
 
-static inline bool pipe_underrun(struct pipe *pp, struct urb *urb)
+static inline bool usbdx_pipe_underrun(struct USBDX_pipe *pp, struct USBDX_urb *urb)
 {
 	if (urb->owned_by_usbd)
 		return false;
 	if (pp->on_usbd_underrun) {
 		pp->usbd_paused = !pp->on_usbd_underrun(pp);
-		#ifndef NDEBUG
+		#ifndef USBDX_NDEBUG
 		if (pp->usbd_paused) {
 			USBDD("PP%d paused at URB%d\r\n", pp->id, urb->id);
 		}
-		#endif /* !NDEBUG */
+		#endif /* !USBDX_NDEBUG */
 		return pp->usbd_paused;
 	} else {
 		pp->usbd_paused = true;
@@ -185,19 +185,19 @@ static inline bool pipe_underrun(struct pipe *pp, struct urb *urb)
 	}
 }
 
-void usbd_submit_urb(struct pipe *pp, struct urb *urb)
+void USBDX_submit_urb(struct USBDX_pipe *pp, struct USBDX_urb *urb)
 {
-#ifndef NDEBUG
+#ifndef USBDX_NDEBUG
 	if (!in_usbd_isr) {
 		/* Global interrupt must be masked when calling usbd_submit_urb() */
 		assert(INTERRUPT->global_mask & 0x80);
 	}
-#endif /* !NDEBUG */
+#endif /* !USBDX_NDEBUG */
 	if (pp->usbd_paused) {
 		USBDD("PP%d resume from app\r\n", pp->id);
 		/* start transfer again and clear paused flag */
 		pp->usbd_paused = false;
-		usbd_transfer(pp, urb);
+		usbdx_transfer(pp, urb);
 	} else {
 		/* queue back to usbd */
 		urb->owned_by_usbd = true;
@@ -205,12 +205,12 @@ void usbd_submit_urb(struct pipe *pp, struct urb *urb)
 	pp->app_urb = pp->app_urb->next;
 }
 
-struct urb *usbd_submit_urbs(struct pipe *pp, uint16_t len)
+struct USBDX_urb *USBDX_submit_urbs(struct USBDX_pipe *pp, uint16_t len)
 {
-	struct urb *urb = usbd_get_app_urb(pp);
+	struct USBDX_urb *urb = usbdx_get_app_urb(pp);
 
 	do {
-		uint16_t app = urb_get_app_to_process(urb);
+		uint16_t app = usbdx_urb_get_app_to_process(urb);
 
 		assert(urb->end >= urb->ptr);
 		if (len < app) {
@@ -219,37 +219,37 @@ struct urb *usbd_submit_urbs(struct pipe *pp, uint16_t len)
 		}
 		urb->ptr += app;
 		len -= app;
-		usbd_submit_urb(pp, urb);
+		USBDX_submit_urb(pp, urb);
 		urb = urb->next;
 	} while (len);
 	return urb;
 }
 
-struct urb *usbd_force_acquire_urb_for_app(struct pipe *pp)
+struct USBDX_urb *USBDX_force_acquire_urb_for_app(struct USBDX_pipe *pp)
 {
-	struct urb *urb = usbd_get_app_urb(pp);
+	struct USBDX_urb *urb = usbdx_get_app_urb(pp);
 
-#ifndef NDEBUG
+#ifndef USBDX_NDEBUG
 	if (!in_usbd_isr) {
 		/* Global interrupt must be masked when calling usbd_submit_urb() */
 		assert(INTERRUPT->global_mask & 0x80);
 	}
-#endif /* !NDEBUG */
+#endif /* !USBDX_NDEBUG */
 	if (urb->owned_by_usbd) {
 		urb->ptr = urb->start;
-		usbd_release_urb(pp, urb);
+		usbdx_release_urb(pp, urb);
 	}
 	return urb;
 }
 
-uint8_t *usbd_get_app_urbs(const struct pipe *pp, uint16_t len)
+uint8_t* USBDX_get_app_urbs(const struct USBDX_pipe *pp, uint16_t len)
 {
-	struct urb *urb = usbd_get_app_urb(pp);
+	struct USBDX_urb *urb = usbdx_get_app_urb(pp);
 	uint8_t *ptr = urb->ptr;
 	uint16_t total = 0;
 
 	while (!urb->owned_by_usbd) {
-		total += urb_get_app_to_process(urb);
+		total += usbdx_urb_get_app_to_process(urb);
 		if (total >= len) {
 			return ptr;
 		}
@@ -258,46 +258,46 @@ uint8_t *usbd_get_app_urbs(const struct pipe *pp, uint16_t len)
 	return NULL;
 }
 
-#ifndef NDEBUG
-void usbd_pipe_isr_start(void)
+#ifndef USBDX_NDEBUG
+void USBDX_pipe_isr_start(void)
 {
 	in_usbd_isr = true;
 }
 
-void usbd_pipe_isr_stop(void)
+void USBDX_pipe_isr_stop(void)
 {
 	in_usbd_isr = false;
 }
-#endif /* !NDEBUG */
+#endif /* !USBDX_NDEBUG */
 
-void usbd_pipe_process(struct pipe *pp)
+void USBDX_pipe_process(struct USBDX_pipe *pp)
 {
-	struct urb *urb = usbd_get_usbd_urb(pp);
+	struct USBDX_urb *urb = usbdx_get_usbd_urb(pp);
 
 	assert (!pp->usbd_paused);
 	/* No buffer belongs to ISR */
-	if (pipe_underrun(pp, urb))
+	if (usbdx_pipe_underrun(pp, urb))
 		return;
 
-	usbd_transfer(pp, urb);
+	usbdx_transfer(pp, urb);
 
 	if (pp->app_paused && pp->on_usbd_ready)
 		pp->app_paused = !pp->on_usbd_ready(pp);
 }
 
-void usbd_pipe_purge(struct pipe *pp)
+void USBDX_pipe_purge(struct USBDX_pipe *pp)
 {
-	struct urb *urb = usbd_get_usbd_urb(pp);
+	struct USBDX_urb *urb = usbdx_get_usbd_urb(pp);
 	uint8_t pipe_id = pp->id;
 
 	/* No buffer belongs to ISR */
-	if (pipe_underrun(pp, urb))
+	if (usbdx_pipe_underrun(pp, urb))
 		return;
 
 	if (pp->ep & 0x80)
 	{
 		/* purging the IN data available for endpoint */
-		uint16_t len = urb_get_app_consumed(urb);
+		uint16_t len = usbdx_urb_get_app_consumed(urb);
 
 		if (len <= USBD_ep_max_size(pipe_id))
 		{
@@ -310,29 +310,29 @@ void usbd_pipe_purge(struct pipe *pp)
 		urb->end = urb->start;
 		urb->ptr = urb->start;
 	}
-	usbd_release_urb(pp, urb);
+	usbdx_release_urb(pp, urb);
 
 	if (pp->app_paused && pp->on_usbd_ready)
 		pp->app_paused = !pp->on_usbd_ready(pp);
 }
 
-void register_on_usbd_ready(struct pipe *pp,
-		usbd_callback callback)
+void USBDX_register_on_ready(struct USBDX_pipe *pp,
+		USBDX_callback callback)
 {
 	pp->on_usbd_ready = callback;
 }
 
-void register_on_usbd_underrun(struct pipe *pp,
-		usbd_callback callback)
+void USBDX_register_on_underrun(struct USBDX_pipe *pp,
+		USBDX_callback callback)
 {
 	pp->on_usbd_underrun = callback;
 }
 
-bool usbd_pipe_init(
-		struct pipe *pp,
+bool USBDX_pipe_init(
+		struct USBDX_pipe *pp,
 		uint8_t id,
 		uint8_t ep,
-		struct urb *urbs,
+		struct USBDX_urb *urbs,
 		uint8_t *bufs,
 		uint8_t urb_count)
 {
@@ -373,7 +373,7 @@ bool usbd_pipe_init(
 	return true;
 }
 
-void usbd_buf_write(struct pipe *pp,
+void USBDX_buf_write(struct USBDX_pipe *pp,
 		void (*buf_write)(uint8_t *usbd, const uint8_t *app, uint16_t len),
 		uint8_t *usbd, const uint8_t *app, uint16_t len)
 {
@@ -386,7 +386,7 @@ void usbd_buf_write(struct pipe *pp,
 		buf_write(usbd, app, len);
 }
 
-void usbd_buf_read(struct pipe *pp,
+void USBDX_buf_read(struct USBDX_pipe *pp,
 		void (*buf_read)(uint8_t *app, const uint8_t *usbd, uint16_t len),
 		uint8_t *app, const uint8_t *usbd, uint16_t len)
 {
@@ -399,7 +399,7 @@ void usbd_buf_read(struct pipe *pp,
 		buf_read(app, usbd, len);
 }
 
-void usbd_stream_write(struct pipe *pp,
+void USBDX_stream_write(struct USBDX_pipe *pp,
 		void (*stream_write)(uint8_t *usbd, const uint8_t *app, uint16_t len),
 		uint8_t *usbd, const uint8_t *app, uint16_t len)
 {
@@ -412,7 +412,7 @@ void usbd_stream_write(struct pipe *pp,
 		stream_write(usbd, app, len);
 }
 
-void usbd_stream_read(struct pipe *pp,
+void USBDX_stream_read(struct USBDX_pipe *pp,
 		void (*stream_read)(uint8_t *app, const uint8_t *usbd, uint16_t len),
 		uint8_t *app, const uint8_t *usbd, uint16_t len)
 {

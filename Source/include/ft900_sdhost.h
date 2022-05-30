@@ -77,6 +77,7 @@ extern "C" {
 #define SD_V1	0x01
 #define SD_V2	0x02
 #define MMC_V3	0x03
+#define MMC		0x04
 
 /* TYPES ***************************************************************************/
 
@@ -92,6 +93,7 @@ typedef enum {
     SDHOST_INVALID_RESPONSE_TYPE,		/* invalid response */
     SDHOST_CMD_TIMEOUT,				/* command timeout */
     SDHOST_UNUSABLE_CARD,			/* card is unusable */
+	SDHOST_CMD1_FAILED,				/* command 1 (send op cond) failed */
     SDHOST_CMD2_FAILED,				/* command 2 (get CID) failed */
     SDHOST_CMD3_FAILED,				/* command 3 (get RCA) failed */
     SDHOST_CMD8_FAILED,				/* command 8 (voltage check) failed */
@@ -100,6 +102,7 @@ typedef enum {
     SDHOST_ACMD41_FAILED,			/* command 41 failed */
     SDHOST_CANNOT_ENTER_TRANSFER_STATE,		/* cannot enter transfer state */
     SDHOST_CANNOT_SET_CARD_BUS_WIDTH,		/* cannot set bus width */
+	SDHOST_CANNOT_SET_CARD_HIGH_SPEED,		/* cannot set high speed */
     SDHOST_RESPONSE_ERROR,			/* response error */
     SDHOST_WRITE_ERROR,				/* read error */
     SDHOST_READ_ERROR,				/* write error */

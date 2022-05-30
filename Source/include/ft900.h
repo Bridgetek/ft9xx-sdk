@@ -56,7 +56,7 @@ extern "C" {
  *         !!! To be updated in every release !!!
  */
 #define FT9XX_LIBRARY_MAJOR   2
-#define FT9XX_LIBRARY_MINOR   5
+#define FT9XX_LIBRARY_MINOR   6
 #define FT9XX_LIBRARY_PATCH   0
 
 #define STR_HELPER(x) #x
@@ -149,12 +149,12 @@ extern "C" {
 							  "nop"						"\n\t"\
 							  "nop"						"\n\t"\
 					: [m] "+r" (__mask_all__)	\
-					: : );	{
+					: : "memory" );	{
 
 #define CRITICAL_SECTION_END	} \
 			__asm__ volatile ("exa.b %[m], 0x10123" 	\
 					: [m] "+r" (__mask_all__)	\
-					: : );	}
+					: : "memory" );	}
 
 #else // Assume __FT900 as default (for backward compatibility)
 #define CRITICAL_SECTION_BEGIN	{ \
@@ -163,12 +163,12 @@ extern "C" {
 							  "nop"						"\n\t"\
 							  "nop"						"\n\t"\
 					: [m] "+r" (__mask_all__)	\
-					: : );	{
+					: : "memory" );	{
 
 #define CRITICAL_SECTION_END	} \
 			__asm__ volatile ("exa.b %[m], 0x100E3" 	\
 					: [m] "+r" (__mask_all__)	\
-					: : );	}
+					: : "memory" );	}
 #endif
 
 /* FUNCTION PROTOTYPES *************************************************************/

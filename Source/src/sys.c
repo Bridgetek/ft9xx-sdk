@@ -192,9 +192,9 @@ int sys_cpu_clock_div(sys_cpu_divider_t div)
 		{
             SYS->CLKCFG &= ~MASK_SYS_CLKCFG_CPU_CLK_DIV;
             SYS->CLKCFG |= (div << BIT_SYS_CLKCFG_CPU_CLK_DIV);
-			asm volatile ("nop");
-			asm volatile ("nop");
-			asm volatile ("nop");
+			asm volatile ("nop"::: "memory");
+			asm volatile ("nop"::: "memory");
+			asm volatile ("nop"::: "memory");
 		}
 		//else FT900 Rev B
 		/* Unsupported
@@ -202,9 +202,9 @@ int sys_cpu_clock_div(sys_cpu_divider_t div)
 #else
 		SYS->CLKCFG &= ~MASK_SYS_CLKCFG_CPU_CLK_DIV;
 		SYS->CLKCFG |= (div << BIT_SYS_CLKCFG_CPU_CLK_DIV);
-		asm volatile ("nop");
-		asm volatile ("nop");
-		asm volatile ("nop");
+		asm volatile ("nop"::: "memory");
+		asm volatile ("nop"::: "memory");
+		asm volatile ("nop"::: "memory");
 #endif
     }
     return iRet;

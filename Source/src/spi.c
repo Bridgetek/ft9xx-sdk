@@ -381,6 +381,7 @@ int32_t spi_readn(ft900_spi_regs_t* dev, uint8_t *b, size_t len)
     size_t i = 0, iFifoSize = 0;
     uint8_t FifoScratch[64];
 
+    asm_memset32(0, FifoScratch, sizeof(FifoScratch));
 
     /* Sync up so we don't step on our toes */
     spi_wait_whilst_transmitting(dev);
@@ -567,6 +568,11 @@ int8_t spi_disable_interrupts_globally(ft900_spi_regs_t* dev)
 int8_t spi_enable_interrupt(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
 {
     int8_t iRet = 0;
+#if defined(__FT900__)
+	ft900_spi_regs_ex_t *device = (ft900_spi_regs_ex_t *)dev;
+#else
+	ft900_spi_regs_t *device = dev;
+#endif
 
     switch(interrupt)
     {
@@ -584,6 +590,12 @@ int8_t spi_enable_interrupt(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
         /* Now all the stuff that is set automatically */
         case spi_interrupt_data_ready:
         case spi_interrupt_fault:
+            break;
+        case spi_interrupt_ex_tx_trigger_en:
+        	device->SPI_FIFO_CNTL_2 |= MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_EN;
+            break;
+        case spi_interrupt_ex_rx_trigger_en:
+        	device->SPI_FIFO_CNTL_2 |= MASK_SPIM_SPIM_FIFO_CNTL_2_RX_TRIG_EN;
             break;
         default:
             iRet = -1;
@@ -638,6 +650,11 @@ int8_t spi_disable_interrupt(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
 int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
 {
     int8_t iRet = 0;
+#if defined(__FT900__)
+	ft900_spi_regs_ex_t *device = (ft900_spi_regs_ex_t *)dev;
+#else
+	ft900_spi_regs_t *device = dev;
+#endif
 
     if (dev == NULL)
     {
@@ -650,11 +667,31 @@ int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
         switch(interrupt)
         {
             case spi_interrupt_transmit_empty:
-                if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_TX_EMPTY))
-                        == (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_TX_EMPTY))
+#if defined(__FT900__)
+            	if (sys_check_ft900_revB())//if 90x series is rev B
+            	{
+					if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_TX_EMPTY))
+							== (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_TX_EMPTY))
+					{
+						iRet = 1;
+					}
+            	}
+            	else
+            	{
+            		//if 90x series is rev C
+                    if ((device->SPI_STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_TXFIFO_EMPTY))
+                            == (MASK_SPIM_SPIM_STATUS_2_TXFIFO_EMPTY))
+                    {
+                        iRet = 1;
+                    }
+            	}
+#elif defined(__FT930__)
+                if ((device->SPI_STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_TXFIFO_EMPTY))
+                        == (MASK_SPIM_SPIM_STATUS_2_TXFIFO_EMPTY))
                 {
                     iRet = 1;
                 }
+#endif
                 break;
 #if 0
             case spi_interrupt_receiver_fifo_timeout:    
@@ -671,11 +708,31 @@ int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
 
 
             case spi_interrupt_data_ready:
-                if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_TX_EMPTY | MASK_SPIM_SPIM_STATUS_SPI_BIS | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
-                        == (MASK_SPIM_SPIM_STATUS_SPI_FLAG))
+#if defined(__FT900__)
+            	if (sys_check_ft900_revB())//if 90x series is rev B
+            	{
+                    if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
+                            == (MASK_SPIM_SPIM_STATUS_SPI_FLAG))
+                    {
+                        iRet = 1;
+                    }
+            	}
+            	else
+            	{
+            		//if 90x series is rev C
+                    if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
+                            == (MASK_SPIM_SPIM_STATUS_SPI_FLAG))
+                    {
+                        iRet = 1;
+                    }
+            	}
+#elif defined(__FT930__)
+                if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
+                          == (MASK_SPIM_SPIM_STATUS_SPI_FLAG))
                 {
                     iRet = 1;
                 }
+#endif
                 break;
 
             case spi_interrupt_fault:
@@ -686,7 +743,20 @@ int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
                     dev->SPI_CNTL |= 0x00; /* Do nothing but access SPICTRL1 */
                 }
                 break;
-
+            case spi_interrupt_ex_rx_fifo_full:
+                if ((device->SPI_STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_RXFIFO_FULL))
+                        == (MASK_SPIM_SPIM_STATUS_2_RXFIFO_FULL))
+                {
+                    iRet = 1;
+                }
+                break;
+            case spi_interrupt_ex_rx_fifo_overridden:
+                if ((device->SPI_STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_RXFULL_OVERRIDE))
+                        == (MASK_SPIM_SPIM_STATUS_2_RXFULL_OVERRIDE))
+                {
+                    iRet = 1;
+                }
+                break;
             default:
                 iRet = -1;
                 break;
@@ -1112,6 +1182,17 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
 #endif
         }
         break;    /* spi_option_change_spi_rate */
+
+        case spi_option_slave_select_control:
+        {
+#if defined(__FT900__)
+        	ft900_spi_regs_ex_t *device = (ft900_spi_regs_ex_t *)dev;
+#else
+        	ft900_spi_regs_t *device = dev;
+#endif
+        	device->SPI_SLV_SEL_CNTL &= (~val);
+        }
+        break;
 
         default:
             iRet = -1;

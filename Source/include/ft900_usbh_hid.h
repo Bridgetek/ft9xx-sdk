@@ -103,8 +103,8 @@ int8_t USBH_HID_set_idle(USBH_HID_context *ctx, uint16_t idle);
 
 /**
     @brief      Gets the IN report size for the HID device.
-    @details    Allows the application to discover the size of reports sent by the
-                HID device.
+    @details    Allows the application to discover the maximum size of reports
+                sent by the HID device.
     @param[in]  ctx Pointer to HID context.
     @returns    Zero if fail, non-zero for report size.
   **/
@@ -112,8 +112,8 @@ int8_t USBH_HID_get_report_size_in(USBH_HID_context *ctx);
 
 /**
     @brief      Gets the OUT report size for the HID device.
-    @details    Allows the application to discover the size of reports to send to the
-                HID device.
+    @details    Allows the application to discover the maximum size of reports
+                to send to the HID device.
     @param[in]  ctx Pointer to HID context.
     @returns    Zero if fail, non-zero for report size.
   **/
@@ -141,6 +141,38 @@ int8_t USBH_HID_get_report(USBH_HID_context *ctx, uint8_t *buffer);
   **/
 int8_t USBH_HID_set_report(USBH_HID_context *ctx, uint8_t *buffer);
 
+/**
+    @brief      Retrieves the HID Descriptor for the device.
+    @details    Queries the configuration descriptor to find the HID
+    			descriptor associated with the interface in the HID context.
+    @param[in]  ctx Pointer to HID context.
+    @param[out] size Maximum size of the HID descriptor to read. The total size
+    			of the descriptor is variable depending on the bNumDescriptors
+    			member of the USB_hid_descriptor structure. Read the structure
+    			with the size of the USB_hid_descriptor structure to determine the
+    			number of descriptors available. The read can be repeated by
+    			increasing the size to cover the additional bDescriptorType and
+    			wDescriptorLength pairs.
+    @param[out] buffer Buffer for receiving the USB_hid_descriptor structure.
+    @returns    Zero if successful, non-zero if not.
+  **/
+int8_t USBH_HID_get_hid_descriptor(USBH_HID_context *ctx, size_t size, uint8_t *buffer);
+
+/**
+    @brief      Retrieves a HID Descriptor for the device.
+    @details    Queries the configuration descriptor to find the size of the HID
+    			descriptor associated with the interface in the HID context.
+    			The HID descriptor is
+    @param[in]  ctx Pointer to HID context.
+    @param[in]  descIndex Index of the report descriptor to read. This can be from
+    			the value 1 to the bNumDescriptors value in the HID descriptor.
+    @param[in]  length The length of the report descriptor for the report descriptor
+    			index is found in the wDescriptorLength values in the variable part
+    			of the USB_hid_descriptor structure.
+    @param[out] buffer Buffer for receiving the report descriptor.
+    @returns    Zero if successful, non-zero if not.
+  **/
+int8_t USBH_HID_get_report_descriptor(USBH_HID_context *ctx, uint8_t descIndex, size_t length, uint8_t *buffer);
 
 #ifdef __cplusplus
 } /* extern "C" */

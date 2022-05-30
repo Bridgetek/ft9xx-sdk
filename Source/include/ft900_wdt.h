@@ -60,7 +60,12 @@ extern "C" {
 /* CONSTANTS ***********************************************************************/
 
 /* TYPES ***************************************************************************/
-/** @brief Watchdog Timeouts */
+/** @brief Watchdog Timeout value
+ *
+    @details Corresponds to watchdog duration or timeout value in number of system clock cycles.
+    The number of clock cycles is equal to 2^(enum wdt_counter_t).
+    Refer to the comments against the enum values for the corresponding timeout time in seconds.
+ */
 typedef enum
 {
     wdt_counter_1_clocks,       /*!< 10 nsec @ 100 MHz */
@@ -104,9 +109,19 @@ typedef enum
 /* FUNCTION PROTOTYPES *************************************************************/
 
 /** @brief Initialise and start the Watchdog timer
- *  @param timeout The timeout value of the Watchdog
- *  @returns 0 on success, -1 otherwise
- */
+* @details If ‘X’ is the timeout time, in case of
+*
+* FT90x Revision B: the user application shall kick the watchdog within ‘X’ time. When the watchdog times out,
+* the default handler resets the system
+*
+* FT90x Revision C and FT93x: the user application shall kick the watchdog within ‘X’ time. When the watchdog
+* times out, irrespective of any handler, a second level timer runs for an additional ‘X’ time and the system is
+* reset after that.
+*
+*  @param timeout Enum value corresponding to the timeout value of the Watchdog
+*  @returns 0 on success, -1 otherwise
+*/
+
 int8_t wdt_init(wdt_counter_t timeout);
 
 /** @brief Reset a running Watchdog Timer

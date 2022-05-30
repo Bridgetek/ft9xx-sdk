@@ -104,6 +104,35 @@ extern "C" {
  * @brief Maximum transfer size on an D2XX interface that the user can configure
  */
 #define D2XX_MAX_USERCONFIG_XFER_SIZE   	D2XX_XFER_SIZE_1024
+
+/**
+ * @name D2XX Line Control from USB Host
+ */
+//@{
+#define D2XX_SETDATA_7_BIT  	7
+#define D2XX_SETDATA_8_BIT  	8
+
+#define D2XX_SETDATA_NOPAR  	0
+#define D2XX_SETDATA_ODDPAR  	1
+#define D2XX_SETDATA_EVENPAR  	2
+#define D2XX_SETDATA_MARKPAR  	3
+#define D2XX_SETDATA_SPACEPAR  	4
+
+#define D2XX_SETDATA_1_STOP  	0
+#define D2XX_SETDATA_2_STOP  	2
+
+#define D2XX_SETDATA_BREAK_OFF 	0
+#define D2XX_SETDATA_BREAK_ON 	1
+//@}
+
+/**
+ * @name D2XX Interface reset to purge Tx and Rx buffers
+ */
+//@{
+#define D2XX_INTF_PURGE_TX_RX 	0
+#define D2XX_INTF_PURGE_RX 		1
+#define D2XX_INTF_PURGE_TX 		2
+//@}
 /* TYPES *********************************************************************/
 
 /**
@@ -136,6 +165,24 @@ typedef enum
 	D2XX_EVT_DFU_DETACH,	/**< DFU DETACH Class command from DFU application */
 	D2XX_EVT_TESTMODE,	 	/**< D2XX enters Test Mode. Exit is via power cycle*/
 	D2XX_EVT_INTF_RESET,	/**< Interface RESET Vendor Command from D2XX Application */
+
+	/* D2XX Set commands from host to be notified to the application */
+	D2XX_EVT_SET_DTRSTATUS,				/**< DTR status in case of DTR_DSR flow control is enabled */
+	D2XX_EVT_SET_RTSSTATUS,				/**< RTS status in case of RTS_CTS flow control is enabled */
+	D2XX_EVT_SET_BAUDRATE,				/**< Set Baud rate command */
+	D2XX_EVT_SET_FLOWCTRL_NONE,			/**< No flow control */
+	D2XX_EVT_SET_FLOWCTRL_RTS_CTS,		/**< Flow control type is RTS_CTS*/
+	D2XX_EVT_SET_FLOWCTRL_DTR_DSR,		/**< Flow control type is DTR_DSR*/
+	D2XX_EVT_SET_FLOWCTRL_XON_XOFF,		/**< Flow control type is XON_XOFF*/
+	D2XX_EVT_SET_DATACHARACTERISTICS,   /**< Set Data format */
+	D2XX_EVT_SET_EVENTCHAR,				/**< Set Event character */
+	D2XX_EVT_SET_ERRORCHAR,				/**< Set Error(parity) characters */
+	D2XX_EVT_SET_BITMODE,				/**< Set bit mode to enable different chip mode */
+
+	/* D2XX Get commands from host to be notified to the application */
+	D2XX_EVT_GET_MODEMSTATUS, 			/**< Get Modem Status received */
+	D2XX_EVT_GET_BITMODE,				/**< Get bit mode received */
+
 	D2XX_EVT_MAX_CODE
 
 }ED2XX_EventCode;
@@ -261,7 +308,7 @@ typedef struct D2XX_PACK TD2XX_DeviceConfiguration
 	 * \par
 	 * String 2 - ASCII string detailing the Product.
 	 * \par
-	 * String 3 - ASCII string for the Serial Number.
+	 * String 3 - ASCII string for the Serial Number (max 14 characters).
 	 * \par
 	 * String 4 - ASCII string for the DFU Runtime Interface Name.
 	 * \par
@@ -275,9 +322,13 @@ typedef struct D2XX_PACK TD2XX_DeviceConfiguration
 	 * \par
 	 * 0x0E,'F','T','9','0','0','S','e','r','i','a','l','#','0','3',
 	 * \par
-	 * 0x15,'D','F','U',' ','R','u','n','t','i','m','e',' ','I','n','t','e','r','f','a','c','e‘
+	 * 0x15,'D','F','U',' ','R','u','n','t','i','m','e',' ','I','n','t','e','r','f','a','c','e'
 	 * \par
 	 * 2. No string should be left blank
+	 * 3. The Serial number should be limited to a maximum of 14 characters ONLY by the user.
+	 *    D2XX on the PC host(windows/linux) adds an additional letter to the serial number to identify the port number. 
+	 *    This brings the length of Serial number to 16 characters including null termination as is the requirement from 
+	 *    D2XX library(FT_DEVICE_LIST_INFO_NODE of D2XX_Programmer's_Guide.pdf). 
 	 **/
 	uint8_t Strings[D2XX_MAX_DESCRIPTOR_STRING_SIZE];
 	/** Double Null terminated ascii string for Unique device interface GUID in registry format (including Braces and hyphen).
@@ -294,19 +345,120 @@ typedef struct D2XX_PACK TD2XX_DeviceConfiguration
     @typedef   FD2XX_Callback
     @brief     Callback declaration for user callback functions invoked
     		   from D2XX solution.
-    @param[in] eventID – The events for which the D2XX provides callback
-	@param[in] ref – User application context which is stored and given back
+    @param[in] eventID - The events for which the D2XX provides callback
+	@param[in] ref - User application context which is stored and given back
 					 during invocation of callback functions on events.
-    @param[in] param1 – In case of D2XX_EVT_SUSPEND, this param gives whether
+    @param[in] param1 - Note 1: In case of D2XX_EVT_SUSPEND, this param gives whether
     					the RemoteWakeup is enabled or not.
-						1 – Enabled, 0 – Disabled
+						1 - Enabled, 0 - Disabled
 						Based on which the user application can issue a Remote
 						Wakeup to the host device in Suspend mode.
 
-	@param[in] param2 – Currently unused.
+						Note 2: In case of D2XX_EVT_SET_XXXXXX events, this param gives the D2XX Interface Number
+								Range: 1..n, n -> Number of D2XX Interfaces configured by the application
+
+	@param[in] param2 - This parameter is any one of the below according to the eventID
+						1. can be any one of D2XX_INTF_PURGE_TX_RX, D2XX_INTF_PURGE_RX, D2XX_INTF_PURGE_TX in case of D2XX_EVT_INTF_RESET
+						2. DTR bit with bit status as 0 or 1 (active) in case of D2XX_EVT_SET_DTRSTATUS
+						3. RTS bit with bit status as 0 or 1 (active) in case of D2XX_EVT_SET_RTSSTATUS
+						4. struct TD2XX_EventSetBaudrate in case of D2XX_EVT_SET_BAUDRATE
+						5. Ignore (or unused) in case of D2XX_EVT_SET_FLOWCTRL_NONE, D2XX_EVT_SET_FLOWCTRL_RTS_CTS and D2XX_EVT_SET_FLOWCTRL_DTR_DSR
+						6. struct TD2XX_EventXONXOFF in case of D2XX_EVT_SET_FLOWCTRL_XON_XOFF
+						7. struct TD2XX_EventSetDataCharacteristics in case of D2XX_EVT_SET_DATACHARACTERISTICS
+						8. struct TD2XX_SetSpecialChar in case of D2XX_EVT_SET_EVENTCHAR and D2XX_EVT_SET_ERRORCHAR
+						9. struct TD2XX_EventSetBitMode in case of D2XX_EVT_SET_BITMODE
     @return    void
  **/
 typedef void (*FD2XX_Callback)(ED2XX_EventCode  eventID, void *ref, void* param1, void* param2);
+
+/**
+    @struct TD2XX_EventSetDataCharacteristics
+    @brief Struct to provide the data format - the number of data bits, stop bits and
+    			parity mode set by the D2XX USB Host.
+    @details  Refer 'D2XX Line Control from USB Host' macros in this header
+ **/
+typedef struct TD2XX_EventSetDataCharacteristics
+{
+	/** Can be either D2XX_SETDATA_7_BIT or
+	    				D2XX_SETDATA_8_BIT
+	 **/
+	uint8_t  data_size;
+	/** Can be one of D2XX_SETDATA_NOPAR,
+						D2XX_SETDATA_ODDPAR, D2XX_SETDATA_EVENPAR,
+						D2XX_SETDATA_MARKPAR, D2XX_SETDATA_SPACEPAR.
+	**/
+	uint8_t  parity;
+	/** Number of stop bits. Can be one of
+	    				D2XX_SETDATA_1_STOP or D2XX_SETDATA_2_STOP.
+	**/
+	uint8_t  stop_bits;
+	/** Number of stop bits. Can be one of
+	    				D2XX_SETDATA_BREAK_OFF or D2XX_SETDATA_BREAK_ON.
+	**/
+	uint8_t  break_condition;
+}TD2XX_EventSetDataCharacteristics;
+
+/**
+    @struct TD2XX_EventSetBaudrate
+    @brief Struct to provide the baud rate information in terms of divisor, set by the D2XX USB Host.
+    @details  Refer to: http://www.ftdichip.com/Support/Documents/AppNotes/AN232B-05_BaudRates.pdf
+     	 	 	It doesn't check if the baud rate can be calculated within the
+     	 	 	+/- 3% required to ensure a stable link.
+ **/
+typedef struct TD2XX_EventSetBaudrate
+{
+	uint16_t integer_divisor;
+	uint16_t sub_integer_divisor;
+}TD2XX_EventSetBaudrate;
+
+/**
+    @struct TD2XX_EventXONXOFF
+    @brief Struct to provide the XON and XOFF characters for XON XON flow control, set by the D2XX USB Host.
+    @details  Struct to provide the XON and XOFF characters for XON XON flow control, set by the D2XX USB Host.
+ **/
+typedef struct TD2XX_EventXONXOFF
+{
+	uint8_t XON_char;
+	uint8_t XOFF_char;
+}TD2XX_EventXONXOFF;
+
+/**
+    @struct TD2XX_SetSpecialChar
+    @brief Struct to provide the special character, set by the D2XX USB Host.
+    @details   Useful in inserting specified characters in the data stream to represent events firing or errors occurring.
+ **/
+typedef struct TD2XX_SetSpecialChar
+{
+	/** Event or error character **/
+	uint8_t event_char;
+	/** For event char: 0 if no trigger, 1 if Trigger IN on Event Char
+	    For error char: 0 if no error replacement, 1 if error replacement is on
+	 **/
+	uint8_t trigger_stat;
+}TD2XX_SetSpecialChar;
+
+/**
+    @struct TD2XX_EventSetBitMode
+    @brief Struct to provide the XON and XOFF characters for XON XON flow control, set by the D2XX USB Host.
+    @details  Struct to provide the XON and XOFF characters for XON XON flow control, set by the D2XX USB Host.
+ **/
+typedef struct TD2XX_EventSetBitMode
+{
+	/** Required value for bit mode mask. This sets up which bits are input and outputs
+                       A bit value of 0 sets the corresponding pin to an input, a bit value of 1 for an output.
+                       In the case of CBUS Bit Bag, the upper nibble of this value controls which pins are
+                       inputs and outputs, while the lower nibble controls which of the outputs are high and
+                       low.
+	**/
+	uint8_t mask;
+	/** Can be one of the following:
+    					0x0 - Reset
+    					0x1 - Asynchronous Bit Bang
+    					0x4 - Synchronous Bit Bang (FT232R, FT245R, FT2232, FT2232H, FT4232H and FT232H devices only)
+    					0x20 - CBUS Bit Bang Mode (FT232R and FT232H devices only)
+    **/
+	uint8_t mode;
+}TD2XX_EventSetBitMode;
 
 /* CONSTANTS *****************************************************************/
 
@@ -318,13 +470,13 @@ typedef void (*FD2XX_Callback)(ED2XX_EventCode  eventID, void *ref, void* param1
     @details   Initialises D2XX solution library. \n
                This function MUST be called prior to any further call to the
                USB functions.
-    @param[in] d2xxDeviceConfig – User application custom specific information
+    @param[in] d2xxDeviceConfig - User application custom specific information
     			about the D2XX USB device and its interfaces. This data is
     			used in the construction of device, config and string
     			descriptors.
-	@param[in] callbackFn – The user application registers its callback
+	@param[in] callbackFn - The user application registers its callback
 							function through this param.
-	@param[in] ref – The user application registers its callback
+	@param[in] ref - The user application registers its callback
 							context through this param.
 	@return     D2XX_ERR_NONE if successful.
                 D2XX_ERR_INVALID_PARAMETER if invalid values or ranges provided
@@ -336,7 +488,7 @@ ED2XX_ErrorCode D2XX_Init(TD2XX_DeviceConfiguration *d2xxDeviceConfig, FD2XX_Cal
 /**
     @brief     Performs Read on a D2XX interface.
     @details   Performs Read on a D2XX interface.
-    @param[in] interfaceNum – D2XX Interface Number
+    @param[in] interfaceNum - D2XX Interface Number
 				Range: 1..n, n -> Number of D2XX Interfaces configured by the
 								  application
 	@param[in]  readBuffer - A pointer to the buffer which the stream data is
@@ -359,7 +511,7 @@ int32_t D2XX_Read(int32_t interfaceNum, uint8_t  *readBuffer, const int32_t leng
 /**
     @brief     Performs Write on a D2XX interface.
     @details   Performs Write on a D2XX interface.
-	@param[in] interfaceNum – D2XX Interface Number
+	@param[in] interfaceNum - D2XX Interface Number
 				Range: 1..n, n -> Number of D2XX Interfaces configured by the
 								  application
 	@param[inout]  writeBuffer - A pointer to the buffer to which the stream data
@@ -383,18 +535,18 @@ int32_t D2XX_Write(int32_t interfaceNum, uint8_t  *writeBuffer, const int32_t le
     @details   The ioctl API is a catch-all that can handle transactions where
     			read and write are not suitable. Typically, this means control
     			data for a D2XX interface or system control of USB device.
-    @param[in] interfaceNum – D2XX Interface Number
+    @param[in] interfaceNum - D2XX Interface Number
     			Value: 0 - System Purpose (e.g. Remote Wakeup)
     			       1..n, n -> Number of D2XX Interfaces configured by the
     			       	   	      application
-	@param[in] ioctlID – D2XX IOCTL ID
+	@param[in] ioctlID - D2XX IOCTL ID
     		   Refer to ED2XX_IoctlID documentation
-	@param[in] param1 – Additional Parameter that application passes
+	@param[in] param1 - Additional Parameter that application passes
 			   for D2XX_IOCTL_INTERFACE_WAKEUP.
 			   It is for set or clear
 			   1 -> Set Wakeup
 			   0 -> Clear Wakeup
-	@param[in] param2 – Currently unused.
+	@param[in] param2 - Currently unused.
 
 	@return     D2XX_ERR_NONE if successful.
                 D2XX_ERR_INVALID_PARAMETER if invalid values or ranges provided
@@ -424,6 +576,8 @@ void D2XX_Exit(void);
 
  **/
 void D2XX_Timer(void);
+
+#if defined(__FT900__)
 /**
     @brief     Main foreground D2XX process
     @details   Performs callbacks to pass USBD events to D2XX user. To be called in a main loop of the application
@@ -432,7 +586,8 @@ void D2XX_Timer(void);
 	@return    None
 
  */
-#define D2XX_Process()	D2XX__CoreProcess()
+void D2XX_Process(void);
+#endif // defined(__FT900__)
 
 #ifdef __cplusplus
 } /* extern "C" */

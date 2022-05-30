@@ -52,14 +52,14 @@
 #include <ft900_usb_hid.h>
 #include <ft900_delay.h>
 #include <ft900_usbh.h>
+#include <ft900_usbhx.h>
 #include <ft900_usbh_hid.h>
 
 // Debugging only
 #undef HID_DEBUG
 
 #if defined(HID_DEBUG)
-// Note printf does not work in library (only local builds).
-#include "printf.h"
+#include <tfp_printf.h>
 #endif
 
 /* CONSTANTS ***********************************************************************/
@@ -95,7 +95,7 @@ int8_t USBH_HID_init(USBH_device_handle hHIDDevice, USBH_interface_handle hHIDIn
     {
         ctx->hidInterfaceNumber = ifInfo.interface_number;
 #ifdef HID_DEBUG
-        printf("HID - Using interface number %d\n", ctx->hidInterfaceNumber);
+        tfp_printf("HID - Using interface number %d\n", ctx->hidInterfaceNumber);
 #endif // HID_DEBUG
 
         status = USBH_get_endpoint_list(hHIDInterface, &hEp);
@@ -113,7 +113,7 @@ int8_t USBH_HID_init(USBH_device_handle hHIDDevice, USBH_interface_handle hHIDIn
                             ctx->hHIDEpOut = hEp;
                             ctx->reportOutSize = epInfo.max_packet_size;
 #ifdef HID_DEBUG
-                            printf("HID - Found OUT endpoint %d bytes\n", ctx->reportOutSize);
+                            tfp_printf("HID - Found OUT endpoint %d bytes\n", ctx->reportOutSize);
 #endif // HID_DEBUG
                         }
                     }
@@ -124,7 +124,7 @@ int8_t USBH_HID_init(USBH_device_handle hHIDDevice, USBH_interface_handle hHIDIn
                             ctx->hHIDEpIn = hEp;
                             ctx->reportInSize = epInfo.max_packet_size;
 #ifdef HID_DEBUG
-                            printf("HID - Found IN endpoint %d bytes\n", ctx->reportInSize);
+                            tfp_printf("HID - Found IN endpoint %d bytes\n", ctx->reportInSize);
 #endif // HID_DEBUG
                         }
                     }
@@ -169,9 +169,6 @@ int8_t USBH_HID_get_report_size_out(USBH_HID_context *ctx)
 
 int8_t USBH_HID_get_report(USBH_HID_context *ctx, uint8_t *buffer)
 {
-#ifdef HID_DEBUG
-    static int count = 0;
-#endif // HID_DEBUG
     int8_t status = USBH_OK;
     int32_t count;
 
@@ -181,9 +178,6 @@ int8_t USBH_HID_get_report(USBH_HID_context *ctx, uint8_t *buffer)
     {
     	status = (int8_t)count;
     }
-#ifdef HID_DEBUG
-    printf("Status: %x, Count: %d\n", status, count++);
-#endif // HID_DEBUG
 
     return status;
 }
@@ -202,3 +196,84 @@ int8_t USBH_HID_set_report(USBH_HID_context *ctx, uint8_t *buffer)
 
     return status;
 }
+
+int8_t USBH_HID_get_hid_descriptor(USBH_HID_context *ctx, size_t size, uint8_t *buffer)
+{
+    int8_t status = USBH_OK;
+    uint16_t totalLength;
+    USB_interface_descriptor hidInterface;
+    USB_configuration_descriptor hidConfig;
+    uint16_t offset = 0;
+
+    // Find the HID descriptor for this HID interface.
+    // Parse the config descriptor until we find it. This is done by
+    // iterating through the descriptor until we find an interface
+    // descriptor followed by a HID descriptor.
+    status = USBHX_get_config_descriptor(ctx->hHIDDevice, USB_DESCRIPTOR_TYPE_CONFIGURATION, 0,
+    		0, sizeof(USB_configuration_descriptor), (uint8_t *)&hidConfig);
+
+    // Total length of the configuration descriptor to iterate.
+    totalLength = hidConfig.wTotalLength;
+
+    while (offset < totalLength)
+    {
+		status = USBHX_get_config_descriptor(ctx->hHIDDevice, USB_DESCRIPTOR_TYPE_CONFIGURATION, 0,
+				offset, sizeof(USB_interface_descriptor), (uint8_t *)&hidInterface);
+
+		if (status != USBH_OK)
+		{
+			break;
+		}
+
+		if (hidInterface.bDescriptorType == USB_DESCRIPTOR_TYPE_INTERFACE)
+		{
+			if (hidInterface.bInterfaceClass == USB_CLASS_HID)
+			{
+				if (hidInterface.bInterfaceNumber == ctx->hidInterfaceNumber)
+				{
+					// This is the HID descriptor we need to match the device.
+					// It must immediately follow the interface descriptor.
+					offset += hidInterface.bLength;
+
+					// The HID Descriptor is a variable length descriptor. It can
+					// in theory be up to 255 bytes long. Read it into the supplied
+					// buffer.
+					status = USBHX_get_config_descriptor(ctx->hHIDDevice, USB_DESCRIPTOR_TYPE_CONFIGURATION, 0,
+							offset, size, buffer);
+
+					return status;
+				}
+			}
+		}
+		offset += hidInterface.bLength;
+    }
+
+    return USBH_ERR_NOT_FOUND;
+}
+
+int8_t USBH_HID_get_report_descriptor(USBH_HID_context *ctx, uint8_t descIndex, size_t length, uint8_t *buffer)
+{
+    int8_t status = USBH_OK;
+    int32_t result;
+
+    USB_device_request devReq;
+
+    devReq.bRequest = USB_REQUEST_CODE_GET_DESCRIPTOR;
+    devReq.bmRequestType = USB_BMREQUESTTYPE_DIR_DEV_TO_HOST |
+			USB_BMREQUESTTYPE_STANDARD |
+			USB_BMREQUESTTYPE_RECIPIENT_INTERFACE;
+
+	// HID Report descriptors
+    devReq.wValue = (USB_DESCRIPTOR_TYPE_REPORT << 8) | descIndex;
+    devReq.wIndex = ctx->hidInterfaceNumber;
+    devReq.wLength = length;
+
+	result = USBH_device_setup_transfer(ctx->hHIDDevice, &devReq, buffer, 500);
+	if (result < 0)
+	{
+		status = (int8_t)result;
+	}
+
+	return status;
+}
+

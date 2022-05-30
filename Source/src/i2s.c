@@ -167,7 +167,7 @@ size_t i2s_write(const uint8_t *data, const size_t num_bytes)
 				"sub.l %4, %4, 6 \n\t" // sub.l r_n_bytes, r_n_bytes, 6
 
 				: /* Output */
-				: /* Input */ "r"(r_fifo), "r"(r_data), "r"(temp1), "r"(temp2), "r"(r_n_bytes)
+				: /* Input */ "r"(r_fifo), "r"(r_data), "r"(temp1), "r"(temp2), "r"(r_n_bytes): "memory"
 			);
 
             _size += 8; /* Save the size value to return */

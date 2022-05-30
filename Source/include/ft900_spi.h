@@ -97,10 +97,15 @@ typedef enum
  *  Note: Call spi_is_interrupted() to clear interrupt flags */
 typedef enum
 {
-    spi_interrupt_transmit_empty,           /**< Either the FIFO or the data register are empty.*/
+    spi_interrupt_transmit_empty,           /**< When SPI master is idle and the transmitter FIFO is empty.*/
     spi_interrupt_data_ready,               /**< A transmission or reception was completed *or* the FIFO was filled to a trigger level.*/
     spi_interrupt_transmit_1bit_complete,   /**< Transmission was complete when using the SPI1BIT method.*/
-    spi_interrupt_fault                     /**< The SPI device was asserted when in Master mode.*/
+    spi_interrupt_fault,                    /**< The SPI device was asserted when in Master mode.*/
+	/* Below extension flags are available from FT900 Rev C and F93X */
+	spi_interrupt_ex_tx_trigger_en,			/**< Flag to be enabled to received interrupts when transmit FIFO level reaches trigger level */ 
+	spi_interrupt_ex_rx_trigger_en,			/**< Flag to be enabled to received interrupts when receive FIFO level reaches trigger level */
+	spi_interrupt_ex_rx_fifo_full,			/**< Flag to check if receive FIFO is full */
+	spi_interrupt_ex_rx_fifo_overridden,	/**< Flag to check if receive FIFO overflows and data is overridden */
 } spi_interrupt_t;
 
 /** @brief SS Assertion control */
@@ -123,8 +128,22 @@ typedef enum
 	spi_option_baud_factor,         /**< Applicable in FT930 and FT900 RevC. SCK frequency is determined by BAUD FACTOR ( divided 2 to divided by 256)*/
 	spi_option_fast_spi,              /**< Applicable in FT900 RevC. The master clock is set to CLK (system clock)/2 */
 	spi_option_change_spi_rate,     /**< SCK frequency is determined by CHG_SPI and SPR[0:2] bits ( CLK gets divided 2 to divided by 511)*/
-    spi_option_ignore_incoming
+    spi_option_ignore_incoming,
+	spi_option_slave_select_control
 } spi_option_t;
+
+// Slave Select definitions
+typedef enum
+{
+	DQSPI_SS_0 = 0x01,
+	DQSPI_SS_1 = 0x02,
+	DQSPI_SS_2 = 0x04,
+	DQSPI_SS_3 = 0x08,
+	DQSPI_SS_4 = 0x10,
+	DQSPI_SS_5 = 0x20,
+	DQSPI_SS_6 = 0x40,
+	DQSPI_SS_7 = 0x80
+} spi_slave_select_t;
 
 /* GLOBAL VARIABLES ****************************************************************/
 
