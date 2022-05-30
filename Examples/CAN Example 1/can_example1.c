@@ -124,7 +124,7 @@ void loop(void)
     static can_msg_t rx;
 
     /* Output the transmitted message... */
-    printf("CAN0 TX-> ");
+    tfp_printf("CAN0 TX-> ");
     print_can_msg_t(&tx);
 
     /* Transmit the message on CAN0 to CAN1... */
@@ -137,7 +137,7 @@ void loop(void)
     if (ok && can_read(CAN1, &rx) != -1)
     {
         /* Output the received message... */
-        printf("CAN1 RX<- ");
+        tfp_printf("CAN1 RX<- ");
         print_can_msg_t(&rx);
 
         /* Change the data in the received message... */
@@ -147,7 +147,7 @@ void loop(void)
         }
 
         /* Output the transmitted message... */
-        printf("CAN1 TX-> ");
+        tfp_printf("CAN1 TX-> ");
         print_can_msg_t(&rx);
 
         /* Transmit the new message on CAN1 to CAN0... */
@@ -166,7 +166,7 @@ void loop(void)
     if (ok && can_read(CAN0, &rx) != -1)
     {
         /* Output the received message... */
-        printf("CAN0 RX<- ");
+        tfp_printf("CAN0 RX<- ");
         print_can_msg_t(&rx);
 
         /* Store the received data so that it can be transmitted again
@@ -196,7 +196,7 @@ void loop(void)
     }
 
     /* Insert an empty line so the output can be read easier... */
-    printf("\r\n");
+    tfp_printf("\r\n");
 
     /* Wait a bit... */
     delayms(500);
@@ -221,23 +221,23 @@ void print_can_msg_t(can_msg_t *msg)
     uint8_t i = 0;
 
     if (msg->type == can_type_standard)
-        printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
+        tfp_printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
     else
-        printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
+        tfp_printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
 
     if (msg->rtr == can_rtr_remote_request)
-        printf("RTR ");
+        tfp_printf("RTR ");
     else
-        printf("    ");
+        tfp_printf("    ");
 
-    printf("{");
+    tfp_printf("{");
     for (i = 0; i < msg->dlc; ++i)
     {
-        printf("0x%02x", msg->data[i]);
+        tfp_printf("0x%02x", msg->data[i]);
         if (i < (msg->dlc - 1))
-            printf(",");
+            tfp_printf(",");
     }
-    printf("}"
+    tfp_printf("}"
            "\r\n");
 }
 

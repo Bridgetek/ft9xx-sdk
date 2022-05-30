@@ -250,23 +250,23 @@ void print_can_msg_t(can_msg_t *msg)
     uint8_t i = 0;
 
     if (msg->type == can_type_standard)
-        printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
+        tfp_printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
     else
-        printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
+        tfp_printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
 
     if (msg->rtr == can_rtr_remote_request)
-        printf("RTR ");
+        tfp_printf("RTR ");
     else
-        printf("    ");
+        tfp_printf("    ");
 
-    printf("{");
+    tfp_printf("{");
     for (i = 0; i < msg->dlc; ++i)
     {
-        printf("0x%02x", msg->data[i]);
+        tfp_printf("0x%02x", msg->data[i]);
         if (i < (msg->dlc - 1))
-            printf(",");
+            tfp_printf(",");
     }
-    printf("}"
+    tfp_printf("}"
            "\r\n");
 }
 

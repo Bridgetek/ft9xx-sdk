@@ -27,9 +27,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
      modifies the storage class to be in Flash memory, not RAM.
      The qualifier const has been changed to TFP_CONST thoughout.
   3) Add dummy macro fo va_end() as this is not implemented in MikroC.
+  4) Calculate a string length as the return value from snprintf/vsnprintf when
+     a zero length string is passed.
 */
 
 #include "tinyprintf.h"
+#include <limits.h>
 
 /*
  * Configuration
@@ -39,7 +42,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define PRINTF_LONG_SUPPORT
 
 /* Enable long long int support (implies long int support) */
-#undef PRINTF_LONG_LONG_SUPPORT
+#define PRINTF_LONG_LONG_SUPPORT
 
 /* Enable %z (size_t) support */
 #define PRINTF_SIZE_T_SUPPORT
@@ -466,7 +469,7 @@ struct _vsnprintf_putcf_data
 static void _vsnprintf_putcf(void *p, char c)
 {
   struct _vsnprintf_putcf_data *buffer = (struct _vsnprintf_putcf_data*)p;
-  if (buffer->num_chars < buffer->dest_capacity)
+  if ((buffer->num_chars < buffer->dest_capacity) && (buffer->dest))
     buffer->dest[buffer->num_chars] = c;
   buffer->num_chars ++;
 }
@@ -475,11 +478,14 @@ int tfp_vsnprintf(char *str, size_t size, TFP_CONST char *format, va_list ap)
 {
   struct _vsnprintf_putcf_data buffer;
 
-  if (size < 1)
-    return 0;
-
   buffer.dest = str;
-  buffer.dest_capacity = size-1;
+  if (size > 0)
+	  buffer.dest_capacity = size-1;
+  else
+  {
+	  buffer.dest_capacity = INT_MAX;
+	  buffer.dest = NULL;
+  }
   buffer.num_chars = 0;
   tfp_format(&buffer, _vsnprintf_putcf, format, ap);
 

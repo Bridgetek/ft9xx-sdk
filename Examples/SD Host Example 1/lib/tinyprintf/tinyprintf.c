@@ -19,8 +19,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-#include "tinyprintf.h"
+/*
+  NOTE: Modified by FTDIchip.
+  1) Change include of <sys/types.h> to <stddef.h> to pick up size_t definition
+     in MikroElektronika MikroC compiler environment.
+  2) Remove "const" qualifier for MikroElektronika MikroC compilers as this
+     modifies the storage class to be in Flash memory, not RAM.
+     The qualifier const has been changed to TFP_CONST thoughout.
+  3) Add dummy macro fo va_end() as this is not implemented in MikroC.
+  4) Calculate a string length as the return value from snprintf/vsnprintf when
+     a zero length string is passed.
+*/
 
+#include "tinyprintf.h"
+#include <limits.h>
 
 /*
  * Configuration
@@ -39,7 +51,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  * Configuration adjustments
  */
 #ifdef PRINTF_SIZE_T_SUPPORT
-#include <sys/types.h>
+#if defined(__GNUC__)
+# include <sys/types.h>  /* size_t */
+# define TFP_CONST const
+#elif defined(__MIKROC_PRO_FOR_FT90x__)
+# include <stddef.h>  /* size_t */
+# define TFP_CONST
+# define va_end(A)
+#endif
 #endif
 
 #ifdef PRINTF_LONG_LONG_SUPPORT
@@ -182,9 +201,9 @@ static int a2d(char ch)
         return -1;
 }
 
-static char a2u(char ch, const char **src, int base, unsigned int *nump)
+static char a2u(char ch, TFP_CONST char **src, int base, unsigned int *nump)
 {
-    const char *p = *src;
+    TFP_CONST char *p = *src;
     unsigned int num = 0;
     int digit;
     while ((digit = a2d(ch)) >= 0) {
@@ -250,7 +269,7 @@ static void putchw(void *putp, putcf putf, struct param *p)
     }
 }
 
-void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
+void tfp_format(void *putp, putcf putf, TFP_CONST char *fmt, va_list va)
 {
     struct param p;
 #ifdef PRINTF_LONG_SUPPORT
@@ -449,33 +468,36 @@ struct _vsnprintf_putcf_data
 
 static void _vsnprintf_putcf(void *p, char c)
 {
-  struct _vsnprintf_putcf_data *data = (struct _vsnprintf_putcf_data*)p;
-  if (data->num_chars < data->dest_capacity)
-    data->dest[data->num_chars] = c;
-  data->num_chars ++;
+  struct _vsnprintf_putcf_data *buffer = (struct _vsnprintf_putcf_data*)p;
+  if ((buffer->num_chars < buffer->dest_capacity) && (buffer->dest))
+    buffer->dest[buffer->num_chars] = c;
+  buffer->num_chars ++;
 }
 
-int tfp_vsnprintf(char *str, size_t size, const char *format, va_list ap)
+int tfp_vsnprintf(char *str, size_t size, TFP_CONST char *format, va_list ap)
 {
-  struct _vsnprintf_putcf_data data;
+  struct _vsnprintf_putcf_data buffer;
 
-  if (size < 1)
-    return 0;
-
-  data.dest = str;
-  data.dest_capacity = size-1;
-  data.num_chars = 0;
-  tfp_format(&data, _vsnprintf_putcf, format, ap);
-
-  if (data.num_chars < data.dest_capacity)
-    data.dest[data.num_chars] = '\0';
+  buffer.dest = str;
+  if (size > 0)
+	  buffer.dest_capacity = size-1;
   else
-    data.dest[data.dest_capacity] = '\0';
+  {
+	  buffer.dest_capacity = INT_MAX;
+	  buffer.dest = NULL;
+  }
+  buffer.num_chars = 0;
+  tfp_format(&buffer, _vsnprintf_putcf, format, ap);
 
-  return data.num_chars;
+  if (buffer.num_chars < buffer.dest_capacity)
+    buffer.dest[buffer.num_chars] = '\0';
+  else
+    buffer.dest[buffer.dest_capacity] = '\0';
+
+  return buffer.num_chars;
 }
 
-int tfp_snprintf(char *str, size_t size, const char *format, ...)
+int tfp_snprintf(char *str, size_t size, TFP_CONST char *format, ...)
 {
   va_list ap;
   int retval;
@@ -494,21 +516,21 @@ struct _vsprintf_putcf_data
 
 static void _vsprintf_putcf(void *p, char c)
 {
-  struct _vsprintf_putcf_data *data = (struct _vsprintf_putcf_data*)p;
-  data->dest[data->num_chars++] = c;
+  struct _vsprintf_putcf_data *buffer = (struct _vsprintf_putcf_data*)p;
+  buffer->dest[buffer->num_chars++] = c;
 }
 
-int tfp_vsprintf(char *str, const char *format, va_list ap)
+int tfp_vsprintf(char *str, TFP_CONST char *format, va_list ap)
 {
-  struct _vsprintf_putcf_data data;
-  data.dest = str;
-  data.num_chars = 0;
-  tfp_format(&data, _vsprintf_putcf, format, ap);
-  data.dest[data.num_chars] = '\0';
-  return data.num_chars;
+  struct _vsprintf_putcf_data buffer;
+  buffer.dest = str;
+  buffer.num_chars = 0;
+  tfp_format(&buffer, _vsprintf_putcf, format, ap);
+  buffer.dest[buffer.num_chars] = '\0';
+  return buffer.num_chars;
 }
 
-int tfp_sprintf(char *str, const char *format, ...)
+int tfp_sprintf(char *str, TFP_CONST char *format, ...)
 {
   va_list ap;
   int retval;

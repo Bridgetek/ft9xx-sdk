@@ -672,10 +672,10 @@ void ISR_timer(void)
 	}
 }
 
-static struct pipe *get_pipe(uint8_t pipe)
+static struct USBDX_pipe *get_pipe(uint8_t pipe)
 {
-	static struct pipe pipes[3];
-	struct pipe *ret_val = NULL;
+	static struct USBDX_pipe pipes[3];
+	struct USBDX_pipe *ret_val = NULL;
 
 	switch (pipe) {
 		case BOMS_EP_DATA_IN:
@@ -692,42 +692,42 @@ static struct pipe *get_pipe(uint8_t pipe)
 	return ret_val;
 }
 
-void USBD_pipe_isr(uint16_t pipe_bitfields)
+void USBDX_pipe_isr(uint16_t pipe_bitfields)
 {
 	if (pipe_bitfields & BIT(BOMS_EP_DATA_IN))
 	{
-		usbd_pipe_process(get_pipe(BOMS_EP_DATA_IN));
+		USBDX_pipe_process(get_pipe(BOMS_EP_DATA_IN));
 	}
 	if (pipe_bitfields & BIT(BOMS_EP_DATA_OUT))
 	{
-		usbd_pipe_process(get_pipe(BOMS_EP_DATA_OUT));
+		USBDX_pipe_process(get_pipe(BOMS_EP_DATA_OUT));
 	}
 }
 
-bool boms_out_on_data_ready(struct pipe *pp)
+bool boms_out_on_data_ready(struct USBDX_pipe *pp)
 {
 	return true;
 }
 
-int32_t get_out_buf(struct pipe *out, uint8_t *bomsdata, size_t len)
+int32_t get_out_buf(struct USBDX_pipe *out, uint8_t *bomsdata, size_t len)
 {
 	int32_t status;
 
 	CRITICAL_SECTION_BEGIN
-	struct urb *urb = usbd_get_app_urb(out);
+	struct USBDX_urb *urb = usbdx_get_app_urb(out);
 
-	if (likely(urb_owned_by_app(urb)))
+	if (likely(usbdx_urb_owned_by_app(urb)))
 	{
 		/* got BOMS_DATA_EP_SIZE to write */
 		status = len;
 
-		uint16_t urb_len = urb_get_app_to_process(urb);
+		uint16_t urb_len = usbdx_urb_get_app_to_process(urb);
 
 		if (likely(urb_len == status))
 		{
 			/* Can send out all URB buffer, queue URB back to USBD */
 			asm_memcpy8(urb->ptr, bomsdata, status);
-			usbd_submit_urb(out, urb);
+			USBDX_submit_urb(out, urb);
 			//tfp_printf("get_out_buf\r\n");
 		}
 		else
@@ -739,7 +739,7 @@ int32_t get_out_buf(struct pipe *out, uint8_t *bomsdata, size_t len)
 	else
 	{
 		//tfp_printf("get_out_buf: No BOMS data arrived\r\n");
-		usbd_set_app_paused(out);
+		usbdx_set_app_paused(out);
 		status = 0;
 	}
 
@@ -749,20 +749,20 @@ int32_t get_out_buf(struct pipe *out, uint8_t *bomsdata, size_t len)
 }
 
 
-int32_t get_in_buf(struct pipe *in, uint8_t *bomsdata, size_t len)
+int32_t get_in_buf(struct USBDX_pipe *in, uint8_t *bomsdata, size_t len)
 {
 	int32_t status = len;
 	CRITICAL_SECTION_BEGIN
 	/* Force acquire USB IN buffer */
-	struct urb *urb = usbd_force_acquire_urb_for_app(in);
+	struct USBDX_urb *urb = USBDX_force_acquire_urb_for_app(in);
 
-	uint16_t free = urb_get_app_to_process(urb);
+	uint16_t free = usbdx_urb_get_app_to_process(urb);
 	/* Don't have enough URB space */
 	if (free >= len)
 	{
 		asm_memcpy8(bomsdata, urb->ptr, len);
 		urb->ptr += len;
-		usbd_submit_urb(in, urb);
+		USBDX_submit_urb(in, urb);
 	}
 	else
 	{
@@ -1208,7 +1208,7 @@ uint8_t boms_send_status(uint8_t status,
 	size_t length = 0;
 	do {
 
-		struct pipe *pp = get_pipe(BOMS_EP_DATA_IN);
+		struct USBDX_pipe *pp = get_pipe(BOMS_EP_DATA_IN);
 		length = get_in_buf(pp, (uint8_t *)&BOMSStatus, sizeof(boms_commandStatusWrapper_t));
 	}while (length == 0);
 
@@ -1337,7 +1337,7 @@ int32_t scsi_inquiry(boms_commandBlockWrapper_t *BOMSCmd)
     memcpy(&inq.rev, "1.0 ", 4);
 
     {
-		struct pipe *pp = get_pipe(BOMS_EP_DATA_IN);
+		struct USBDX_pipe *pp = get_pipe(BOMS_EP_DATA_IN);
 		status = get_in_buf(pp, (uint8_t *)&inq, BOMS_SCSI_INQUIRY_TRANSFER_LEN);
     }
 
@@ -1402,7 +1402,7 @@ int32_t scsi_request_sense(boms_commandBlockWrapper_t *BOMSCmd)
 	scsi_sense_ok();
 
     {
-		struct pipe *pp = get_pipe(BOMS_EP_DATA_IN);
+		struct USBDX_pipe *pp = get_pipe(BOMS_EP_DATA_IN);
 		status = get_in_buf(pp, (uint8_t *) &sense, sizeof(boms_scsi_CRB_request_sense_t));
     }
 
@@ -1469,7 +1469,7 @@ int32_t scsi_mode_sense(boms_commandBlockWrapper_t *BOMSCmd)
 	response.reporting.interval_timer = CPU2SCSI_32(28);
 
     {
-		struct pipe *pp = get_pipe(BOMS_EP_DATA_IN);
+		struct USBDX_pipe *pp = get_pipe(BOMS_EP_DATA_IN);
 		status = get_in_buf(pp, (uint8_t *) &response, sizeof(response));
     }
 
@@ -1569,7 +1569,7 @@ int32_t scsi_read_capacity(boms_commandBlockWrapper_t *BOMSCmd)
 		}
 
 	    {
-			struct pipe *pp = get_pipe(BOMS_EP_DATA_IN);
+			struct USBDX_pipe *pp = get_pipe(BOMS_EP_DATA_IN);
 			status = get_in_buf(pp, cap, len);
 	    }
 
@@ -1642,7 +1642,7 @@ int32_t scsi_read_format_capacity(boms_commandBlockWrapper_t *BOMSCmd)
 			fcap.code = 2;
 
 		    {
-				struct pipe *pp = get_pipe(BOMS_EP_DATA_IN);
+				struct USBDX_pipe *pp = get_pipe(BOMS_EP_DATA_IN);
 				status = get_in_buf(pp, (uint8_t *)&fcap, len);
 		    }
 
@@ -1726,19 +1726,19 @@ int32_t scsi_read(boms_commandBlockWrapper_t *BOMSCmd)
 				}
 
 				{
-					struct pipe *pp = get_pipe(BOMS_EP_DATA_IN);
+					struct USBDX_pipe *pp = get_pipe(BOMS_EP_DATA_IN);
 
 					CRITICAL_SECTION_BEGIN
 					/* Force acquire USB IN buffer */
-					struct urb *urb = usbd_force_acquire_urb_for_app(pp);
+					struct USBDX_urb *urb = USBDX_force_acquire_urb_for_app(pp);
 
-					uint16_t free = urb_get_app_to_process(urb);
+					uint16_t free = usbdx_urb_get_app_to_process(urb);
 					/* Don't have enough URB space */
 					if (free == status)
 					{
 						asm_memcpy32(bufBOMSData, urb->ptr, status);
 						urb->ptr += status;
-						usbd_submit_urb(pp, urb);
+						USBDX_submit_urb(pp, urb);
 						if (count)
 						{
 							count--;
@@ -1835,23 +1835,23 @@ int32_t scsi_write(boms_commandBlockWrapper_t *BOMSCmd)
 			while (count)
 			{
 				{
-					struct pipe *pp = get_pipe(BOMS_EP_DATA_OUT);
+					struct USBDX_pipe *pp = get_pipe(BOMS_EP_DATA_OUT);
 
 					CRITICAL_SECTION_BEGIN
-					struct urb *urb = usbd_get_app_urb(pp);
+					struct USBDX_urb *urb = usbdx_get_app_urb(pp);
 
-					if (likely(urb_owned_by_app(urb)))
+					if (likely(usbdx_urb_owned_by_app(urb)))
 					{
 						/* got BOMS_DATA_EP_SIZE to write */
 						status = BOMS_DATA_EP_SIZE;
 
-						uint16_t urb_len = urb_get_app_to_process(urb);
+						uint16_t urb_len = usbdx_urb_get_app_to_process(urb);
 
 						if (likely(urb_len == status))
 						{
 							/* Can send out all URB buffer, queue URB back to USBD */
 							asm_memcpy32(urb->ptr, bufBOMSData, status);
-							usbd_submit_urb(pp, urb);
+							USBDX_submit_urb(pp, urb);
 							if (count)
 							{
 								count--;
@@ -1864,7 +1864,7 @@ int32_t scsi_write(boms_commandBlockWrapper_t *BOMSCmd)
 					}
 					else
 					{
-						usbd_set_app_paused(pp);
+						usbdx_set_app_paused(pp);
 						status = 0;
 					}
 
@@ -1925,21 +1925,22 @@ void boms_sdcard_bridge(void)
 	static uint8_t boms_in_buf[BOMS_DATA_EP_SIZE * BOMS_URB_IN_COUNT] __attribute__ ((aligned (16)));
 	static uint8_t boms_out_buf[BOMS_DATA_EP_SIZE * BOMS_URB_OUT_COUNT];
 
-	static struct urb boms_in[BOMS_URB_IN_COUNT];
-	static struct urb boms_out[BOMS_URB_OUT_COUNT];
-	struct pipe *pp;
+	static struct USBDX_urb boms_in[BOMS_URB_IN_COUNT];
+	static struct USBDX_urb boms_out[BOMS_URB_OUT_COUNT];
+	struct USBDX_pipe *pp;
 
 	/* BOMS */
 
 	pp = get_pipe(BOMS_EP_DATA_IN);
-	usbd_pipe_init(pp, BOMS_EP_DATA_IN, BOMS_EP_DATA_IN | 0x80,
+	USBDX_pipe_init(pp, BOMS_EP_DATA_IN, BOMS_EP_DATA_IN | 0x80,
 			boms_in, boms_in_buf, BOMS_URB_IN_COUNT);
 
 	pp = get_pipe(BOMS_EP_DATA_OUT);
-	usbd_pipe_init(pp, BOMS_EP_DATA_OUT, BOMS_EP_DATA_OUT,
+	USBDX_pipe_init(pp, BOMS_EP_DATA_OUT, BOMS_EP_DATA_OUT,
 			boms_out, boms_out_buf, BOMS_URB_OUT_COUNT);
 
-	register_on_usbd_ready(pp, boms_out_on_data_ready);
+	USBDX_register_on_ready(pp, boms_out_on_data_ready);
+
 
 	memset((void *)&BOMSCmd, 0, sizeof(BOMSCmd));
 
@@ -1951,9 +1952,9 @@ void boms_sdcard_bridge(void)
 		// If data is available on the USB OUT endpoint and there is space
 		// in the ring buffer to receive it then read it in from the host.
 
-		struct pipe *pp = get_pipe(BOMS_EP_DATA_OUT);
-		struct urb *urb = usbd_get_app_urb(pp);
-		if (likely(urb_owned_by_app(urb)) && (urb_get_app_to_process(urb) == sizeof(BOMSCmd)))
+		struct USBDX_pipe *pp = get_pipe(BOMS_EP_DATA_OUT);
+		struct USBDX_urb *urb = usbdx_get_app_urb(pp);
+		if (likely(usbdx_urb_owned_by_app(urb)) && (usbdx_urb_get_app_to_process(urb) == sizeof(BOMSCmd)))
 		{
 
 			read_bytes = get_out_buf(pp, (uint8_t *)&BOMSCmd, sizeof(BOMSCmd));
@@ -2046,9 +2047,9 @@ void boms_sdcard_bridge(void)
 				scsi_sense_illegal_request_parm();
 			}
 		}
-		else if (!urb_owned_by_app(urb))
+		else if (!usbdx_urb_owned_by_app(urb))
 		{
-			usbd_set_app_paused(pp);
+			usbdx_set_app_paused(pp);
 		}
 
 		sdret = SDHOST_OK;

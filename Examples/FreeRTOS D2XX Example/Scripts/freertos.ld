@@ -37,14 +37,14 @@ SECTIONS
     . = ALIGN(4);
   } > ram
   
-  .data	  : AT (ADDR (.text) + SIZEOF (.text))
+  .data	  :
   {
   _sdata = .;
     *(.data)
     *(.rodata)
     *(.rodata*)
      _edata = . ;
-  }  > ram
+  }  > ram AT>flash
   
 
 

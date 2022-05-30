@@ -72,15 +72,17 @@ rtc_result ext_rtc_attach_interrupt(register_callback cb)
 	rtc_result iRet = RTC_OK;
 
 	interrupt_disable_globally();
-//	interrupt_detach(interrupt_gpio);
+	//interrupt_detach(interrupt_gpio);
 	/* Set up the pin */
 	gpio_function(RTC_INT_PIN,pad_gpio40);
 	gpio_dir(RTC_INT_PIN, pad_dir_input);
 	gpio_pull(RTC_INT_PIN, pad_pull_pullup);
 
 	/* Attach an interrupt */
-	iRet = interrupt_attach(interrupt_gpio, (uint8_t)(interrupt_gpio),cb);checkStatus(iRet);
-	iRet = gpio_interrupt_enable(RTC_INT_PIN, gpio_int_edge_raising);checkStatus(iRet);
+	iRet = interrupt_attach(interrupt_gpio, (uint8_t)(interrupt_gpio),cb);
+	checkStatus(iRet);
+	iRet = gpio_interrupt_enable(RTC_INT_PIN, gpio_int_edge_raising);
+	checkStatus(iRet);
 	interrupt_enable_globally();
 
 __exit:
@@ -93,8 +95,10 @@ __exit:
 rtc_result ext_rtc_detach_interrupt()
 {
 	rtc_result iRet;
-	iRet = gpio_interrupt_disable(RTC_INT_PIN);checkStatus(iRet);
-	iRet = interrupt_detach(interrupt_gpio);checkStatus(iRet);
+	iRet = gpio_interrupt_disable(RTC_INT_PIN);
+	checkStatus(iRet);
+	iRet = interrupt_detach(interrupt_gpio);
+	checkStatus(iRet);
 
 __exit:
 	return iRet;
@@ -108,12 +112,16 @@ static rtc_result enable_oscillator(void)
 	rtc_result iRet;
 	uint8_t txByte = 0;
 	
-	iRet = i2cm_read(ADDR_RTCC,ADDR_SEC,&txByte,1);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC,ADDR_SEC,&txByte,1);
+	checkStatus(iRet);
 	txByte |= START_32KHZ;
-	iRet = i2cm_write(ADDR_RTCC,ADDR_SEC,&txByte,1);checkStatus(iRet);	// init SEC register and start the 32khz oscillator
-//	iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txByte,1);checkStatus(iRet);
-//	txByte |= EXTOSC;
-//	iRet = i2cm_write(ADDR_RTCC,ADDR_SEC,&txByte,1);checkStatus(iRet);  // Enable external clock source
+	iRet = i2cm_write(ADDR_RTCC,ADDR_SEC,&txByte,1);
+	checkStatus(iRet);	// init SEC register and start the 32khz oscillator
+	//iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txByte,1);
+	//checkStatus(iRet);
+	//txByte |= EXTOSC;
+	//iRet = i2cm_write(ADDR_RTCC,ADDR_SEC,&txByte,1);
+	//checkStatus(iRet);  // Enable external clock source
 
 __exit:
 	return iRet;
@@ -127,12 +135,16 @@ static rtc_result disable_oscillator(void)
 	rtc_result iRet;
 	uint8_t txByte = 0;
 
-	iRet = i2cm_read(ADDR_RTCC,ADDR_SEC,&txByte,1);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC,ADDR_SEC,&txByte,1);
+	checkStatus(iRet);
 	txByte &= (~START_32KHZ);
-	iRet = i2cm_write(ADDR_RTCC,ADDR_SEC,&txByte,1);checkStatus(iRet);	// init SEC register and start the 32khz oscillator
-//	iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txByte,1);checkStatus(iRet);
-//	txByte &= (~EXTOSC);
-//	iRet = i2cm_write(ADDR_RTCC,ADDR_SEC,&txByte,1);checkStatus(iRet);  // Enable external clock source
+	iRet = i2cm_write(ADDR_RTCC,ADDR_SEC,&txByte,1);
+	checkStatus(iRet);	// init SEC register and start the 32khz oscillator
+	//iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txByte,1);
+	//checkStatus(iRet);
+	//txByte &= (~EXTOSC);
+	//iRet = i2cm_write(ADDR_RTCC,ADDR_SEC,&txByte,1);
+	//checkStatus(iRet);  // Enable external clock source
 	
 __exit:
 	return iRet;
@@ -179,7 +191,8 @@ rtc_result ext_rtc_init(register_callback cb)
 	rtc_result iRet;
 	uint8_t txByte = 0;
 	ext_rtc_time_t time;
-	iRet = i2cm_read(ADDR_RTCC,ADDR_DAY,&txByte,1);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC,ADDR_DAY,&txByte,1);
+	checkStatus(iRet);
 	if((txByte&OSCON) != OSCON)             // if oscillator = not running, set time/date(arbitrary) else do nothing.
 	{
 		time.sec = 0;
@@ -192,7 +205,8 @@ rtc_result ext_rtc_init(register_callback cb)
 		time.month = 01;
 		time.year = 17;
 		ext_rtc_write(time);
-		iRet = enable_oscillator();checkStatus(iRet);
+		iRet = enable_oscillator();
+		checkStatus(iRet);
 	}
 
 	if(cb != NULL)
@@ -216,10 +230,12 @@ rtc_result ext_rtc_enable_squarewave(ext_rtc_square_wave_t option)
 	uint8_t address = ADDR_CTRL;
 
 	assert(option,0x00,0x03);
-	iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txByte,1);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txByte,1);
+	checkStatus(iRet);
 	txByte &= 0xFC;
 	txByte |= (option | SQWE); //select frequency and enable square wave
-	iRet = i2cm_write(ADDR_RTCC,address,&txByte,1);checkStatus(iRet);
+	iRet = i2cm_write(ADDR_RTCC,address,&txByte,1);
+	checkStatus(iRet);
 
 __exit:
 	return iRet;
@@ -234,9 +250,11 @@ rtc_result ext_rtc_disable_squarewave(void)
 {
 	rtc_result iRet = RTC_OK;
 	uint8_t txByte = 0;
-	iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txByte,1);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txByte,1);
+	checkStatus(iRet);
 	txByte &= (~SQWE);
-	iRet = i2cm_write(ADDR_RTCC,ADDR_CTRL,&txByte,1);checkStatus(iRet);
+	iRet = i2cm_write(ADDR_RTCC,ADDR_CTRL,&txByte,1);
+	checkStatus(iRet);
 
 __exit:
 	return iRet;
@@ -256,12 +274,15 @@ rtc_result ext_rtc_enable_interrupt(ext_rtc_interrupt_t _interrupt)
 
 	if((_interrupt != AL_INT_0) && (_interrupt != AL_INT_1) && (_interrupt != SQWE_INT) && (_interrupt != ALL_INT))
 	{
-		iRet = RTC_INVALID_PARAMETERS;checkStatus(iRet);
+		iRet = RTC_INVALID_PARAMETERS;
+		checkStatus(iRet);
 	}
 
-	iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txbuf,1);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txbuf,1);
+	checkStatus(iRet);
 	txbuf |= _interrupt;
-	iRet = i2cm_write(ADDR_RTCC,ADDR_CTRL,&txbuf,1);checkStatus(iRet);
+	iRet = i2cm_write(ADDR_RTCC,ADDR_CTRL,&txbuf,1);
+	checkStatus(iRet);
 	delayms(100);
 __exit:
 	return iRet;
@@ -281,12 +302,15 @@ rtc_result ext_rtc_disable_interrupt(ext_rtc_interrupt_t _interrupt)
 
 	if((_interrupt != AL_INT_0) && (_interrupt != AL_INT_1) && (_interrupt != SQWE_INT) && (_interrupt != ALL_INT) )
 	{
-		iRet = RTC_INVALID_PARAMETERS;checkStatus(iRet);
+		iRet = RTC_INVALID_PARAMETERS;
+		checkStatus(iRet);
 	}
 
-	iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txbuf,1);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC,ADDR_CTRL,&txbuf,1);
+	checkStatus(iRet);
 	txbuf &= ~_interrupt;
-	iRet = i2cm_write(ADDR_RTCC,ADDR_CTRL,&txbuf,1);checkStatus(iRet);
+	iRet = i2cm_write(ADDR_RTCC,ADDR_CTRL,&txbuf,1);
+	checkStatus(iRet);
 	delayms(100);
 	/*clear alarm flags*/
 	if((_interrupt == AL_INT_0) || (_interrupt == ALL_INT))
@@ -350,7 +374,8 @@ rtc_result ext_rtc_write(ext_rtc_time_t time)
 	txBuffer[4] = dec2bcd(time.date);
 	txBuffer[5] = dec2bcd(time.month);
 	txBuffer[6] = dec2bcd(time.year);
-	iRet = i2cm_write(ADDR_RTCC,ADDR_SEC,txBuffer,7);checkStatus(iRet);
+	iRet = i2cm_write(ADDR_RTCC,ADDR_SEC,txBuffer,7);
+	checkStatus(iRet);
 	enable_oscillator();
 
 __exit:
@@ -369,7 +394,8 @@ rtc_result ext_rtc_read(ext_rtc_time_t *time)
 	rtc_result iRet = RTC_OK;
 	uint8_t rxBuffer[7] = {0};
 
-	iRet = i2cm_read(ADDR_RTCC,ADDR_SEC,rxBuffer,7);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC,ADDR_SEC,rxBuffer,7);
+	checkStatus(iRet);
 	time->sec = bcd2dec((rxBuffer[0]) & 0x7f);
 	time->min = bcd2dec((rxBuffer[1]) & 0x7f);
 	time->fmt_12_24 = (rxBuffer[2] & HOUR_12) >> MASK_HOUR_12;
@@ -404,8 +430,11 @@ rtc_result ext_rtc_set_alarm(ext_rtc_alarm_num alrm_num, ext_rtc_alarm_time_t al
 
 	assert(alrm_num,0,1);
 	assert(alrm_type,0,7);
-	if((alrm_type == 5) ||(alrm_type == 6))
-		iRet = RTC_ERROR;checkStatus(iRet);
+	if ((alrm_type == 5) ||(alrm_type == 6))
+	{
+		iRet = RTC_ERROR;
+		checkStatus(iRet);
+	}
 
 	txBuffer[0] = dec2bcd(al_time.sec);
 	txBuffer[1] = dec2bcd(al_time.min);
@@ -417,51 +446,68 @@ rtc_result ext_rtc_set_alarm(ext_rtc_alarm_num alrm_num, ext_rtc_alarm_time_t al
 	txBuffer[5] = dec2bcd(al_time.month);
 
 	if(alrm_num == ALARM_0)
+	{
 		alarm_addr = ALARM_0_REG;
+	}
 	else
+	{
 		alarm_addr = ALARM_1_REG;
+	}
 
-//	iRet = enable_oscillator();checkStatus(iRet);
-//	iRet = i2cm_read(ADDR_RTCC,alarm_addr + 3,&temp,1);checkStatus(iRet);
-	iRet = i2cm_read(ADDR_RTCC,alarm_addr + 3,&tmp,1);checkStatus(iRet);
+	//iRet = enable_oscillator();checkStatus(iRet);
+	//iRet = i2cm_read(ADDR_RTCC,alarm_addr + 3,&temp,1);
+	//checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC,alarm_addr + 3,&tmp,1);
+	checkStatus(iRet);
+
 	temp = 0;
 	temp |= ALMx_POL;
 	if(tmp & ALMx_IF)
 		temp |= ALMx_IF;
 	temp |= (alrm_type << 4) | ALMx_IF; 	//select alarm mask and clear ALMx_IF by writing 1 to it
-	iRet = i2cm_write(ADDR_RTCC,alarm_addr + 3,&temp,1);checkStatus(iRet);
+	iRet = i2cm_write(ADDR_RTCC,alarm_addr + 3,&temp,1);
+	checkStatus(iRet);
+
 	switch(alrm_type) {
 		case seconds:
-			iRet = i2cm_write(ADDR_RTCC,alarm_addr + 0,&txBuffer[0],1);checkStatus(iRet);
+			iRet = i2cm_write(ADDR_RTCC,alarm_addr + 0,&txBuffer[0],1);
+			checkStatus(iRet);
 			break;
 
 		case minutes:
-			iRet = i2cm_write(ADDR_RTCC,alarm_addr + 1,&txBuffer[1],1);checkStatus(iRet);
+			iRet = i2cm_write(ADDR_RTCC,alarm_addr + 1,&txBuffer[1],1);
+			checkStatus(iRet);
 			break;
 
 		case hours:
-			iRet = i2cm_write(ADDR_RTCC,alarm_addr + 2,&txBuffer[2],1);checkStatus(iRet);
+			iRet = i2cm_write(ADDR_RTCC,alarm_addr + 2,&txBuffer[2],1);
+			checkStatus(iRet);
 			break;
 
 		case day_of_week:
 			txBuffer[3] |= temp;
-			iRet = i2cm_write(ADDR_RTCC,alarm_addr + 3,&txBuffer[3],1);checkStatus(iRet);
+			iRet = i2cm_write(ADDR_RTCC,alarm_addr + 3,&txBuffer[3],1);
+			checkStatus(iRet);
 			break;
 
 		case date:
-			iRet = i2cm_write(ADDR_RTCC,alarm_addr + 4,&txBuffer[4],1);checkStatus(iRet);
+			iRet = i2cm_write(ADDR_RTCC,alarm_addr + 4,&txBuffer[4],1);
+			checkStatus(iRet);
 			break;
 
 		case sec_min_hr_day_date_month:
-			iRet = i2cm_write(ADDR_RTCC,alarm_addr,txBuffer,6);checkStatus(iRet);
+			iRet = i2cm_write(ADDR_RTCC,alarm_addr,txBuffer,6);
+			checkStatus(iRet);
 			break;
 
 		default:
-			iRet = RTC_ERROR;checkStatus(iRet);
+			iRet = RTC_ERROR;
+			checkStatus(iRet);
 	}
 
 	temp = (alrm_num ==ALARM_0)?AL_INT_0:AL_INT_1;
-	iRet = ext_rtc_enable_interrupt(temp);checkStatus(iRet);
+	iRet = ext_rtc_enable_interrupt(temp);
+	checkStatus(iRet);
 
 __exit:
 	return iRet;
@@ -482,13 +528,20 @@ rtc_result ext_rtc_clear_alarm_interrupt(ext_rtc_alarm_num alrm_num)
 
 	assert(alrm_num,0,1);
 	if(alrm_num == ALARM_0)
+	{
 		alarm_addr = ALARM_0_REG;
+	}
 	else
+	{
 		alarm_addr = ALARM_1_REG;
+	}
 
-	iRet = i2cm_read(ADDR_RTCC, alarm_addr + 3 , &txbuf, 1);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC, alarm_addr + 3 , &txbuf, 1);
+	checkStatus(iRet);
+
 	txbuf |= ALMx_IF;
-	iRet = i2cm_write(ADDR_RTCC, alarm_addr + 3, &txbuf, 1);checkStatus(iRet);
+	iRet = i2cm_write(ADDR_RTCC, alarm_addr + 3, &txbuf, 1);
+	checkStatus(iRet);
 
 __exit:
 	return iRet;
@@ -504,10 +557,12 @@ ext_rtc_alarm_stat ext_rtc_alarm_status(void)
 {
 	uint8_t txbuf, iRet, alarm_status = 0 ;
 
-	iRet = i2cm_read(ADDR_RTCC, ADDR_ALM0CTL , &txbuf, 1);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC, ADDR_ALM0CTL , &txbuf, 1);
+	checkStatus(iRet);
 	if(txbuf & ALMx_IF)
 		alarm_status = AL_0;
-	iRet = i2cm_read(ADDR_RTCC, ADDR_ALM1CTL, &txbuf, 1);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC, ADDR_ALM1CTL, &txbuf, 1);
+	checkStatus(iRet);
 	if(txbuf & ALMx_IF)
 		alarm_status |= AL_1;
 
@@ -529,7 +584,8 @@ rtc_result ext_rtc_write_ram(uint8_t address,uint8_t *buffer,uint8_t len)
 	rtc_result iRet = RTC_OK;
 	assert(address, 0, 0x3F);
 	address += SRAM_PTR;
-	iRet = i2cm_write(ADDR_RTCC, address,buffer,len);checkStatus(iRet);
+	iRet = i2cm_write(ADDR_RTCC, address,buffer,len);
+	checkStatus(iRet);
 
 __exit:
 	return iRet;
@@ -549,10 +605,9 @@ rtc_result ext_rtc_read_ram(uint8_t address,uint8_t *buffer,uint8_t len)
 	rtc_result iRet = RTC_OK;
 	assert(address, 0, 0x3F);
 	address += SRAM_PTR;
-	iRet = i2cm_read(ADDR_RTCC,address,buffer,len);checkStatus(iRet);
+	iRet = i2cm_read(ADDR_RTCC,address,buffer,len);
+	checkStatus(iRet);
 
 __exit:
 	return iRet;
 }
-
-

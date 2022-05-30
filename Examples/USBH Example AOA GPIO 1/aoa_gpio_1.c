@@ -151,37 +151,37 @@ int8_t aoa_read_cb(uint32_t id, int8_t status, size_t len, uint8_t *buffer)
 		// Decode commands from the Android app.
 		if (readBuf[0] == 0x14)
 		{
-			printf("Reset command\r\n");
+			tfp_printf("Reset command\r\n");
 		}
 		else if (readBuf[0] == 0x11)
 		{
-			printf("Configure command: Outmap ");
+			tfp_printf("Configure command: Outmap ");
 			for (i = 0; i < 7; i++)
 			{
 				tfp_printf("%c", ((readBuf[2] >> i) & 1)?'1':'0');
 			}
-			printf(" Inmap ");
+			tfp_printf(" Inmap ");
 			for (i = 0; i < 7; i++)
 			{
 				tfp_printf("%c", ((readBuf[3] >> i) & 1)?'1':'0');
 			}
-			printf("\r\n");
+			tfp_printf("\r\n");
 		}
 		else if (readBuf[0] == 0x13)
 		{
-			printf("Write Port: Bitmap ");
+			tfp_printf("Write Port: Bitmap ");
 			for (i = 0; i < 7; i++)
 			{
 				tfp_printf("%c", ((readBuf[1] >> i) & 1)?'1':'0');
 			}
-			printf("\r\n");
+			tfp_printf("\r\n");
 		}
 		else
 		{
-			printf("Unknown command %02x.\r\n", readBuf[0]);
+			tfp_printf("Unknown command %02x.\r\n", readBuf[0]);
 		}
 	}
-	printf(".");
+	tfp_printf(".");
 
 	// Resubmit asyncronous read.
 	return USBH_AOA_accessory_read_async((USBH_AOA_context *)id, readBuf, 64, id, aoa_read_cb);
@@ -242,18 +242,18 @@ void aoa_testing(USBH_AOA_context *ctx, USBH_device_handle hAOAdev)
 			{
 				for (i = 0; i < result; i++)
 				{
-					printf("%02x", writeBuf[i]);
+					tfp_printf("%02x", writeBuf[i]);
 				}
 			}
-			printf("\r\n");
+			tfp_printf("\r\n");
 #endif // USBH_AOA_DEBUG_DATA
 
-			printf("Read Port: Bitmap ");
+			tfp_printf("Read Port: Bitmap ");
 			for (i = 0; i < 7; i++)
 			{
 				tfp_printf("%c", ((writeBuf[1] >> i) & 1)?'1':'0');
 			}
-			printf("\r\n");
+			tfp_printf("\r\n");
 
 			// Shift 'on' LED. Wrap at bit 8 (it's not used).
 			map = map << 1;

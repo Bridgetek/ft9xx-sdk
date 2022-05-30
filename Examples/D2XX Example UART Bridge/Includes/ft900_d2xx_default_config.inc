@@ -18,7 +18,7 @@ Strings:	/**< strings are preceded by length byte */
 Strings_start = .
 			.byte	0x04,'F','T','D','I'						/**< manufacturer string */
 			.byte	0x0A,'F','T','9','0','0',' ','D','2','X','X' 			/**< product description */
-			.byte	0x0E,'F','T','9','0','0','S','e','r','i','a','l','#','0','3' 	/**< serial number */
+			.byte	0x0E,'F','T','9','0','0','S','e','r','i','a','l','#','0','3' 	/**< Serial number. Maximum should be limited  to 14 characters. */
 			.byte	0x15,'D','F','U',' ','R','u','n','t','i','m','e',' ','I','n','t','e','r','f','a','c','e'  /* dfu description */
 			.skip	(0x80-(. - Strings_start))
 DfuDeviceInterfaceGUID:	/**< Default DeviceInterfaceGUID {47C2B3D7-CF33-4423-86FA-2480C412FB5D} */

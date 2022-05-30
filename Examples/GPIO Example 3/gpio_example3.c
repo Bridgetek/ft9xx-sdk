@@ -48,9 +48,6 @@
 #include <stdint.h>
 #include <ft900.h>
 
-#define STR(a) STR_(a)
-#define STR_(a) #a
-
 #define GPIO_PIN 18
 
 void setup(void);
@@ -104,6 +101,7 @@ void setup()
     gpio_interrupt_enable(GPIO_PIN, gpio_int_edge_falling);
     interrupt_enable_globally();
 
+	/* Stringify macro STR is defined in ft900.h file */
     uart_puts(UART0, "Triggering off GPIO" STR(GPIO_PIN) "\r\n");
 }
 

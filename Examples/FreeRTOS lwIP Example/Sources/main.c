@@ -181,7 +181,7 @@ int main(void)
     gpio_function(49, pad_func_3);
 
     uart_open(UART0, 1,
-            UART_DIVIDER_115200_BAUD, uart_data_bits_8, uart_parity_none,
+            UART_DIVIDER_19200_BAUD, uart_data_bits_8, uart_parity_none,
             uart_stop_bits_1);
     /* Enable tfp_printf() functionality... */
     init_printf(UART0, myputc);

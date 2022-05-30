@@ -190,7 +190,8 @@ void setup(void)
     delayms(10000);
 
     /* attaching watchdog interrupt */
-    vector_table[33] = watchdog_ISR;
+    //vector_table[33] = watchdog_ISR;
+    interrupt_attach(interrupt_wdg, interrupt_wdg, watchdog_ISR);
     /* Enable the WDT... */
     sys_enable(sys_device_timer_wdt);
 
