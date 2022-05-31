@@ -70,8 +70,9 @@
 int8_t pwm_init(uint8_t prescaler, uint16_t maxcount, uint8_t shots)
 {
     PWM->PWM_PRESCALER = prescaler;
-    PWM->PWM_CNTH = (maxcount >> 8) & 0x00FF;
+    /* LSB is written first followed by MSB */
     PWM->PWM_CNTL = (maxcount >> 0) & 0x00FF;
+    PWM->PWM_CNTH = (maxcount >> 8) & 0x00FF;
     PWM->PWM_CTRL_BL_CMP8 = shots;
 
     return 0;
@@ -147,16 +148,17 @@ int8_t pwm_compare(uint8_t channel, uint16_t value)
     int8_t iRet = 0;
 
     /* Set up the compare value */
+    /* LSB of the 16 bit register is written first followed by MSB */
     switch(channel)
     {
-        case 0: PWM->PWM_CMP0H = (value >> 8) & 0x00FF; PWM->PWM_CMP0L = (value >> 0) & 0x00FF; break;
-        case 1: PWM->PWM_CMP1H = (value >> 8) & 0x00FF; PWM->PWM_CMP1L = (value >> 0) & 0x00FF; break;
-        case 2: PWM->PWM_CMP2H = (value >> 8) & 0x00FF; PWM->PWM_CMP2L = (value >> 0) & 0x00FF; break;
-        case 3: PWM->PWM_CMP3H = (value >> 8) & 0x00FF; PWM->PWM_CMP3L = (value >> 0) & 0x00FF; break;
-        case 4: PWM->PWM_CMP4H = (value >> 8) & 0x00FF; PWM->PWM_CMP4L = (value >> 0) & 0x00FF; break;
-        case 5: PWM->PWM_CMP5H = (value >> 8) & 0x00FF; PWM->PWM_CMP5L = (value >> 0) & 0x00FF; break;
-        case 6: PWM->PWM_CMP6H = (value >> 8) & 0x00FF; PWM->PWM_CMP6L = (value >> 0) & 0x00FF; break;
-        case 7: PWM->PWM_CMP7H = (value >> 8) & 0x00FF; PWM->PWM_CMP7L = (value >> 0) & 0x00FF; break;
+        case 0: PWM->PWM_CMP0L = (value >> 0) & 0x00FF; PWM->PWM_CMP0H = (value >> 8) & 0x00FF; break;
+        case 1: PWM->PWM_CMP1L = (value >> 0) & 0x00FF; PWM->PWM_CMP1H = (value >> 8) & 0x00FF; break;
+        case 2: PWM->PWM_CMP2L = (value >> 0) & 0x00FF; PWM->PWM_CMP2H = (value >> 8) & 0x00FF; break;
+        case 3: PWM->PWM_CMP3L = (value >> 0) & 0x00FF; PWM->PWM_CMP3H = (value >> 8) & 0x00FF; break;
+        case 4: PWM->PWM_CMP4L = (value >> 0) & 0x00FF; PWM->PWM_CMP4H = (value >> 8) & 0x00FF; break;
+        case 5: PWM->PWM_CMP5L = (value >> 0) & 0x00FF; PWM->PWM_CMP5H = (value >> 8) & 0x00FF; break;
+        case 6: PWM->PWM_CMP6L = (value >> 0) & 0x00FF; PWM->PWM_CMP6H = (value >> 8) & 0x00FF; break;
+        case 7: PWM->PWM_CMP7L = (value >> 0) & 0x00FF; PWM->PWM_CMP7H = (value >> 8) & 0x00FF; break;
         default: iRet = -1; break;
     }
 

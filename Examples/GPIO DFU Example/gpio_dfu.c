@@ -51,9 +51,6 @@
 #include <ft900.h>
 #include <ft900_startup_dfu.h>
 
-#define STR(a) STR_(a)
-#define STR_(a) #a
-
 #if defined(__FT930__)
 #define GPIO_PIN_1 19
 #define GPIO_PIN_2 20
@@ -97,6 +94,7 @@ void setup()
 			"---------------------------------------------------------------------- \r\n"
 	);
 
+	/* Stringify macro STR is defined in ft900.h file */
     uart_puts(UART0, "On GPIO trigger GPIO"STR(GPIO_PIN_1)" for infinite DFU timeout\r\n"
     				 "                GPIO"STR(GPIO_PIN_2)" for 5 seconds DFU timeout\r\n"
     				 "                GPIO"STR(GPIO_PIN_3)" for default timeout\r\n");

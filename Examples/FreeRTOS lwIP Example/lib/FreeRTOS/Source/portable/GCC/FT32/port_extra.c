@@ -6,11 +6,11 @@
 */
 /*
  * =============================================================================
- * Copyright (C) Bridgetek Pte Ltd
+ * (C) Copyright, Bridgetek Pte Ltd
  * =============================================================================
  *
- * This source code ("the Software") is provided by Future Technology Devices
- * International Limited ("Bridgetek") subject to the licence terms set out
+ * This source code ("the Software") is provided by Bridgetek Pte Ltd ("Bridgetek") 
+ * subject to the licence terms set out
  * http://brtchip.com/BRTSourceCodeLicenseAgreement/ ("the Licence Terms").
  * You must read the Licence Terms before downloading or using the Software.
  * By installing or using the Software you agree to the Licence Terms. If you
@@ -228,11 +228,11 @@ extern volatile TCB_t * volatile pxCurrentTCB;
 inline void vPortTaskCreate(void *pxNewTCB)
 {
     TCB_t *p = (TCB_t *)pxNewTCB;
-    DPRINTF("C %s %x %x %x\r\n",
+    DPRINTF("C %s %p %p %p\r\n",
             p->pcTaskName,
-            (unsigned int)p->pxStackBase,
-            (unsigned int)p->pxTopOfStack,
-            (unsigned int)p->pxStack);
+            p->pxStackBase,
+            p->pxTopOfStack,
+            p->pxStack);
 }
 
 inline void vPortTaskCreateFailed(void)

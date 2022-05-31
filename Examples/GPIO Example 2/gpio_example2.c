@@ -48,9 +48,6 @@
 #include <stdint.h>
 #include <ft900.h>
 
-#define STR(a) STR_(a)
-#define STR_(a) #a
-
 #define GPIO_PIN 18
 
 void setup(void);
@@ -98,6 +95,7 @@ void setup()
     gpio_dir(GPIO_PIN, pad_dir_input);
     gpio_pull(GPIO_PIN, pad_pull_pullup);
 
+	/* Stringify macro STR is defined in ft900.h file */
     uart_puts(UART0, "Reading GPIO" STR(GPIO_PIN) "\r\n");
 }
 

@@ -1,6 +1,7 @@
 #ifndef FT900_RTC_H_
 #define FT900_RTC_H_
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <ft900.h>

@@ -130,14 +130,14 @@ void loop(void)
 
 
     /* Output the transmitted message... */
-    printf("CAN0 TX-> ");
+    tfp_printf("CAN0 TX-> ");
     print_can_msg_t(&tx);
 
     /* Transmit the message on CAN0 to CAN1... */
     can_write(CAN0, &tx);
 
     /* Insert an empty line so the output can be read easier... */
-    printf("\r\n");
+    tfp_printf("\r\n");
 
     /* Manipulate the data */
     tx.data[8] = tx.data[7];
@@ -161,7 +161,7 @@ void can1ISR(void)
     if (can_is_interrupted(CAN1, can_interrupt_receive))
     {
         can_read(CAN1, &rx);
-        printf("CAN1 RX<- ");
+        tfp_printf("CAN1 RX<- ");
         print_can_msg_t(&rx);
     }
 }
@@ -185,23 +185,23 @@ void print_can_msg_t(can_msg_t *msg)
     uint8_t i = 0;
 
     if (msg->type == can_type_standard)
-        printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
+        tfp_printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
     else
-        printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
+        tfp_printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
 
     if (msg->rtr == can_rtr_remote_request)
-        printf("RTR ");
+        tfp_printf("RTR ");
     else
-        printf("    ");
+        tfp_printf("    ");
 
-    printf("{");
+    tfp_printf("{");
     for (i = 0; i < msg->dlc; ++i)
     {
-        printf("0x%02x", msg->data[i]);
+        tfp_printf("0x%02x", msg->data[i]);
         if (i < (msg->dlc - 1))
-            printf(",");
+            tfp_printf(",");
     }
-    printf("}"
+    tfp_printf("}"
            "\r\n");
 }
 

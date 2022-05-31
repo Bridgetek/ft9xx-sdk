@@ -398,6 +398,7 @@ void USBH_initialise(USBH_ctx *ctx);
                 disables the hardware.
  **/
 void USBH_finalise(void);
+
 //@}
 
 /** 

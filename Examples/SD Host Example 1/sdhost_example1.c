@@ -174,6 +174,7 @@ void setup(void)
     /* Enable tfp_printf() functionality... */
     init_printf(UART0,myputc);
 
+#if defined(__FT900__)
     /* All SD Host pins except CLK need a pull-up to work. The MM900EV*A module does not have external pull-up, so enable internal one */
     gpio_function(GPIO_SD_CLK, pad_sd_clk); gpio_pull(GPIO_SD_CLK, pad_pull_none);
     gpio_function(GPIO_SD_CMD, pad_sd_cmd); gpio_pull(GPIO_SD_CMD, pad_pull_pullup);
@@ -183,7 +184,23 @@ void setup(void)
     gpio_function(GPIO_SD_DAT0, pad_sd_data0); gpio_pull(GPIO_SD_DAT0, pad_pull_pullup);
     gpio_function(GPIO_SD_CD, pad_sd_cd); gpio_pull(GPIO_SD_CD, pad_pull_pullup);
     gpio_function(GPIO_SD_WP, pad_sd_wp); gpio_pull(GPIO_SD_WP, pad_pull_pullup);
-
+#elif defined(__FT930__)
+    /* All SD Host pins except CLK need a pull-up to work. The MM930EVLite module has external pull-up, so no need of internal ones */
+    gpio_function(GPIO_SD_CLK, pad_sd_clk); gpio_pull(GPIO_SD_CLK, pad_pull_none);
+    gpio_function(GPIO_SD_CMD, pad_sd_cmd); gpio_pull(GPIO_SD_CMD, pad_pull_none);
+    gpio_function(GPIO_SD_DAT3, pad_sd_data3); gpio_pull(GPIO_SD_DAT3, pad_pull_none);
+    gpio_function(GPIO_SD_DAT2, pad_sd_data2); gpio_pull(GPIO_SD_DAT2, pad_pull_none);
+    gpio_function(GPIO_SD_DAT1, pad_sd_data1); gpio_pull(GPIO_SD_DAT1, pad_pull_none);
+    gpio_function(GPIO_SD_DAT0, pad_sd_data0); gpio_pull(GPIO_SD_DAT0, pad_pull_none);
+    gpio_function(GPIO_SD_CD, pad_sd_cd); gpio_pull(GPIO_SD_CD, pad_pull_none);
+    gpio_function(GPIO_SD_WP, pad_sd_wp); gpio_pull(GPIO_SD_WP, pad_pull_none);
+#endif
+   gpio_idrive(GPIO_SD_CMD, pad_drive_16mA);
+   gpio_idrive(GPIO_SD_CLK, pad_drive_16mA);
+   gpio_idrive(GPIO_SD_DAT0, pad_drive_16mA);
+   gpio_idrive(GPIO_SD_DAT1, pad_drive_16mA);
+   gpio_idrive(GPIO_SD_DAT2, pad_drive_16mA);
+   gpio_idrive(GPIO_SD_DAT3, pad_drive_16mA);
 
     /* Start up the SD Card */
     sys_enable(sys_device_sd_card);
@@ -191,9 +208,9 @@ void setup(void)
     sdhost_init();  
     
     /* Check to see if a card is inserted */
-    uart_puts(UART0, "Please Insert SD Card\r\n");
+    tfp_printf("Please Insert SD Card\r\n");
     while (sdhost_card_detect() != SDHOST_CARD_INSERTED);
-    uart_puts(UART0, "SD Card Inserted\r\n");
+    tfp_printf("SD Card Inserted\r\n");
 
     /* Initialise FatFS */
     ASSERT_P(FR_OK, f_mount(&fs, "", 0), "Unable to mount File System");
@@ -226,18 +243,18 @@ void loop(void)
     /* List the root directory */
     res = dir("");
 
-    uart_puts(UART0,"\r\n\r\n"); delayms(1000);
+    tfp_printf("\r\n\r\n"); delayms(1000);
 
     /* Check to see if the example file is there */
     res = f_stat(EXAMPLE_FILE, NULL);
     if (FR_OK == res)
     {
-        uart_puts(UART0, EXAMPLE_FILE " already exists. Deleting\r\n");
+    	tfp_printf(EXAMPLE_FILE " already exists. Deleting\r\n");
         ASSERT_P(FR_OK, f_unlink(EXAMPLE_FILE), "Problem deleting " EXAMPLE_FILE);
     }
 
     /* Write some data to the SD Card */
-    uart_puts(UART0, "Opening " EXAMPLE_FILE " for writing\r\n");
+    tfp_printf("Opening " EXAMPLE_FILE " for writing\r\n");
     res = f_open(&f, EXAMPLE_FILE, FA_WRITE | FA_CREATE_NEW);
     ASSERT_P(FR_OK, res, "Problem creating " EXAMPLE_FILE);
 
@@ -255,14 +272,14 @@ void loop(void)
         tfp_printf("Wrote %d bytes\r\n", written);
     }
 
-    uart_puts(UART0, "Closing " EXAMPLE_FILE "\r\n");
+    tfp_printf("Closing " EXAMPLE_FILE "\r\n");
     ASSERT_P(FR_OK, f_close(&f), "Error closing " EXAMPLE_FILE);
 
 
-    uart_puts(UART0,"\r\n\r\n"); delayms(1000);
+    tfp_printf("\r\n\r\n"); delayms(1000);
 
     /* Open the file and dump out the contents */
-    uart_puts(UART0, "Opening " EXAMPLE_FILE " for reading\r\n\r\n");
+    tfp_printf("Opening " EXAMPLE_FILE " for reading\r\n\r\n");
     ASSERT(FR_OK, f_open(&f, EXAMPLE_FILE, FA_READ));
 
     do
@@ -273,11 +290,11 @@ void loop(void)
     while(read == 128);
 
 
-    uart_puts(UART0, "\r\n" "Closing " EXAMPLE_FILE "\r\n");
+    tfp_printf("\r\n" "Closing " EXAMPLE_FILE "\r\n");
     f_close(&f);
 
 
-    uart_puts(UART0,"\r\n\r\n");
+    tfp_printf("\r\n\r\n");
 
     for(;;);
 }

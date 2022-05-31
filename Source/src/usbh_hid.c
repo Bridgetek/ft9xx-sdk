@@ -52,13 +52,14 @@
 #include <ft900_usb_hid.h>
 #include <ft900_delay.h>
 #include <ft900_usbh.h>
+#include <ft900_usbhx.h>
 #include <ft900_usbh_hid.h>
 
 // Debugging only
 #undef HID_DEBUG
 
 #if defined(HID_DEBUG)
-#include "<tfp_printf.h>
+#include <tfp_printf.h>
 #endif
 
 /* CONSTANTS ***********************************************************************/
@@ -209,7 +210,7 @@ int8_t USBH_HID_get_hid_descriptor(USBH_HID_context *ctx, size_t size, uint8_t *
     // iterating through the descriptor until we find an interface
     // descriptor followed by a HID descriptor.
     status = USBHX_get_config_descriptor(ctx->hHIDDevice, USB_DESCRIPTOR_TYPE_CONFIGURATION, 0,
-    		0, sizeof(USB_configuration_descriptor), &hidConfig);
+    		0, sizeof(USB_configuration_descriptor), (uint8_t *)&hidConfig);
 
     // Total length of the configuration descriptor to iterate.
     totalLength = hidConfig.wTotalLength;
@@ -217,7 +218,7 @@ int8_t USBH_HID_get_hid_descriptor(USBH_HID_context *ctx, size_t size, uint8_t *
     while (offset < totalLength)
     {
 		status = USBHX_get_config_descriptor(ctx->hHIDDevice, USB_DESCRIPTOR_TYPE_CONFIGURATION, 0,
-				offset, sizeof(USB_interface_descriptor), &hidInterface);
+				offset, sizeof(USB_interface_descriptor), (uint8_t *)&hidInterface);
 
 		if (status != USBH_OK)
 		{

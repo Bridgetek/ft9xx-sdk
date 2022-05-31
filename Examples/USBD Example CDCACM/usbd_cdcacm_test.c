@@ -193,8 +193,10 @@
 #define CDC_EP_DATA_OUT 				USBD_EP_3
 #define CDC_NOTIFICATION_EP_SIZE 		0x10
 #define CDC_NOTIFICATION_USBD_EP_SIZE 	USBD_EP_SIZE_16
-#define CDC_DATA_EP_SIZE				512
-#define CDC_DATA_USBD_EP_SIZE 			USBD_EP_SIZE_512
+#define CDC_DATA_EP_SIZE_FS				64
+#define CDC_DATA_USBD_EP_SIZE_FS		USBD_EP_SIZE_64
+#define CDC_DATA_EP_SIZE_HS				512
+#define CDC_DATA_USBD_EP_SIZE_HS		USBD_EP_SIZE_512
 //@}
 
 /**
@@ -354,8 +356,18 @@ struct PACK config_descriptor_cdcacm
 	USB_dfu_functional_descriptor dfu_functional;
 };
 
+/**
+ @brief Storage for Configuration Descriptors.
+ @details Configuration descriptors may need to be modified to turn from type
+ USB_DESCRIPTOR_TYPE_CONFIGURATION to USB_DESCRIPTOR_TYPE_OTHER_SPEED_CONFIGURATION.
+ */
+union config_descriptor_buffer {
+	struct config_descriptor_cdcacm hs;
+	struct config_descriptor_cdcacm fs;
+} config_descriptor_buffer;
+
 // Fields marked with * are updated with information in device_config[]
-DESCRIPTOR_QUALIFIER struct config_descriptor_cdcacm config_descriptor_cdcacm =
+DESCRIPTOR_QUALIFIER struct config_descriptor_cdcacm config_descriptor_cdcacm_hs =
 {
 	{
 		sizeof(USB_configuration_descriptor), /* configuration.bLength */
@@ -456,7 +468,7 @@ DESCRIPTOR_QUALIFIER struct config_descriptor_cdcacm config_descriptor_cdcacm =
 		USB_DESCRIPTOR_TYPE_ENDPOINT, /* endpoint_data_out.bDescriptorType */
 		USB_ENDPOINT_DESCRIPTOR_EPADDR_OUT | CDC_EP_DATA_OUT, /* endpoint_data_out.bEndpointAddress */
 		USB_ENDPOINT_DESCRIPTOR_ATTR_BULK, /* endpoint_data_out.bmAttributes */
-		CDC_DATA_EP_SIZE, /* endpoint_data_out.wMaxPacketSize */
+		CDC_DATA_EP_SIZE_HS, /* endpoint_data_out.wMaxPacketSize */
 		0x0a /* endpoint_data_out.bInterval */
 	},
 
@@ -465,7 +477,7 @@ DESCRIPTOR_QUALIFIER struct config_descriptor_cdcacm config_descriptor_cdcacm =
 		USB_DESCRIPTOR_TYPE_ENDPOINT, /* endpoint_data_in.bDescriptorType */
 		USB_ENDPOINT_DESCRIPTOR_EPADDR_IN | CDC_EP_DATA_IN, /* endpoint_data_in.bEndpointAddress */
 		USB_ENDPOINT_DESCRIPTOR_ATTR_BULK, /* endpoint_data_in.bmAttributes */
-		CDC_DATA_EP_SIZE, /* endpoint_data_in.wMaxPacketSize */
+		CDC_DATA_EP_SIZE_HS, /* endpoint_data_in.wMaxPacketSize */
 		0x0a /* endpoint_data_in.bInterval */
 	},
 #ifndef DISABLE_DFU
@@ -493,6 +505,146 @@ DESCRIPTOR_QUALIFIER struct config_descriptor_cdcacm config_descriptor_cdcacm =
 	}
 #endif // DISABLE_DFU
 };
+
+DESCRIPTOR_QUALIFIER struct config_descriptor_cdcacm config_descriptor_cdcacm_fs =
+{
+	{
+		sizeof(USB_configuration_descriptor), /* configuration.bLength */
+		USB_DESCRIPTOR_TYPE_CONFIGURATION, /* configuration.bDescriptorType */
+		sizeof(struct config_descriptor_cdcacm), /* configuration.wTotalLength */
+#ifndef DISABLE_DFU
+		0x03, /* configuration.bNumInterfaces */
+#else
+		0x02, /* configuration.bNumInterfaces */
+#endif
+		0x01, /* configuration.bConfigurationValue */
+		0x00, /* configuration.iConfiguration */
+		 USB_CONFIG_BMATTRIBUTES_VALUE, /* configuration.bmAttributes */
+		0xFA /* configuration.bMaxPower */           // 500mA
+	},
+
+	{
+		sizeof(USB_interface_association_descriptor), /* interface_association.bLength */
+		USB_DESCRIPTOR_TYPE_INTERFACE_ASSOCIATION, /* interface_association.bDescriptorType */
+		0, /* interface_association.bFirstInterface */
+		2, /* interface_association.bInterfaceCount */
+		USB_CLASS_CDC_CONTROL, /* interface_association.bFunctionClass */
+		USB_SUBCLASS_CDC_CONTROL_ABSTRACT, /* interface_association.bFunctionSubClass */
+		USB_PROTOCOL_CDC_CONTROL_ITU_T_V250, /* interface_association.bFunctionProtocol */
+		2 /* interface_association.iFunction */  // "FT900 CDCACM"
+	},
+
+	// ---- INTERFACE DESCRIPTOR for CDCACM Control ----
+	{
+		sizeof(USB_interface_descriptor), /* interface_control.bLength */
+		USB_DESCRIPTOR_TYPE_INTERFACE, /* interface_control.bDescriptorType */
+		0, /* interface_control.bInterfaceNumber */
+		0x00, /* interface_control.bAlternateSetting */
+		0x01, /* interface_control.bNumEndpoints */
+		USB_CLASS_CDC_CONTROL, /* interface_control.bInterfaceClass */ // CDC Class
+		USB_SUBCLASS_CDC_CONTROL_ABSTRACT, /* interface_control.bInterfaceSubClass */ // Abstract Control Model
+		USB_PROTOCOL_CDC_CONTROL_ITU_T_V250, /* interface_control.bInterfaceProtocol */ // No built-in protocol
+		0x00 /* interface_control.iInterface */ // Unused
+	},
+
+	// ---- FUNCTIONAL DESCRIPTORS for CDCACM ----
+	{
+		sizeof(USB_CDC_ClassSpecificDescriptorHeaderFormat), /* cdcCPDHF.bFunctionLength */
+		USB_CDC_DESCRIPTOR_TYPE_CS_INTERFACE, /* cdcCPDHF.bDescriptorType */
+		USB_CDC_DESCRIPTOR_SUBTYPE_HEADER_FUNCTIONAL_DESCRIPTOR, /* cdcCPDHF.bDescriptorSubtype */
+		0x0110 /* cdcCPDHF.bcdCDC */
+	},
+
+	{
+		sizeof(USB_CDC_UnionInterfaceFunctionalDescriptor), /* cdcUIFD.bFunctionLength */
+		USB_CDC_DESCRIPTOR_TYPE_CS_INTERFACE, /* cdcUIFD.bDescriptorType */
+		USB_CDC_DESCRIPTOR_SUBTYPE_UNION_FUNCTIONAL_DESCRIPTOR, /* cdcUIFD.bDescriptorSubtype */
+		0, /* cdcUIFD.bControlInterface */
+		1 /* cdcUIFD.bSubordinateInterface0 */
+	},
+
+	{
+		sizeof(USB_CDC_CallManagementFunctionalDescriptor), /* cdcCMFD.bFunctionLength */
+		USB_CDC_DESCRIPTOR_TYPE_CS_INTERFACE, /* cdcCMFD.bDescriptorType */
+		USB_CDC_DESCRIPTOR_SUBTYPE_CALL_MANAGEMENT_FUNCTIONAL_DESCRIPTOR, /* cdcCMFD.bDescriptorSubtype */
+		USB_CDC_CM_CAPABILITIES_NONE, /* cdcCMFD.bmCapabilities */
+		0x01 /* cdcCMFD.bDataInterface */
+	},
+
+	{
+		sizeof(USB_CDC_AbstractControlManagementFunctionalDescriptor), /* cdcACMFD.bFunctionLength */
+		USB_CDC_DESCRIPTOR_TYPE_CS_INTERFACE, /* cdcACMFD.bDescriptorType */
+		USB_CDC_DESCRIPTOR_SUBTYPE_ABSTRACT_CONTROL_MANAGEMENT_FUNCTIONAL_DESCRIPTOR, /* cdcACMFD.bDescriptorSubtype */
+		USB_CDC_ACM_CAPABILITIES_LINE_STATE_CODING /* cdcACMFD.bmCapabilities */
+	},
+
+	// ---- ENDPOINT DESCRIPTOR for CDCACM Control ----
+	{
+		sizeof(USB_endpoint_descriptor), /* endpoint_control.bLength */
+		USB_DESCRIPTOR_TYPE_ENDPOINT, /* endpoint_control.bDescriptorType */
+		USB_ENDPOINT_DESCRIPTOR_EPADDR_IN | CDC_EP_NOTIFICATION, /* endpoint_control.bEndpointAddress */
+		USB_ENDPOINT_DESCRIPTOR_ATTR_INTERRUPT, /* endpoint_control.bmAttributes */
+		CDC_NOTIFICATION_EP_SIZE, /* endpoint_control.wMaxPacketSize */
+		0x0a /* endpoint_control.bInterval */
+	},
+
+	// ---- INTERFACE DESCRIPTOR for CDCACM Data ----
+	{
+		sizeof(USB_interface_descriptor), /* interface_data.bLength */
+		USB_DESCRIPTOR_TYPE_INTERFACE, /* interface_data.bDescriptorType */
+		1, /* interface_data.bInterfaceNumber */
+		0x00, /* interface_data.bAlternateSetting */
+		0x02, /* interface_data.bNumEndpoints */
+		USB_CLASS_CDC_DATA, /* interface_data.bInterfaceClass */ // CDC Data Class
+		USB_SUBCLASS_CDC_DATA, /* interface_data.bInterfaceSubClass */ // Abstract Control Model
+		USB_PROTOCOL_CDC_DATA, /* interface_data.bInterfaceProtocol */ // No built-in protocol
+		0x00 /* interface_data.iInterface */               // Unused
+	},
+
+	// ---- ENDPOINT DESCRIPTORS for CDCACM Data ----
+	{
+		sizeof(USB_endpoint_descriptor), /* endpoint_data_out.bLength */
+		USB_DESCRIPTOR_TYPE_ENDPOINT, /* endpoint_data_out.bDescriptorType */
+		USB_ENDPOINT_DESCRIPTOR_EPADDR_OUT | CDC_EP_DATA_OUT, /* endpoint_data_out.bEndpointAddress */
+		USB_ENDPOINT_DESCRIPTOR_ATTR_BULK, /* endpoint_data_out.bmAttributes */
+		CDC_DATA_EP_SIZE_FS, /* endpoint_data_out.wMaxPacketSize */
+		0x0a /* endpoint_data_out.bInterval */
+	},
+
+	{
+		sizeof(USB_endpoint_descriptor), /* endpoint_data_in.bLength */
+		USB_DESCRIPTOR_TYPE_ENDPOINT, /* endpoint_data_in.bDescriptorType */
+		USB_ENDPOINT_DESCRIPTOR_EPADDR_IN | CDC_EP_DATA_IN, /* endpoint_data_in.bEndpointAddress */
+		USB_ENDPOINT_DESCRIPTOR_ATTR_BULK, /* endpoint_data_in.bmAttributes */
+		CDC_DATA_EP_SIZE_FS, /* endpoint_data_in.wMaxPacketSize */
+		0x0a /* endpoint_data_in.bInterval */
+	},
+#ifndef DISABLE_DFU
+	// ---- INTERFACE DESCRIPTOR for DFU Interface ----
+	{
+		sizeof(USB_interface_descriptor), /* dfu_interface.bLength */
+		USB_DESCRIPTOR_TYPE_INTERFACE, /* dfu_interface.bDescriptorType */
+		DFU_USB_INTERFACE_RUNTIME, /* dfu_interface.bInterfaceNumber */
+		0x00, /* dfu_interface.bAlternateSetting */
+		0x00, /* dfu_interface.bNumEndpoints */
+		USB_CLASS_APPLICATION, /* dfu_interface.bInterfaceClass */ // bInterfaceClass: Application Specific Class
+		USB_SUBCLASS_DFU, /* dfu_interface.bInterfaceSubClass */ // bInterfaceSubClass: Device Firmware Update
+		USB_PROTOCOL_DFU_RUNTIME, /* dfu_interface.bInterfaceProtocol */ // bInterfaceProtocol: Runtime Protocol
+		0x05 /* dfu_interface.iInterface */       // * iInterface: "DFU Interface"
+	},
+
+	// ---- FUNCTIONAL DESCRIPTOR for DFU Interface ----
+	{
+		sizeof(USB_dfu_functional_descriptor), /* dfu_functional.bLength */
+		USB_DESCRIPTOR_TYPE_DFU_FUNCTIONAL, /* dfu_functional.bDescriptorType */
+		DFU_ATTRIBUTES, /* dfu_functional.bmAttributes */  	// bmAttributes
+		DFU_TIMEOUT, /* dfu_functional.wDetatchTimeOut */ // wDetatchTimeOut
+		DFU_TRANSFER_SIZE, /* dfu_functional.wTransferSize */     // wTransferSize
+		USB_BCD_VERSION_DFU_1_1 /* dfu_functional.bcdDfuVersion */ // bcdDfuVersion: DFU Version 1.1
+	}
+#endif // DISABLE_DFU
+};
+
 //@}
 #ifndef DISABLE_DFU
 /**
@@ -628,7 +780,7 @@ DESCRIPTOR_QUALIFIER USB_WCID_feature_descriptor wcid_feature_dfumode =
  */
 static USB_CDC_line_coding cdc_line_coding =
 {
-		19200, /* dwDTERate */
+		115200, /* dwDTERate */
 		USB_CDC_STOP_BITS_1, /* bCharFormat */
 		USB_CDC_PARITY_NONE, /* bParityType */
 		USB_CDC_DATA_BITS_8, /* bDataBits */
@@ -644,10 +796,10 @@ size_t uart0Tx(uint8_t *data, size_t len);
 size_t uart0Rx(uint8_t *data, size_t len);
 void uart0ISR(void);
 
-static struct pipe *get_pipe(uint8_t pipe)
+static struct USBDX_pipe *get_pipe(uint8_t pipe)
 {
-	static struct pipe pipes[4];
-	struct pipe *ret_val = NULL;
+	static struct USBDX_pipe pipes[4];
+	struct USBDX_pipe *ret_val = NULL;
 
 	switch (pipe) {
 		case CDC_EP_NOTIFICATION:
@@ -667,14 +819,14 @@ static struct pipe *get_pipe(uint8_t pipe)
 	return ret_val;
 }
 
-void USBD_pipe_isr(uint16_t pipe_bitfields)
+void USBDX_pipe_isr(uint16_t pipe_bitfields)
 {
 	if (pipe_bitfields & BIT(CDC_EP_NOTIFICATION))
-		usbd_pipe_process(get_pipe(CDC_EP_NOTIFICATION));
+		USBDX_pipe_process(get_pipe(CDC_EP_NOTIFICATION));
 	if (pipe_bitfields & BIT(CDC_EP_DATA_IN))
-		usbd_pipe_process(get_pipe(CDC_EP_DATA_IN));
+		USBDX_pipe_process(get_pipe(CDC_EP_DATA_IN));
 	if (pipe_bitfields & BIT(CDC_EP_DATA_OUT))
-		usbd_pipe_process(get_pipe(CDC_EP_DATA_OUT));
+		USBDX_pipe_process(get_pipe(CDC_EP_DATA_OUT));
 }
 
 static inline void uart_spr_write(ft900_uart_regs_t *uart,
@@ -706,13 +858,7 @@ void ISR_timer(void)
 	}
 }
 
-
-static inline bool uart_rx_has_data(ft900_uart_regs_t *REG)
-{
-	return (REG->LSR_ICR_XON2 & MASK_UART_LSR_DR) == MASK_UART_LSR_DR;
-}
-
-static inline void _uart_tx(uint8_t *ptr, uint16_t len)
+static inline void uart_tx_direct(uint8_t *ptr, uint16_t len)
 {
 	asm("streamout.b %0,%1,%2"
 				::"r"(&UART0->RHR_THR_DLL), "r"(ptr), "r"(len));
@@ -738,29 +884,29 @@ static inline uint8_t uart_get_intr_status(const ft900_uart_regs_t *dev)
 	return dev->ISR_FCR_EFR & 0x3F;
 }
 
-static void uart_tx(struct pipe *pp, struct urb *urb)
+static void uart_tx(struct USBDX_pipe *pp, struct USBDX_urb *urb)
 {
 	/* UART got at least TX_SPACE to write */
 	uint8_t to_write = TX_FIFO_DEPTH;
 
 	do {
-		uint16_t urb_len = urb_get_app_to_process(urb);
+		uint16_t urb_len = usbdx_urb_get_app_to_process(urb);
 
 		if (likely(urb_len > to_write)) {
 			/* Part of the URB buffer */
-			_uart_tx(urb->ptr, to_write);
+			uart_tx_direct(urb->ptr, to_write);
 			urb->ptr += to_write;
 			//tfp_printf("UART TX%d len:%d\r\n", urb->id, to_write);
 			break;
 		} else {
 			/* Can send out all URB buffer, queue URB back to USBD */
-			_uart_tx(urb->ptr, urb_len);
+			uart_tx_direct(urb->ptr, urb_len);
 			//tfp_printf("UART TX%d len:%d\r\n", urb->id, urb_len);
-			usbd_submit_urb(pp, urb);
+			USBDX_submit_urb(pp, urb);
 			to_write -= urb_len;
 			/* Try read next available URB buffer */
-			urb = usbd_get_app_urb(pp);
-			if (!urb_owned_by_app(urb))
+			urb = usbdx_get_app_urb(pp);
+			if (!usbdx_urb_owned_by_app(urb))
 				break;
 		}
 	} while(to_write);
@@ -779,16 +925,16 @@ void uart0ISR(void)
 	};
 
 	if (uart_get_intr_status(UART0) == UART_TX_EMPTY) {
-		struct pipe *pp = get_pipe(CDC_EP_DATA_OUT);
+		struct USBDX_pipe *pp = get_pipe(CDC_EP_DATA_OUT);
 
 		CRITICAL_SECTION_BEGIN
-		struct urb *urb = usbd_get_app_urb(pp);
+		struct USBDX_urb *urb = usbdx_get_app_urb(pp);
 
-		if (likely(urb_owned_by_app(urb)))
+		if (likely(usbdx_urb_owned_by_app(urb)))
 			uart_tx(pp, urb);
 		else {
 			//tfp_printf("UART TX paused\r\n");
-			usbd_set_app_paused(pp);
+			usbdx_set_app_paused(pp);
 			uart_disable_interrupt(UART0, uart_interrupt_tx);
 		}
 		CRITICAL_SECTION_END
@@ -797,15 +943,15 @@ void uart0ISR(void)
 	/* Check RX */
 	if (uart_get_intr_status(UART0) == UART_RX_FULL) {
 		uint8_t to_read = RX_WATERMARK;
-		struct pipe *pp = get_pipe(CDC_EP_DATA_IN);
+		struct USBDX_pipe *pp = get_pipe(CDC_EP_DATA_IN);
 
 		CRITICAL_SECTION_BEGIN
 		/* Got at least RX_WATERMARK bytes to read */
 		do {
 			/* Force acquire USB IN buffer */
-			struct urb *urb = usbd_force_acquire_urb_for_app(pp);
+			struct USBDX_urb *urb = USBDX_force_acquire_urb_for_app(pp);
 
-			uint16_t free = urb_get_app_to_process(urb);
+			uint16_t free = usbdx_urb_get_app_to_process(urb);
 			/* Don't have enough URB space */
 			if (free <= to_read) {
 				uart_rx_direct(urb->ptr, free);
@@ -813,7 +959,7 @@ void uart0ISR(void)
 				to_read -= free;
 				//tfp_printf("UART RX%d submit total:%d\r\n",
 				//		urb->id, urb_get_app_consumed(urb));
-				usbd_submit_urb(pp, urb);
+				USBDX_submit_urb(pp, urb);
 				continue;
 			}
 
@@ -826,17 +972,17 @@ void uart0ISR(void)
 	}
 
 	if (uart_get_intr_status(UART0) == UART_RX_TIMEOUT) {
-		struct pipe *pp = get_pipe(CDC_EP_DATA_IN);
+		struct USBDX_pipe *pp = get_pipe(CDC_EP_DATA_IN);
 
 		CRITICAL_SECTION_BEGIN
 		do {
-			struct urb *urb = usbd_force_acquire_urb_for_app(pp);
+			struct USBDX_urb *urb = USBDX_force_acquire_urb_for_app(pp);
 
 			/* Buffer is not fully filled */
 			urb->ptr = uart_rx_try(urb->ptr, urb->end);
 			//tfp_printf("UART RX%d timeout, send total:%d\r\n",
 			//		urb->id, urb_get_app_consumed(urb));
-			usbd_submit_urb(pp, urb);
+			USBDX_submit_urb(pp, urb);
 
 			if (urb->end != urb->ptr)
 				break;
@@ -1138,9 +1284,20 @@ int8_t standard_req_get_descriptor(USB_device_request *req, uint8_t **buffer, ui
 #ifndef DISABLE_DFU
 		if (USBD_DFU_is_runtime())
 		{
-			src = (uint8_t *) &config_descriptor_cdcacm;
-			if (length > sizeof(config_descriptor_cdcacm)) // too many bytes requested
-				length = sizeof(config_descriptor_cdcacm); // Entire structure.
+			src = (uint8_t *) &config_descriptor_buffer.hs;
+			if (USBD_get_bus_speed() == USBD_SPEED_HIGH)
+			{
+				memcpy((void *)&config_descriptor_buffer.hs, (void *)&config_descriptor_cdcacm_hs, sizeof(config_descriptor_cdcacm_hs));
+				if (length > sizeof(config_descriptor_cdcacm_hs)) // too many bytes requested
+					length = sizeof(config_descriptor_cdcacm_hs); // Entire structure.
+			}
+			else
+			{
+				memcpy((void *)&config_descriptor_buffer.fs, (void *)&config_descriptor_cdcacm_fs, sizeof(config_descriptor_cdcacm_fs));
+				if (length > sizeof(config_descriptor_cdcacm_fs)) // too many bytes requested
+					length = sizeof(config_descriptor_cdcacm_fs); // Entire structure.
+			}
+			config_descriptor_buffer.hs.configuration.bDescriptorType = USB_DESCRIPTOR_TYPE_CONFIGURATION;
 		}
 		else
 		{
@@ -1149,11 +1306,64 @@ int8_t standard_req_get_descriptor(USB_device_request *req, uint8_t **buffer, ui
 				length = sizeof(config_descriptor_dfumode); // Entire structure.
 		}
 #else // DISABLE_DFU
-		src = (uint8_t *) &config_descriptor_cdcacm;
-		if (length > sizeof(config_descriptor_cdcacm)) // too many bytes requested
-			length = sizeof(config_descriptor_cdcacm); // Entire structure.
+		src = (uint8_t *) &config_descriptor_buffer.hs;
+		if (USBD_get_bus_speed() == USBD_SPEED_HIGH)
+		{
+			memcpy((void *)&config_descriptor_buffer.hs, (void *)&config_descriptor_cdcacm_hs, sizeof(config_descriptor_cdcacm_hs));
+			if (length > sizeof(config_descriptor_cdcacm_hs)) // too many bytes requested
+				length = sizeof(config_descriptor_cdcacm_hs); // Entire structure.
+		}
+		else
+		{
+			memcpy((void *)&config_descriptor_buffer.fs, (void *)&config_descriptor_cdcacm_fs, sizeof(config_descriptor_cdcacm_fs));
+			if (length > sizeof(config_descriptor_cdcacm_fs)) // too many bytes requested
+				length = sizeof(config_descriptor_cdcacm_fs); // Entire structure.
+		}
+		config_descriptor_buffer.hs.configuration.bDescriptorType = USB_DESCRIPTOR_TYPE_CONFIGURATION;
 #endif // DISABLE_DFU
+		break;
 
+	case USB_DESCRIPTOR_TYPE_OTHER_SPEED_CONFIGURATION:
+#ifndef DISABLE_DFU
+		if (USBD_DFU_is_runtime())
+		{
+			src = (uint8_t *) &config_descriptor_buffer.hs;
+			if (USBD_get_bus_speed() == USBD_SPEED_HIGH)
+			{
+				memcpy((void *)&config_descriptor_buffer.fs, (void *)&config_descriptor_cdcacm_fs, sizeof(config_descriptor_cdcacm_fs));
+				if (length > sizeof(config_descriptor_cdcacm_fs)) // too many bytes requested
+					length = sizeof(config_descriptor_cdcacm_fs); // Entire structure.
+			}
+			else
+			{
+				memcpy((void *)&config_descriptor_buffer.hs, (void *)&config_descriptor_cdcacm_hs, sizeof(config_descriptor_cdcacm_hs));
+				if (length > sizeof(config_descriptor_cdcacm_hs)) // too many bytes requested
+					length = sizeof(config_descriptor_cdcacm_hs); // Entire structure.
+			}
+			config_descriptor_buffer.hs.configuration.bDescriptorType = USB_DESCRIPTOR_TYPE_OTHER_SPEED_CONFIGURATION;
+		}
+		else
+		{
+			src = (uint8_t *) &config_descriptor_dfumode;
+			if (length > sizeof(config_descriptor_dfumode)) // too many bytes requested
+				length = sizeof(config_descriptor_dfumode); // Entire structure.
+		}
+#else // DISABLE_DFU
+		src = (uint8_t *) &config_descriptor_buffer.hs;
+		if (USBD_get_bus_speed() == USBD_SPEED_HIGH)
+		{
+			memcpy((void *)&config_descriptor_buffer.fs, (void *)&config_descriptor_cdcacm_fs, sizeof(config_descriptor_cdcacm_fs));
+			if (length > sizeof(config_descriptor_cdcacm_fs)) // too many bytes requested
+				length = sizeof(config_descriptor_cdcacm_fs); // Entire structure.
+		}
+		else
+		{
+			memcpy((void *)&config_descriptor_buffer.hs, (void *)&config_descriptor_cdcacm_hs, sizeof(config_descriptor_cdcacm_hs));
+			if (length > sizeof(config_descriptor_cdcacm_hs)) // too many bytes requested
+				length = sizeof(config_descriptor_cdcacm_hs); // Entire structure.
+		}
+		config_descriptor_buffer.hs.configuration.bDescriptorType = USB_DESCRIPTOR_TYPE_OTHER_SPEED_CONFIGURATION;
+#endif // DISABLE_DFU
 		break;
 
 	case USB_DESCRIPTOR_TYPE_DEVICE_QUALIFIER:
@@ -1360,18 +1570,18 @@ void cdc_send_serial_state_notification(void)
 	notification.serialState.bRxCarrier = 0;
 	notification.serialState.bTxCarrier = 0;
 
-	struct pipe *pp = get_pipe(CDC_EP_NOTIFICATION);
+	struct USBDX_pipe *pp = get_pipe(CDC_EP_NOTIFICATION);
 
 	CRITICAL_SECTION_BEGIN
 		/* Force acquire USB IN buffer */
-		struct urb *urb = usbd_force_acquire_urb_for_app(pp);
+		struct USBDX_urb *urb = USBDX_force_acquire_urb_for_app(pp);
 
-		uint16_t free = urb_get_app_to_process(urb);
+		uint16_t free = usbdx_urb_get_app_to_process(urb);
 		/* Don't have enough URB space */
 		if (free >= sizeof(notification)) {
 			memcpy(urb->ptr, &notification, sizeof(notification));
 			urb->ptr += sizeof(notification);
-			usbd_submit_urb(pp, urb);
+			USBDX_submit_urb(pp, urb);
 		}
 	CRITICAL_SECTION_END
 }
@@ -1388,26 +1598,26 @@ void cdc_send_response_notification(void)
 	header.wIndex = 0; // CDC ACM interface
 	header.wLength = 2;
 
-	struct pipe *pp = get_pipe(CDC_EP_NOTIFICATION);
+	struct USBDX_pipe *pp = get_pipe(CDC_EP_NOTIFICATION);
 
 	CRITICAL_SECTION_BEGIN
 		/* Force acquire USB IN buffer */
-		struct urb *urb = usbd_force_acquire_urb_for_app(pp);
+		struct USBDX_urb *urb = USBDX_force_acquire_urb_for_app(pp);
 
-		uint16_t free = urb_get_app_to_process(urb);
+		uint16_t free = usbdx_urb_get_app_to_process(urb);
 		/* Don't have enough URB space */
 		if (free >= sizeof(USB_CDC_Notification)) {
 			memcpy(urb->ptr, &header, sizeof(USB_CDC_Notification));
 			urb->ptr += sizeof(USB_CDC_Notification);
-			usbd_submit_urb(pp, urb);
+			USBDX_submit_urb(pp, urb);
 		}
 	CRITICAL_SECTION_END
 }
 
-bool acm_out_on_data_ready(struct pipe *pp)
+bool acm_out_on_data_ready(struct USBDX_pipe *pp)
 {
 	//tfp_printf("UART TX resumed\r\n");
-	uart_tx(pp, usbd_get_app_urb(pp));
+	uart_tx(pp, usbdx_get_app_urb(pp));
 	/* Enable the UART to fire interrupts when transmitting data... */
 	uart_enable_interrupt(UART0, uart_interrupt_tx);
 	return true;
@@ -1421,32 +1631,41 @@ void cdc_uart_init(void)
 
 	USBD_create_endpoint(CDC_EP_NOTIFICATION, USBD_EP_INT, USBD_DIR_IN,
 			CDC_NOTIFICATION_USBD_EP_SIZE, USBD_DB_OFF, NULL /*ep_cb*/);
-	USBD_create_endpoint(CDC_EP_DATA_OUT, USBD_EP_BULK, USBD_DIR_OUT,
-			CDC_DATA_USBD_EP_SIZE, USBD_DB_ON, NULL /*ep_cb*/);
-	USBD_create_endpoint(CDC_EP_DATA_IN, USBD_EP_BULK, USBD_DIR_IN,
-			CDC_DATA_USBD_EP_SIZE, USBD_DB_ON, NULL /*ep_cb*/);
-
+	if (USBD_get_bus_speed() == USBD_SPEED_HIGH)
+	{
+		USBD_create_endpoint(CDC_EP_DATA_OUT, USBD_EP_BULK, USBD_DIR_OUT,
+				CDC_DATA_USBD_EP_SIZE_HS, USBD_DB_ON, NULL /*ep_cb*/);
+		USBD_create_endpoint(CDC_EP_DATA_IN, USBD_EP_BULK, USBD_DIR_IN,
+				CDC_DATA_USBD_EP_SIZE_HS, USBD_DB_ON, NULL /*ep_cb*/);
+	}
+	else
+	{
+		USBD_create_endpoint(CDC_EP_DATA_OUT, USBD_EP_BULK, USBD_DIR_OUT,
+				CDC_DATA_USBD_EP_SIZE_FS, USBD_DB_ON, NULL /*ep_cb*/);
+		USBD_create_endpoint(CDC_EP_DATA_IN, USBD_EP_BULK, USBD_DIR_IN,
+				CDC_DATA_USBD_EP_SIZE_FS, USBD_DB_ON, NULL /*ep_cb*/);
+	}
 	static uint8_t acm_int_buf[CDC_NOTIFICATION_EP_SIZE * ACM_URB_INT_COUNT] __attribute__ ((aligned (16)));
-	static uint8_t acm_in_buf[CDC_DATA_EP_SIZE * ACM_URB_IN_COUNT];
-	static uint8_t acm_out_buf[CDC_DATA_EP_SIZE * ACM_URB_OUT_COUNT];
-	static struct urb acm_int[ACM_URB_INT_COUNT];
-	static struct urb acm_in[ACM_URB_IN_COUNT];
-	static struct urb acm_out[ACM_URB_OUT_COUNT];
-	struct pipe *pp;
+	static uint8_t acm_in_buf[CDC_DATA_EP_SIZE_HS * ACM_URB_IN_COUNT];
+	static uint8_t acm_out_buf[CDC_DATA_EP_SIZE_HS * ACM_URB_OUT_COUNT];
+	static struct USBDX_urb acm_int[ACM_URB_INT_COUNT];
+	static struct USBDX_urb acm_in[ACM_URB_IN_COUNT];
+	static struct USBDX_urb acm_out[ACM_URB_OUT_COUNT];
+	struct USBDX_pipe *pp;
 
 	/* ACM */
 	pp = get_pipe(CDC_EP_NOTIFICATION);
-	usbd_pipe_init(pp, CDC_EP_NOTIFICATION, CDC_EP_NOTIFICATION | 0x80,
+	USBDX_pipe_init(pp, CDC_EP_NOTIFICATION, CDC_EP_NOTIFICATION | 0x80,
 			acm_int, acm_int_buf, ACM_URB_INT_COUNT);
 
 	pp = get_pipe(CDC_EP_DATA_IN);
-	usbd_pipe_init(pp, CDC_EP_DATA_IN, CDC_EP_DATA_IN | 0x80,
+	USBDX_pipe_init(pp, CDC_EP_DATA_IN, CDC_EP_DATA_IN | 0x80,
 			acm_in, acm_in_buf, ACM_URB_IN_COUNT);
 
 	pp = get_pipe(CDC_EP_DATA_OUT);
-	usbd_pipe_init(pp, CDC_EP_DATA_OUT, CDC_EP_DATA_OUT,
+	USBDX_pipe_init(pp, CDC_EP_DATA_OUT, CDC_EP_DATA_OUT,
 			acm_out, acm_out_buf, ACM_URB_OUT_COUNT);
-	register_on_usbd_ready(pp, acm_out_on_data_ready);
+	USBDX_register_on_ready(pp, acm_out_on_data_ready);
 }
 
 void cdc_uart_bridge(void)
@@ -1488,7 +1707,6 @@ uint8_t usbd_testing(void)
 	//usb_ctx.ep0_cb = ep_cb;
 
 	USBD_initialise(&usb_ctx);
-	cdc_uart_init();
 
 	for (;;)
 	{
@@ -1500,6 +1718,7 @@ uint8_t usbd_testing(void)
 		USBD_attach();
 		USBD_connect();
 		delayms(1000); //1s delay to get the device configured
+		cdc_uart_init();
 		if (USBD_get_state() >= USBD_STATE_DEFAULT)
 		{
 			if (USBD_DFU_is_runtime())

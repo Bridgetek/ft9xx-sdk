@@ -125,12 +125,11 @@ uint16_t ethernet_mii_read(uint8_t reg)
 
 	CRITICAL_SECTION_BEGIN
     /* wait for any previous transmit to complete */
-    while (ETH->ETH_TR_REQ);
+    while (ETH->ETH_TR_REQ) {};
 
     ETH->ETH_MNG_CNTL = (reg << BIT_ETH_MCR_RGAD) | MASK_ETH_MCR_START;
 
-    while((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) == 0)
-             ;
+    while((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) == 0) {};
 
     ETH->ETH_INT_STATUS = MASK_ETH_IACK_MD_INT;
     res = ETH->ETH_MNG_RX0;
@@ -148,16 +147,17 @@ uint16_t ethernet_mii_read(uint8_t reg)
 
 int ethernet_mii_write(uint8_t reg, uint16_t v)
 {
-    if((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) != 0)
+    if ((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) != 0)
+	{
         return -1;
+	}
 
 	CRITICAL_SECTION_BEGIN
 
 	ETH->ETH_MNG_TX0 = v;
     ETH->ETH_MNG_CNTL = (reg << BIT_ETH_MCR_RGAD) | MASK_ETH_MCR_START | MASK_ETH_MCR_WRITE;
 
-    while((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) == 0)
-                    ;
+    while((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) == 0) {};
 
     ETH->ETH_INT_STATUS = MASK_ETH_IACK_MD_INT;
     ETH->ETH_MNG_CNTL = 0;
@@ -430,7 +430,7 @@ void ethernet_init(const uint8_t *mac)
 	uint16_t bmcr;
 	/* Reset the PHY */
     SYS->MSC0CFG |= MASK_SYS_MSC0CFG_MAC_RESET_PHY;
-    while(SYS->MSC0CFG & MASK_SYS_MSC0CFG_MAC_RESET_PHY);
+    while(SYS->MSC0CFG & MASK_SYS_MSC0CFG_MAC_RESET_PHY) {};
 
     /* Setup the PHY address */
 	ETHPHY->MISC = (ETHPHY->MISC & ~MASK_ETHPHY_MISC_PHYAD) |
@@ -570,7 +570,7 @@ int ethernet_read(size_t *blen, uint8_t *buf)
 
     /* transfer the remainder of the packet */
     data_reg = &ETH->ETH_DATA;
-    __asm__("streamin.l %0,%1,%2" : :"r"(dst), "r"(data_reg), "r"(len));
+    __asm__("streamin.l %0,%1,%2" : :"r"(dst), "r"(data_reg), "r"(len): "memory");
 
     /* Restore previous interrupt mask. */
 	CRITICAL_SECTION_END
@@ -625,7 +625,7 @@ int ethernet_write(uint8_t *buf, size_t blen)
 
     /* Wait for any previous transmit to complete and free up
      * the TX RAM. */
-    while (ETH->ETH_TR_REQ);
+    while (ETH->ETH_TR_REQ) {};
 
     /* add on amount to align last streamout.l to a 32 bit boundary */
     size = blen;
@@ -637,7 +637,7 @@ int ethernet_write(uint8_t *buf, size_t blen)
 
     CRITICAL_SECTION_BEGIN
 
-    __asm__("streamout.l %0,%1,%2" : :"r"(data_reg), "r"(src), "r"(size));
+    __asm__("streamout.l %0,%1,%2" : :"r"(data_reg), "r"(src), "r"(size): "memory");
 
     /* send the packet! */
     ETH->ETH_TR_REQ = 1;

@@ -298,6 +298,22 @@ size_t uart_write(ft900_uart_regs_t *dev, uint8_t buffer);
  */
 size_t uart_writen(ft900_uart_regs_t *dev, uint8_t *buffer, size_t len);
 
+/** @brief Check UART receive buffer for data
+ *
+ *  @param dev The device to use
+ *
+ *  @returns True if there is data available to read
+ */
+uint8_t uart_rx_has_data(ft900_uart_regs_t *dev);
+
+/** @brief Check UART transmit buffer for data
+ *
+ *  @param dev The device to use
+ *
+ *  @returns True if there is no data waiting to transmit
+ */
+uint8_t uart_tx_is_empty(ft900_uart_regs_t *dev);
+
 /** @brief Read a data word from a UART
  *
  *  @param dev The device to use

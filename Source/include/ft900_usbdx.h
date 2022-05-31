@@ -1,4 +1,20 @@
 /**
+    @file
+
+    @brief
+    USB Device extended API.
+
+    APIs that provides asynchronous transfer of USB data.
+ 	USBDX manages buffer, buffer is divided into chunks called USB Request Blocks (URBs)
+ 	and are marked with ownership as ‘USBD owned’ or ‘Application owned’.
+    USBDX will transfer its owned URB to the USBD ISR, and releases the empty URB(s) back to application (change ownership)
+
+	Application can
+	– get owned URB(s) in main loop or another ISR
+	– process URB(s)
+	– queue back URB(s) to USBD (change ownership)
+ **/
+/**
  * ============================================================================
  * (C) Copyright Bridgetek Pte Ltd
  * ============================================================================
@@ -44,27 +60,19 @@ extern "C" {
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
-#include <stdbool.h>
+#include <stdio.h>
 #include <ft900_memctl.h>
-
-//#define FEATURE_ACM_LOOPBACK
+// uncomment to disable debug macros & assert()
+#define USBDX_NDEBUG
 
 //#define FEATURE_LOGD
 //#define FEATURE_LOGI
 //#define FEATURE_LOGE
-//#define FEATURE_ASSERT_IN_DEBUG_BUILD
+#define FEATURE_ASSERT_IN_DEBUG_BUILD
 
 //#define FEATURE_USBD_DEBUG
 //#define FEATURE_USBDOUT_DEBUG
 //#define FEATURE_USBDIN_DEBUG
-
-//#define FEATURE_ACM_DEBUG
-//#define FEATURE_ACMTX_DEBUG
-//#define FEATURE_ACMRX_DEBUG
-
-//#define FEATURE_NCM_DEBUG
-//#define FEATURE_NCMTX_DEBUG
-//#define FEATURE_NCMRX_DEBUG
 
 /*********************************************************************
  *                           Common macros                           *
@@ -85,22 +93,13 @@ extern "C" {
 #define UNUSED_PARAMETER(x) (void)(x)
 
 /*********************************************************************
- *                        Assembly functions                         *
- *********************************************************************/
-void pm_memcpy(void *dest, CONST void *src, int16_t n)
-__attribute__((nonnull(1, 2)));
-
-/*********************************************************************
  *                        Debugging functions                        *
  *********************************************************************/
-#ifndef NDEBUG
-
-void hex_dump(const void *addr, int len);
-
+#ifndef USBDX_NDEBUG
 #define LOGBASE(x, ...) \
 		do { \
 			static CONST char local[] = (x); \
-			tfp_printf("%s",(CONST char *)local); \
+			printf("%s",(CONST char *)local); \
 		} while (0)
 
 
@@ -132,12 +131,12 @@ void hex_dump(const void *addr, int len);
 \
 		if (__e) \
 			break; \
-			tfp_printf("%s",(CONST char *)local); \
+			printf("%s",(CONST char *)local); \
 		while (1); \
 	} while (0)
 #endif /* FEATURE_ASSERT_IN_DEBUG_BUILD */
 
-#else /* !NDEBUG */
+#else /* !USBDX_NDEBUG */
 
 #define LOGD(x, ...)
 #define LOGI(x, ...)
@@ -145,103 +144,136 @@ void hex_dump(const void *addr, int len);
 
 #define assert(__e)
 
-#endif /* NDEBUG */
+#endif /* USBDX_NDEBUG */
 
 /**********************************************************************
 *                  Structure and constants defines                   *
 **********************************************************************/
-
-struct urb {
+/**
+    @struct USBDX_urb
+    @brief Struct for USB Request Block or URB
+           USBDX is based on message passing transactions.
+           The messages are called URBs, which stands for USB request block.
+           URBs are sent by calling the USBDX_submit_urb method, whichs is
+           an asynchronous call, and it returns immediately. .
+ **/
+struct USBDX_urb {
+	/** Start of URB **/
 	uint8_t *start;
 
-	/* reset to &buf[0] after data transfer
+	/** reset to &buf[0] after data transfer
 	 * OUT: start of buffer to be processed
-	 *  IN: end of data to be transferred */
+	 *  IN: end of data to be transferred **/
 	uint8_t *ptr;
 
-	/* OUT: end of data to be transferred
-	 *  IN: Maximum packet length */
+	/** OUT: end of data to be transferred
+	 *  IN: Maximum packet length **/
 	uint8_t *end;
+	/** ownership bit **/
 	bool owned_by_usbd;
+	/** URB number or id **/
 	uint8_t id;
-	struct urb *next;
+	/** Pointer to next URB **/
+	struct USBDX_urb *next;
 };
 
-struct pipe;
+/**
+    @struct USBDX_pipe
+    @brief Struct to maintain the pipe related data.
+    A pipe structure is for each endpoint.
+ **/
+struct USBDX_pipe;
 
 /* return true if any URB is submitted in callback function */
-typedef bool (*usbd_callback)(struct pipe *pp);
+typedef bool (*USBDX_callback)(struct USBDX_pipe *pp);
 
-struct pipe {
-	struct urb *usbd_urb;
-	struct urb *app_urb;
+struct USBDX_pipe {
+	/** The address of the start of the URB that is available
+	 * for USBD to process. **/
+	struct USBDX_urb *usbd_urb;
+	/**The address of the start of the URB that is available for
+	 * application to process. **/
+	struct USBDX_urb *app_urb;
+	/** Start of the linear buffer **/
 	uint8_t *buf_start;
+	/** End of the liner buffer **/
 	uint8_t *buf_end;
-	usbd_callback on_usbd_ready;
-	usbd_callback on_usbd_underrun;
+	/** Application’s callback function registered with USBD will be
+	 * called at the event when USBD engine is ready. **/
+	USBDX_callback on_usbd_ready;
+	/** Application’s callback function registered with USBD will be
+	 * called at the event when USBD engine is underrunning. **/
+	USBDX_callback on_usbd_underrun;
+	/** USBD_ENDPOINT_NUMBER for which a pipe has to be created **/
 	uint8_t id;
+	/** USBD_ENDPOINT_NUMBER with MSB bit set incase of IN endpoint **/
 	uint8_t ep;
+	/** Set if USBD engine is paused when no application data **/
 	bool usbd_paused;
+	/** Application pause itself when no more buffer can be processed,
+	 * and waiting for USBD to give more datas. USBD engine will call
+	 * the on_usbd_ready() callback once app is paused, to resume the
+	 * application's process.**/
 	bool app_paused;
 };
 
 /**********************************************************************
 *                          Helper functions                          *
 **********************************************************************/
-/* URB id, for debugging purpose */
-static inline uint8_t urb_get_id(const struct urb *urb)
+/** @brief Get URB id, for debugging purpose **/
+static inline uint8_t usbdx_urb_get_id(const struct USBDX_urb *urb)
 {
 	return urb->id;
 }
 
-/* Length to be processed by application
- * IN: length of free space to fill in, OUT: length of host data */
-static inline uint16_t urb_get_app_to_process(const struct urb *urb)
+/** @brief Get length of the USB data available to be processed by application
+ * IN: length of free space to fill in, OUT: length of host data **/
+static inline uint16_t usbdx_urb_get_app_to_process(const struct USBDX_urb *urb)
 {
 	return urb->end - urb->ptr;
 }
 
-/* Length of data already been processed by application */
-static inline uint16_t urb_get_app_consumed(const struct urb *urb)
+/** @brief  Get length of USB data already been processed by application **/
+static inline uint16_t usbdx_urb_get_app_consumed(const struct USBDX_urb *urb)
 {
 	return urb->ptr - urb->start;
 }
 
-/* To detect aligned IN data transfer */
-static inline bool urb_in_fully_filled(const struct urb *urb)
+/** @brief To detect aligned IN data transfer **/
+static inline bool usbdx_urb_in_fully_filled(const struct USBDX_urb *urb)
 {
 	return urb->end == urb->ptr;
 }
-
-static inline bool urb_in_empty(const struct urb *urb)
+/** @brief To detect empty IN URB **/
+static inline bool usbdx_urb_in_empty(const struct USBDX_urb *urb)
 {
 	return urb->start == urb->ptr;
 }
 
-/* To detect if application are free to use the URB */
-static inline bool urb_owned_by_app(const struct urb *urb)
+/** @brief To detect if application are free to use the URB **/
+static inline bool usbdx_urb_owned_by_app(const struct USBDX_urb *urb)
 {
 	return !urb->owned_by_usbd;
 }
 
-/* Get next application URB pointer, but it may still been hold by USBD engine
+/** @brief Get next application URB pointer, but it may still been hold by USBD engine
  * at this point. To be used in conjunction with urb_owned_by_app() to know
- * the ownership */
-static inline struct urb *usbd_get_app_urb(const struct pipe* pp)
+ * the ownership **/
+static inline struct USBDX_urb *usbdx_get_app_urb(const struct USBDX_pipe* pp)
 {
 	return pp->app_urb;
 }
 
-/* Application pause itself when no more buffer can be processed, and waiting
+/** @brief Application pause itself when no more buffer can be processed, and waiting
  * for USBD to give more datas. USBD engine will call the on_usbd_ready()
- * callback once app is paused, to resume the application's process. */
-static inline void usbd_set_app_paused(struct pipe *pp)
+ * callback once app is paused, to resume the application's process. **/
+static inline void usbdx_set_app_paused(struct USBDX_pipe *pp)
 {
 	pp->app_paused = true;
 }
 
-/* To detect if USBD engine is paused */
-static inline bool usbd_is_engine_paused(const struct pipe *pp)
+/** @brief To detect if USBD engine is paused **/
+static inline bool usbdx_is_engine_paused(const struct USBDX_pipe *pp)
 {
 	return pp->usbd_paused;
 }
@@ -266,11 +298,11 @@ static inline bool usbd_is_engine_paused(const struct pipe *pp)
     @param[in] urb_count number of URBs.
     @return    'True' if pipe is created. 'False' if the input parameters are invalid.
  **/
-bool usbd_pipe_init(
-		struct pipe *pp,
+bool USBDX_pipe_init(
+		struct USBDX_pipe *pp,
 		uint8_t id,
 		uint8_t ep,
-		struct urb *urbs,
+		struct USBDX_urb *urbs,
 		uint8_t *bufs,
 		uint8_t urb_count);
 
@@ -285,7 +317,7 @@ bool usbd_pipe_init(
     			process the URBs.
     @param[in] pp Pipe for which the callback function is associated to.
  **/
-void register_on_usbd_ready(struct pipe *pp, usbd_callback callback);
+void USBDX_register_on_ready(struct USBDX_pipe *pp, USBDX_callback callback);
 
 /**
     @brief     To register callback function for USDB UNDERRUN event.
@@ -294,7 +326,7 @@ void register_on_usbd_ready(struct pipe *pp, usbd_callback callback);
     			when no data from application.
     @param[in] pp Pipe for which the callback function is associated to.
  **/
-void register_on_usbd_underrun(struct pipe *pp, usbd_callback callback);
+void USBDX_register_on_underrun(struct USBDX_pipe *pp, USBDX_callback callback);
 //@}
 
 /**
@@ -304,7 +336,7 @@ void register_on_usbd_underrun(struct pipe *pp, usbd_callback callback);
     @param[in] pp The pipe whose data to be transferred to/from USBD
     @return    A URB.
  **/
-struct urb *usbd_force_acquire_urb_for_app(struct pipe *pp);
+struct USBDX_urb *USBDX_force_acquire_urb_for_app(struct USBDX_pipe *pp);
 
 /**
     @brief     Submit a URB to USBD.
@@ -315,7 +347,7 @@ struct urb *usbd_force_acquire_urb_for_app(struct pipe *pp);
     @param[in] pp The pipe whose data to be transferred to/from USBD.
     @param[in] urb Filled URB.
  **/
-void usbd_submit_urb(struct pipe *pp, struct urb *urb);
+void USBDX_submit_urb(struct USBDX_pipe *pp, struct USBDX_urb *urb);
 
 /**
     @brief     To get more than one URBs for application.
@@ -326,7 +358,7 @@ void usbd_submit_urb(struct pipe *pp, struct urb *urb);
     @param[in] len The length of the data that the application wants to transfer.
     @return    The length of the URBs that is available for application usage.
  **/
-uint8_t *usbd_get_app_urbs(const struct pipe *pp, uint16_t len);
+uint8_t *USBDX_get_app_urbs(const struct USBDX_pipe *pp, uint16_t len);
 
 /**
     @brief     To submit more than one URBs from application.
@@ -337,42 +369,60 @@ uint8_t *usbd_get_app_urbs(const struct pipe *pp, uint16_t len);
     @param[in] len The length must be equal or smaller than the length gotten from usbd_get_app_urbs().
     @return The next available URB
  **/
-struct urb *usbd_submit_urbs(struct pipe *pp, uint16_t len);
+struct USBDX_urb *USBDX_submit_urbs(struct USBDX_pipe *pp, uint16_t len);
 
 /**
     @brief     The given pipe is processed to transfer the data to/from USBD hardware endpoint.
     @details   The given pipe is processed to transfer the data to/from USBD hardware endpoint.
-    @attention This function has to be called from USBD_pipe_isr() implemented by the application.
+    @attention This function has to be called from USBDX_pipe_isr() implemented by the application.
     @param[in] pp The pipe whose data to be transferred to/from USBD.
  **/
-void usbd_pipe_process(struct pipe *pp);
+void USBDX_pipe_process(struct USBDX_pipe *pp);
 
 /**
     @brief     To flush the pipe.
     @details   Purge the data in the the URBs for a given pipe
     @param[in] pp Pipe for which data to be purged.
  **/
-void usbd_pipe_purge(struct pipe *pp);
+void USBDX_pipe_purge(struct USBDX_pipe *pp);
 
-void usbd_buf_write(struct pipe *pp,
+void USBDX_buf_write(struct USBDX_pipe *pp,
 		void (*buf_write)(uint8_t *usbd, const uint8_t *app, uint16_t len),
 		uint8_t *usbd, const uint8_t *app, uint16_t len);
 
-void usbd_buf_read(struct pipe *pp,
+void USBDX_buf_read(struct USBDX_pipe *pp,
 		void (*buf_read)(uint8_t *app, const uint8_t *usbd, uint16_t len),
 		uint8_t *app, const uint8_t *usbd, uint16_t len);
 
-void usbd_stream_write(struct pipe *pp,
+void USBDX_stream_write(struct USBDX_pipe *pp,
 		void (*stream_write)(uint8_t *usbd, const uint8_t *app, uint16_t len),
 		uint8_t *usbd, const uint8_t *app, uint16_t len);
 
-void usbd_stream_read(struct pipe *pp,
+void USBDX_stream_read(struct USBDX_pipe *pp,
 		void (*stream_read)(uint8_t *app, const uint8_t *usbd, uint16_t len),
 		uint8_t *app, const uint8_t *usbd, uint16_t len);
 
-void usbd_pipe_isr_start(void);
+/**
+    @brief     Container function before processing pipes.
+    @details   Defined as a weak function in USBD.
+               Note: !!! Application can implement this function !!!
+ **/
+void USBDX_pipe_isr_start(void);
+/**
+    @brief     Container function after processing pipes.
+    @details   Defined as a weak function in USBD.
+               Note: !!! Application can implement this function !!!
+ **/
+void USBDX_pipe_isr_stop(void);
 
-void usbd_pipe_isr_stop(void);
+/**
+    @brief     Asynchronous data transfer in USBDX.
+    @details   Defined as a weak function in USBD.
+               Note: !!! Application need to implement this function !!!
+    @param[in] pipe_bitfields Bits corresponding to Endpoint URBDX_pipe
+    for which USBDX_pipe_process has to be called.
+ **/
+void USBDX_pipe_isr(uint16_t pipe_bitfields);
 
 #ifdef __cplusplus
 } /* extern "C" */

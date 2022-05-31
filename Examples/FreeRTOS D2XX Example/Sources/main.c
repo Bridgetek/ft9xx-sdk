@@ -88,7 +88,7 @@ extern TD2XX_DeviceConfiguration __pD2XXDefaultConfiguration[]; // pointer to D2
 // The test config (in Flash and then PM) is copied to the RAM structure D2XXTEST_FlashConfig on startup
 __attribute__ ((aligned (4))) TD2XX_DeviceConfiguration D2XXTEST_UserD2xxConfig = {0};
 
-#ifdef DEBUG
+#ifdef DEBUG_EVENT
 static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] = {	"SUSPEND",    	/**< SUSPEND EVENT from USB Host */
 																	"RESUME",	 	/**< RESUME EVENT from USB Host */
 																	"BUS_RESET",	 		/**< USB Bus Reset */
@@ -248,7 +248,7 @@ void setup(void)
 	retVal =
 
 			D2XX_Init(__pD2XXDefaultConfiguration, d2xx_callback, NULL);
-	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig.ConfigDesc, (uint32_t)&__pD2XXDefaultConfiguration->ConfigDesc, sizeof(TConfigDescriptors));
+	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig.ConfigDesc, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration->ConfigDesc, sizeof(TConfigDescriptors));
 #endif
 
 	interrupt_enable_globally(); //needed for interrupts
@@ -290,8 +290,10 @@ void d2xx_callback (ED2XX_EventCode ec, void *ref, void *param1, void *param2)
 	{
 		param = (*(uint8_t *)param1);
 	}
-	//dbg("~%d",eventID);
-	//dbg("%s\n", D2XXTest_EventStrings[eventID]);
+#ifdef DEBUG_EVENT
+	dbg("~%d",eventID);
+	dbg("%s\n", D2XXTest_EventStrings[eventID]);
+#endif // DEBUG_EVENTS
 	switch (ec)
 	{
 	case D2XX_EVT_SUSPEND:
@@ -300,7 +302,9 @@ void d2xx_callback (ED2XX_EventCode ec, void *ref, void *param1, void *param2)
 			D2XXTEST__Suspend = 1;
 			D2XXTEST__Sleep = 0;
 			RemoteWakeupEnable = param;
-			//dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
+#ifdef DEBUG_EVENT
+			dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
+#endif // DEBUG_EVENTS
 		}
 		break;
 	case D2XX_EVT_RESUME:

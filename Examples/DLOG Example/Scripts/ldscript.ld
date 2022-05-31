@@ -21,9 +21,8 @@ SECTIONS
     *(._pm*)
     *(.init)
     *(.fini)
-     _etext = . ;
     . = ALIGN(4);
-    	
+     _etext = . ;
   }  > flash
   
   .tors :
@@ -33,19 +32,20 @@ SECTIONS
     ___ctors_end = . ;
     ___dtors = . ;
     *(.dtors)
+    . = ALIGN(4);
     ___dtors_end = . ;
-    . = ALIGN(4);
   } > ram
-  
-  .data	  : AT (ADDR (.text) + SIZEOF (.text))
+  .data	  :
   {
-  	_sdata = .;
+  	. = ALIGN(4);
+    __data = .;
     *(.data)
-    *(.rodata)
+	*(.data*)
+	*(.rodata)
     *(.rodata*)
+  . = ALIGN(4);
      _edata = . ;
-    . = ALIGN(4);
-  }  > ram
+  }  > ram AT>flash
   
 
 

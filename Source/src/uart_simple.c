@@ -311,7 +311,7 @@ static uint8_t uart_read_index_register(ft900_uart_regs_t *dev, int8_t reg)
 		uint8_t temp;
 		uart_spr_write(dev, OFFSET_UART_SPR_ACR, val | MASK_UART_ACR_ICR); /*Enable access, ACR[6] (ICR) <- '1'*/
 		temp = uart_spr_read(dev, reg); /*get the value*/
-		uart_spr_write(dev, OFFSET_UART_SPR_ACR, val & ~MASK_UART_ACR_ICR);/*Disable access, ACR[6] (ICR) <- ’0’*/
+		uart_spr_write(dev, OFFSET_UART_SPR_ACR, val & ~MASK_UART_ACR_ICR);/*Disable access, ACR[6] (ICR) <- '0'*/
 		val = temp;
 	}
 
@@ -566,7 +566,7 @@ int32_t uart_calculate_baud(uint32_t target_baud, uint8_t samples, uint32_t f_pe
             lBaud = f_perif / (samples * wDivisor * bPrescaler);
 
             /* Check to see if we got any closer to the target */
-            if (labs(lBaud - target_baud) < labs(lBaudErrorBestMatch))
+            if ((lBaud - target_baud) < labs(lBaudErrorBestMatch))
             {
                 /* We found a better match... */
                 lBaudErrorBestMatch = lBaud - target_baud;
@@ -688,6 +688,27 @@ size_t uart_writen(ft900_uart_regs_t *dev, uint8_t *buffer, size_t len)
     return iRet;
 }
 
+/** @brief Check UART receive buffer for data
+ *
+ *  @param dev The device to use
+ *
+ *  @returns True if there is data available to read
+ */
+uint8_t uart_rx_has_data(ft900_uart_regs_t *dev)
+{
+	return (dev->LSR_ICR_XON2 & MASK_UART_LSR_DR) == MASK_UART_LSR_DR;
+}
+
+/** @brief Check UART transmit buffer for data
+ *
+ *  @param dev The device to use
+ *
+ *  @returns True if there is no data waiting to transmit
+ */
+uint8_t uart_tx_is_empty(ft900_uart_regs_t *dev)
+{
+	return (dev->LSR_ICR_XON2 & MASK_UART_LSR_THRE) == MASK_UART_LSR_THRE;
+}
 
 /** @brief Read a data word from a UART
  *

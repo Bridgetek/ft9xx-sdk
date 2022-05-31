@@ -101,14 +101,14 @@ static uint8_t i2c_wait_for(void)
 /* FUNCTIONS ***********************************************************************/
 void i2cm_init(I2CM_speed_mode mode, uint32_t i2c_clk_speed)
 {
-	uint32_t TPVal, period_constant;
+	uint32_t TPVal, lTPVal, period_constant;
 	
 	/* Reset I2CM first */
 	I2CM->I2CM_CNTL_STATUS = I2C_FLAGS_RSTB;
 
 	isHighSpeed = 0;	/* high speed mode is not enabled by default */
 
-	/* Set I2CM clock frequency by writing to I2CM_TIMER_PERIOD ï¿½ Timer Period Register (address offset: 0x03).
+	/* Set I2CM clock frequency by writing to I2CM_TIMER_PERIOD – Timer Period Register (address offset: 0x03).
 	 * Frequency scaler (TIMER_PRD)is used in Standard/Fast/Fast-plus modes to calculate the I2C clock period (SCL_PRD).
 	 *
 	 * In Standard speed mode:
@@ -139,10 +139,22 @@ void i2cm_init(I2CM_speed_mode mode, uint32_t i2c_clk_speed)
 	/* In high speed mode, another TP is used and the MSB of TPVal has to be 1 */
 	if (mode == I2CM_HIGH_SPEED)
 	{
+		//Programming standard speed for master code transmission
+		//lTPVal = ((sys_get_cpu_clock() / (I2CM_100_Kbps * I2CM_PERIOD_CONST_STD)) - 1) >> 1;
+		lTPVal = ((sys_get_cpu_clock() / (I2CM_400_Kbps * I2CM_PERIOD_CONST_FAST_FASTPLUS_HS)) - 1) >> 1;
+		lTPVal &= MASK_I2CM_TIME_PERIOD_STD_FAST_FPLUS;
+
+		/* Then write timer value to the Normal register with the MSB set to 0 for standard/fast speed */
+	    I2CM->I2CM_TIME_PERIOD = (uint8_t)lTPVal;
+	    //tfp_printf("l:%02x\n",lTPVal);
+		//Programming High speed for data transmission
 		/* To write to the High-speed register, the MSB must be 1. FAST bit is cleared. Timer value is written*/
 		TPVal &= MASK_I2CM_TIME_PERIOD_HIGHSPEED;
-		TPVal |= MASK_I2CM_TIME_PERIOD_HS_SELECT;
+		//TPVal |= MASK_I2CM_TIME_PERIOD_HS_SELECT;
+		TPVal |= MASK_I2CM_TIME_PERIOD_HS_SELECT | MASK_I2CM_TIME_PERIOD_FS_SELECT;
+
 		I2CM->I2CM_TIME_PERIOD = TPVal;
+		//tfp_printf("h:%02x\n",TPVal);
 	}
 	else
 	{
@@ -155,6 +167,7 @@ void i2cm_init(I2CM_speed_mode mode, uint32_t i2c_clk_speed)
 		}
 		/* Then write timer value to the Normal register with the MSB set to 1 or 0 depending on high speed or not */
 	    I2CM->I2CM_TIME_PERIOD = (uint8_t)TPVal;
+	    //tfp_printf("l:%02x\n",TPVal);
 	}
 
 	return;
@@ -165,7 +178,7 @@ int8_t i2cm_write(const uint8_t addr, const uint8_t cmd,
 {
     int8_t ret = 0;
 
-	if(isHighSpeed)
+	if (isHighSpeed)
 	{
 		/* In high speed mode, the following sequence has to be done before each data transfer
 		   Write Master code 0x09 to I2CMSA and the HIGH SPEED command to I2CMCR */
@@ -173,7 +186,7 @@ int8_t i2cm_write(const uint8_t addr, const uint8_t cmd,
         I2CM->I2CM_CNTL_STATUS = I2C_FLAGS_HS | I2C_FLAGS_RUN;
 
 		/* Wait until I2CM is no longer busy */
-		if(i2c_wait_for())	{ /* An Error Occurred */ ret = -1; }
+		if (i2c_wait_for())	{ /* Ignore ACK Error in case of master code  ret = -1; */}
 	}
 	
 	if (ret == 0)
@@ -186,7 +199,7 @@ int8_t i2cm_write(const uint8_t addr, const uint8_t cmd,
 	    /* Check that the bus is not occupied by another master
 	       (this step is not needed in single-master system or in high speed mode since
 	       arbitration takes place during transmission of the master code) */
-	    if(isHighSpeed == 0)
+	    if (isHighSpeed == 0)
 	    {
 	        while (I2CM->I2CM_CNTL_STATUS & MASK_I2CM_STATUS_BUS_BUSY)
 	        {
@@ -195,7 +208,7 @@ int8_t i2cm_write(const uint8_t addr, const uint8_t cmd,
 
 	    /* Write command to I2CMCR to send Start and command byte. */
 	    I2CM->I2CM_CNTL_STATUS = I2C_FLAGS_START | I2C_FLAGS_RUN;
-	    if(i2c_wait_for()) { /* An Error Occurred */ ret = -1; }
+	    if (i2c_wait_for()) { /* An Error Occurred */ ret = -1; }
 	}
 
 	if (ret == 0)
@@ -207,7 +220,7 @@ int8_t i2cm_write(const uint8_t addr, const uint8_t cmd,
 	            /* Write command to I2CMCR to send data byte. */
 	            I2CM->I2CM_DATA = *data++;
 	            I2CM->I2CM_CNTL_STATUS = I2C_FLAGS_RUN;
-	            if(i2c_wait_for()) { /* An Error Occurred */ ret = -1; }
+	            if (i2c_wait_for()) { /* An Error Occurred */ ret = -1; }
 	        }
 	    }
 	}
@@ -227,7 +240,7 @@ int8_t i2cm_read(const uint8_t addr, const uint8_t cmd,
 {
     int8_t ret = 0;
 
-	if(isHighSpeed)
+	if (isHighSpeed)
 	{
 		/* In high speed mode, the following sequence has to be done before each data transfer
 		   Write Master code 0x09 to I2CMSA and the HIGH SPEED command to I2CMCR */
@@ -235,7 +248,8 @@ int8_t i2cm_read(const uint8_t addr, const uint8_t cmd,
 		I2CM->I2CM_CNTL_STATUS = I2C_FLAGS_HS | I2C_FLAGS_RUN;
 
 		/* Wait until I2CM is no longer busy */
-		if(i2c_wait_for()) { ret = -1; }
+		if (i2c_wait_for())	
+		{ /* Ignore ACK Error in case of master code  ret = -1; */}
 	}
 
 	if (ret == 0)
@@ -248,7 +262,7 @@ int8_t i2cm_read(const uint8_t addr, const uint8_t cmd,
 	    /* Check that the bus is not occupied by another master
 	       (this step is not needed in single-master system or in high speed mode since
 	       arbitration takes place during transmission of the master code) */
-	    if(isHighSpeed == 0)
+	    if (isHighSpeed == 0)
 	    {
 	        while (I2CM->I2CM_CNTL_STATUS & MASK_I2CM_STATUS_BUS_BUSY)
 	        {
@@ -258,7 +272,10 @@ int8_t i2cm_read(const uint8_t addr, const uint8_t cmd,
 	    /* Write command to I2CMCR to send Start and command byte. */
 	    I2CM->I2CM_CNTL_STATUS = I2C_FLAGS_START | I2C_FLAGS_RUN;
 
-	    if(i2c_wait_for()) { ret = -1; }
+	    if (i2c_wait_for()) 
+		{ 
+			ret = -1; 
+		}
 	}
 
 	if (ret == 0)
@@ -267,13 +284,19 @@ int8_t i2cm_read(const uint8_t addr, const uint8_t cmd,
 	    I2CM->I2CM_SLV_ADDR = addr | 0x01;
 
         if (number_to_read <= 1)
+		{
             /* Receive with a NACK */
             I2CM->I2CM_CNTL_STATUS = I2C_FLAGS_START | I2C_FLAGS_RUN;
+		}
         else
-            /* Receive with an ACK */
+        {
+			/* Receive with an ACK */
             I2CM->I2CM_CNTL_STATUS = I2C_FLAGS_START | I2C_FLAGS_RUN | I2C_FLAGS_ACK;
-
-	    if(i2c_wait_for()) { ret = -1; }
+		}
+	    if (i2c_wait_for()) 
+		{ 
+			ret = -1; 
+		}
 	}
 
 	if (ret == 0)
@@ -294,7 +317,7 @@ int8_t i2cm_read(const uint8_t addr, const uint8_t cmd,
             
                 /* Write command to I2CMCR to read data byte.
                    I2CM->I2CM_CNTL_STATUS = I2C_FLAGS_RUN; */
-                if(i2c_wait_for())
+                if (i2c_wait_for())
                 {
                     ret = -1;
                     break;

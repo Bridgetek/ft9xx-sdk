@@ -1,7 +1,7 @@
 /**
   @file
   @brief
-  BAttery charge detection in device mode example
+  Battery charge detection in device mode example
 
   Displays the charging port the USB device is connected to.
 */

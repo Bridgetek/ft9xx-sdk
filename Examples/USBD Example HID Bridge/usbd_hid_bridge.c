@@ -787,10 +787,10 @@ static volatile uint32_t report_active = 0;
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
-static struct pipe *get_pipe(uint8_t pipe)
+static struct USBDX_pipe *get_pipe(uint8_t pipe)
 {
-	static struct pipe pipes[2];
-	struct pipe *ret_val = NULL;
+	static struct USBDX_pipe pipes[2];
+	struct USBDX_pipe *ret_val = NULL;
 
 	switch (pipe) {
 		case USBD_EP_1:
@@ -804,10 +804,10 @@ static struct pipe *get_pipe(uint8_t pipe)
 	return ret_val;
 }
 
-void USBD_pipe_isr(uint16_t pipe_bitfields)
+void USBDX_pipe_isr(uint16_t pipe_bitfields)
 {
 	if (pipe_bitfields & BIT(USBD_EP_1))
-		usbd_pipe_process(get_pipe(USBD_EP_1));
+		USBDX_pipe_process(get_pipe(USBD_EP_1));
 }
 
 /** @name tfp_putc
@@ -1338,12 +1338,12 @@ void keyboard(void)
 			USBD_EP_SIZE_8, USBD_DB_OFF, NULL /*ep_cb*/);
 
 	static uint8_t hid_int_buf[sizeof(hid_report_structure_t) * HID_URB_INT_COUNT] __attribute__ ((aligned (16)));
-	static struct urb hid_int[HID_URB_INT_COUNT];
-	struct pipe *pp;
+	static struct USBDX_urb hid_int[HID_URB_INT_COUNT];
+	struct USBDX_pipe *pp;
 
 	/* ACM */
 	pp = get_pipe(USBD_EP_1);
-	usbd_pipe_init(pp, USBD_EP_1, USBD_EP_1 | 0x80,
+	USBDX_pipe_init(pp, USBD_EP_1, USBD_EP_1 | 0x80,
 			hid_int, hid_int_buf, HID_URB_INT_COUNT);
 
 	memset(&report_buffer, 0, sizeof(report_buffer));
@@ -1491,19 +1491,19 @@ void keyboard(void)
 					{
 						send_report = 0;
 
-						struct pipe *pp = get_pipe(USBD_EP_1);
+						struct USBDX_pipe *pp = get_pipe(USBD_EP_1);
 
 						CRITICAL_SECTION_BEGIN
 							/* Force acquire USB IN buffer */
-							struct urb *urb = usbd_force_acquire_urb_for_app(pp);
+							struct USBDX_urb *urb = USBDX_force_acquire_urb_for_app(pp);
 
-							uint16_t free = urb_get_app_to_process(urb);
+							uint16_t free = usbdx_urb_get_app_to_process(urb);
 							/* If have enough URB space */
 							if (free >= sizeof(hid_report_structure_t))
 							{
 								asm_memcpy8(&report_buffer, urb->ptr, sizeof(hid_report_structure_t));
 								urb->ptr += sizeof(hid_report_structure_t);
-								usbd_submit_urb(pp, urb);
+								USBDX_submit_urb(pp, urb);
 							}
 						CRITICAL_SECTION_END
 					}

@@ -598,7 +598,7 @@ int main(int argc, char *argv[])
     sys_disable(sys_device_timer_wdt);
 
     // Wait forever...
-    for (;;);
+    for (;;) {};
 
 	return 0;
 }

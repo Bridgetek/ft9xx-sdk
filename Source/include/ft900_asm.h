@@ -68,97 +68,133 @@ extern "C" {
 #if defined( __GNUC__)
 
 /** @brief A No Operation Instruction */
-#define asm_noop() __asm__ volatile("move.l $r0,$r0")
+#define asm_noop() __asm__ volatile("move.l $r0,$r0"::: "memory")
 
 /** @brief 8-bitwise memory copy
  *  @param src A pointer to the source data
  *  @param dst A pointer to the destination data
  *  @param size The size of the data to copy */
-#define asm_memcpy8(src, dst, size) __asm__ volatile("memcpy.b %1, %0, %2" :: "r"(src), "r"(dst), "r"(size))
+#define asm_memcpy8(src, dst, size) __asm__ volatile("memcpy.b %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
 
 /** @brief 16-bitwise memory copy
  *  @param src A pointer to the source data
  *  @param dst A pointer to the destination data
  *  @param size The size of the data to copy */
-#define asm_memcpy16(src, dst, size) __asm__ volatile("memcpy.s %1, %0, %2" :: "r"(src), "r"(dst), "r"(size))
+#define asm_memcpy16(src, dst, size) __asm__ volatile("memcpy.s %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
 
 /** @brief 32-bitwise memory copy
  *  @param src A pointer to the source data
  *  @param dst A pointer to the destination data
  *  @param size The size of the data to copy */
-#define asm_memcpy32(src, dst, size) __asm__ volatile("memcpy.l %1, %0, %2" :: "r"(src), "r"(dst), "r"(size))
+#define asm_memcpy32(src, dst, size) __asm__ volatile("memcpy.l %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
 
 /** @brief 8-bitwise memory set
  *  @param val The value to set the memory to
  *  @param dst A pointer to the destination data
  *  @param size The size of the data to set */
-#define asm_memset8(val, dst, size) __asm__ volatile("memset.b %1, %0, %2" :: "r"(val), "r"(dst), "r"(size))
+#define asm_memset8(val, dst, size) __asm__ volatile("memset.b %1, %0, %2" :: "r"(val), "r"(dst), "r"(size): "memory")
 
 /** @brief 16-bitwise memory set
  *  @param val The value to set the memory to
  *  @param dst A pointer to the destination data
  *  @param size The size of the data to set */
-#define asm_memset16(val, dst, size) __asm__ volatile("memset.s %1, %0, %2" :: "r"(val), "r"(dst), "r"(size))
+#define asm_memset16(val, dst, size) __asm__ volatile("memset.s %1, %0, %2" :: "r"(val), "r"(dst), "r"(size): "memory")
 
 /** @brief 32-bitwise memory set
  *  @param val The value to set the memory to
  *  @param dst A pointer to the destination data
  *  @param size The size of the data to set */
-#define asm_memset32(val, dst, size) __asm__ volatile("memset.l %1, %0, %2" :: "r"(val), "r"(dst), "r"(size))
+#define asm_memset32(val, dst, size) __asm__ volatile("memset.l %1, %0, %2" :: "r"(val), "r"(dst), "r"(size): "memory")
 
 /** @brief String copy
  *  @param src A pointer to the source string
  *  @param dst A pointer to the destination string */
 static inline void asm_strcpy(const char * src, char * dst ){
     __attribute__ ((__unused__)) int dummy;
-    __asm__ volatile ("stpcpy.b %2, %1" :"=r" (dummy) : "r"(src),"0"(dst));
+    __asm__ volatile ("stpcpy.b %2, %1" :"=r" (dummy) : "r"(src),"0"(dst): "memory");
 }
 
 /** @brief 8-bitwise Memory stream from FIFO to Memory
  *  @param src A pointer to the source register
  *  @param dst A pointer to the destination data
  *  @param size The size of data to copy */
-#define asm_streamin8(src, dst, size) __asm__ volatile("streamin.b %1, %0, %2" :: "r"(src), "r"(dst), "r"(size))
+#define asm_streamin8(src, dst, size) __asm__ volatile("streamin.b %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
 
 /** @brief 16-bitwise Memory stream from FIFO to Memory
  *  @param src A pointer to the source register
  *  @param dst A pointer to the destination data
  *  @param size The size of data to copy */
-#define asm_streamin16(src, dst, size) __asm__ volatile("streamin.s %1, %0, %2" :: "r"(src), "r"(dst), "r"(size))
+#define asm_streamin16(src, dst, size) __asm__ volatile("streamin.s %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
 
 /** @brief 32-bitewise Memory stream from FIFO to Memory
  *  @param src A pointer to the source register
  *  @param dst A pointer to the destination data
  *  @param size The size of data to copy */
-#define asm_streamin32(src, dst, size) __asm__ volatile("streamin.l %1, %0, %2" :: "r"(src), "r"(dst), "r"(size))
+#define asm_streamin32(src, dst, size) __asm__ volatile("streamin.l %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
 
 /** @brief 8-bitwise Memory stream from Memory to FIFO
  *  @param src A pointer to the source data
  *  @param dst A pointer to the destination register
  *  @param size The size of data to copy */
-#define asm_streamout8(src, dst, size) __asm__ volatile("streamout.b %1, %0, %2" :: "r"(src), "r"(dst), "r"(size))
+#define asm_streamout8(src, dst, size) __asm__ volatile("streamout.b %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
 
 /** @brief 16-bitwise Memory stream from Memory to FIFO
  *  @param src A pointer to the source data
  *  @param dst A pointer to the destination register
  *  @param size The size of data to copy */
-#define asm_streamout16(src, dst, size) __asm__ volatile("streamout.s %1, %0, %2" :: "r"(src), "r"(dst), "r"(size))
+#define asm_streamout16(src, dst, size) __asm__ volatile("streamout.s %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
 
 /** @brief 32-bitwise Memory stream from Memory to FIFO
  *  @param src A pointer to the source data
  *  @param dst A pointer to the destination register
  *  @param size The size of data to copy */
-#define asm_streamout32(src, dst, size) __asm__ volatile("streamout.l %1, %0, %2" :: "r"(src), "r"(dst), "r"(size))
+#define asm_streamout32(src, dst, size) __asm__ volatile("streamout.l %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
+
+/** @brief 8-bitwise Memory stream from I/O registers to Memory
+ *  @param src A pointer to the source register
+ *  @param dst A pointer to the first destination data
+ *  @param size The size of data to copy */
+#define asm_streamini8(src, dst, size) __asm__ volatile("streamini.b %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
+
+/** @brief 16-bitwise Memory stream from I/O registers to Memory
+ *  @param src A pointer to the source register
+ *  @param dst A pointer to the first destination data
+ *  @param size The size of data to copy */
+#define asm_streamini16(src, dst, size) __asm__ volatile("streamini.s %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
+
+/** @brief 32-bitewise Memory stream from I/O registers to Memory
+ *  @param src A pointer to the source register
+ *  @param dst A pointer to the first destination data
+ *  @param size The size of data to copy */
+#define asm_streamini32(src, dst, size) __asm__ volatile("streamini.l %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
+
+/** @brief 8-bitwise Memory stream from Memory to I/O registers
+ *  @param src A pointer to the source data
+ *  @param dst A pointer to the first destination register
+ *  @param size The size of data to copy */
+#define asm_streamouti8(src, dst, size) __asm__ volatile("streamouti.b %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
+
+/** @brief 16-bitwise Memory stream from Memory to I/O registers
+ *  @param src A pointer to the source data
+ *  @param dst A pointer to the first destination register
+ *  @param size The size of data to copy */
+#define asm_streamouti16(src, dst, size) __asm__ volatile("streamouti.s %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
+
+/** @brief 32-bitwise Memory stream from Memory to I/O registers
+ *  @param src A pointer to the source data
+ *  @param dst A pointer to the first destination register
+ *  @param size The size of data to copy */
+#define asm_streamouti32(src, dst, size) __asm__ volatile("streamouti.l %1, %0, %2" :: "r"(src), "r"(dst), "r"(size): "memory")
 
 /** @brief Set a bit in a 32 bit value
  *  @param val The value to use
  *  @param bit The bit position to set */
-#define asm_setbit(val, bit) __asm__ volatile("bins.l %0, %0, %1", :: "r"(val), "r"(0x200 | 1 << 5 | bit));
+#define asm_setbit(val, bit) __asm__ volatile("bins.l %0, %0, %1", :: "r"(val), "r"(0x200 | 1 << 5 | bit): "memory");
 
 /** @brief Clear a bit in a 32 bit value
  *  @param val The value to use
  *  @param bit The bit position to clear */
-#define asm_clrbit(val, bit) __asm__ volatile("bins.l %0, %0, %1", :: "r"(val), "r"(0x000 | 1 << 5 | bit));
+#define asm_clrbit(val, bit) __asm__ volatile("bins.l %0, %0, %1", :: "r"(val), "r"(0x000 | 1 << 5 | bit): "memory");
 
 /** @brief Flip bit regions
  *
@@ -174,7 +210,7 @@ static inline void asm_strcpy(const char * src, char * dst ){
  *  @param src The source data to use
  *  @param dst The destination for src
  *  @param val The selection of regions to flip */
-#define asm_flip32(src, dst, val) __asm__ volatile("flip.l %1,%0,%2" :: "r"(src), "r"(dst), "r"(val))
+#define asm_flip32(src, dst, val) __asm__ volatile("flip.l %1,%0,%2" :: "r"(src), "r"(dst), "r"(val): "memory")
 
 /** @brief Reverse the endianness of a value
  *  @param val The value to use */
@@ -187,7 +223,7 @@ static inline void asm_strcpy(const char * src, char * dst ){
 /** @brief Rotate bits left or right
  *  @param val The value to rotate
  *  @param num The number and direction to rotate in (negative numbers rotate left) */
-#define asm_rotate32(val, num) __asm__ volatile ("ror.l %0,%0,%1" :: "r"(val), "r"(num))
+#define asm_rotate32(val, num) __asm__ volatile ("ror.l %0,%0,%1" :: "r"(val), "r"(num): "memory")
 
 /** @brief Compare two strings
  *  @param str1 The first string to compare
@@ -196,7 +232,7 @@ static inline void asm_strcpy(const char * src, char * dst ){
 static inline int32_t asm_strcmp(const char* str1, const char* str2)
 {
     register int32_t ret = 0;
-    __asm__ volatile ("strcmp.b %0, %1, %2" : "=r"(ret) : "r"(str1), "r"(str2));
+    __asm__ volatile ("strcmp.b %0, %1, %2" : "=r"(ret) : "r"(str1), "r"(str2): "memory");
     return ret;
 }
 
@@ -206,7 +242,7 @@ static inline int32_t asm_strcmp(const char* str1, const char* str2)
 static inline uint32_t asm_strlen(const char* str)
 {
     register uint32_t ret = 0;
-    __asm__ volatile ("strlen.b %0, %1" : "=r"(ret) : "r"(str));
+    __asm__ volatile ("strlen.b %0, %1" : "=r"(ret) : "r"(str): "memory");
     return ret;
 }
 
@@ -291,6 +327,42 @@ static inline uint32_t asm_strlen(const char* str)
  *  @param dst A pointer to the destination register
  *  @param size The size of data to copy */
 #define asm_streamout32(src, dst, size) STREAMOUT_L(src, dst, size)
+
+/** @brief 8-bitwise Memory stream from I/O registers to Memory
+ *  @param src A pointer to the source register
+ *  @param dst A pointer to the first destination data
+ *  @param size The size of data to copy */
+#define asm_streamin8(src, dst, size) STREAMINI_B(src, dst, size)
+
+/** @brief 16-bitwise Memory stream from I/O registers to Memory
+ *  @param src A pointer to the source register
+ *  @param dst A pointer to the first destination data
+ *  @param size The size of data to copy */
+#define asm_streamin16(src, dst, size) STREAMINI_S(src, dst, size)
+
+/** @brief 32-bitewise Memory stream from I/O registers to Memory
+ *  @param src A pointer to the source register
+ *  @param dst A pointer to the first destination data
+ *  @param size The size of data to copy */
+#define asm_streamin32(src, dst, size) STREAMINI_L(src, dst, size)
+
+/** @brief 8-bitwise Memory stream from Memory to I/O registers
+ *  @param src A pointer to the source data
+ *  @param dst A pointer to the first destination register
+ *  @param size The size of data to copy */
+#define asm_streamout8(src, dst, size) STREAMOUTI_B(src, dst, size)
+
+/** @brief 16-bitwise Memory stream from Memory to I/O registers
+ *  @param src A pointer to the source data
+ *  @param dst A pointer to the first destination register
+ *  @param size The size of data to copy */
+#define asm_streamout16(src, dst, size) STREAMOUTI_S(src, dst, size)
+
+/** @brief 32-bitwise Memory stream from Memory to I/O registers
+ *  @param src A pointer to the source data
+ *  @param dst A pointer to the first destination register
+ *  @param size The size of data to copy */
+#define asm_streamout32(src, dst, size) STREAMOUTI_L(src, dst, size)
 
 /*inline void BINS_L(uint32_t val, uint32_t usebit)
 {

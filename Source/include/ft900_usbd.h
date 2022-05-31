@@ -229,7 +229,7 @@ typedef enum
 	/** 1023 Bytes.  Only available on Full Speed ISO endpoints. **/
 	USBD_EP_SIZE_1023 = 0x07,
 	/** 1024 Bytes.  Only available on High Speed ISO and Interrupt endpoints. **/
-	USBD_EP_SIZE_1024 = 0x08,
+	USBD_EP_SIZE_1024 = 0x07,
 } USBD_ENDPOINT_SIZE;
 
 /**
@@ -407,9 +407,10 @@ typedef struct USBD_ctx
         3: 64 bytes.
 	 **/
 	USBD_ENDPOINT_SIZE ep0_size;
-	/** Callback function for a data transfer to or from the control endpoint.
+	/** Deprecated: Callback function for a data transfer to or from the control 
+	endpoint. This feature has been deprecated in the v2.5.0 release. 
 	 **/
-	USBD_ep_callback ep0_cb;
+	void *ep0_cb;
 
 	/** Device configuration section.
     High speed/full speed select. Section 3.2.2 FT900 USB Program Manual.\n
@@ -679,9 +680,9 @@ void USBD_resume(void);
     @param[in]  ep_dir Endpoint direction, In or Out. (
     @param[in]  ep_size USB endpoint max packet size in bytes.
     @param[in]  ep_db USB endpoint double buffering enable. (N/A for control endpoints).
-    @param[in]  ep_cb Callback function for this endpoint. This function will be called
+    @param[in]  ep_cb Deprecated: Callback function for this endpoint. This function was called
                 when an event concerned with the endpoint has occurred.
-				This can be used for receiving notification of transaction to or from
+				This was used for receiving notification of transaction to or from
 				the endpoint heralding the availability of data (OUT endpoints) or the
 				completion of a transmission of data (IN endpoints). However, the
 				USBD_ep_buffer_full() function can be polled to determine the same
@@ -697,8 +698,8 @@ int8_t USBD_create_endpoint(USBD_ENDPOINT_NUMBER   ep_number,
 		USBD_ENDPOINT_TYPE     ep_type,
 		USBD_ENDPOINT_DIR      ep_dir,
 		USBD_ENDPOINT_SIZE     ep_size,
-		USBD_ENDPOINT_DB                 ep_db,
-		USBD_ep_callback ep_cb);
+		USBD_ENDPOINT_DB       ep_db,
+		void *ep_cb);
 
 /**
     @brief      Free USB endpoint.

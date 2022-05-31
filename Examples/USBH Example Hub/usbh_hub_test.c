@@ -169,11 +169,11 @@ void getDeviceDescp(USBH_device_handle hDev, int level)
 			}
 
 			bufString[i++] = '\0';
-			printf(manfMsg, bufString);
+			tfp_printf(manfMsg, bufString);
 		}
 		else
 		{
-			printf(manfMsg, "No manufacturer string");
+			tfp_printf(manfMsg, "No manufacturer string");
 		}
 
 		// product
@@ -194,11 +194,11 @@ void getDeviceDescp(USBH_device_handle hDev, int level)
 			}
 
 			bufString[i++] = '\0';
-			printf(productMsg, bufString);
+			tfp_printf(productMsg, bufString);
 		}
 		else
 		{
-			printf(productMsg, "No product string");
+			tfp_printf(productMsg, "No product string");
 		}
 
 		// serial
@@ -219,11 +219,11 @@ void getDeviceDescp(USBH_device_handle hDev, int level)
 			}
 
 			bufString[i++] = '\0';
-			printf(serialMsg, bufString);
+			tfp_printf(serialMsg, bufString);
 		}
 		else
 		{
-			printf(serialMsg, "No serial number string");
+			tfp_printf(serialMsg, "No serial number string");
 		}
 	}
 }
@@ -700,7 +700,7 @@ int main(int argc, char *argv[])
     sys_disable(sys_device_timer_wdt);
 
     // Wait forever...
-    for (;;);
+    for (;;) {};
 
 	return 0;
 }

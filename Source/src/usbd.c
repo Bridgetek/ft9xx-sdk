@@ -137,7 +137,7 @@
 #undef USBD_DEBUG_OUT_PACKET
 #undef USBD_DEBUG_TEST_MODE
 #undef USBD_DEBUG_TRANSFER
-#include <ft900_uart_simple.h>
+//#include <ft900_uart_simple.h>
 //#include "../tinyprintf/tinyprintf.h"
 #endif // USBD_LIBRARY_DEBUG_ENABLED
 //@}
@@ -224,7 +224,7 @@ typedef struct USBD_endpoint
 	/** Callback function for data being available to read for OUT endpoints
               or data read by host for IN endpoints.
 	 **/
-	USBD_ep_callback cb;
+	void *cb;
 } USBD_endpoint;
 
 /* GLOBAL VARIABLES ****************************************************************/
@@ -386,9 +386,9 @@ __attribute__((weak)) int8_t USBD_standard_req_get_descriptor(
 		USB_device_request *req);
 
 static int32_t usbd_out_request(uint8_t ep_number,
-		uint8_t *buffer, size_t length);
+		uint8_t *buffer, size_t length, size_t offset);
 static int32_t usbd_in_request(uint8_t ep_number,
-		const uint8_t *buffer, size_t length);
+		const uint8_t *buffer, size_t length, size_t offset);
 static void usbd_process_setup_packet(void);
 static void usbd_restore_endpoints(void);
 
@@ -424,15 +424,15 @@ static inline void usbd_phy_enable(bool en)
 		SYS->PMCFG_L &= ~MASK_SYS_PMCFG_DEV_PHY_EN;
 }
 
-__attribute__((weak)) void USBD_pipe_isr_start(void)
+__attribute__((weak)) void USBDX_pipe_isr_start(void)
 {
 }
 
-__attribute__((weak)) void USBD_pipe_isr_stop(void)
+__attribute__((weak)) void USBDX_pipe_isr_stop(void)
 {
 }
 
-__attribute__((weak)) void USBD_pipe_isr(uint16_t pipe_bitfields)
+__attribute__((weak)) void USBDX_pipe_isr(uint16_t pipe_bitfields)
 {
 	for (int i = USBD_EP_1; i < USBD_MAX_ENDPOINT_COUNT; i++)
 	{
@@ -613,9 +613,9 @@ static inline void epif_process(void)
 			return;
 		}
 	}
-	USBD_pipe_isr_start();
-	USBD_pipe_isr(epif);
-	USBD_pipe_isr_stop();
+	USBDX_pipe_isr_start();
+	USBDX_pipe_isr(epif);
+	USBDX_pipe_isr_stop();
 }
 
 static void ISR_usbd(void)
@@ -1140,7 +1140,7 @@ static void usbd_hw_disable(void)
  @param[in] length Number of bytes to read.
  @return The actual number of bytes written.
  **/
-static int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t length)
+static int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t length, size_t offset)
 {
 	volatile uint8_t *data_reg;
 	int32_t bytes_read = 0;
@@ -1156,7 +1156,7 @@ static int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t 
 		data_reg = (uint8_t *)&(USBD->ep[ep_number].epxfifo);
 		if (length)
 		{
-			if (((uint32_t)buffer) % 4 == 0)
+			if (((((uint32_t)buffer) & 3) == 0) && ((offset & 3) == 0))
 			{
 				uint16_t aligned = length & (~3);
 				uint16_t left = length & 3;
@@ -1164,19 +1164,19 @@ static int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t 
 				if (aligned)
 				{
 					__asm__ volatile ("streamout.l %0,%1,%2" : :
-							"r"(data_reg), "r"(buffer), "r"(aligned));
+							"r"(data_reg), "r"(buffer), "r"(aligned): "memory");
 					buffer += aligned;
 				}
 				if (left)
 				{
 					__asm__ volatile ("streamout.b %0,%1,%2" : :
-							"r"(data_reg), "r"(buffer), "r"(left));
+							"r"(data_reg), "r"(buffer), "r"(left): "memory");
 				}
 			}
 			else
 			{
 				__asm__ volatile ("streamout.b %0,%1,%2" : :"r"
-						(data_reg), "r"(buffer), "r"(length));
+						(data_reg), "r"(buffer), "r"(length): "memory");
 			}
 			bytes_read = length;
 		}
@@ -1212,7 +1212,7 @@ static int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t 
  @param[in] buffer Suitably-sized buffer to hold the data.
  @return Returns the number of bytes read.
  **/
-static int32_t usbd_out_request(uint8_t ep_number, uint8_t *buffer, size_t length)
+static int32_t usbd_out_request(uint8_t ep_number, uint8_t *buffer, size_t length, size_t offset)
 {
 	volatile uint8_t *data_reg;
 	uint32_t buff_size = 0;
@@ -1246,7 +1246,7 @@ static int32_t usbd_out_request(uint8_t ep_number, uint8_t *buffer, size_t lengt
 		data_reg = (uint8_t *)&(USBD->ep[ep_number].epxfifo);
 		if (buff_size)
 		{
-			if ((uint32_t)buffer % 4 == 0)
+			if ((((uint32_t)buffer & 3) == 0) && ((offset & 3) == 0))
 			{
 				uint16_t aligned = buff_size & (~3);
 				uint16_t left = buff_size & 3;
@@ -1254,19 +1254,19 @@ static int32_t usbd_out_request(uint8_t ep_number, uint8_t *buffer, size_t lengt
 				if (aligned)
 				{
 					__asm__ volatile ("streamin.l %0,%1,%2" : :
-							"r"(buffer), "r"(data_reg), "r"(aligned));
+							"r"(buffer), "r"(data_reg), "r"(aligned): "memory");
 					buffer += aligned;
 				}
 				if (left)
 				{
 					__asm__ volatile ("streamin.b %0,%1,%2" : :
-							"r"(buffer), "r"(data_reg), "r"(left));
+							"r"(buffer), "r"(data_reg), "r"(left): "memory");
 				}
 			}
 			else
 			{
 				__asm__ volatile ("streamin.b %0,%1,%2" : :
-						"r"(buffer), "r"(data_reg), "r"(buff_size));
+						"r"(buffer), "r"(data_reg), "r"(buff_size): "memory");
 			}
 		}
 #else // USBD_USE_STREAMS
@@ -1305,7 +1305,7 @@ static void usbd_process_setup_packet(void)
 	USB_device_request USBD_received_setup_packet;
 
 	//Get Setup Packet from control endpoint
-	usbd_out_request(USBD_EP_0, (uint8_t *)&USBD_received_setup_packet, sizeof(USB_device_request));
+	usbd_out_request(USBD_EP_0, (uint8_t *)&USBD_received_setup_packet, sizeof(USB_device_request), 0);
 
 	// Clear SETUP bit to allow following IN/OUT packets to be received by the
 	// control endpoint.
@@ -1384,7 +1384,7 @@ static void usbd_restore_endpoints(void)
 					USBD_ep[i].direction,
 					USBD_ep[i].max_packet_size,
 					USBD_ep[i].db,
-					USBD_ep[i].cb);
+					NULL);
 		}
 	}
 }
@@ -1461,7 +1461,7 @@ static bool usbd_wait_epx_in_ready(USBD_ENDPOINT_NUMBER   ep_number)
 		if (!USBD_transfer_timeout)
 		{
 			/** clear an in-process transaction */
-			/* Writing a ï¿½1ï¿½ to this bit flushes the next packet to be transmitted from the Endpoint 1 IN FIFO.
+			/* Writing a ‘1’ to this bit flushes the next packet to be transmitted from the Endpoint 1 IN FIFO.
 			 * The FIFO pointer is reset and the INPRDY bit is cleared.
 			 **/
 			USBD_EP_SR_REG(ep_number) = (MASK_USBD_EPxSR_FIFO_FLUSH);
@@ -1500,8 +1500,10 @@ int8_t USBD_create_endpoint(USBD_ENDPOINT_NUMBER ep_num,
 		USBD_ENDPOINT_DIR ep_dir,
 		USBD_ENDPOINT_SIZE ep_size,
 		USBD_ENDPOINT_DB ep_db,
-		USBD_ep_callback ep_cb)
+		void *ep_cb)
 {
+	// Deprecated parameter.
+	(void)ep_cb;
 	// Refer to section 6.2.5 for information on obtaining endpoints.
 	uint8_t ep_data = 0x00;
 	USBD_endpoint *new_ep;
@@ -1523,12 +1525,12 @@ int8_t USBD_create_endpoint(USBD_ENDPOINT_NUMBER ep_num,
 		// Check there is enough memory for the EP size requested...
 
 		// Add the control endpoint requirements.
-		if (sys_check_ft900_revB())
+		if ((ep_num != USBD_EP_0) && sys_check_ft900_revB())
 		{
-		ramTot = USBD_ep_size_bytes(USBD_ep[USBD_EP_0].max_packet_size);
-		/*RAM total size is including control endpoint size of 64bytes
-		 * in case of 90x series rev B
-		 */
+			/*RAM total size is including control endpoint size of 64bytes
+			 * in case of 90x series rev B
+			 */
+			ramTot = USBD_ep_size_bytes(USBD_EP_SIZE_64);
 		}
 
 		// Add in all the other enabled endpoints.
@@ -1563,6 +1565,12 @@ int8_t USBD_create_endpoint(USBD_ENDPOINT_NUMBER ep_num,
 			/*The total buffer size is to be shared by all the endpoints */
 			return USBD_ERR_RESOURCES;
 		}
+#ifdef USBD_DEBUG_CONFIGURE
+		else
+		{
+			tfp_printf("Configuring ep[%d], Total RAM used: %d\n",ep_num,ramTot);
+		}
+#endif
 
 	}
 #endif // USB_ENDPOINT_CHECKS
@@ -1599,7 +1607,7 @@ int8_t USBD_create_endpoint(USBD_ENDPOINT_NUMBER ep_num,
 	new_ep->max_packet_size = ep_size;
 	new_ep->type = ep_type;
 	new_ep->db = ep_db;
-	new_ep->cb = ep_cb;
+	new_ep->cb = NULL;
 	new_ep->enabled = 1;
 
 	return USBD_OK;
@@ -1705,7 +1713,7 @@ void USBD_initialise(USBD_ctx *c)
 	if (c)
 	{
 		USBD_ENDPOINT_SIZE ep_size = (c->ep0_size > USBD_EP_SIZE_64)?USBD_EP_SIZE_64:c->ep0_size;
-		USBD_create_endpoint(USBD_EP_0, USBD_EP_CTRL, 0, ep_size, 0, c->ep0_cb);
+		USBD_create_endpoint(USBD_EP_0, USBD_EP_CTRL, 0, ep_size, 0, NULL);
 	}
 	else
 	{
@@ -1854,7 +1862,7 @@ void USBD_set_test_mode(USBD_TESTMODE_SELECT test_selector)
 						tfp_printf ("USBD_TEST_PACKET pattern on IN!\r\n");
 				#endif // USBD_DEBUG_TEST_MODE
 				// Place the data to transmit into the endpoint buffer.
-				usbd_in_request(USBD_EP_0, USBD_test_pattern_bytes, 53);
+				usbd_in_request(USBD_EP_0, USBD_test_pattern_bytes, 53, 0);
 			}
 			break;
 		default:
@@ -2112,7 +2120,7 @@ int32_t /*__attribute__((optimize("O0")))*/ USBD_transfer_ex(USBD_ENDPOINT_NUMBE
 
 			// When len is not exactly a the maximum packet size then we
 			// know that data-receiving is complete.
-			transferedLen = usbd_out_request(ep_number, pdata, packetLen);
+			transferedLen = usbd_out_request(ep_number, pdata, packetLen, offset);
 			transferred += transferedLen;
 
 			if (transferedLen < packetLen)
@@ -2139,7 +2147,7 @@ int32_t /*__attribute__((optimize("O0")))*/ USBD_transfer_ex(USBD_ENDPOINT_NUMBE
 				// Wait for buffer space to become available.
 				usbd_wait_epx_in_ready(ep_number);
 			}
-			transferred += usbd_in_request(ep_number, pdata, packetLen);
+			transferred += usbd_in_request(ep_number, pdata, packetLen, offset);
 
 			if ((packetLen != 0) && ((packetLen + offset) % max_bytes == 0))
 			{
@@ -2161,7 +2169,7 @@ int32_t /*__attribute__((optimize("O0")))*/ USBD_transfer_ex(USBD_ENDPOINT_NUMBE
 #ifdef USBD_DEBUG_TRANSFER
 							tfp_printf ("%d:zlp sr=0x%x\n", ep_number, USBD_EP_SR_REG(ep_number));
 #endif //USBD_DEBUG_TRANSFER
-							(void) usbd_in_request(ep_number, NULL, 0);
+							(void) usbd_in_request(ep_number, NULL, 0, 0);
 						}
 					}
 				}
@@ -2234,7 +2242,7 @@ int32_t /*__attribute__((optimize("O0")))*/ USBD_transfer_ep0(USBD_ENDPOINT_DIR 
 
 				// When len is not exactly a the maximum packet size then we
 				// know that data-receiving is complete.
-				len = usbd_out_request(USBD_EP_0, pdata, len);
+				len = usbd_out_request(USBD_EP_0, pdata, len, 0);
 			}
 
 			// If this is the last packet to send then set the DATAEND bit.
@@ -2278,7 +2286,7 @@ int32_t /*__attribute__((optimize("O0")))*/ USBD_transfer_ep0(USBD_ENDPOINT_DIR 
 			}
 
 			// Place the data to transmit into the endpoint buffer.
-			transferred += usbd_in_request(USBD_EP_0, pdata, len);
+			transferred += usbd_in_request(USBD_EP_0, pdata, len, 0);
 
 			// The last packet has been transmitted to the host if:
 			// - The exact number of bytes requested by the host have been sent.

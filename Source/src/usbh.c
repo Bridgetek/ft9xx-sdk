@@ -54,6 +54,7 @@
 #include <limits.h>
 
 #include <ft900.h>
+#include <ft900_asm.h>
 #include <registers/ft900_registers.h>
 #include <ft900_gpio.h>
 #include <ft900_sys.h>
@@ -65,10 +66,6 @@
 
 /* CONSTANTS ***********************************************************************/
 
-#undef EHCI_MEM
-#undef EHCI_REG
-#define EHCI_MEM(A) (*(uint32_t *)&(A))
-#define EHCI_REG(A) (*(uint32_t volatile *)&(EHCI->A))
 
 /* USBH Memory Map
  *
@@ -99,6 +96,10 @@
  *
  *
  */
+#undef EHCI_MEM
+#undef EHCI_REG
+#define EHCI_MEM(A) (*(uint32_t *)&(A))
+#define EHCI_REG(A) (*(uint32_t volatile *)&(EHCI->A))
 
 /**
     @name    USB Device, Interface and Endpoint allocation presets.
@@ -362,9 +363,25 @@ static uint8_t usbh_xfer_callback_active;
 //@{
 static uint8_t usbh_aoa_compat_delay = 0;
 //@}
+
 /* MACROS **************************************************************************/
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
+
+static inline void usbh_memcpy32_mem2hc(void *dst0, void *src0, uint32_t len)
+{
+	asm_streamouti32(src0, dst0, len);
+}
+
+static inline void usbh_memcpy8_hc2mem(void *dst0, void *src0, uint32_t len)
+{
+	asm_streamini8(src0, dst0, len);
+}
+
+static inline void usbh_memcpy8_mem2hc(void *dst0, void *src0, uint32_t len)
+{
+	asm_streamouti32(src0, dst0, len);
+}
 
 static inline uint32_t usbh_get_periodic_size(void)
 {
@@ -793,7 +810,7 @@ static int8_t usbh_hub_change(uint32_t id, int8_t status, size_t len, uint8_t *c
 #ifdef USBH_DEBUG_ENUM
 				tfp_printf("Enumeration: Hub notification enumeration change port %d\r\n", hubPort);
 #endif
-				usbh_hub_port_update(hubDev, hubPort, 1, &devNew);
+				usbh_hub_port_update(hubDev, hubPort, 0, &devNew);
 
 #ifdef USBH_DEBUG_ENUM
 				tfp_printf("Enumeration: Hub notification enumeration done\r\n");
@@ -857,7 +874,7 @@ static void usbh_update_transactions(USBH_xfer **list)
 						// Copy data from EHCI RAM to program RAM.
 						if (xferThis->callback)
 						{
-							usbh_memcpy(xferThis->dest_buf, xferThis->hc_buf, xferThis->hc_len);
+							usbh_memcpy8_hc2mem(xferThis->dest_buf, xferThis->hc_buf, xferThis->hc_len);
 						}
 					}
 				}
@@ -1228,7 +1245,7 @@ static int8_t usbh_ep_list_remove(USBH_endpoint *epThis, USBH_endpoint *epListHe
 			EHCI_MEM(hc_prev_qh->next) = EHCI_NEXT_QH(EHCI_MEM(hc_this_qh->next))
 											| EHCI_TYPE_QH(EHCI_MEM(hc_prev_qh->next))
 											| 	(EHCI_TERMINATE_QH(EHCI_MEM(hc_this_qh->next))
-													| EHCI_TERMINATE_QH(EHCI_MEM(hc_prev_qh->next))
+											| EHCI_TERMINATE_QH(EHCI_MEM(hc_prev_qh->next))
 											);
 
 			// Point this QH to somewhere that will continue to be here.
@@ -1299,7 +1316,7 @@ static USBH_endpoint *usbh_ep_list_find_periodic(uint16_t interval)
 	// required interval (or less) is found.
 	while (end_ep)
 	{
-		if (end_ep->interval <= interval)
+		if (end_ep->interval <= ((interval * 2) - 1))
 		{
 			// Insert before end_ep in the list
 			// If this is the first pass then add to end of list (after dummy entry).
@@ -1347,14 +1364,16 @@ static int8_t usbh_init_ep_qh(USBH_list_entry *hc_this_entry, USBH_qh *hc_ctrl_q
 			{
 				// Periodic entry actioned on one of the 8 microframes only.
 				// Use the endpoint number as a shortcut to this.
-				epcapab |= (1 << ((this_ep->index - 1) & 0x07));
+				epcapab = epcapab | (1 << ((this_ep->index - 1) & 0x07))
+						| ((0x1c1c << ((this_ep->index - 1) & 0x07)) & MASK_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_CMASK);
 				// Turn off the NAK counter reload for interrupt endpoints
 				epchar &= (~MASK_EHCI_QUEUE_HEAD_EP_CHAR_RL);
 			}
 			else
 			{
-				epcapab = epcapab | (1 << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_SMASK)
-												| (0x1c << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_CMASK);
+				epcapab = epcapab | (1 << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_SMASK);
+				// Turn off the NAK counter reload for interrupt endpoints
+				epchar &= (~MASK_EHCI_QUEUE_HEAD_EP_CHAR_RL);
 			}
 		}
 		// Update missing parts in the endpoint characteristics.
@@ -1823,7 +1842,7 @@ static int32_t usbh_setup_transfer(USBH_endpoint *ep0, USB_device_request *devRe
 
 		hc_devReq = (USB_device_request *)usbh_alloc_hc_buffer(sizeof(USB_device_request));
 		if (hc_devReq == NULL) break;
-		usbh_memcpy(hc_devReq, devReq, sizeof(USB_device_request));
+		usbh_memcpy8_mem2hc(hc_devReq, devReq, sizeof(USB_device_request));
 
 		status = USBH_OK;
 	} while (0);
@@ -1873,7 +1892,7 @@ static int32_t usbh_setup_transfer(USBH_endpoint *ep0, USB_device_request *devRe
 				// If this is an OUT request then change PID to OUT token
 				token |= EHCI_QUEUE_TD_TOKEN_PID_OUT;
 				// Copy data to send to the HC memory
-				usbh_memcpy(hc_devData, devData, len);
+				usbh_memcpy8_mem2hc(hc_devData, devData, len);
 			}
 			hc_data_qtd->token = token;
 			// Get description data from this buffer address
@@ -1959,7 +1978,7 @@ static int32_t usbh_setup_transfer(USBH_endpoint *ep0, USB_device_request *devRe
 		// Disable the SETUP request qTD for now.
 		setup_qtd.token = EHCI_QUEUE_TD_TOKEN_STATUS_HALTED;
 		// Copy SETUP request qTD to dummy qTD from previous transaction...
-		usbh_memcpy((void *)&hc_setup_qtd->alt_next, (void *)&setup_qtd.alt_next,
+		usbh_memcpy32_mem2hc((void *)&hc_setup_qtd->alt_next, (void *)&setup_qtd.alt_next,
 				sizeof(USBH_qtd) - sizeof(uint32_t));
 		hc_setup_qtd->next = setup_qtd.next;
 		// Update transaction to the new setup qTD
@@ -1995,7 +2014,7 @@ static int32_t usbh_setup_transfer(USBH_endpoint *ep0, USB_device_request *devRe
 				if ((devReq->bmRequestType & USB_BMREQUESTTYPE_DIR_MASK) == USB_BMREQUESTTYPE_DIR_DEV_TO_HOST)
 				{
 					// Copy data received from the HC memory
-					usbh_memcpy(devData, hc_devData, len);
+					usbh_memcpy8_hc2mem(devData, hc_devData, len);
 				}
 
 				// Number of bytes actually transferred.
@@ -2144,7 +2163,7 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 		}
 		else
 		{
-			usbh_memset(hc_dummy_qtd, 0, sizeof(USBH_qtd));
+			usbh_memset32_hc(hc_dummy_qtd, 0, sizeof(USBH_qtd));
 			xferNew = usbh_alloc_transfer();
 			if (xferNew == NULL)
 			{
@@ -2167,7 +2186,7 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 			token |= EHCI_QUEUE_TD_TOKEN_PID_SETUP;
 			token |= (1 << BIT_EHCI_QUEUE_TD_TOKEN_CERR);
 			// Copy data from user to EHCI RAM
-			usbh_memcpy(hc_data_buf, buffer, length);
+			usbh_memcpy8_mem2hc(hc_data_buf, buffer, length);
 		}
 		else
 		{
@@ -2183,7 +2202,7 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 				token |= EHCI_QUEUE_TD_TOKEN_PID_OUT;
 				token |= (3 << BIT_EHCI_QUEUE_TD_TOKEN_CERR);
 				// Copy data from user to EHCI RAM
-				usbh_memcpy(hc_data_buf, buffer, length);
+				usbh_memcpy8_mem2hc(hc_data_buf, buffer, length);
 			}
 
 			if (ep->type == USBH_EP_CTRL)
@@ -2223,7 +2242,7 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 		// Disable the SETUP request qTD for now.
 		data_qtd.token = EHCI_QUEUE_TD_TOKEN_STATUS_HALTED;
 		// Copy SETUP request qTD to dummy qTD from previous transaction...
-		usbh_memcpy(hc_data_qtd, &data_qtd, sizeof(USBH_qtd));
+		usbh_memcpy32_mem2hc(hc_data_qtd, &data_qtd, sizeof(USBH_qtd));
 
 		usbh_xfer_init(xferNew);
 		// Fill in the basic fields required for all transactions.
@@ -2288,7 +2307,7 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 				// Copy data from EHCI RAM to program RAM
 				if (hc_data_buf)
 				{
-					usbh_memcpy(buffer, hc_data_buf, length);
+					usbh_memcpy8_hc2mem(buffer, hc_data_buf, length);
 				}
 			}
 		}
@@ -2413,7 +2432,7 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 		if (ep->direction == USBH_DIR_OUT)
 		{
 			// Copy data from user to EHCI RAM
-			usbh_memcpy(hc_data_buf, buffer, length);
+			usbh_memcpy8_mem2hc(hc_data_buf, buffer, length);
 		}
 
 		// High-speed endpoint.
@@ -2544,8 +2563,8 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 			// Program in the length, interrupt on completion bit and active bit.
 			// This will start the transaction.
 			EHCI_MEM(hc_sitd->transfer_state) = EHCI_SPLIT_ISO_TD_TRANSACTION_LENGTH(length)
-											| MASK_EHCI_SPLIT_ISO_TD_IOC
-											| EHCI_SPLIT_ISO_TD_STATUS_ACTIVE;
+													| MASK_EHCI_SPLIT_ISO_TD_IOC
+													| EHCI_SPLIT_ISO_TD_STATUS_ACTIVE;
 
 #ifdef USBH_DEBUG_XFER
 			tfp_printf("siTD next %08x\r\n", hc_sitd->next);
@@ -2589,7 +2608,7 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 				// Copy data from EHCI RAM to program RAM
 				if (hc_data_buf)
 				{
-					usbh_memcpy(buffer, hc_data_buf, length);
+					usbh_memcpy8_hc2mem(buffer, hc_data_buf, length);
 				}
 			}
 		}
@@ -3261,7 +3280,7 @@ static void usbh_update_periodic_tree(void)
 	count = 8;
 	// Count is shifted left 1 (count *= 2) each pass to make a populated list with
 	// each entry appearing
-	while (count < (1<<15))
+	while (count <= (1 << 15))
 	{
 		// Find first endpoint in the (ordered) list which has a polling interval
 		// equal to or less than the endpoint being added.
@@ -3282,7 +3301,7 @@ static void usbh_update_periodic_tree(void)
 				link |= MASK_EHCI_QUEUE_HEAD_TYPE_iTD;
 			}
 
-			// If the period is within therange addressable by the configuration
+			// If the period is within the range addressable by the configuration
 			// (the number of entries in the periodic list) then add it to the list.
 			// Otherwise add it as the first entry and it can poll more often than
 			// strictly required.
@@ -3311,7 +3330,7 @@ static void usbh_update_periodic_tree(void)
 	CRITICAL_SECTION_END
 }
 
-static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *buf0, size_t confDescLen, USBH_device *devNew)
+static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *buf0, uint8_t configurationNum, size_t confDescLen, USBH_device *devNew)
 {
 	int8_t status = USBH_OK;
 	// Pointer to current interface to attach endpoints to.
@@ -3334,7 +3353,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 	tfp_printf("Enumeration: Get Config Descriptor FULL %d bytes\r\n", confDescLen);
 #endif
 	status = usbh_req_get_descriptor(epZero, USB_DESCRIPTOR_TYPE_CONFIGURATION,
-			0, confDescLen, (uint8_t *)buf0);
+			configurationNum, confDescLen, (uint8_t *)buf0);
 
 	if (status >= 0)
 	{
@@ -3552,7 +3571,15 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 							}
 							else
 							{
-								epNew->hc_entry.type = USBH_list_entry_type_siTD;
+								// If this is directly connected to the root hub then make it iTD
+								if (devNew->parent == NULL)
+								{
+									epNew->hc_entry.type = USBH_list_entry_type_iTD;
+								}
+								else
+								{
+									epNew->hc_entry.type = USBH_list_entry_type_siTD;
+								}
 							}
 						}
 
@@ -3591,79 +3618,276 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 	return status;
 }
 
-static int8_t usbh_enumerate_config_desc_128(USBH_endpoint *epZero, size_t confDescLen, USBH_device *devNew)
+static int8_t usbh_enumerate_config_desc_128(USBH_endpoint *epZero, uint8_t configurationIndex, size_t confDescLen, USBH_device *devNew)
 {
 	uint8_t buf[128];
 
-	return usbh_enumerate_parse_config_desc(epZero, buf, confDescLen, devNew);
+	return usbh_enumerate_parse_config_desc(epZero, buf, configurationIndex, confDescLen, devNew);
 }
 
-static int8_t usbh_enumerate_config_desc_256(USBH_endpoint *epZero, size_t confDescLen, USBH_device *devNew)
+static int8_t usbh_enumerate_config_desc_256(USBH_endpoint *epZero, uint8_t configurationIndex, size_t confDescLen, USBH_device *devNew)
 {
 	uint8_t buf[256];
 
-	return usbh_enumerate_parse_config_desc(epZero, buf, confDescLen, devNew);
+	return usbh_enumerate_parse_config_desc(epZero, buf, configurationIndex, confDescLen, devNew);
 }
 
-static int8_t usbh_enumerate_config_desc_512(USBH_endpoint *epZero, size_t confDescLen, USBH_device *devNew)
+static int8_t usbh_enumerate_config_desc_512(USBH_endpoint *epZero, uint8_t configurationIndex, size_t confDescLen, USBH_device *devNew)
 {
 	uint8_t buf[512];
 
-	return usbh_enumerate_parse_config_desc(epZero, buf, confDescLen, devNew);
+	return usbh_enumerate_parse_config_desc(epZero, buf, configurationIndex, confDescLen, devNew);
 }
 
-static int8_t usbh_enumerate_config_desc_1024(USBH_endpoint *epZero, size_t confDescLen, USBH_device *devNew)
+static int8_t usbh_enumerate_config_desc_1024(USBH_endpoint *epZero, uint8_t configurationIndex, size_t confDescLen, USBH_device *devNew)
 {
 	uint8_t buf[1024];
 
-	return usbh_enumerate_parse_config_desc(epZero, buf, confDescLen, devNew);
+	return usbh_enumerate_parse_config_desc(epZero, buf, configurationIndex, confDescLen, devNew);
 }
 
-static int8_t usbh_enumerate_config_desc_2048(USBH_endpoint *epZero, size_t confDescLen, USBH_device *devNew)
+static int8_t usbh_enumerate_config_desc_2048(USBH_endpoint *epZero, uint8_t configurationIndex, size_t confDescLen, USBH_device *devNew)
 {
 	uint8_t buf[2048];
 
-	return usbh_enumerate_parse_config_desc(epZero, buf, confDescLen, devNew);
+	return usbh_enumerate_parse_config_desc(epZero, buf, configurationIndex, confDescLen, devNew);
 }
 
-static int8_t usbh_enumerate_config_desc_4096(USBH_endpoint *epZero, size_t confDescLen, USBH_device *devNew)
+static int8_t usbh_enumerate_config_desc_4096(USBH_endpoint *epZero, uint8_t configurationIndex, size_t confDescLen, USBH_device *devNew)
 {
 	uint8_t buf[4096];
 
-	return usbh_enumerate_parse_config_desc(epZero, buf, confDescLen, devNew);
+	return usbh_enumerate_parse_config_desc(epZero, buf, configurationIndex, confDescLen, devNew);
+}
+
+static int8_t usbh_hub_port_enumerate_device(USBH_device *devNew, USBH_device *hubDev, uint8_t hubPort, uint8_t configurationNum)
+{
+	int8_t status = USBH_OK;
+
+	// Storage for config descriptors. Max packet size of High Speed control endpoint.
+	uint8_t buf0[64];
+	// Index of configuration descriptor that matches configuration number.
+	uint8_t configurationIndex = 0;
+	// Temporary device pointer to find end of list of child devices of hub.
+	USBH_device *devNext;
+	// Configuration descriptor pointers (data stored in buf0).
+	USB_configuration_descriptor *confDesc;
+	// Hub descriptor
+	USB_hub_descriptor hubDesc;
+	// Pointer to current interface to attach endpoints to.
+	USBH_interface *ifaceNew;
+	// Pointer to current endpoint to attach queue headers to.
+	USBH_endpoint *epNew;
+	// Intermediate configuration descriptor length.
+	size_t confDescLen;
+
+	(void)hubPort;
+	
+	enumInProgress = 1;
+
+#ifdef USBH_DEBUG_ENUM
+	//usbh_dump_device_descriptor(&(devNew->descriptor));
+#endif
+
+	// Transaction 4: Get Configuration Descriptor Part
+#ifdef USBH_DEBUG_ENUM
+	tfp_printf("Enumeration: Get Config Descriptor first\r\n");
+#endif
+
+	for (configurationIndex = 0; configurationIndex < devNew->descriptor.bNumConfigurations; configurationIndex++)
+	{
+		status = usbh_req_get_descriptor(devNew->endpoint0, USB_DESCRIPTOR_TYPE_CONFIGURATION,
+				configurationIndex, sizeof(USB_configuration_descriptor), (uint8_t *)buf0);
+		if (status == USBH_OK)
+		{
+			confDesc = (USB_configuration_descriptor*)buf0;
+
+			// Check for a valid config descriptor first.
+			if (confDesc->bDescriptorType == USB_DESCRIPTOR_TYPE_CONFIGURATION)
+			{
+				// Take a matching configuration value or the first one if the requested configuration is zero.
+				if ((confDesc->bConfigurationValue == configurationNum) || (configurationNum == 0))
+				{
+					configurationNum = confDesc->bConfigurationValue;
+					usbh_dev_disconnect_config(devNew, 1);
+					break;
+				}
+			}
+		}
+		status = USBH_ERR_NOT_FOUND;
+	}
+
+	if (status == USBH_OK)
+	{
+#ifdef USBH_DEBUG_ENUM
+		//usbh_dump_config_descriptor((USB_configuration_descriptor*)buf0, 0);
+#endif
+
+		// Check for a valid config descriptor first.
+		if (confDesc->bDescriptorType == USB_DESCRIPTOR_TYPE_CONFIGURATION)
+		{
+			// Make a new device handle.
+			// Add current hc_ep0_qh to this.
+
+			// Only need to continue with enumeration if the config descriptor claims more interfaces.
+			// Otherwise there is nothing else to do.
+#ifdef USBH_DEBUG_ENUM
+			tfp_printf("Enumeration: Parsing Configuration Descriptor for %d interfaces\r\n", confDesc->bNumInterfaces);
+#endif
+
+			if (confDesc->bNumInterfaces)
+			{
+				// Depending on the size of the config descriptor call one or
+				// other functions to use stack memory to acheive this.
+				confDescLen = confDesc->wTotalLength;
+
+				if (confDescLen <= 64)
+				{
+					status = usbh_enumerate_parse_config_desc(devNew->endpoint0, buf0, configurationIndex, confDescLen, devNew);
+				}
+				else if (confDescLen <= 128)
+				{
+					status = usbh_enumerate_config_desc_128(devNew->endpoint0, configurationIndex, confDescLen, devNew);
+				}
+				else if (confDescLen <= 256)
+				{
+					status = usbh_enumerate_config_desc_256(devNew->endpoint0, configurationIndex, confDescLen, devNew);
+				}
+				else if (confDescLen <= 512)
+				{
+					status = usbh_enumerate_config_desc_512(devNew->endpoint0, configurationIndex, confDescLen, devNew);
+				}
+				else if (confDescLen <= 1024)
+				{
+					status = usbh_enumerate_config_desc_1024(devNew->endpoint0, configurationIndex, confDescLen, devNew);
+				}
+				else if (confDescLen <= 2048)
+				{
+					status = usbh_enumerate_config_desc_2048(devNew->endpoint0, configurationIndex, confDescLen, devNew);
+				}
+				else if (confDescLen <= 4096)
+				{
+					status = usbh_enumerate_config_desc_4096(devNew->endpoint0, configurationIndex, confDescLen, devNew);
+				}
+
+				if (status == USBH_ENUM_PARTIAL)
+				{
+					// By definition there are no enumeration resources
+					// available now.
+					enumResourcesFull = 1;
+				}
+				// Increment enumeration value
+				uniqueEnumValue++;
+			}
+#ifdef USBH_DEBUG_ENUM
+			tfp_printf("Enumeration: Get Config Descriptor status %d\r\n", status);
+#endif
+		}
+	}
+
+	if (status >= USBH_OK)
+	{
+		// Transaction 6: Set Configuration
+		status = usbh_req_set_configuration(devNew->endpoint0, configurationNum);
+	}
+
+	if (status >= USBH_OK)
+	{
+		devNew->configuration = configurationNum;
+
+		if (devNew->descriptor.bDeviceClass == USB_CLASS_HUB)
+		{
+			// Wait a short time for the hub to become responsive
+			delayms(10);
+
+			status = usbh_get_hub_descriptor(devNew, &hubDesc);
+			devNew->portCount = hubDesc.bNbrPorts;
+
+			// Once the hub is fully enumerated then we will start polling it
+			// properly.
+			// Calculate the polling interval of the hub Status Change Endpoint
+			devNew->hubPollTimeout = -1;
+			ifaceNew = devNew->interfaces;
+			if (ifaceNew)
+			{
+				// Get Status Change Endpoint
+				epNew = ifaceNew->endpoints;
+				if (epNew)
+				{
+					// Set the polling interval for the hub accordingly.
+					// The polling interval for hubs is in milliseconds so divide
+					// the endpoint interval (in milli-frames) by 8.
+					devNew->hubPollTimeout = (epNew->interval >> 3);
+				}
+			}
+
+#ifdef USBH_DEBUG_ENUM
+			tfp_printf("Enumeration: Downstream hub with %d ports\r\n", devNew->portCount);
+			tfp_printf("Enumeration: polling interval approx %d ms\r\n", devNew->hubPollTimeout);
+#endif
+		}
+
+		usbh_update_periodic_tree();
+
+		if (hubDev == NULL)
+		{
+			// For root hub set the device chain head.
+			usbh_firstDev = devNew;
+		}
+		else
+		{
+			// For downstream hub add the device to the parent hub child list.
+			devNext = hubDev->children;
+			if (devNext)
+			{
+				while (devNext->next)
+				{
+					devNext = devNext->next;
+				}
+				devNext->next = devNew;
+			}
+			else
+			{
+				hubDev->children = devNew;
+			}
+		}
+
+		//CRITICAL_SECTION_END
+		// UNLOCK
+	}
+
+	if (status < USBH_OK)
+	{
+#ifdef USBH_DEBUG_ENUM
+		tfp_printf("Enumeration: failed %d\r\n", status);
+#endif // USBH_DEBUG_ENUM
+
+	}
+	enumInProgress = 0;
+
+	return status;
 }
 
 static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint8_t configurationNum, USBH_device **ppDevNew)
 {
 	int8_t status = USBH_OK;
 
-	// Storage for configuration descriptors - size is twice max packet size.
-	uint8_t buf0[128];
-	// Pointer to control endpoint data structure
-	USBH_qh *hc_ep0_qh;
-	// Pointer to current interface to attach endpoints to.
-	USBH_interface *ifaceNew;
-	// Pointer to current endpoint to attach queue headers to.
-	USBH_endpoint *epNew;
-	// Pointer to device endpoint0 for new device.
-	USBH_endpoint *epZero;
+	// Storage for device descriptors.
+	uint8_t buf0[64];
 	// Pointer to new device made during this enumeration
 	USBH_device *devNew;
-	// Temporary device pointer to find end of list of child devices of hub.
-	USBH_device *devNext;
+	// Pointer to device endpoint0 for new device.
+	USBH_endpoint *epZero;
+	// Pointer to control endpoint data structure
+	USBH_qh *hc_ep0_qh;
 	// Device descriptor
 	USB_device_descriptor *devDesc;
-	// Configuration descriptor pointers (data stored in buf0).
-	USB_configuration_descriptor *confDesc;
-	// Hub descriptor
-	USB_hub_descriptor hubDesc;
 	// Hub and Port statuses
 	USB_hub_port_status portStatus;
-	size_t confDescLen;
-
 	// Device speed
 	uint8_t speed = USBH_SPEED_FULL;
-
+	// Hub descriptor
+	USB_hub_descriptor hubDesc;
 	// Device address
 	uint8_t addr;
 	// Initialise the delay to TSIGATT which is a minimum of 100 ms.
@@ -3678,9 +3902,11 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 #endif
 		// Get downstream hub descriptor
 		status = usbh_get_hub_descriptor(hubDev, &hubDesc);
-
-		// Add in extra delay required by hub
-		delay = (hubDesc.bPwrOn2PwrGood * 2);
+		if (status == USBH_OK)
+		{
+			// Add in extra delay required by hub
+			delay = (hubDesc.bPwrOn2PwrGood * 2);
+		}
 	}
 
 	// TSIGATT 100 ms delay
@@ -3741,7 +3967,15 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 		delayms(10);
 	}
 
-	status = usbh_clear_hub_port_feature(hubDev, hubPort, USB_HUB_CLASS_FEATURE_PORT_RESET);
+	status += usbh_clear_hub_port_feature(hubDev, hubPort, USB_HUB_CLASS_FEATURE_PORT_RESET);
+	if (status != USBH_OK)
+	{
+		// Hub port feature error. No port found on hub device?
+		portStatus.currentConnectStatusChange = 1;
+		enumInProgress = 0;
+
+		return USBH_ERR_NOT_FOUND;
+	}
 
 	usbh_get_hub_status_worker(hubDev, hubPort, &portStatus);
 	if (portStatus.currentConnectStatus == 0)
@@ -3843,43 +4077,43 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 	// Set port number for device (0 is on Root Hub).
 	devNew->parentPort = hubPort;
 
-		// Construct an EP0 endpoint structure for control endpoint of device.
-		epZero->hc_entry.qh = hc_ep0_qh;
-		epZero->enumValue = uniqueEnumValue;
-		epZero->max_packet_size = 64; // placeholder
-		epZero->index = 0;
-		epZero->type = USBH_EP_CTRL;
-		// Control endpoints do not require direction set nor the interface set
+	// Construct an EP0 endpoint structure for control endpoint of device.
+	epZero->hc_entry.qh = hc_ep0_qh;
+	epZero->enumValue = uniqueEnumValue;
+	epZero->max_packet_size = 64; // placeholder
+	epZero->index = 0;
+	epZero->type = USBH_EP_CTRL;
+	// Control endpoints do not require direction set nor the interface set
 
-		if (hubDev)
-		{
-			status = usbh_init_ctrlep(epZero, hc_ep0_qh, speed, 0, hubDev->address, hubPort);
-		}
-		else
-		{
-			status = usbh_init_ctrlep(epZero, hc_ep0_qh, speed, 0, 0, 0);
-		}
+	if (hubDev)
+	{
+		status = usbh_init_ctrlep(epZero, hc_ep0_qh, speed, 0, hubDev->address, hubPort);
+	}
+	else
+	{
+		status = usbh_init_ctrlep(epZero, hc_ep0_qh, speed, 0, 0, 0);
+	}
+
+	if (status == USBH_OK)
+	{
+		// Transaction 1: Get Device Descriptor at Addr 0
+#ifdef USBH_DEBUG_ENUM
+		tfp_printf("Enumeration: Get Device Descriptor first\r\n");
+#endif
+
+		status = usbh_req_get_descriptor(epZero, USB_DESCRIPTOR_TYPE_DEVICE, 0,
+				(speed == USBH_SPEED_HIGH)?64:8, (uint8_t *)buf0);
 
 		if (status == USBH_OK)
 		{
-			// Transaction 1: Get Device Descriptor at Addr 0
+			devDesc = (USB_device_descriptor *)&buf0[0];
+			// Fill in information from the device descriptor
+			epZero->max_packet_size = devDesc->bMaxPacketSize0;
 #ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Get Device Descriptor first\r\n");
+			tfp_printf("Enumeration: Get Device Descriptor status %d\r\n", status);
 #endif
-
-			status = usbh_req_get_descriptor(epZero, USB_DESCRIPTOR_TYPE_DEVICE, 0,
-					(speed == USBH_SPEED_HIGH)?64:8, (uint8_t *)buf0);
-
-			if (status == USBH_OK)
-			{
-				devDesc = (USB_device_descriptor *)&buf0[0];
-				// Fill in information from the device descriptor
-				epZero->max_packet_size = devDesc->bMaxPacketSize0;
-#ifdef USBH_DEBUG_ENUM
-				tfp_printf("Enumeration: Get Device Descriptor status %d\r\n", status);
-#endif
-			}
 		}
+	}
 
 	if (status == USBH_OK)
 	{
@@ -3946,170 +4180,14 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 		}
 	}
 
+	status = usbh_hub_port_enumerate_device(devNew, hubDev, hubPort, configurationNum);
 	if (status == USBH_OK)
 	{
-#ifdef USBH_DEBUG_ENUM
-		//usbh_dump_device_descriptor(&(devNew->descriptor));
-#endif
-
-		// Transaction 4: Get Configuration Descriptor Part
-#ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Get Config Descriptor first\r\n");
-#endif
-		status = usbh_req_get_descriptor(epZero, USB_DESCRIPTOR_TYPE_CONFIGURATION,
-				0, sizeof(USB_configuration_descriptor), (uint8_t *)buf0);
-	}
-
-	if (status == USBH_OK)
-	{
-#ifdef USBH_DEBUG_ENUM
-		//usbh_dump_config_descriptor((USB_configuration_descriptor*)buf0, 0);
-#endif
-
-		confDesc = (USB_configuration_descriptor*)buf0;
-
-		// Check for a valid config descriptor first.
-		if (confDesc->bDescriptorType == USB_DESCRIPTOR_TYPE_CONFIGURATION)
-		{
-			// Make a new device handle.
-			// Add current hc_ep0_qh to this.
-
-			// Only need to continue with enumeration if the config descriptor claims more interfaces.
-			// Otherwise there is nothing else to do.
-#ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Parsing Configuration Descriptor for %d interfaces\r\n", confDesc->bNumInterfaces);
-#endif
-
-			if (confDesc->bNumInterfaces)
-			{
-				// Depending on the size of the config descriptor call one or
-				// other functions to use stack memory to acheive this.
-				confDescLen = confDesc->wTotalLength;
-
-				if (confDescLen <= 64)
-				{
-					status = usbh_enumerate_parse_config_desc(epZero, buf0, confDescLen, devNew);
-				}
-				else if (confDescLen <= 128)
-				{
-					status = usbh_enumerate_config_desc_128(epZero, confDescLen, devNew);
-				}
-				else if (confDescLen <= 256)
-				{
-					status = usbh_enumerate_config_desc_256(epZero, confDescLen, devNew);
-				}
-				else if (confDescLen <= 512)
-				{
-					status = usbh_enumerate_config_desc_512(epZero, confDescLen, devNew);
-				}
-				else if (confDescLen <= 1024)
-				{
-					status = usbh_enumerate_config_desc_1024(epZero, confDescLen, devNew);
-				}
-				else if (confDescLen <= 2048)
-				{
-					status = usbh_enumerate_config_desc_2048(epZero, confDescLen, devNew);
-				}
-				else if (confDescLen <= 4096)
-				{
-					status = usbh_enumerate_config_desc_4096(epZero, confDescLen, devNew);
-				}
-
-				if (status == USBH_ENUM_PARTIAL)
-				{
-					// By definition there are no enumeration resources
-					// available now.
-					enumResourcesFull = 1;
-				}
-				// Increment enumeration value
-				uniqueEnumValue++;
-			}
-#ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Get Config Descriptor status %d\r\n", status);
-#endif
-		}
-	}
-
-	if (status >= USBH_OK)
-	{
-		// Transaction 6: Set Configuration
-		status = usbh_req_set_configuration(epZero, configurationNum);
-	}
-
-	if (status >= USBH_OK)
-	{
-		devNew->configuration = configurationNum;
-
 		// Return pointer to new device made during this enumeration pass.
 		*ppDevNew = devNew;
-
-		if (devNew->descriptor.bDeviceClass == USB_CLASS_HUB)
-		{
-			// Wait a short time for the hub to become responsive
-			delayms(10);
-
-			status = usbh_get_hub_descriptor(devNew, &hubDesc);
-			devNew->portCount = hubDesc.bNbrPorts;
-
-			// Once the hub is fully enumerated then we will start polling it
-			// properly.
-			// Calculate the polling interval of the hub Status Change Endpoint
-			devNew->hubPollTimeout = -1;
-			ifaceNew = devNew->interfaces;
-			if (ifaceNew)
-			{
-				// Get Status Change Endpoint
-				epNew = ifaceNew->endpoints;
-				if (epNew)
-				{
-					// Set the polling interval for the hub accordingly.
-					// The polling interval for hubs is in milliseconds so divide
-					// the endpoint interval (in milli-frames) by 8.
-					devNew->hubPollTimeout = (epNew->interval >> 3);
-				}
-			}
-
-#ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Downstream hub with %d ports\r\n", devNew->portCount);
-			tfp_printf("Enumeration: polling interval approx %d ms\r\n", devNew->hubPollTimeout);
-#endif
-		}
-
-		usbh_update_periodic_tree();
-
-		if (hubDev == NULL)
-		{
-			// For root hub set the device chain head.
-			usbh_firstDev = devNew;
-		}
-		else
-		{
-			// For downstream hub add the device to the parent hub child list.
-			devNext = hubDev->children;
-			if (devNext)
-			{
-				while (devNext->next)
-				{
-					devNext = devNext->next;
-				}
-				devNext->next = devNew;
-			}
-			else
-			{
-				hubDev->children = devNew;
-			}
-		}
-
-		//CRITICAL_SECTION_END
-		// UNLOCK
 	}
-
-	if (status < USBH_OK)
+	else
 	{
-#ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: failed %d\r\n", status);
-#endif // USBH_DEBUG_ENUM
-
 		usbh_free_endpoint(epZero);
 		usbh_free_device(devNew);
 		usbh_free_hc_2_blocks((void *)hc_ep0_qh);
@@ -4119,12 +4197,10 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 			usbh_firstDev = NULL;
 		}
 	}
-	enumInProgress = 0;
-
 	return status;
 }
 
-static void usbh_dev_disconnect(USBH_device *devRemove)
+static void usbh_dev_disconnect_config(USBH_device *devRemove, uint8_t keepDev)
 {
 	// Pointer to current interface to attach endpoints to.
 	USBH_interface *ifaceRemove, *ifaceRemoveNext;
@@ -4142,9 +4218,10 @@ static void usbh_dev_disconnect(USBH_device *devRemove)
 		while (devChild)
 		{
 			devChildNext = devChild->next;
-			usbh_dev_disconnect(devChild);
+			usbh_dev_disconnect_config(devChild, 0);
 			devChild = devChildNext;
 		}
+		devRemove->children = NULL;
 
 		// Find all interfaces on this device and free
 		ifaceRemove = devRemove->interfaces;
@@ -4160,21 +4237,33 @@ static void usbh_dev_disconnect(USBH_device *devRemove)
 				usbh_free_endpoint(epRemove);
 				epRemove = epRemoveNext;
 			}
+			ifaceRemove->endpoints = NULL;
 
 			ifaceRemoveNext = ifaceRemove->next;
 			usbh_free_interface(ifaceRemove);
 			ifaceRemove = ifaceRemoveNext;
 		}
+		devRemove->interfaces = NULL;
+
 #ifdef USBH_DEBUG_LISTS
 		tfp_printf("List disconnect: Remove EP0 %08x\r\n", devRemove->endpoint0);
 #endif // USBH_DEBUG_LISTS
-		usbh_free_endpoint(devRemove->endpoint0);
-		usbh_free_device(devRemove);
+
+		if (keepDev == 0)
+		{
+			usbh_free_endpoint(devRemove->endpoint0);
+			usbh_free_device(devRemove);
+		}
 
 		// By definition there are free enumeration resources
 		// available now.
 		enumResourcesFull = 0;
 	}
+}
+
+static void usbh_dev_disconnect(USBH_device *devRemove)
+{
+	usbh_dev_disconnect_config(devRemove, 0);
 }
 
 /* PREALLOCATED MEMORY BLOCK FUNCTIONS **************************************/
@@ -4408,7 +4497,7 @@ static void *usbh_alloc_hc_2_blocks(void)
 #endif // USBH_DEBUG_ALLOC
 
 			// Zero out queue header
-			usbh_memset((void *)hc_alloc, 0, 64);
+			usbh_memset32_hc(hc_alloc, 0, 64);
 			break;
 		}
 	}
@@ -4452,7 +4541,7 @@ static void *usbh_alloc_hc_1_block(void)
 #endif // USBH_DEBUG_ALLOC
 
 			// Zero out allocated memory
-			usbh_memset((void *)hc_alloc, 0, 32);
+			usbh_memset32_hc(hc_alloc, 0, 32);
 			break;
 		}
 	}
@@ -4576,11 +4665,10 @@ static void usbh_hc_memclear(void)
 }
 
 // Set pattern in HC shared memory
-static void usbh_memset(void *dst0, uint32_t val, uint32_t len)
+static void usbh_memset32_hc(void *dst0, uint32_t val, uint32_t len)
 {
-	uint32_t *dst = (uint32_t *)dst0;
+	volatile uint32_t *dst = (uint32_t *)dst0;
 	uint32_t lenDw;
-	uint32_t lenR;
 
 	// Clear an integral number of DWORDs starting on a DWORD boundary
 	lenDw = len / (sizeof(uint32_t));
@@ -4588,74 +4676,6 @@ static void usbh_memset(void *dst0, uint32_t val, uint32_t len)
 	{
 		*dst++ = val;
 	};
-
-	// Compute remainder from last DWORD boundary
-	lenR = len % (sizeof(uint32_t));
-
-	if (lenR > 0)
-	{
-		// Behave according to destination RAM location
-		if (dst >= &EHCI_RAM[0])
-		{
-			// Destination is EHCI RAM - clear whole DWORD
-			*dst = val;
-		}
-		else
-		{
-			uint8_t *dst1 = (uint8_t*)dst;
-
-			// Destination CPU RAM - clear exact number of bytes
-			while (lenR--)
-			{
-				*dst1++ = val & 0xff;
-				val >>= 8;
-			}
-		}
-	}
-}
-
-// Copy data to or from HC shared memory
-static void usbh_memcpy(void *dst0, void *src0, uint32_t len)
-{
-	uint32_t *dst = (uint32_t *)dst0;
-	uint32_t *src = (uint32_t *)src0;
-	uint32_t remain;
-	uint32_t lenDw;
-	uint32_t lenR;
-
-	// Copy an integral number of DWORDs starting on a DWORD boundary
-	lenDw = len / (sizeof(uint32_t));
-	while (lenDw--)
-	{
-		*dst++ = *src++;
-	};
-
-	// Compute remainder from last DWORD boundary
-	lenR = len % (sizeof(uint32_t));
-	// Get remaining DWORD
-	remain = *src;
-
-	if (lenR > 0)
-	{
-		// Behave according to destination RAM location
-		if (dst >= &EHCI_RAM[0])
-		{
-			// Destination is EHCI RAM - copy whole DWORD over
-			*dst = remain;
-		}
-		else
-		{
-			uint8_t *dst1 = (uint8_t*)dst;
-
-			// Destination CPU RAM - copy exact number of bytes over
-			while (lenR--)
-			{
-				*dst1++ = remain & 0xff;
-				remain >>= 8;
-
-			}
-		}
-	}
 }
 
 void usbh_init_qtd(USBH_qtd *hc_qtd)
@@ -4721,13 +4741,10 @@ static void usbh_hw_enable_int(void)
 			| MASK_EHCI_USBINTR_PO_CHG_INT_EN );
 }
 
-//TODO: currently not used
-#if 0
 static void usbh_hw_disable_int(void)
 {
 	EHCI_REG(usbintr) = 0;
 }
-#endif // 0
 
 //0-sdp, 1-dcp, 2-cpd1, 3-cpd2
 //TODO: currently not used
@@ -5084,7 +5101,7 @@ int8_t USBH_process(void)
 			// Remove all devices/interfaces/endpoints from root hub.
 			usbh_hub_port_remove(NULL, 1);
 
-			return usbh_hub_enumerate(NULL, 1);
+			return usbh_hub_enumerate(NULL, 0);
 		}
 	}
 
@@ -5128,6 +5145,25 @@ void USBH_initialise(USBH_ctx *ctx)
 	CRITICAL_SECTION_BEGIN
 	usbh_intr_port = 1;
 	CRITICAL_SECTION_END
+}
+
+void USBH_finalise(void)
+{
+	// Remove all devices/interfaces/endpoints from root hub.
+	usbh_hub_port_remove(NULL, 1);
+	usbh_hw_disable_int();
+	interrupt_detach(interrupt_usb_host);
+
+	CRITICAL_SECTION_BEGIN
+				   usbh_intr_xfer = 0;
+				   usbh_intr_port = 0;
+	CRITICAL_SECTION_END
+
+	// Clear Status Register
+	usbh_hw_clrsts();
+	usbh_hw_stop();
+	usbh_hw_reset();
+	sys_disable(sys_device_usb_host);
 }
 
 int8_t USBH_endpoint_halt(USBH_endpoint_handle endpoint,
@@ -5330,8 +5366,6 @@ int32_t USBH_device_setup_transfer(USBH_device_handle device,
 	int32_t status = USBH_ERR_NOT_FOUND;
 	size_t length = req->wLength;
 	USBH_device *dev = (USBH_device *)USBH_HANDLE_ADDR(device);
-	USB_device_request *hc_devReq;
-	uint8_t *hc_devData = 0;
 
 	if (dev)
 	{
@@ -5340,39 +5374,7 @@ int32_t USBH_device_setup_transfer(USBH_device_handle device,
 			return USBH_ERR_REMOVED;
 		}
 
-		status = USBH_ERR_RESOURCES;
-		hc_devReq = (USB_device_request *)usbh_alloc_hc_buffer(sizeof(USB_device_request));
-		if (hc_devReq)
-		{
-			if (length)
-				hc_devData = (uint8_t *)usbh_alloc_hc_buffer(length);
-
-			if ((length == 0) || (hc_devData))
-			{
-				usbh_memcpy(hc_devReq, req, sizeof(USB_device_request));
-
-				if ((req->bmRequestType & USB_BMREQUESTTYPE_DIR_MASK) == USB_BMREQUESTTYPE_DIR_HOST_TO_DEV)
-				{
-					// If this is an OUT request then copy user buffer to EHCI RAM to transmit
-					if (length)
-						usbh_memcpy(hc_devData, buffer, length);
-				}
-
-				status = usbh_setup_transfer(dev->endpoint0, hc_devReq, hc_devData, length, timeout);
-
-				if ((req->bmRequestType & USB_BMREQUESTTYPE_DIR_MASK) == USB_BMREQUESTTYPE_DIR_DEV_TO_HOST)
-				{
-					// If this is an IN request then copy EHCI RAM buffer to user area
-					if (length)
-						usbh_memcpy(buffer, hc_devData, length);
-				}
-
-				if (hc_devData)
-					usbh_free_hc_buffer(hc_devData, length);
-			}
-
-			usbh_free_hc_buffer(hc_devReq, sizeof(USB_device_request));
-		}
+		status = usbh_setup_transfer(dev->endpoint0, req, buffer, length, timeout);
 	}
 
 	return status;
@@ -5839,7 +5841,7 @@ int8_t USBH_enumerate(USBH_device_handle hub, uint8_t hubPort)
 		tfp_printf("Enumeration: start from downstream hub port %d\r\n", hubPort);
 #endif // USBH_DEBUG_ENUM
 
-		status = usbh_hub_port_enumerate(hubDev, hubPort, 1, &devNew);
+		status = usbh_hub_port_enumerate(hubDev, hubPort, 0, &devNew);
 		// Recurse through any hubs
 		if (status == USBH_OK)
 		{
@@ -5847,7 +5849,7 @@ int8_t USBH_enumerate(USBH_device_handle hub, uint8_t hubPort)
 			{
 				if (devNew->descriptor.bDeviceClass == USB_CLASS_HUB)
 				{
-					status = usbh_hub_enumerate(devNew, 1);
+					status = usbh_hub_enumerate(devNew, 0);
 					// Now poll downstream hub...
 					usbh_hub_poll_start(devNew);
 				}
@@ -5859,7 +5861,7 @@ int8_t USBH_enumerate(USBH_device_handle hub, uint8_t hubPort)
 #ifdef USBH_DEBUG_ENUM
 		tfp_printf("Enumeration: start from hub\r\n");
 #endif // USBH_DEBUG_ENUM
-		status = usbh_hub_enumerate(hubDev, 1);
+		status = usbh_hub_enumerate(hubDev, 0);
 	}
 
 #ifdef USBH_DEBUG_ENUM
@@ -6254,7 +6256,8 @@ int8_t USBH_device_set_configuration(USBH_device_handle device,
 		dev = usbh_firstDev;
 	}
 
-	status = usbh_req_set_configuration(dev->endpoint0, conf);
+	// Re-enumerate from this device downwards with new configuration.
+	status = usbh_hub_port_enumerate_device(dev, dev->parent, dev->parentPort, conf);
 	if (status == USBH_OK)
 	{
 		dev->configuration = conf;

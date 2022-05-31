@@ -18,7 +18,7 @@ Strings:	/**< strings are preceded by length byte */
 Strings_start = .
 			.byte	0x04,'F','T','D','I'						/**< manufacturer string */
 			.byte	0x0A,'F','T','9','3','0',' ','D','2','X','X' 			/**< product description */
-			.byte	0x0F,'F','T','9','3','0','S','e','r','i','a','l','#','0','0','7 	/**< serial number */
+			.byte	0x0E,'F','T','9','3','0','S','e','r','i','a','l','#','0','7' 	/**< Serial number. Maximum should be limited  to 14 characters. */
 			.byte	0x15,'D','F','U',' ','R','u','n','t','i','m','e',' ','I','n','t','e','r','f','a','c','e'  /* dfu description */
 			.skip	(0x80-(. - Strings_start))
 DfuDeviceInterfaceGUID:	/**< Default DeviceInterfaceGUID /*	{02D8AE6B-928B-4B55-8235-1B73E61B191C}*/
@@ -34,7 +34,7 @@ DfuDeviceInterfaceGUID:	/**< Default DeviceInterfaceGUID /*	{02D8AE6B-928B-4B55-
 			.byte	0x31, 0x42, 0x37, 0x33, 0x45, 0x36, 0x31, 0x42, 0x31, 0x39, 0x31, 0x43	/* 1B73E61B191C */
 			.byte	'}'
 			.byte	0x00,0x00					/* double terminators */
-XORchecksum: 		.word	0xAC2C						/* location for checksum */
+XORchecksum: 		.word	0xC071						/* location for checksum */
 D2XX_Struct_end = .
 	.rept  (0x1000 - (. - D2XX_Struct_start))
 	.byte	0xFF

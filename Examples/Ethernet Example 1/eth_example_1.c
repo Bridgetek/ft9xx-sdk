@@ -66,6 +66,9 @@
 #define VERBOSE 0
 /** The number of receive buffers */
 #define N_RX_BUFFERS 4
+/** Undefine to use a locally administered MAC address.
+ * Define to use a random valid MAC address. */
+#undef USE_LOCAL_ADMIN_MAC
 
 /* TYPES ......................................... */
 /** The structure used to store packets coming into the device */
@@ -219,13 +222,16 @@ static inline uint32_t htonl(uint32_t n) { return HTONL(n); }
  *  @return The converted data */
 static inline uint32_t ntohl(uint32_t n) { return NTOHL(n); }
 
+#ifndef USE_LOCAL_ADMIN_MAC
 /** The MAC Address used by the device.
  *  This is a network local administered address */
 static const uint8_t my_mac[6] = {0x00,0xF7,0xD1,0x00,0x00,0x01};
+#else // USE_LOCAL_ADMIN_MAC
 /** Another MAC Address which could be used by the device.
  *  This is a random address - not used unless you have trouble with
  *  local administered addresses. */
-static const uint8_t my_random_mac[6] = {0x11,0x1A,0xC6,0x03,0x31,0x57};
+static const uint8_t my_mac[6] = {0x11,0x1A,0xC6,0x03,0x31,0x57};
+#endif // USE_LOCAL_ADMIN_MAC
 /** The IPv4 Address used by the device
  *  Change this to fit your network set up */
 static const uint8_t my_ip[4] = {192,168,1,55};

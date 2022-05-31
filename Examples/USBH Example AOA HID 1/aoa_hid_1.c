@@ -694,7 +694,7 @@ int8_t hub_scan_for_aoa(USBH_device_handle hDev, int level, int retry)
 
     (void)audio_on; (void)audio_off;
 
-	tfp_printf("!parent %d \n!port %d \n",
+	tfp_printf("!parent %d \n!port %ld \n",
 			ctx.parentPort,
 			ctx.hDevParent);
     // Initialise the device. Try to change it into an accessory after

@@ -228,7 +228,7 @@ extern volatile TCB_t * volatile pxCurrentTCB;
 inline void vPortTaskCreate(void *pxNewTCB)
 {
     TCB_t *p = (TCB_t *)pxNewTCB;
-    DPRINTF("C %s %x %x %x\r\n",
+    DPRINTF("C %s %p %p %p\r\n",
             p->pcTaskName,
             p->pxStackBase,
             p->pxTopOfStack,

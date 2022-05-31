@@ -193,7 +193,7 @@ static int get_debugger(void)
 
 	while(count--)
 	{
-		__asm__("");
+		__asm__(""::: "memory");
 		if(*DBG_SEMAPHORE == 0)
 			return 1;
 	}
@@ -203,7 +203,7 @@ static int get_debugger(void)
 
 static void release_debugger(void)
 {
-	__asm__("");
+	__asm__(""::: "memory");
 	*DBG_SEMAPHORE = 1;
 }
 
@@ -293,7 +293,7 @@ void memcpy_dat2pm(uint32_t dst, const void *src, size_t s)
 
 	*PMCONTROL_ADDR = dst;
 
-	__asm__("streamout.l %0,%1,%2" : :"r"(PMCONTROL_DATA), "r"(src), "r"(s));
+	__asm__("streamout.l %0,%1,%2" : :"r"(PMCONTROL_DATA), "r"(src), "r"(s): "memory");
 
 	*PMCONTROL_UNLOCK = 0x00000000;
 }

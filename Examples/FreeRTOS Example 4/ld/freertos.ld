@@ -10,6 +10,7 @@ MEMORY
   flash     (rx)   : ORIGIN = 0,        LENGTH = __PMSIZE
   ram       (rw!x) : ORIGIN = 0x800000, LENGTH = __RAMSIZE
 }
+
 SECTIONS
 {
   .text :
@@ -20,21 +21,21 @@ SECTIONS
     *(._pm*)
     *(.init)
     *(.fini)
-     _etext = . ;
     . = ALIGN(4);
+     _etext = . ;
   }  > flash
   
   .tors :
   {
-    . = ALIGN(4);
     ___ctors = . ;
     *(.ctors)
     ___ctors_end = . ;
     ___dtors = . ;
     *(.dtors)
+    . = ALIGN(4);
     ___dtors_end = . ;
   } > ram
-  .data	  : AT (ADDR (.text) + SIZEOF (.text) )
+  .data	  :
   {
   	. = ALIGN(4);
     __data = .;
@@ -42,10 +43,10 @@ SECTIONS
 	*(.data*)
 	*(.rodata)
     *(.rodata*)
-     _edata = . ;
-  }  > ram
   . = ALIGN(4);
-  .bss  SIZEOF(.data) + ADDR(.data) (NOLOAD):
+     _edata = . ;
+  }  > ram AT>flash
+  .bss  SIZEOF(.data) + ADDR(.data) (NOLOAD) :
   {
      _bss_start = . ;
     *(.bss)
@@ -54,6 +55,8 @@ SECTIONS
   }  > ram
    __data_load_start = LOADADDR(.data);
    __data_load_end = __data_load_start + SIZEOF(.data);
+   
+   
   .stab 0 (NOLOAD) :
   {
     *(.stab)

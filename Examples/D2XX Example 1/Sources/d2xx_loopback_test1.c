@@ -119,6 +119,7 @@ __attribute__ ((aligned (4))) TD2XX_DeviceConfiguration D2XXTEST_UserD2xxConfig 
 
 static uint8_t D2XXTest_ReadBuffer[MAX_READBUFFER_SIZE];
 #ifdef DEBUG
+#ifdef DEBUG_EVENT
 static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] = {	"SUSPEND",    	/**< SUSPEND EVENT from USB Host */
 																	"RESUME",	 	/**< RESUME EVENT from USB Host */
 																	"BUS_RESET",	 		/**< USB Bus Reset */
@@ -128,7 +129,9 @@ static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] = {	"SUSPEND",    	/**< SU
 																	"TESTMODE",	 	/**< D2XX enters Test Mode. Exit is via power cycle*/
 																	"INTF_RESET"	/**< Interface RESET Vendor Command from D2XX Application */
 																};
-#endif
+#endif // DEBUG_EVENT
+#endif // DEBUG
+
 uint8_t D2XXTEST__DfuDetach = 0;
 uint8_t D2XXTEST__Ready = 0;
 volatile uint8_t SetRemoteWakeup = 0;
@@ -309,7 +312,7 @@ int main(void)
 			dbg("Exit sleep:%02X... \r\n", wkupSource);
 			if (SetRemoteWakeup)
 			{
-				D2XX_IOCTL(0, D2XX_IOCTL_SYS_REMOTE_WAKEUP, &SetRemoteWakeup, NULL);
+				D2XX_IOCTL(0, D2XX_IOCTL_SYS_REMOTE_WAKEUP, (void *)&SetRemoteWakeup, NULL);
 				SetRemoteWakeup = 0;
 				dbg("Sending remote wakeup to host.. \r\n");
 			}
@@ -388,7 +391,7 @@ void setup(void)
 	retVal =
 
 			D2XX_Init(__pD2XXDefaultConfiguration, d2xx_callback, NULL);
-	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig.ConfigDesc, (uint32_t)&__pD2XXDefaultConfiguration->ConfigDesc, sizeof(TConfigDescriptors));
+	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig.ConfigDesc, (__flash__ void *)((uint32_t)&__pD2XXDefaultConfiguration->ConfigDesc), sizeof(TConfigDescriptors));
 #endif
 
 	sys_enable(sys_device_timer_wdt);
@@ -438,8 +441,10 @@ void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* para
 	{
 		param = (*(uint8_t *)param1);
 	}
-	//dbg("~%d",eventID);
-	//dbg("%s\n", D2XXTest_EventStrings[eventID]);
+#ifdef DEBUG_EVENT
+	dbg("~%d",eventID);
+	dbg("%s\n", D2XXTest_EventStrings[eventID]);
+#endif // DEBUG_EVENT
 	switch(eventID)
 	{
 	case D2XX_EVT_SUSPEND:
@@ -448,7 +453,9 @@ void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* para
 			D2XXTEST__Suspend = 1;
 			D2XXTEST__Sleep = 0;
 			RemoteWakeupEnable = param;
-			//dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
+#ifdef DEBUG_EVENT
+			dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
+#endif // DEBUG_EVENT
 		}
 		break;
 	case D2XX_EVT_RESUME:
@@ -515,7 +522,6 @@ void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* para
 /* Initializes the UART for the testing */
 void debug_uart_init(void)
 {
-
 	/* Enable the UART Device... */
 	sys_enable(sys_device_uart0);
 #if defined(__FT930__)

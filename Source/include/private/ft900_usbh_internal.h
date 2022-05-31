@@ -894,10 +894,12 @@ static void *usbh_alloc_hc_buffer(uint32_t size);
 static void usbh_free_hc_buffer(void *buf, uint32_t size);
 static void usbh_hc_memclear(void);
 // EHCI memory copy/set functions
-// Guaranteed atomic and of size 32 bit in HC shared memory
-static void usbh_memset(void *dst0, uint32_t val, uint32_t len);
-static void usbh_memcpy(void *dst0, void *src0, uint32_t len);
 void usbh_init_qtd(USBH_qtd *hc);
+// Guaranteed atomic and of size 32 bit in HC shared memory
+static inline void usbh_memcpy32_mem2hc(void *dst0, void *src0, uint32_t len);
+static inline void usbh_memcpy8_hc2mem(void *dst0, void *src0, uint32_t len);
+static inline void usbh_memcpy8_mem2hc(void *dst0, void *src0, uint32_t len);
+static void usbh_memset32_hc(void *dst0, uint32_t val, uint32_t len);
 
 // Asynchronous and Periodic List Functions
 static void usbh_periodic_init(void);
@@ -959,6 +961,8 @@ static uint8_t usbh_set_hub_port_feature(USBH_device *usbHub, uint8_t port, uint
 static uint8_t usbh_clear_hub_port_feature(USBH_device *usbHub, uint8_t port, uint16_t feature);
 
 static void usbh_dev_disconnect(USBH_device *usbDev);
+static void usbh_dev_disconnect_config(USBH_device *devRemove, uint8_t keepDev);
+static int8_t usbh_hub_enumerate(USBH_device *hubDev, uint8_t configurationNum);
 
 
 /**
