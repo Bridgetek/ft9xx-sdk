@@ -10,7 +10,14 @@ The following documents are available from the [BRTChip](https://brtchip.com) we
 * [Hardware API Programmers Manual](https://brtchip.com/wp-content/uploads/Support/Documentation/Programming_Guides/ICs/MCU/AN_365-FT9xx-API-Programmers-Manual.pdf). Documentation for the Hardware API for FT9xx series. This describes the API with hardware-specific libraries for the FT90x and FT93x to facilitate accessing peripherals. Prebuilt libraries and source code are installed with the toolchain.
 * [Assembly Language Programming](https://brtchip.com/wp-content/uploads/Support/Documentation/Programming_Guides/ICs/MCU/AN_342_FT90X_Assembly_Language_Programming_Guide.pdf). A guide for writing code fragments in assembler for the FT90x.
 Other documents are linked to in the [FT90X Produce Page](https://brtchip.com/ft900/) on the Bridgetek website.
+
 ## Examples
 Example code for the hardware API is included in the toolchain installation.
 * [Example Applications](https://brtchip.com/wp-content/uploads/Support/Documentation/Application_Notes/ICs/MCU/AN-360-FT9xx-Example-Applications.pdf). This guide describes each of the example codes.
 * Further example code can be found on the [FT90x Software Examples](https://brtchip.com/softwareexamples-ft90x/)
+
+## Version
+This branch is provided from the v2.5.0 source code and has modification for the following:
+* Fixes for pedantic compiler options in header and source files, e.g. cast-align, strict-prototypes and pedantic.
+* Adding missing required header file includes to usbd_startup_dfu.c, usbhx.c.
+* Use of gcc builtin macros in ethernet.c, i2cm.c, memctrl.c, usbd_rndis.c, usbh_cdcacm.c, to prevent cast-align warnings.

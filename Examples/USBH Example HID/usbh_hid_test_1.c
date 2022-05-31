@@ -52,6 +52,7 @@
 
 #include <ft900.h>
 #include <ft900_usb.h>
+#include <ft900_usb_hid.h>
 #include <ft900_usbh_hid.h>
 // For startup DFU mode optional feature.
 #include <ft900_startup_dfu.h>
@@ -95,10 +96,15 @@ void hid_testing(USBH_device_handle hHIDdev, USBH_interface_handle hHID)
 {
     USBH_HID_context hidCtx;
     int8_t status;
+    uint8_t hidDescBuffer[255];
     uint8_t buffer[512];
     int i;
+    int desc;
+    int32_t count;
     uint16_t usbVid, usbPid;
     USBH_device_info devInfo;
+    USB_hid_descriptor *hidDesc;
+
     char *speed[3] = {"low", "full", "high"};
 
     USBH_HID_init(hHIDdev, hHID, &hidCtx);
@@ -112,17 +118,55 @@ void hid_testing(USBH_device_handle hHIDdev, USBH_interface_handle hHID)
 		tfp_printf("Speed: %d %s \r\n", devInfo.speed, speed[devInfo.speed]);
 	    tfp_printf("Address: %d \r\n", devInfo.addr);
 	}
-    tfp_printf("Setting idle\r\n");
+
+	hidDesc = (USB_hid_descriptor *)&hidDescBuffer;
+	if (USBH_HID_get_hid_descriptor(&hidCtx, sizeof(USB_hid_descriptor), hidDescBuffer) == USBH_OK)
+	{
+		tfp_printf("Number of report descriptors %d\r\n", hidDesc->bNumDescriptors);
+
+		// If there are multiple descriptor get them all.
+		if (hidDesc->bNumDescriptors > 1)
+		{
+			USBH_HID_get_hid_descriptor(&hidCtx, hidDesc->bLength, hidDescBuffer);
+		}
+		tfp_printf("HID descriptor: ");
+		for (i = 0; i < hidDesc->bLength; i++)
+			tfp_printf("%02x ", hidDescBuffer[i]);
+		tfp_printf("\r\n");
+
+		// For each report descriptor read it in.
+		for (desc = 1; desc <= hidDesc->bNumDescriptors; desc++)
+		{
+			// Location of additional bDescriptorType and wDescriptorLength defined in 6.2.1 HID Descriptor
+			// Note that the first descriptor is
+			uint8_t type = hidDescBuffer[(3 * (desc - 1)) + 6];
+			uint16_t size = hidDescBuffer[(3 * (desc - 1)) + 7] + (hidDescBuffer[(3 * (desc - 1)) + 8] << 8);
+
+			tfp_printf("Report descriptor %d type 0x%x size %u\r\n", desc, type, size);
+
+			if (USBH_HID_get_report_descriptor(&hidCtx, desc, size, buffer) == USBH_OK)
+			{
+				tfp_printf("Report descriptor %d: ", desc);
+				for (i = 0; i < size; i++)
+					tfp_printf("%02x ", buffer[i]);
+				tfp_printf("\r\n");
+			}
+		}
+	}
+
+	tfp_printf("Setting idle\r\n");
     USBH_HID_set_idle(&hidCtx, 0);
     tfp_printf("Reports from device %d bytes:\r\n", USBH_HID_get_report_size_in(&hidCtx));
 
     while (1)
     {
-        status = USBH_HID_get_report(&hidCtx, buffer);
+        count = USBH_transfer(hidCtx.hHIDEpIn, buffer, USBH_HID_get_report_size_in(&hidCtx), 1000);
+        if (count >= 0) status = USBH_OK;
+        //status = USBH_HID_get_report(&hidCtx, buffer);
 
         if (status == USBH_OK)
         {
-            for (i = 0; i < USBH_HID_get_report_size_in(&hidCtx); i++)
+            for (i = 0; i < count; i++)
                 tfp_printf("%02x ", buffer[i]);
             tfp_printf("\r\n");
         }
@@ -171,6 +215,7 @@ int8_t hub_scan_for_hid(USBH_device_handle hDev, int level)
         	{
        			// If it is a HID interface then use that...
        			if (usbClass == USB_CLASS_HID)
+       			//if (usbClass == USB_CLASS_VENDOR)
        			{
        			    tfp_printf("HID device found at level %d\r\n", level);
        				hid_testing(hDev, hInterface);
@@ -275,7 +320,7 @@ int main(void)
 {
 	/* Check for a USB device connection and initiate a DFU firmware download or
 	   upload operation. This will timeout and return control here if no host PC
-	   program contacts the device's DFU interace. USB device mode is disabled
+	   program contacts the device's DFU interface. USB device mode is disabled
 	   before returning.
 	*/
 	STARTUP_DFU();

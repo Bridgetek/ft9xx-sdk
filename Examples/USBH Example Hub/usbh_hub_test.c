@@ -447,8 +447,8 @@ void getReportDescp(USBH_device_handle hDev, unsigned char descIndex, unsigned s
 	desc_dev.bRequest = USB_REQUEST_CODE_GET_DESCRIPTOR;
 
 	// HID Report descriptors
-	desc_dev.wValue = (USB_DESCRIPTOR_TYPE_REPORT << 8) | descIndex;
-	desc_dev.wIndex = 0x0000;
+	desc_dev.wValue = (USB_DESCRIPTOR_TYPE_REPORT << 8) | 0x00;
+	desc_dev.wIndex = descIndex;
 	desc_dev.wLength = 0x00ff;
 
 	result = USBH_device_setup_transfer(hDev, &desc_dev, buf, 500);
