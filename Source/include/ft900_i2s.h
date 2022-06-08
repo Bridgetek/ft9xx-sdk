@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_i2s.h
 
     @brief
     I2S Audio

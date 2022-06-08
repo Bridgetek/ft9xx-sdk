@@ -1,9 +1,10 @@
 /**
-    @file
+    @file ft900_usbd.h
 
     @brief
     USB Device API.
 
+	@details
     This contains USB Device API function definitions, constants and structures
     which are exposed in the API.
 
@@ -183,8 +184,8 @@ typedef enum
 } USBD_ENDPOINT_TYPE;
 
 /**
-    @enum USBD_ENDPOINT_SPEED
-    @brief USB Endpoint Speed.
+    @enum USBD_DEVICE_SPEED
+    @brief USB Device Speed.
  **/
 typedef enum
 {
@@ -277,6 +278,7 @@ typedef int8_t (*USBD_request_callback)(USB_device_request *req);
                        to obtain descriptor data.
     @param[in] req USB request.
     @param[in] buffer Data buffer containing descriptor.
+    @param[in] len Length of the data buffer.
     @return    USBD_OK if the request was handled successfully; any other
                return value (such as FT9XX_FAILED) causes the USB driver
                to stall the control endpoints.
@@ -305,6 +307,7 @@ typedef int8_t (*USBD_set_interface_callback)(USB_device_request *req);
     @typedef   USBD_get_interface_callback
     @brief     Callback declaration for get interface standard requests.
     @param[in] req USB request.
+    @param[in] val Status of USB request.
     @return    USBD_OK if the request is valid; any other
                return value (such as FT9XX_FAILED) causes the USB driver
                to stall the control endpoints.
@@ -704,7 +707,7 @@ int8_t USBD_create_endpoint(USBD_ENDPOINT_NUMBER   ep_number,
 /**
     @brief      Free USB endpoint.
     @details    Disable and free the specified endpoint.
-    @param[in]  ep USB endpoint handle.
+    @param[in]  ep_number USB endpoint to free.
     @return     USBD_OK if successful
                 USBD_ERR_NOT_CONFIGURED if the endpoint is not configured.
                 USBD_ERR_INVALID_PARAMETER if the endpoint number is not allowed.
@@ -715,7 +718,7 @@ int8_t USBD_free_endpoint(USBD_ENDPOINT_NUMBER ep_number);
     @brief      Find Max Packet Size of USB endpoint.
     @details    Return the maximum number of bytes which can be sent or received
      	 	 	in a single USB packets for an endpoint.
-    @param[in]  ep USB endpoint handle.
+    @param[in]  ep_number USB endpoint to query.
     @return     Number of bytes if successful
                 USBD_ERR_NOT_CONFIGURED if the endpoint is not configured.
                 USBD_ERR_INVALID_PARAMETER if the endpoint number is not allowed.
@@ -793,7 +796,7 @@ int32_t USBD_transfer(USBD_ENDPOINT_NUMBER   ep_number,
 /**
     @brief      Transfer data to/from a USB control endpoint.
     @details    Endpoint number is asusmed to be zero.
-    @param[in]  ep_dir Control endpoint data direction.
+    @param[in]  dir Control endpoint data direction.
     @param[in]  buffer Appropriately sized buffer for the transfer.
     @param[in]  dataLength For IN transfers, the number of bytes to be sent.
                        For OUT transfers, the maximum number of bytes to
@@ -846,7 +849,7 @@ int32_t USBD_ep_data_rx_count(USBD_ENDPOINT_NUMBER ep_number);
 /**
     @brief      USBD_set_test_mode
     @details    To be called to enter into Test Mode.
-    @param[in]  the type of test to be performed in the Test Mode.
+    @param[in]  test_selector The type of test to be performed in the Test Mode.
  **/
 void USBD_set_test_mode(USBD_TESTMODE_SELECT test_selector);
 

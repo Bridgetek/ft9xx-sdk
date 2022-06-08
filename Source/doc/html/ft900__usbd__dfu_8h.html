@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.3"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libft900: C:/Users/gordon.mcnab/Documents/SVN/FT900/library/v2.6.0_dev/initial/ft900/lib/include/ft900_usbd_dfu.h File Reference</title>
+<title>libft900: include/ft900_usbd_dfu.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -48,7 +48,7 @@ $(function() {
 <div id="main-nav"></div>
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_e6bb53534ac0e427887cf7a94c0c004e.html">C:</a></li><li class="navelem"><a class="el" href="dir_8ceffd4ee35c3518d4e8bdc7e638efe8.html">Users</a></li><li class="navelem"><a class="el" href="dir_80914b739d55df2c289d7e7e74179905.html">gordon.mcnab</a></li><li class="navelem"><a class="el" href="dir_e0ac5996fcbfd5e602264d7f2e032b77.html">Documents</a></li><li class="navelem"><a class="el" href="dir_c862b2e07ec65398a15e748efd91d845.html">SVN</a></li><li class="navelem"><a class="el" href="dir_62951bcf44b843c4a90c31673427ea13.html">FT900</a></li><li class="navelem"><a class="el" href="dir_29f865958ac81f7a55e506c70a532e4d.html">library</a></li><li class="navelem"><a class="el" href="dir_6583a459bb687999d21357f40e08705c.html">v2.6.0_dev</a></li><li class="navelem"><a class="el" href="dir_9917bcd21ffde720abfd22bd678f3a2c.html">initial</a></li><li class="navelem"><a class="el" href="dir_f8e52e592915e1a8b14cc696fb9046a6.html">ft900</a></li><li class="navelem"><a class="el" href="dir_8814635debd6b93800fdd5b3220df18f.html">lib</a></li><li class="navelem"><a class="el" href="dir_a54ed9b74f242e7a0b3d6642c52dcad9.html">include</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -64,8 +64,10 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:ab0712226291dca0bd73a7f37d4055a1b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__usbd__dfu_8h.html#ab0712226291dca0bd73a7f37d4055a1b">USBD_DFU_MAX_BLOCK_SIZE</a>&#160;&#160;&#160;256</td></tr>
+<tr class="memdesc:ab0712226291dca0bd73a7f37d4055a1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the maximum block size for a packet of data from the host in a DFU_DNLOAD request. A packet sent to the device for programming or a request for data frm the Flash cannot ever cross a page boundary. The maximum block size is therefore the page size. All requests for data must be entirely within a page.  <a href="ft900__usbd__dfu_8h.html#ab0712226291dca0bd73a7f37d4055a1b">More...</a><br /></td></tr>
 <tr class="separator:ab0712226291dca0bd73a7f37d4055a1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a517812dd8c9982cd68ccde994ecfbc13"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__usbd__dfu_8h.html#a517812dd8c9982cd68ccde994ecfbc13">USBD_DFU_TIMEOUT</a>&#160;&#160;&#160;0x2000</td></tr>
+<tr class="memdesc:a517812dd8c9982cd68ccde994ecfbc13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Suggested timeout for DFU downloads.  <a href="ft900__usbd__dfu_8h.html#a517812dd8c9982cd68ccde994ecfbc13">More...</a><br /></td></tr>
 <tr class="separator:a517812dd8c9982cd68ccde994ecfbc13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader">USBD_DFU_ATTRIBUTES</h2></td></tr>
@@ -128,7 +130,7 @@ Macros</h2></td></tr>
 <b>Value:</b><div class="fragment"><div class="line">        (<a class="code hl_define" href="ft900__usb__dfu_8h.html#a971edecde35d07e5a68fa1985f269921">USB_DFU_BMATTRIBUTES_CANDNLOAD</a> |\</div>
 <div class="line">        USB_DFU_BMATTRIBUTES_WILLDETACH |\</div>
 <div class="line">        USB_DFU_BMATTRIBUTES_CANUPLOAD)</div>
-<div class="ttc" id="aft900__usb__dfu_8h_html_a971edecde35d07e5a68fa1985f269921"><div class="ttname"><a href="ft900__usb__dfu_8h.html#a971edecde35d07e5a68fa1985f269921">USB_DFU_BMATTRIBUTES_CANDNLOAD</a></div><div class="ttdeci">#define USB_DFU_BMATTRIBUTES_CANDNLOAD</div><div class="ttdef"><b>Definition:</b> ft900_usb_dfu.h:208</div></div>
+<div class="ttc" id="aft900__usb__dfu_8h_html_a971edecde35d07e5a68fa1985f269921"><div class="ttname"><a href="ft900__usb__dfu_8h.html#a971edecde35d07e5a68fa1985f269921">USB_DFU_BMATTRIBUTES_CANDNLOAD</a></div><div class="ttdeci">#define USB_DFU_BMATTRIBUTES_CANDNLOAD</div><div class="ttdef"><b>Definition:</b> ft900_usb_dfu.h:209</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -144,6 +146,8 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Set the maximum block size for a packet of data from the host in a DFU_DNLOAD request. A packet sent to the device for programming or a request for data frm the Flash cannot ever cross a page boundary. The maximum block size is therefore the page size. All requests for data must be entirely within a page. </p>
+
 </div>
 </div>
 <a id="a517812dd8c9982cd68ccde994ecfbc13" name="a517812dd8c9982cd68ccde994ecfbc13"></a>
@@ -157,6 +161,8 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Suggested timeout for DFU downloads. </p>
 
 </div>
 </div>
@@ -258,7 +264,7 @@ Macros</h2></td></tr>
 <p>USB class request handler for DFU_DNLOAD. </p>
 <p >Receive blocks of firmware from the host on the control OUT endpoint and program these into the MTP. If the state machine is in the dfuIDLE state then move to dfuDNLOAD_IDLE state. If zero length data is received indicating the end of the firmware then move the state machine to dfuMANIFEST_WAIT_RESET. If an address or data length error are detected then move to the dfuERROR state. An ACK packet is sent on the USB control IN endpoint to the host to acknowledge successful completion of this request. If the bmAttributes value set in the USBD_DFU_ATTRIBUTES does not support download then this function will have no body. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">address</td><td>- starting address of data to program. It is up to the calling program to make sure this is calculated correctly. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>- Starting block number (address) of data to program. It is up to the calling program to make sure this is calculated correctly. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dataLength</td><td>- Number of bytes to program. This can be between the control endpoint max packet size and DFU_MAX_BLOCK_SIZE. </td></tr>
   </table>
   </dd>
@@ -347,7 +353,7 @@ Macros</h2></td></tr>
 <p>USB class request handler for DFU_UPLOAD. </p>
 <p >Receive blocks of firmware from the Flash to the control IN endpoint. If the state machine is in the dfuIDLE state then move to dfuUPLOAD_IDLE state. If an address or data length error are detected then move to the dfuERROR state. An ACK packet is sent on the USB control IN endpoint to the host to acknowledge successful completion of this request. If the bmAttributes value set in the USBD_DFU_ATTRIBUTES does not support upload then this function will have no body. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">address</td><td>- starting address of data to read. It is up to the calling program to make sure this is calculated correctly. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>- Starting block number (address) of data to read. It is up to the calling program to make sure this is calculated correctly. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dataLength</td><td>- Number of bytes to read. This can be between the control endpoint max packet size and DFU_MAX_BLOCK_SIZE. </td></tr>
   </table>
   </dd>
@@ -456,20 +462,14 @@ Macros</h2></td></tr>
 
 <p>Decrements the detach_counter and adjusts state accordingly. </p>
 <p >If the state is appDETACH moves to dfuIDLE state if we have been in the appDETACH state for longer than the attach timeout specified by the DFU_DETACH request.</p>
-<p >Note: This is run from INTERRUPT LEVEL as a handler for an ISR. The bmAttributes value set in the USBD_DFU_ATTRIBUTES determines the actions that are taken upon a timer event (i.e. may call a detach). </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">attributes</td><td>- the bmAttributes value set in the DFU functional descriptor. This determines the actions that are taken upon a reset. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Zero if timer running, non-zero if timer expired. </dd></dl>
+<p >Note: This is run from INTERRUPT LEVEL as a handler for an ISR. The bmAttributes value set in the USBD_DFU_ATTRIBUTES determines the actions that are taken upon a timer event (i.e. may call a detach). </p><dl class="section return"><dt>Returns</dt><dd>Zero if timer running, non-zero if timer expired. </dd></dl>
 
 </div>
 </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu May 12 2022 11:02:49 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
+Generated on Tue Jun 7 2022 14:07:40 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
 </small></address>
 </body>
 </html>

@@ -1,8 +1,8 @@
 /**
-    @file
+    @file ft900_flash_registers.h
 
     @brief
-    <A brief description of the file>
+    Flash controller access registers.
 
     
 **/

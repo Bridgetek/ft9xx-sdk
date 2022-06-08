@@ -2,7 +2,7 @@
     @file
 
     @brief
-    UART Registers
+    UART registers
 
 
 **/

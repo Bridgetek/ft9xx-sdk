@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_pwm_pcm.h
 
     @brief
     PWM Audio

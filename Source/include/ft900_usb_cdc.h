@@ -4,6 +4,7 @@
     @brief
     USB CDC class USB definitions.
 
+	@details
     This contains USB definitions of constants and structures which are used in
     USB CDC implementations.
 

@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_asm.h
 
     @brief
     FT900 Assembler Macros

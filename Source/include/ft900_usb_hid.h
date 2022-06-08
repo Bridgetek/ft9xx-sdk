@@ -4,6 +4,7 @@
     @brief 
     USB HID class definitions.
   
+	@details
     This contains USB definitions of constants and structures which are used in
     USB HID implementations.
 

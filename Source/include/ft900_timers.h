@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_timers.h
 
     @brief
     Timers

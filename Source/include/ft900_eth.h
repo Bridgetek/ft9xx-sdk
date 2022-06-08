@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_eth.h
 
     @brief
     Ethernet driver
@@ -292,21 +292,18 @@ void ethernet_accept_multicast(int flag);
 /** @brief set the ethernet peripheral to transmit in full duplex mode
  *  @details By default this is enabled.
  *  @param flag 0 - disable duplex mode,  1 - set enable duplex mode
- *  @returns nothing
  */
 void ethernet_enable_full_duplex(int flag);
 
 /** @brief set the ethernet peripheral to handle CRCs
  *  @details By default this is enabled.
  *  @param flag 0 - disable crc mode,  1 - set enable crc mode
- *  @returns nothing
  */
 void ethernet_enable_crc(int flag);
 
 /** @brief set the ethernet peripheral to handle padding
  *  @details By default this is enabled.
  *  @param flag 0 - disable pad mode,  1 - set enable pad mode
- *  @returns nothing
  */
 void ethernet_enable_pad(int flag);
 
@@ -321,13 +318,11 @@ void ethernet_set_mac(const uint8_t * mac);
 int ethernet_is_link_up(void);
 
 /** @brief Return the ethernet link speed
- *  @params none
  *  @returns 10 - 10 Mb/sec, 100 - 100 Mb/sec.
  */
 int ethernet_link_speed(void);
 
 /** @brief Return the ethernet duplex mode
- *  @params none
  *  @returns 0 - half duplex, 1 - full duplex.
  */
 int ethernet_link_duplex(void);

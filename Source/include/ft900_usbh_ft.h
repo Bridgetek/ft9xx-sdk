@@ -4,6 +4,7 @@
     @brief
     FT devices on USB host stack API.
 
+	@details
     API functions for USB Host stack. These functions provide additional
     functionality useful to implement a USB Host application.
 **/
@@ -294,7 +295,6 @@ int8_t USBH_FT232_set_latency(USBH_FT232_context *ctx, uint16_t latency);
     @param		ctx - context information for this instance of the driver.
     @param		data_status - pointer to receive status of data endpoint
     				polling.
-    @returns    N/A.
  **/
 void USBH_FT232_get_poll_status(USBH_FT232_context *ctx, int8_t *data_status);
 

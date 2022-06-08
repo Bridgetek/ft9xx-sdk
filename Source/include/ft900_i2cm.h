@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_i2cm.h
 
     @brief
     I2C Master.

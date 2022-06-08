@@ -87,7 +87,7 @@ extern "C" {
  */
 //@{
 /**
-    @typedef USBH_device_handle
+    @typedef USBH_device_handle_t
     @brief Structure that is used to pass a handle to a device to the
         application. It is made up of a pointer to the device structure
         and a fairly unique value to detect enumeration changes and hence
@@ -107,7 +107,7 @@ typedef struct USBH_device_handle_s
 } USBH_device_handle_t;
 
 /**
-    @typedef USBH_interface_handle
+    @typedef USBH_interface_handle_t
     @brief Structure that is used to pass a handle to an interface to the
         application. It is made up of a pointer to the interface structure
         and a fairly unique value to detect enumeration changes and hence
@@ -127,7 +127,7 @@ typedef struct USBH_interface_handle_s
 } USBH_interface_handle_t;
 
 /**
-    @typedef USBH_endpoint_handle
+    @typedef USBH_endpoint_handle_t
     @brief Structure that is used to pass a handle to an endpoint to the
         application. It is made up of a pointer to the endpoint structure
         and a fairly unique value to detect enumeration changes and hence

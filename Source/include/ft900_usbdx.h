@@ -1,9 +1,10 @@
 /**
-    @file
+    @file ft900_usbdx.h
 
     @brief
     USB Device extended API.
 
+	@details
     APIs that provides asynchronous transfer of USB data.
  	USBDX manages buffer, buffer is divided into chunks called USB Request Blocks (URBs)
  	and are marked with ownership as ‘USBD owned’ or ‘Application owned’.
@@ -50,8 +51,8 @@
  * ============================================================================
  */
 
-#ifndef USBD_H_6AGQHMZB
-#define USBD_H_6AGQHMZB
+#ifndef FT900_USBDX_H_
+#define FT900_USBDX_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,6 +62,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdio.h>
+#include <registers/ft900_registers.h>
 #include <ft900_memctl.h>
 // uncomment to disable debug macros & assert()
 #define USBDX_NDEBUG
@@ -316,6 +318,7 @@ bool USBDX_pipe_init(
     			function to get notified of when USBD is ready to
     			process the URBs.
     @param[in] pp Pipe for which the callback function is associated to.
+    @param[in] callback Callback function to register.
  **/
 void USBDX_register_on_ready(struct USBDX_pipe *pp, USBDX_callback callback);
 
@@ -325,6 +328,7 @@ void USBDX_register_on_ready(struct USBDX_pipe *pp, USBDX_callback callback);
     			function to get notified of when USBD is underrunning
     			when no data from application.
     @param[in] pp Pipe for which the callback function is associated to.
+    @param[in] callback Callback function to register.
  **/
 void USBDX_register_on_underrun(struct USBDX_pipe *pp, USBDX_callback callback);
 //@}
@@ -427,4 +431,4 @@ void USBDX_pipe_isr(uint16_t pipe_bitfields);
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */
-#endif /* end of include guard: USBD_H_6AGQHMZB */
+#endif /* FT900_USBDX_H_ */

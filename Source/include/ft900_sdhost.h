@@ -1,10 +1,8 @@
 /**
-    @file
+    @file ft900_sdhost.h
 
-    @brief
-    SD Host
+    @brief SD Host
 
-    
 **/
 /*
  * ============================================================================
@@ -147,10 +145,10 @@ SDHOST_STATUS sdhost_card_detect(void);
 SDHOST_STATUS sdhost_card_init(void);
 
 /** @brief Transfer data to/from SD card
- *  @param direction SDHOST_READread or SDHOST_WRITE
+ *  @param [in] direction SDHOST_READread or SDHOST_WRITE
  *  @param buf address of memory data to be read or written
- *  @param numBytes size of data to be written
- *  @param addr address of SD card to written to or read from
+ *  @param [in] numBytes size of data to be written
+ *  @param [in] addr address of SD card to written to or read from
  *  @returns SDHOST_STATUS enum indicationg on outcome of operation
  */
 SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf, uint32_t numBytes, uint32_t addr);
@@ -181,7 +179,7 @@ uint32_t sdhost_get_erase_block_count(void);
 uint32_t sdhost_get_block_size(void);
 
 /** @brief Read the SD STATUS register of the card
- *  @param pointer to buffer to store status register dump
+ *  @param [out] pBuff Pointer to buffer to store status register dump
  */
 void sdhost_get_card_status_reg(uint32_t* pBuff);
 

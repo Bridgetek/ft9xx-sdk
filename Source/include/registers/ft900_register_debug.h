@@ -1,9 +1,10 @@
 /**
-    @file
+    @file ft900_register_debug.h
 
     @brief
-    FT900 Registers for Debuggers. Requires integration with register mapping
-    section in linker script.
+    FT900 debugging registers. 
+
+	Provides integration with register mapping section in linker script.
 
 **/
 /*

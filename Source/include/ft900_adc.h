@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_adc.h
 
     @brief
     Analogue to Digital Converter

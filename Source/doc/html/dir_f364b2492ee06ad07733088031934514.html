@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.3"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libft900: C:/Users/gordon.mcnab/Documents/SVN/FT900/library/v2.6.0_dev/initial/ft900/lib/include/registers Directory Reference</title>
+<title>libft900: include/registers Directory Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,7 +26,7 @@ MathJax.Hub.Config({
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="brtlogo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">libft900<span id="projectnumber">&#160;0.0.1a</span>
+   <div id="projectname">libft900<span id="projectnumber">&#160;2.6.0</span>
    </div>
    <div id="projectbrief">A hardware abstraction library for the FT9xx</div>
   </td>
@@ -68,13 +68,13 @@ Files</h2></td></tr>
 <tr class="memdesc:ft900__can__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">CANBus registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__ehci__registers_8h.html">ft900_ehci_registers.h</a></td></tr>
-<tr class="memdesc:ft900__ehci__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">EHCI Registers. <br /></td></tr>
+<tr class="memdesc:ft900__ehci__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">EHCI (USB Host) registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__eth__registers_8h.html">ft900_eth_registers.h</a></td></tr>
 <tr class="memdesc:ft900__eth__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ethernet registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__flash__registers_8h.html">ft900_flash_registers.h</a></td></tr>
-<tr class="memdesc:ft900__flash__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight"><br /></td></tr>
+<tr class="memdesc:ft900__flash__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flash controller access registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__gpio__registers_8h.html">ft900_gpio_registers.h</a></td></tr>
 <tr class="memdesc:ft900__gpio__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">General Purpose IO and Pad control registers. <br /></td></tr>
@@ -92,47 +92,46 @@ Files</h2></td></tr>
 <tr class="memdesc:ft900__pwm__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pulse Width Modulation registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__register__debug_8h.html">ft900_register_debug.h</a></td></tr>
-<tr class="memdesc:ft900__register__debug_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">FT900 Registers for Debuggers. Requires integration with register mapping section in linker script. <br /></td></tr>
+<tr class="memdesc:ft900__register__debug_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">FT900 debugging registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__registers_8h.html">ft900_registers.h</a></td></tr>
-<tr class="memdesc:ft900__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">FT900 Registers. <br /></td></tr>
+<tr class="memdesc:ft900__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">FT900 registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__rtc__registers_8h.html">ft900_rtc_registers.h</a></td></tr>
-<tr class="memdesc:ft900__rtc__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">Real Time Clock Registers. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__sdhost__registers_8h.html">ft900_sdhost_registers.h</a></td></tr>
-<tr class="memdesc:ft900__sdhost__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">SD Host Registers. <br /></td></tr>
+<tr class="memdesc:ft900__rtc__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">Real Time Clock registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__spi__registers_8h.html">ft900_spi_registers.h</a></td></tr>
-<tr class="memdesc:ft900__spi__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">SPI Registers. <br /></td></tr>
+<tr class="memdesc:ft900__spi__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">SPI registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__sys__registers_8h.html">ft900_sys_registers.h</a></td></tr>
 <tr class="memdesc:ft900__sys__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chip management registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__timer__wdt__registers_8h.html">ft900_timer_wdt_registers.h</a></td></tr>
-<tr class="memdesc:ft900__timer__wdt__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timer and Watchdog Registers. <br /></td></tr>
+<tr class="memdesc:ft900__timer__wdt__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">Timer and Watchdog registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__uart__registers_8h.html">ft900_uart_registers.h</a></td></tr>
-<tr class="memdesc:ft900__uart__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">UART Registers. <br /></td></tr>
+<tr class="memdesc:ft900__uart__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">UART registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__usbd__hbw__registers_8h.html">ft900_usbd_hbw_registers.h</a></td></tr>
 <tr class="memdesc:ft900__usbd__hbw__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">High Bandwidth ISO configuration registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__usbd__registers_8h.html">ft900_usbd_registers.h</a></td></tr>
-<tr class="memdesc:ft900__usbd__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">USBD Registers. <br /></td></tr>
+<tr class="memdesc:ft900__usbd__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">USBD (USB Device) registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft930__epfifo__registers_8h.html">ft930_epfifo_registers.h</a></td></tr>
+<tr class="memdesc:ft930__epfifo__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">FT930 Endpoint FIFO registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft930__ipc__registers_8h.html">ft930_ipc_registers.h</a></td></tr>
+<tr class="memdesc:ft930__ipc__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">IPC registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft930__slave__cpu__registers_8h.html">ft930_slave_cpu_registers.h</a></td></tr>
-<tr class="memdesc:ft930__slave__cpu__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">Chip management registers. <br /></td></tr>
+<tr class="memdesc:ft930__slave__cpu__registers_8h"><td class="mdescLeft">&#160;</td><td class="mdescRight">FT930 Chip Management registers. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed May 11 2022 16:54:22 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
+Generated on Tue Jun 7 2022 14:07:41 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
 </small></address>
 </body>
 </html>

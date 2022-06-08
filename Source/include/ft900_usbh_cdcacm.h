@@ -4,6 +4,7 @@
     @brief
     CDC ACM devices on USB host stack API.
 
+	@details
     API functions for USB Host stack. These functions provide additional
     functionality useful to implement a USB Host application.
 **/
@@ -400,7 +401,6 @@ int8_t USBH_CDCACM_get_call_capabilities(USBH_CDCACM_context *ctx);
     				endpoint polling.
     @param		data_status - pointer to receive status of data endpoint
     				polling.
-    @returns    N/A.
  **/
 void USBH_CDCACM_get_poll_status(USBH_CDCACM_context *ctx, int8_t *notification_status, int8_t *data_status);
 

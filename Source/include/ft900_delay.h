@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_delay.h
 
     @brief
     Delay functions

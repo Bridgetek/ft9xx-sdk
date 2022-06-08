@@ -3,7 +3,8 @@
 
     @brief 
     USB host stack API.
-  
+
+	@details
     This contains USB Host API function definitions, constants and structures which
     are exposed in the API.
 **/
@@ -591,7 +592,7 @@ int8_t USBH_get_device_list(USBH_device_handle device, USBH_device_handle *child
                 a handle to the device if there are more devices.
                 If there are no more devices then a NULL is returned.
     @param[in]  device Handle to a device.
-    @param[in]  device Handle to a device.
+    @param[out]  next Handle to the next device.
     @returns    USBH_OK if successful.
                 USBH_ERR_NOT_FOUND if device handle is invalid.
  **/
@@ -666,7 +667,7 @@ int8_t USBH_get_endpoint_count(USBH_interface_handle interface, uint8_t *count);
                 a handle to the endpoint if there is one or more endpoints.
                 If there are no endpoint then a NULL is returned.
     @param[in]  interface Handle to an interface.
-    @param[out] next Handle to first endpoint.
+    @param[out] endpoint Handle to first endpoint.
     @returns    USBH_OK if successful.
                 USBH_ERR_NOT_FOUND if interface handle is invalid.
  **/
@@ -784,8 +785,8 @@ int8_t USBH_device_get_configuration(USBH_device_handle device,
                                            uint8_t *conf);
 /**
     @brief      Sets the current configuration value of a device.
-    @details    Sends a SET_CONFIGURATION request to a device.
-                NOTE: Should strictly only be done during enumeration.
+    @details    Sends a SET_CONFIGURATION request to a device. Forces reenumeration of the device with the new configuration.
+				Handles referring to the previous configuration will expire and will need to be renewed with the new device configuration.
     @param[in]  device Handle to a device.
     @param[in]  conf New configuration value.
     @returns    USBH_OK if successful.
@@ -1002,7 +1003,6 @@ int32_t USBH_transfer_async(USBH_endpoint_handle endpoint,
 				for asynchronous transfer completions and root hub events.
 				When a root hub connection is detected then the enumeration
 				routine is called automatically.
-    @param[in]  Nothing
     @return     Non-zero if USB transaction has been processed.
  **/                      
 int8_t USBH_process(void);

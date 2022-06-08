@@ -4,6 +4,7 @@
     @brief 
     USB definitions.
   
+	@details
     This contains USB definitions of constants and structures which are used in
     all USB implementations.
 

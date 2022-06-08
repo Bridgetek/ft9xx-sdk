@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_spi.h
 
     @brief
      SPI
@@ -195,7 +195,7 @@ int8_t spi_close(ft900_spi_regs_t* dev, uint8_t num);
  *  @param b The byte to send
  *  @returns The number of bytes written or -1 for a failure
  */
-#define spi_write(a,b) 	spi_writen((a),&(b),1)
+#define spi_write(dev,b) 	spi_writen((dev),&(b),1)
 
 /** @brief Writes several bytes to the SPI device
  *
@@ -217,7 +217,7 @@ int32_t spi_writen(ft900_spi_regs_t* dev, const uint8_t *b, size_t len);
  *
  *  @returns The number of bytes read or -1 for a failure
  */
-#define spi_read(a,b) spi_readn((a),&(b),1)
+#define spi_read(dev, b) spi_readn((dev),&(b),1)
 
 /** @brief Reads several bytes from the SPI device
  *
@@ -244,7 +244,7 @@ int32_t spi_readn(ft900_spi_regs_t* dev, uint8_t *b, size_t len);
  *
  *  @returns The number of bytes transferred or -1 for a failure
  */
-#define spi_xchange(a,b,c) spi_xchangen((a),(b),&(c),1)
+#define spi_xchange(dev,binp,bout) spi_xchangen((dev),(binp),&(bout),1)
 
 /** @brief Exchange several bytes from the SPI device
  *

@@ -4,7 +4,6 @@
     @brief
     USB definitions for USB device stack RNDIS on FT900.
 
-    @version 1.0.0
  */
 /*
  * ============================================================================
