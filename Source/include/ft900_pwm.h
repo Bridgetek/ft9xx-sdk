@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_pwm.h
 
     @brief
     Pulse Width Modulation

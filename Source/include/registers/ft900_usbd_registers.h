@@ -1,8 +1,8 @@
 /**
-    @file
+    @file ft900_usbd_registers.h
 
     @brief
-    USBD Registers
+    USBD (USB Device) registers
 
     
 **/

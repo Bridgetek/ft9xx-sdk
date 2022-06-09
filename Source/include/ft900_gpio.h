@@ -1,9 +1,11 @@
 /**
-    @file
+    @file ft900_gpio.h
 
     @brief
     General Purpose I/O and Pad control
 
+	@details
+	
     | Pin                              | pad_func_0     | pad_func_1     | pad_func_2     | pad_func_3     |
     | -------------------------------- | -------------- | -------------- | -------------- | -------------- |
     | VBUS_DISCH/GPIO0                 | GPIO0          |                |                |                |

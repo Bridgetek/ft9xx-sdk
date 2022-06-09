@@ -1,9 +1,10 @@
 /**
-    @file
+    @file ft900_usbd_hbw.h
 
     @brief
     USB Device High Bandwidth Isochronous IN support API on FT90x Rev C onwards.
 
+	@details
     This contains USB Device High Bandwidth Isochronous IN support
     API function definitions, constants and structures
     which are exposed in the API.

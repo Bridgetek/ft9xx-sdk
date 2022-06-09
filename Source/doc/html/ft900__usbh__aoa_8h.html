@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.3"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libft900: C:/Users/gordon.mcnab/Documents/SVN/FT900/library/v2.6.0_dev/initial/ft900/lib/include/ft900_usbh_aoa.h File Reference</title>
+<title>libft900: include/ft900_usbh_aoa.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -48,7 +48,7 @@ $(function() {
 <div id="main-nav"></div>
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_e6bb53534ac0e427887cf7a94c0c004e.html">C:</a></li><li class="navelem"><a class="el" href="dir_8ceffd4ee35c3518d4e8bdc7e638efe8.html">Users</a></li><li class="navelem"><a class="el" href="dir_80914b739d55df2c289d7e7e74179905.html">gordon.mcnab</a></li><li class="navelem"><a class="el" href="dir_e0ac5996fcbfd5e602264d7f2e032b77.html">Documents</a></li><li class="navelem"><a class="el" href="dir_c862b2e07ec65398a15e748efd91d845.html">SVN</a></li><li class="navelem"><a class="el" href="dir_62951bcf44b843c4a90c31673427ea13.html">FT900</a></li><li class="navelem"><a class="el" href="dir_29f865958ac81f7a55e506c70a532e4d.html">library</a></li><li class="navelem"><a class="el" href="dir_6583a459bb687999d21357f40e08705c.html">v2.6.0_dev</a></li><li class="navelem"><a class="el" href="dir_9917bcd21ffde720abfd22bd678f3a2c.html">initial</a></li><li class="navelem"><a class="el" href="dir_f8e52e592915e1a8b14cc696fb9046a6.html">ft900</a></li><li class="navelem"><a class="el" href="dir_8814635debd6b93800fdd5b3220df18f.html">lib</a></li><li class="navelem"><a class="el" href="dir_a54ed9b74f242e7a0b3d6642c52dcad9.html">include</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -598,7 +598,7 @@ Data Structures</h2></td></tr>
 <p>Attaches to the AOA device. </p>
 <p >Connects to the AOA device which is in accessory mode. It will decode the AOA protocol, VID and the PID to determine support for accessories, adb bridge and audio. Endpoints and size information is stored for use by the driver later. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="struct_u_s_b_h___a_o_a__context.html">USBH_AOA_context</a></td><td>- context of AOA device to use. </td></tr>
+    <tr><td class="paramname">ctx</td><td>- context of AOA device to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -665,7 +665,7 @@ Data Structures</h2></td></tr>
 <p>Detaches from the AOA device. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="struct_u_s_b_h___a_o_a__context.html">USBH_AOA_context</a></td><td>- context of AOA device to use. </td></tr>
+    <tr><td class="paramname">ctx</td><td>- context of AOA device to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -708,8 +708,9 @@ Data Structures</h2></td></tr>
 <p>Gets a handle to the audio endpoint. </p>
 <p >If the AOA device supports it then the audio isochronous endpoint can be obtained with this call. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="struct_u_s_b_h___a_o_a__context.html">USBH_AOA_context</a></td><td>- context of AOA device to use. </td></tr>
+    <tr><td class="paramname">ctx</td><td>- context of AOA device to use. </td></tr>
     <tr><td class="paramname">hAudio</td><td>- pointer to handle to receive audio endpoint. </td></tr>
+    <tr><td class="paramname">maxSize</td><td>- maximum size of data transferred on the audio endpoint. </td></tr>
   </table>
   </dd>
 </dl>
@@ -746,7 +747,7 @@ Data Structures</h2></td></tr>
 <p>Gets the protocol revision of the AOA device. </p>
 <p >Returns the protocol revision for the AOA device. This can be used to determine support for the different types of accessories. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="struct_u_s_b_h___a_o_a__context.html">USBH_AOA_context</a></td><td>- context of AOA device to use. </td></tr>
+    <tr><td class="paramname">ctx</td><td>- context of AOA device to use. </td></tr>
     <tr><td class="paramname">protocol</td><td>- pointer to BCD protocol revision. </td></tr>
   </table>
   </dd>
@@ -774,7 +775,7 @@ Data Structures</h2></td></tr>
 <p>AOA device supports accessories. </p>
 <p >Queries the type of device that can connect to the AOA device. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="struct_u_s_b_h___a_o_a__context.html">USBH_AOA_context</a></td><td>- context of AOA device to use. </td></tr>
+    <tr><td class="paramname">ctx</td><td>- context of AOA device to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -801,7 +802,7 @@ Data Structures</h2></td></tr>
 <p>AOA device supports adb. </p>
 <p >Queries the type of device that can connect to the AOA device. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="struct_u_s_b_h___a_o_a__context.html">USBH_AOA_context</a></td><td>- context of AOA device to use. </td></tr>
+    <tr><td class="paramname">ctx</td><td>- context of AOA device to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -828,7 +829,7 @@ Data Structures</h2></td></tr>
 <p>AOA device supports audio. </p>
 <p >Queries the type of device that can connect to the AOA device. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="struct_u_s_b_h___a_o_a__context.html">USBH_AOA_context</a></td><td>- context of AOA device to use. </td></tr>
+    <tr><td class="paramname">ctx</td><td>- context of AOA device to use. </td></tr>
   </table>
   </dd>
 </dl>
@@ -923,7 +924,7 @@ Data Structures</h2></td></tr>
 <p>Register a new HID device. </p>
 <p >Tell the AOA device that a new HID is to be registered. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="struct_u_s_b_h___a_o_a__context.html">USBH_AOA_context</a></td><td>- context of AOA device to use. </td></tr>
+    <tr><td class="paramname">ctx</td><td>- context of AOA device to use. </td></tr>
     <tr><td class="paramname">hidID</td><td>- ID of new HID device. </td></tr>
     <tr><td class="paramname">descriptorSize</td><td>- number of bytes in HIDs report descriptor. This is sent separately as it can be changed. </td></tr>
   </table>
@@ -974,7 +975,7 @@ Data Structures</h2></td></tr>
 <p>Send a report descriptor to the AOA device. </p>
 <p >Sends a formatted report descriptor matching the last HID descriptor to the AOA device. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="struct_u_s_b_h___a_o_a__context.html">USBH_AOA_context</a></td><td>- context of AOA device to use. </td></tr>
+    <tr><td class="paramname">ctx</td><td>- context of AOA device to use. </td></tr>
     <tr><td class="paramname">hidID</td><td>- ID of HID device. </td></tr>
     <tr><td class="paramname">reportSize</td><td>- number of bytes in HIDs report. </td></tr>
     <tr><td class="paramname">data</td><td>- report data. </td></tr>
@@ -1032,11 +1033,11 @@ Data Structures</h2></td></tr>
 <p>Set the HID descriptor for a HID device. </p>
 <p >Tell the AOA device the format of HID reports sent from the HID device. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="struct_u_s_b_h___a_o_a__context.html">USBH_AOA_context</a></td><td>- context of AOA device to use. </td></tr>
+    <tr><td class="paramname">ctx</td><td>- context of AOA device to use. </td></tr>
     <tr><td class="paramname">hidID</td><td>- ID of previously registered HID device. </td></tr>
     <tr><td class="paramname">descriptorOffset</td><td>- used when the HID descriptor is sent in multiple packets. This is the offset to the position in the descriptor where this fragment goes. </td></tr>
     <tr><td class="paramname">descriptorLength</td><td>- length of this section of HID descriptor. If the whole HID descriptor is sent in one packet then this will be the same as the length set in descriptorSize parameter of USBH_AOA_register_hid. If the descriptor is made up of multiple packets then the length will be smaller. </td></tr>
-    <tr><td class="paramname">data</td><td>- HID descriptor. </td></tr>
+    <tr><td class="paramname">descriptor</td><td>- HID descriptor. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1073,7 +1074,7 @@ Data Structures</h2></td></tr>
 <p>Unregister a HID device. </p>
 <p >Tell the AOA device that the HID is to be unregistered. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname"><a class="el" href="struct_u_s_b_h___a_o_a__context.html">USBH_AOA_context</a></td><td>- context of AOA device to use. </td></tr>
+    <tr><td class="paramname">ctx</td><td>- context of AOA device to use. </td></tr>
     <tr><td class="paramname">hidID</td><td>- ID of previously registered HID device. </td></tr>
   </table>
   </dd>
@@ -1085,7 +1086,7 @@ Data Structures</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu May 12 2022 11:02:49 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
+Generated on Tue Jun 7 2022 14:07:40 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
 </small></address>
 </body>
 </html>

@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900.h
 
     @brief
     FT900 API
@@ -72,9 +72,9 @@ extern "C" {
 
 /** @brief Single number format for library version
  *  Test for toolchain version > 2.4.0, then usage is
- *  #if FT9XX_LIBRARY_VERSION > 20400
- *    <call a new API>
- *  #endif
+ *  \#if FT9XX_LIBRARY_VERSION > 20400
+ *    \<call a new API\>
+ *  \#endif
  */
 #define FT9XX_LIBRARY_VERSION (FT9XX_LIBRARY_MAJOR * 10000 \
         							+ FT9XX_LIBRARY_MINOR * 100 \

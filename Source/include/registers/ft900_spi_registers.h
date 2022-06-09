@@ -1,8 +1,8 @@
 /**
-    @file
+    @file ft900_spi_registers.h
 
     @brief
-    SPI Registers
+    SPI registers
 
     
 **/

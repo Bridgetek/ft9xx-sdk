@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_can.h
 
     @brief
     CANBus

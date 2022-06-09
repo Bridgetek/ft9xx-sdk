@@ -1,9 +1,11 @@
-/*
- * usbd_uvc.h
- *
- *  Created on: 20 Apr 2016
- *      Author: Gordon.McNab
- */
+/**
+    @file ft900_usb_uvc.h
+
+    @brief
+    USB UVC class definitions
+
+    
+**/
 /*
  * ============================================================================
  * History

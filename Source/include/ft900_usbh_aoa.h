@@ -1,8 +1,8 @@
 /**
- @file ft900_usbh_aoa.h
+	@file ft900_usbh_aoa.h
 
- @brief
- Google Open Android Accessory devices on USB host stack API.
+	@brief
+	Google Open Android Accessory devices on USB host stack API.
 
  **/
 /*
@@ -186,12 +186,12 @@ int8_t USBH_AOA_init(USBH_AOA_context *ctx, USBH_interface_handle hAOAInterface,
 
 //@{
 /**
- @brief      Attaches to the AOA device.
+ @brief     Attaches to the AOA device.
  @details	Connects to the AOA device which is in accessory mode. It will
  	 	 	 decode the AOA protocol, VID and the PID to determine support for
  	 	 	 accessories, adb bridge and audio. Endpoints and size information
  	 	 	 is stored for use by the driver later.
- @param		USBH_AOA_context - context of AOA device to use.
+ @param		ctx - context of AOA device to use.
  @returns   USBH_AOA_OK if successful
  	 	 	USBH_AOA_ERR_CONFIG if a device reporting to possess a particular
  			 interface does not, in fact, present that interface.
@@ -201,29 +201,29 @@ int8_t USBH_AOA_init(USBH_AOA_context *ctx, USBH_interface_handle hAOAInterface,
 int8_t USBH_AOA_attach(USBH_AOA_context *ctx);
 
 /**
- @brief      Detaches from the AOA device.
- @param		USBH_AOA_context - context of AOA device to use.
- @returns    USBH_AOA_OK if successful
+ @brief     Detaches from the AOA device.
+ @param		ctx - context of AOA device to use.
+ @returns   USBH_AOA_OK if successful
  **/
 int8_t USBH_AOA_detach(USBH_AOA_context *ctx);
 
 /**
- @brief      Gets the protocol revision of the AOA device.
+ @brief     Gets the protocol revision of the AOA device.
  @details	Returns the protocol revision for the AOA device. This can be
  used to determine support for the different types of
  accessories.
- @param		USBH_AOA_context - context of AOA device to use.
+ @param		ctx - context of AOA device to use.
  @param		protocol - pointer to BCD protocol revision.
- @returns    USBH_AOA_OK if successful
+ @returns   USBH_AOA_OK if successful
  **/
 int8_t USBH_AOA_get_protocol(USBH_AOA_context *ctx, uint16_t *protocol);
 //@}
 
 //@{
 /**
- @brief      AOA device supports accessories.
+ @brief     AOA device supports accessories.
  @details	Queries the type of device that can connect to the AOA device.
- @param		USBH_AOA_context - context of AOA device to use.
+ @param		ctx - context of AOA device to use.
  @returns	This will return a positive value if the device supports the
  accessory class. Zero if it does not. Negative if there was an
  error.
@@ -231,9 +231,9 @@ int8_t USBH_AOA_get_protocol(USBH_AOA_context *ctx, uint16_t *protocol);
 int8_t USBH_AOA_has_accessory(USBH_AOA_context *ctx);
 
 /**
- @brief      AOA device supports audio.
+ @brief     AOA device supports audio.
  @details	Queries the type of device that can connect to the AOA device.
- @param		USBH_AOA_context - context of AOA device to use.
+ @param		ctx - context of AOA device to use.
  @returns	This will return a positive value if the device supports the
  audio class. Zero if it does not. Negative if there was an
  error.
@@ -241,9 +241,9 @@ int8_t USBH_AOA_has_accessory(USBH_AOA_context *ctx);
 int8_t USBH_AOA_has_audio(USBH_AOA_context *ctx);
 
 /**
- @brief      AOA device supports adb.
+ @brief     AOA device supports adb.
  @details	Queries the type of device that can connect to the AOA device.
- @param		USBH_AOA_context - context of AOA device to use.
+ @param		ctx - context of AOA device to use.
  @returns	This will return a positive value if the device supports the
  adb class. Zero if it does not. Negative if there was an
  error.
@@ -252,11 +252,12 @@ int8_t USBH_AOA_has_adb(USBH_AOA_context *ctx);
 //@}
 
 /**
- @brief      Gets a handle to the audio endpoint.
+ @brief     Gets a handle to the audio endpoint.
  @details	If the AOA device supports it then the audio isochronous endpoint
  can be obtained with this call.
- @param		USBH_AOA_context - context of AOA device to use.
+ @param		ctx - context of AOA device to use.
  @param		hAudio - pointer to handle to receive audio endpoint.
+ @param		maxSize - maximum size of data transferred on the audio endpoint.
  @returns    USBH_AOA_OK if successful
  **/
 int8_t USBH_AOA_get_audio_endpoint(USBH_AOA_context *ctx,
@@ -264,9 +265,9 @@ int8_t USBH_AOA_get_audio_endpoint(USBH_AOA_context *ctx,
 
 //@{
 /**
- @brief      Register a new HID device.
+ @brief     Register a new HID device.
  @details	Tell the AOA device that a new HID is to be registered.
- @param		USBH_AOA_context - context of AOA device to use.
+ @param		ctx - context of AOA device to use.
  @param		hidID - ID of new HID device.
  @param		descriptorSize - number of bytes in HIDs report descriptor. This
  is sent separately as it can be changed.
@@ -276,18 +277,18 @@ int8_t USBH_AOA_register_hid(USBH_AOA_context *ctx, uint16_t hidID,
 		uint16_t descriptorSize);
 
 /**
- @brief      Unregister a HID device.
+ @brief     Unregister a HID device.
  @details	Tell the AOA device that the HID is to be unregistered.
- @param		USBH_AOA_context - context of AOA device to use.
+ @param		ctx - context of AOA device to use.
  @param		hidID - ID of previously registered HID device.
  @returns    USBH_AOA_OK if successful
  **/
 int8_t USBH_AOA_unregister_hid(USBH_AOA_context *ctx, uint16_t hidID);
 
 /**
- @brief      Set the HID descriptor for a HID device.
+ @brief     Set the HID descriptor for a HID device.
  @details	Tell the AOA device the format of HID reports sent from the HID device.
- @param		USBH_AOA_context - context of AOA device to use.
+ @param		ctx - context of AOA device to use.
  @param		hidID - ID of previously registered HID device.
  @param		descriptorOffset - used when the HID descriptor is sent in multiple
  	 	 	 packets. This is the offset to the position in the descriptor where
@@ -297,17 +298,17 @@ int8_t USBH_AOA_unregister_hid(USBH_AOA_context *ctx, uint16_t hidID);
  	 	 	 same as the length set in descriptorSize parameter of
  	 	 	 USBH_AOA_register_hid. If the descriptor is made up of multiple
  	 	 	 packets then the length will be smaller.
- @param		data - HID descriptor.
+ @param		descriptor - HID descriptor.
  @returns    USBH_AOA_OK if successful
  **/
 int8_t USBH_AOA_set_hid_report_descriptor(USBH_AOA_context *ctx, uint16_t hidID,
 		uint16_t descriptorOffset, uint16_t descriptorLength, uint8_t *descriptor);
 
 /**
- @brief      Send a report descriptor to the AOA device.
+ @brief     Send a report descriptor to the AOA device.
  @details	Sends a formatted report descriptor matching the last HID descriptor
  to the AOA device.
- @param		USBH_AOA_context - context of AOA device to use.
+ @param		ctx - context of AOA device to use.
  @param		hidID - ID of HID device.
  @param		reportSize - number of bytes in HIDs report.
  @param		data - report data.

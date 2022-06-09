@@ -4,6 +4,7 @@
     @brief 
     HID devices on USB host stack API.
   
+	@details
     API functions for USB Host HID devices. These functions provide functionality
     required to communicate with a HID device through the USB Host interface.
 **/

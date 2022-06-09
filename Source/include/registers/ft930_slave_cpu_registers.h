@@ -1,8 +1,8 @@
 /**
-    @file
+    @file ft930_slave_cpu_registers.h
 
     @brief
-    Chip management registers
+    FT930 Chip Management registers
 
     
 **/

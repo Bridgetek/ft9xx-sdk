@@ -4,6 +4,7 @@
     @brief
     USB AOA class USB definitions.
 
+	@details
     This contains USB definitions of constants and structures which are used in
     USB AOA implementations.
 
@@ -91,7 +92,7 @@ extern "C" {
 #define USB_AOA_SUPPORT_MASK_ACCESSORY 	0x01
 #define USB_AOA_SUPPORT_MASK_AUDIO		0x02 // AOA 2.0 and above
 #define USB_AOA_SUPPORT_MASK_ADB		0x80
-///@}
+//@}
 
 /**
     @name USB AOA Request Codes

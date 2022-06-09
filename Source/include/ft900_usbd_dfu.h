@@ -4,6 +4,7 @@
     @brief
     DFU device for USB device stack API.
 
+	@details
     API functions for USB Device DFU interfaces. These functions provide functionality
     required to communicate with a DFU application through the USB Device interface.
 
@@ -57,7 +58,7 @@ extern "C" {
 #include <ft900_usb_dfu.h>
 
 /**
-    @def DFU_MAX_BLOCK_SIZE
+    @def USBD_DFU_MAX_BLOCK_SIZE
     @brief Set the maximum block size for a packet of data from
      the host in a DFU_DNLOAD request.
      A packet sent to the device for programming or a request for
@@ -68,7 +69,7 @@ extern "C" {
 #define USBD_DFU_MAX_BLOCK_SIZE 256
 
 /**
-    @def DFU_TIMEOUT
+    @def USBD_DFU_TIMEOUT
     @brief Suggested timeout for DFU downloads.
  */
 #define USBD_DFU_TIMEOUT 0x2000
@@ -155,7 +156,7 @@ void USBD_DFU_class_req_detach(uint16_t timeout);
              If the bmAttributes value set in the USBD_DFU_ATTRIBUTES
  	 	 	 does not support download then this function will have
  	 	 	 no body.
- @param[in]  address - starting address of data to program.
+ @param[in]  block - Starting block number (address) of data to program.
              It is up to the calling program to make sure this
              is calculated correctly.
  @param[in]  dataLength - Number of bytes to program. This can be
@@ -178,7 +179,7 @@ void USBD_DFU_class_req_download(uint32_t block, uint16_t dataLength);
              If the bmAttributes value set in the USBD_DFU_ATTRIBUTES
  	 	 	 does not support upload then this function will have
  	 	 	 no body.
- @param[in]  address - starting address of data to read.
+ @param[in]  block - Starting block number (address) of data to read.
              It is up to the calling program to make sure this
              is calculated correctly.
  @param[in]  dataLength - Number of bytes to read. This can be
@@ -251,9 +252,6 @@ uint8_t USBD_DFU_reset(void);
  	 	 	 The bmAttributes value set in the USBD_DFU_ATTRIBUTES
  	 	 	 determines the actions that are taken upon a timer event (i.e.
  	 	 	 may call a detach).
- @param		 attributes - the bmAttributes value set in the DFU
- 	 	 	 functional descriptor. This determines the actions
- 	 	 	 that are taken upon a reset.
  @return     Zero if timer running, non-zero if timer expired.
  **/
 uint8_t USBD_DFU_timer(void);

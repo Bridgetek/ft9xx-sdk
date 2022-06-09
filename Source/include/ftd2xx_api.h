@@ -562,7 +562,6 @@ ED2XX_ErrorCode  D2XX_IOCTL(int32_t interfaceNum, int ioctlID, void *param1, voi
     @brief     Cleanup D2XX solution when exiting D2XX mode.
     @details   Application to call this function to exit D2XX mode. \n
                This function cleans up D2XX solution and USB Driver.
-	@return    void
 
  **/
 void D2XX_Exit(void);
@@ -572,7 +571,6 @@ void D2XX_Exit(void);
     @details   To be called every millisecond from a timer interrupt handler to
 	            to support for D2XX USB transactions.
 	            Note: !!! To be called ONLY after D2XX_Init is successful !!!
-	@return    void
 
  **/
 void D2XX_Timer(void);
@@ -582,8 +580,6 @@ void D2XX_Timer(void);
     @brief     Main foreground D2XX process
     @details   Performs callbacks to pass USBD events to D2XX user. To be called in a main loop of the application
 	            Note: !!! To be called ONLY after D2XX_Init is successful !!!
-    @param     None
-	@return    None
 
  */
 void D2XX_Process(void);

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.3"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>libft900: C:/Users/gordon.mcnab/Documents/SVN/FT900/library/v2.6.0_dev/initial/ft900/lib/include/ft900_usbd.h File Reference</title>
+<title>libft900: include/ft900_usbd.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -48,7 +48,7 @@ $(function() {
 <div id="main-nav"></div>
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_e6bb53534ac0e427887cf7a94c0c004e.html">C:</a></li><li class="navelem"><a class="el" href="dir_8ceffd4ee35c3518d4e8bdc7e638efe8.html">Users</a></li><li class="navelem"><a class="el" href="dir_80914b739d55df2c289d7e7e74179905.html">gordon.mcnab</a></li><li class="navelem"><a class="el" href="dir_e0ac5996fcbfd5e602264d7f2e032b77.html">Documents</a></li><li class="navelem"><a class="el" href="dir_c862b2e07ec65398a15e748efd91d845.html">SVN</a></li><li class="navelem"><a class="el" href="dir_62951bcf44b843c4a90c31673427ea13.html">FT900</a></li><li class="navelem"><a class="el" href="dir_29f865958ac81f7a55e506c70a532e4d.html">library</a></li><li class="navelem"><a class="el" href="dir_6583a459bb687999d21357f40e08705c.html">v2.6.0_dev</a></li><li class="navelem"><a class="el" href="dir_9917bcd21ffde720abfd22bd678f3a2c.html">initial</a></li><li class="navelem"><a class="el" href="dir_f8e52e592915e1a8b14cc696fb9046a6.html">ft900</a></li><li class="navelem"><a class="el" href="dir_8814635debd6b93800fdd5b3220df18f.html">lib</a></li><li class="navelem"><a class="el" href="dir_a54ed9b74f242e7a0b3d6642c52dcad9.html">include</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -206,6 +206,7 @@ Functions</h2></td></tr>
 <tr class="memitem:a139ee345e3a7133cca9b3fd1bb95ade8"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__usbd_8h.html#a139ee345e3a7133cca9b3fd1bb95ade8">USBD_DEVICE_SPEED</a> { <a class="el" href="ft900__usbd_8h.html#a139ee345e3a7133cca9b3fd1bb95ade8a0549585df28ba0c8054381aa686bc6b7">USBD_SPEED_FULL</a>
 , <a class="el" href="ft900__usbd_8h.html#a139ee345e3a7133cca9b3fd1bb95ade8a43efe0713518e3f60fe62dd4dc9c70a1">USBD_SPEED_HIGH</a>
  }</td></tr>
+<tr class="memdesc:a139ee345e3a7133cca9b3fd1bb95ade8"><td class="mdescLeft">&#160;</td><td class="mdescRight">USB Device Speed.  <a href="ft900__usbd_8h.html#a139ee345e3a7133cca9b3fd1bb95ade8">More...</a><br /></td></tr>
 <tr class="separator:a139ee345e3a7133cca9b3fd1bb95ade8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43d12225cb06f8331d359e6dcca5c70d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ft900__usbd_8h.html#a43d12225cb06f8331d359e6dcca5c70d">USBD_ENDPOINT_DIR</a> { <a class="el" href="ft900__usbd_8h.html#a43d12225cb06f8331d359e6dcca5c70da0232295edc22cc7590013ac3986481db">USBD_DIR_OUT</a>
 , <a class="el" href="ft900__usbd_8h.html#a43d12225cb06f8331d359e6dcca5c70dabaf0bfce671ce7a8bc07b693011c259d">USBD_DIR_IN</a>
@@ -534,6 +535,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">req</td><td>USB request. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">buffer</td><td>Data buffer containing descriptor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">len</td><td>Length of the data buffer. </td></tr>
   </table>
   </dd>
 </dl>
@@ -573,6 +575,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">req</td><td>USB request. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">val</td><td>Status of USB request. </td></tr>
   </table>
   </dd>
 </dl>
@@ -709,6 +712,8 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>USB Device Speed. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a139ee345e3a7133cca9b3fd1bb95ade8a0549585df28ba0c8054381aa686bc6b7" name="a139ee345e3a7133cca9b3fd1bb95ade8a0549585df28ba0c8054381aa686bc6b7"></a>USBD_SPEED_FULL&#160;</td><td class="fielddoc"><p >Full speed. </p>
 </td></tr>
@@ -1170,7 +1175,7 @@ Functions</h2></td></tr>
 <p>Find Max Packet Size of USB endpoint. </p>
 <p >Return the maximum number of bytes which can be sent or received in a single USB packets for an endpoint. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">ep</td><td>USB endpoint handle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ep_number</td><td>USB endpoint to query. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1218,7 +1223,7 @@ Functions</h2></td></tr>
 <p>Free USB endpoint. </p>
 <p >Disable and free the specified endpoint. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">ep</td><td>USB endpoint handle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ep_number</td><td>USB endpoint to free. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1551,7 +1556,7 @@ Functions</h2></td></tr>
 <p>USBD_set_test_mode. </p>
 <p >To be called to enter into Test Mode. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">the</td><td>type of test to be performed in the Test Mode. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">test_selector</td><td>The type of test to be performed in the Test Mode. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1713,7 +1718,7 @@ Functions</h2></td></tr>
 <p>Transfer data to/from a USB control endpoint. </p>
 <p >Endpoint number is asusmed to be zero. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">ep_dir</td><td>Control endpoint data direction. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dir</td><td>Control endpoint data direction. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">buffer</td><td>Appropriately sized buffer for the transfer. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dataLength</td><td>For IN transfers, the number of bytes to be sent. For OUT transfers, the maximum number of bytes to read. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">requestLength</td><td>The number of bytes requested by the host in the wLength field of the SETUP packet. </td></tr>
@@ -1807,7 +1812,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu May 12 2022 11:02:49 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
+Generated on Tue Jun 7 2022 14:07:40 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
 </small></address>
 </body>
 </html>

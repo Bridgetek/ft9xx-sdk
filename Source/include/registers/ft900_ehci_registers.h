@@ -1,8 +1,8 @@
 /**
-    @file
+    @file ft900_ehci_registers.h
 
     @brief
-    EHCI Registers
+    EHCI (USB Host) registers
 
     
 **/

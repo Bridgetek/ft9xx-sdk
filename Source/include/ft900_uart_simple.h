@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_uart_simple.h
 
     @brief
     UART
@@ -202,8 +202,6 @@ typedef enum
  * 	all UART registers to default value except
  * 	clock select register(CKS) and clock alteration(CKA) registers.
  *  @param dev The device to use
- *
- *   @returns void.
  */
 void uart_soft_reset(ft900_uart_regs_t *dev);
 

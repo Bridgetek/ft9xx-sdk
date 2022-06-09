@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_rtc.h
 
     @brief
     Real Time Clock

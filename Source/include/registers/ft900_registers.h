@@ -1,8 +1,8 @@
 /**
-    @file
+    @file ft900_registers.h
 
     @brief
-    FT900 Registers
+    FT900 registers
     
 **/
 /*

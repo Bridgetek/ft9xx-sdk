@@ -4,6 +4,7 @@
     @brief
     Startup DFU Feature.
 
+	@details
     The Startup DFU library allows application to enable the USB device on the
     FT900 temporarily to present a DFU interface to the USB host. Software on
     the USB host can then update the application stored in Flash on the FT900

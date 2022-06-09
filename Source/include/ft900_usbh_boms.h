@@ -4,6 +4,7 @@
     @brief 
     BOMS devices on USB host stack API.
   
+	@details
     API functions for USB Host BOMS devices. These functions provide functionality
     required to communicate with a BOMS device through the USB Host interface.
 **/

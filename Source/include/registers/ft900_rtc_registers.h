@@ -1,8 +1,8 @@
 /**
-    @file
+    @file ft900_rtc_registers.h
 
     @brief
-    Real Time Clock Registers
+    Real Time Clock registers
     
 **/
 /*

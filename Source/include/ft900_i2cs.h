@@ -1,5 +1,5 @@
 /**
-    @file
+    @file ft900_i2cs.h
 
     @brief
     I2C Slave.

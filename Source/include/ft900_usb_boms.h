@@ -4,6 +4,7 @@
     @brief 
     USB BOMS class definitions.
   
+	@details
     This contains USB definitions of constants and structures which are used in
     USB BOMS implementations.
 

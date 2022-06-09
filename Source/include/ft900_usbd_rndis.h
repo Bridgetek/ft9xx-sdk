@@ -4,6 +4,7 @@
     @brief
     API for USB device stack RNDIS on FT900.
 
+	@details
     API functions for USB device RNDIS stack. These functions provide all
     the functionality required to implement a USB Device RNDIS interface.
     Only one instance of the USB device RNDIS driver may exist.
@@ -143,9 +144,13 @@ typedef void (*RNDIS_rx_enable_cb)(uint8_t rx_enable, uint32_t rx_filter);
     @param[in] vendor_id Pointer to a 3 byte array containing a IEEE vendor ID.
     @param[in] vendor_desc Pointer to a null-terminated string with a description of
     			the vendor.
+    @param[in] mtu_size Value of Maximum Transfer Unit (MTU) to use.
+    @param[in] max_total_size Maximum packet size which can be transmitted. This may
+				be larger than the MTU. Larger values use more buffering.
     @param[in] ep_n Endpoint handle for the RNDIS notification endpoint.
     @param[in] ep_out Endpoint handle for the RNDIS data OUT endpoint.
     @param[in] ep_in Endpoint handle for the RNDIS data IN endpoint.
+	@param[in] rx_enable_cb Callback made when receiving data.
  **/
  void USBD_RNDIS_initialise(const uint8_t *mac, const uint8_t *vendor_id, const char *vendor_desc,
  		size_t mtu_size, size_t max_total_size,
@@ -239,7 +244,6 @@ uint8_t USBD_RNDIS_connected_state(void);
     @param[in] speed The connection speed. Either 0, 10 or 100. This is
     				reported to the host software. If the speed is zero
     				then the link is disconnected.
-    @returns   none.
  **/
 void USBD_RNDIS_link(int speed);
 
@@ -254,7 +258,6 @@ void USBD_RNDIS_link(int speed);
 				USBD_RNDIS_STAT_TX_PACKETS, USBD_RNDIS_STAT_RX_PACKETS,
 				USBD_RNDIS_STAT_TX_ERROR, USBD_RNDIS_STAT_RX_ERROR
 				USBD_RNDIS_STAT_TX_DROPPED, USBD_RNDIS_STAT_RX_DROPPED
-    @returns   none.
  **/
 void USBD_RNDIS_stat(int8_t stat);
 

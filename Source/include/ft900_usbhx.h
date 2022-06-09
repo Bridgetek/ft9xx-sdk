@@ -4,6 +4,7 @@
     @brief
     USB host API extensions.
 
+	@details
     API functions for extensions to the USB Host stack. These functions
     provide additional functionality useful to implement a USB Host application.
 **/
@@ -71,9 +72,9 @@ extern "C" {
 /**
     @brief      Find the first device with a specific VID and PID.
     @details    Get the VID and PID of a device.
-    @param[in]  device Handle to a device.
-    @param[out] vid Vendor ID value from Device Descriptor.
-    @param[out] pid Product ID value from Device Descriptor.
+    @param[in]  phDev Handle to a device.
+    @param[out] usbVid Vendor ID value from Device Descriptor.
+    @param[out] usbPid Product ID value from Device Descriptor.
     @returns    USBH_OK if successful.
                 USBH_ERR_NOT_FOUND if device handle is invalid.
  **/
@@ -83,10 +84,11 @@ int8_t USBHX_find_by_vid_pid(USBH_device_handle *phDev,
 /**
     @brief      Get interface class, subclass and protocol.
     @details    Get the class information of an interface.
-    @param[in]  interface Handle to an interface.
-    @param[out] class USB class value for interface.
-    @param[out] subclass USB subclass value for interface.
-    @param[out] protocol USB protocol value for interface.
+    @param[in]  phDev Handle to a device.
+    @param[in]  phInterface Handle to an interface.
+    @param[out] usbClass USB class value for interface.
+    @param[out] usbSubclass USB subclass value for interface.
+    @param[out] usbProtocol USB protocol value for interface.
     @returns    USBH_OK if successful.
                 USBH_ERR_NOT_FOUND if interface handle is invalid.
  **/

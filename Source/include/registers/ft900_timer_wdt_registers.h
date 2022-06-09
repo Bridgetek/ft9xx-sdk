@@ -1,8 +1,8 @@
 /**
-    @file
+    @file ft900_timer_wdt_registers.h
 
     @brief
-    Timer and Watchdog Registers
+    Timer and Watchdog registers
 
     
 **/
