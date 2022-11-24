@@ -198,11 +198,6 @@ size_t i2s_read(uint8_t *data, const size_t num_bytes);
  */
 size_t i2s_write(const uint8_t *data, const size_t num_bytes);
 
-/** @brief Determine I2S status.
- *  @return Returns the status of the I2S peripheral.
- */
-uint16_t i2s_get_status(void);
-
 /** @brief Enable interrupts on the I2S module
  *
  *  | Bit     | Mask Name                     | Interrupts when...             |
