@@ -175,7 +175,7 @@ void interrupt_enable_globally(void)
 	INTERRUPT->global_mask &= ~(MASK_IRQ_CTRL_MASKALL);
 }
 #else // INTERRUPTS_INLINE_ENABLE // End of inline.
-extern void interrupt_enable_globally(void);
+extern inline void interrupt_enable_globally(void);
 #endif // INTERRUPTS_INLINE_ENABLE
 
 #ifndef INTERRUPTS_INLINE_ENABLE // This function is inlined.
@@ -187,7 +187,7 @@ void interrupt_disable_globally(void)
 	INTERRUPT->global_mask |= MASK_IRQ_CTRL_MASKALL;
 }
 #else // INTERRUPTS_INLINE_ENABLE // End of inline.
-extern void interrupt_disable_globally(void);
+extern inline void interrupt_disable_globally(void);
 #endif // INTERRUPTS_INLINE_ENABLE
 
 /** @brief Enable nesting interrupts

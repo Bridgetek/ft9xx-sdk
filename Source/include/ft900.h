@@ -90,6 +90,7 @@ extern "C" {
 #include <ft900_gpio.h>
 #include <ft900_i2cm.h>
 #include <ft900_interrupt.h>
+#include <ft900_memctl.h>
 #include <ft900_pwm_pcm.h>
 #include <ft900_pwm.h>
 #include <ft900_rtc.h>
