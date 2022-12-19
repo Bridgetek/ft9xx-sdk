@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <ft900.h>
-#include <tinyprintf.h>
 
  #define  ADDR_EEPROM_WRITE 0xae       //  DEVICE ADDR for EEPROM (writes)
  #define  ADDR_EEPROM_READ  0xaf       //  DEVICE ADDR for EEPROM (reads)

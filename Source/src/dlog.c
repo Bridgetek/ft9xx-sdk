@@ -63,7 +63,7 @@
 
 #ifdef DEBUG
 #include "tinyprintf.h"
-#define dbg(s,...)	tfp_printf ((s), __VA_ARGS__)
+#define dbg(s,...)	printf ((s), __VA_ARGS__)
 #else
 #define dbg(s,...)
 #endif

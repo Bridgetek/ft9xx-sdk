@@ -226,13 +226,13 @@ int8_t USBH_CDCACM_init(USBH_interface_handle hControlInterface,
     ctx->recvBufferAvail = CDCACM_IN_BUFFER;
 
 #ifdef CDC_DEBUG
-    tfp_printf("CDC - Initialising\r\n");
+    printf("CDC - Initialising\r\n");
 #endif // CDC_DEBUG
 
     if ((hControlInterface == 0) || (ctx == NULL))
     {
 #ifdef CDC_DEBUG
-    tfp_printf("CDC - Zero or null parameters\r\n", status);
+    printf("CDC - Zero or null parameters\r\n", status);
 #endif // CDC_DEBUG
     	return USBH_CDCACM_ERR_PARAMETER;
     }
@@ -240,7 +240,7 @@ int8_t USBH_CDCACM_init(USBH_interface_handle hControlInterface,
     if (USBH_interface_get_info(hControlInterface, &ifInfo) != USBH_OK)
     {
 #ifdef CDC_DEBUG
-    tfp_printf("CDC - Could not get control interface info\r\n", status);
+    printf("CDC - Could not get control interface info\r\n", status);
 #endif // CDC_DEBUG
 		return USBH_CDCACM_ERR_PARAMETER;
     }
@@ -267,7 +267,7 @@ int8_t USBH_CDCACM_init(USBH_interface_handle hControlInterface,
 	if (status != USBH_OK)
 	{
 #ifdef CDC_DEBUG
-    tfp_printf("CDC - USB Error reading partial config descriptor\r\n", status);
+    printf("CDC - USB Error reading partial config descriptor\r\n", status);
 #endif // CDC_DEBUG
 		return USBH_CDCACM_ERR_USB;
 	}
@@ -380,7 +380,7 @@ int8_t USBH_CDCACM_init(USBH_interface_handle hControlInterface,
 	if (status != USBH_OK)
 	{
 #ifdef CDC_DEBUG
-    tfp_printf("CDC - No matching data endpoints found\r\n", status);
+    printf("CDC - No matching data endpoints found\r\n", status);
 #endif // CDC_DEBUG
 		return USBH_CDCACM_ERR_DATA_ENDPOINT;
 	}
@@ -391,7 +391,7 @@ int8_t USBH_CDCACM_init(USBH_interface_handle hControlInterface,
 		if (USBH_get_endpoint_list(ctx->hControlInterface, &ctx->hControlEpIn) != USBH_OK)
 		{
 #ifdef CDC_DEBUG
-    tfp_printf("CDC - No endpoints found for notification endpoint\r\n", status);
+    printf("CDC - No endpoints found for notification endpoint\r\n", status);
 #endif // CDC_DEBUG
 			return USBH_CDCACM_ERR_NOTIFICATION_ENDPOINT;
 		}
@@ -405,7 +405,7 @@ int8_t USBH_CDCACM_init(USBH_interface_handle hControlInterface,
 	else
 	{
 #ifdef CDC_DEBUG
-    tfp_printf("CDC - No endpoints found for data endpoints\r\n", status);
+    printf("CDC - No endpoints found for data endpoints\r\n", status);
 #endif // CDC_DEBUG
 		return USBH_CDCACM_ERR_DATA_ENDPOINT;
 	}
@@ -427,7 +427,7 @@ int8_t USBH_CDCACM_init(USBH_interface_handle hControlInterface,
 	else
 	{
 #ifdef CDC_DEBUG
-    tfp_printf("CDC - No endpoint info for data endpoints\r\n", status);
+    printf("CDC - No endpoint info for data endpoints\r\n", status);
 #endif // CDC_DEBUG
 		return USBH_CDCACM_ERR_DATA_ENDPOINT;
 	}
@@ -445,7 +445,7 @@ int8_t USBH_CDCACM_init(USBH_interface_handle hControlInterface,
 			500, (uint32_t)ctx, cdcacm_datain);
 
 #ifdef CDC_DEBUG
-    tfp_printf("CDC - Initialisation successful %x\r\n", status);
+    printf("CDC - Initialisation successful %x\r\n", status);
 #endif // CDC_DEBUG
     return USBH_CDCACM_OK;
 }

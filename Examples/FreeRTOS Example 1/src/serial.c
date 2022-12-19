@@ -151,7 +151,7 @@ void xSerialHWInit(void){
 		//uart_enable_interrupt(UART1, uart_interrupt_tx);
 	    uart_enable_interrupts_globally(UART1);
 
-		tfp_printf("Setup of UART1 Complete !\n");
+		printf("Setup of UART1 Complete !\n");
 
 	}
 	portEXIT_CRITICAL();

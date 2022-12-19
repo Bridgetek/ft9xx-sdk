@@ -47,8 +47,8 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 
 #if defined(__FT900__)
 
@@ -125,9 +125,6 @@ void setup(void)
         "Loopback use case between two FT900/FT930 (SPI Master) and FT900/FT930 (SPI Slave) \r\n"
         "--------------------------------------------------------------------- \r\n"
         );
-
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
 
     /* Enable the SPI Slave device... */
     sys_enable(sys_device_spi_slave0);
@@ -223,9 +220,4 @@ void spis_dev_ISR(void)
         /* Set up the new data to send */
         SPIS0->SPI_DATA = spis_dev_buffer[spis_dev_buffer_ptr];
     }
-}
-
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
 }

@@ -45,9 +45,9 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include "ft900.h"
-#include "tinyprintf.h"
 
 /* lwIP Headers. */
 #include "lwip/sockets.h"
@@ -65,7 +65,7 @@
 
 #define DEBUG
 #ifdef DEBUG
-#define DEBUG_PRINTF(...) do {tfp_printf(__VA_ARGS__);} while (0)
+#define DEBUG_PRINTF(...) do {printf(__VA_ARGS__);} while (0)
 #else
 #define DEBUG_PRINTF(...)
 #endif
@@ -164,13 +164,6 @@ static void process_server(int i, int conn, struct sockaddr_in* addr_server, str
 #endif
 void vTaskConnect(void *pvParameters);
 
-/** tfp_printf putc
- *  @param p Parameters
- *  @param c The character to write */
-void myputc(void* p, char c) {
-    uart_write((ft900_uart_regs_t*) p, (uint8_t) c);
-}
-
 int main(void)
 {
     sys_reset_all();
@@ -183,9 +176,6 @@ int main(void)
     uart_open(UART0, 1,
             UART_DIVIDER_19200_BAUD, uart_data_bits_8, uart_parity_none,
             uart_stop_bits_1);
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0, myputc);
-
     /* Set up Ethernet */
     sys_enable(sys_device_ethernet);
 

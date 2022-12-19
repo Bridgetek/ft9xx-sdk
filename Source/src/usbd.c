@@ -370,7 +370,7 @@ static const uint8_t USBD_test_pattern_bytes[53] =
 	int8_t status = usbd_check_ep(A);\
 	if (status != USBD_OK) \
 	{\
-		/*tfp_printf("EP CHECK FAILED\r\n");*/\
+		/*printf("EP CHECK FAILED\r\n");*/\
 		return status;\
 	}\
 		}
@@ -449,7 +449,7 @@ static inline void cmif_process(void)
 	uint8_t cmif = USBD_REG(cmif);
 
 #ifdef USBD_DEBUG_INTERRUPTS
-	tfp_printf ("cmif %x ", cmif);
+	printf ("cmif %x ", cmif);
 #endif // USBD_DEBUG_INTERRUPTS
 	if (!(cmif & MASKS))
 	{
@@ -459,31 +459,31 @@ static inline void cmif_process(void)
 #ifdef USBD_DEBUG_COMMON_INTERRUPTS
 	if (cmif & MASK_USBD_CMIF_PHYIRQ)                               //Handle PHY interrupt
 	{
-		tfp_printf ("DUSB2 PHYIRQ!\r\n");
+		printf ("DUSB2 PHYIRQ!\r\n");
 	}
 #endif // USBD_DEBUG_COMMON_INTERRUPTS
 #ifdef USBD_DEBUG_COMMON_INTERRUPTS
 	if (cmif & MASK_USBD_CMIF_PIDIRQ)                               //Handle PIDIRQ interrupt
 	{
-		tfp_printf ("DUSB2 PIDIRQ!\r\n");
+		printf ("DUSB2 PIDIRQ!\r\n");
 	}
 #endif // USBD_DEBUG_COMMON_INTERRUPTS
 #ifdef USBD_DEBUG_COMMON_INTERRUPTS
 	if (cmif & MASK_USBD_CMIF_CRC16IRQ)                             //Handle CRC16IRQ interrupt
 	{
-		tfp_printf ("DUSB2 CRC16IRQ!\r\n");
+		printf ("DUSB2 CRC16IRQ!\r\n");
 	}
 #endif // USBD_DEBUG_COMMON_INTERRUPTS
 #ifdef USBD_DEBUG_COMMON_INTERRUPTS
 	if (cmif & MASK_USBD_CMIF_CRC5IRQ)                              //Handle CRC5 interrupt
 	{
-		tfp_printf ("DUSB2 CRC5IRQ!\r\n");
+		printf ("DUSB2 CRC5IRQ!\r\n");
 	}
 #endif // USBD_DEBUG_COMMON_INTERRUPTS
 	if (cmif & MASK_USBD_CMIF_RSTIRQ)                               //Handle Reset interrupt
 	{
 #ifdef USBD_DEBUG_INTERRUPTS
-		tfp_printf ("DUSB2 RSTIRQ!\r\n");
+		printf ("DUSB2 RSTIRQ!\r\n");
 #endif // USBD_DEBUG_INTERRUPTS
 		{
 			if (USBD_current_state == USBD_STATE_NONE)
@@ -513,7 +513,7 @@ static inline void cmif_process(void)
 	if (cmif & MASK_USBD_CMIF_SUSIRQ)                               //Handle Suspend interrupt
 	{
 #ifdef USBD_DEBUG_INTERRUPTS
-		tfp_printf ("DUSB2 SUSIRQ!\r\n");
+		printf ("DUSB2 SUSIRQ!\r\n");
 #endif // USBD_DEBUG_INTERRUPTS
 		if (usbd_vbus() && (USBD_current_state < USBD_STATE_SUSPENDED)
 				&& (USBD_current_state >= USBD_STATE_DEFAULT))
@@ -525,7 +525,7 @@ static inline void cmif_process(void)
 	if (cmif & MASK_USBD_CMIF_RESIRQ)                               //Handle Resume interrupt
 	{
 #ifdef USBD_DEBUG_INTERRUPTS
-		tfp_printf ("DUSB2 RESIRQ!\r\n");
+		printf ("DUSB2 RESIRQ!\r\n");
 #endif // USBD_DEBUG_INTERRUPTS
 		if (USBD_current_state >= USBD_STATE_SUSPENDED)
 		{
@@ -540,7 +540,7 @@ static inline void cmif_process(void)
 	if (cmif & MASK_USBD_CMIF_SOFIRQ)                               //Handle SOF interrupt
 	{
 #ifdef USBD_DEBUG_INTERRUPTS
-		//tfp_printf ("DUSB2 SOFIRQ!\r\n");
+		//printf ("DUSB2 SOFIRQ!\r\n");
 #endif // USBD_DEBUG_INTERRUPTS
 		if (USBD_sof_cb)
 		{
@@ -563,7 +563,7 @@ static inline void cmif_process(void)
 	    		USBD_speed = USBD_SPEED_FULL;
 	    	}
 #ifdef USBD_DEBUG_INTERRUPTS
-	    	tfp_printf ("DUSB2 SOFIRQ: Speed detected: %d!\r\n", USBD_speed);
+	    	printf ("DUSB2 SOFIRQ: Speed detected: %d!\r\n", USBD_speed);
 #endif
 	    }
 #endif
@@ -579,7 +579,7 @@ static inline void epif_process(void)
 #endif
 
 #ifdef USBD_DEBUG_INTERRUPTS
-	tfp_printf ("epif %x\r\n", epif);
+	printf ("epif %x\r\n", epif);
 #endif // USBD_DEBUG_INTERRUPTS
 	if (!epif)
 	{
@@ -591,7 +591,7 @@ static inline void epif_process(void)
 	if (epif & MASK_USBD_EPIF_EP0IRQ)
 	{
 #ifdef USBD_DEBUG_INTERRUPTS
-		tfp_printf ("EP0IRQ!\r\n");
+		printf ("EP0IRQ!\r\n");
 #endif // USBD_DEBUG_INTERRUPTS
 		if (USBD_EP_SR_REG(USBD_EP_0) & MASK_USBD_EP0SR_SETUP)
 		{
@@ -746,7 +746,7 @@ static int8_t usbd_standard_req_get_descriptor(USB_device_request *req)
 		if (length != transferred)
 		{
 			//status = USBD_ERR_INCOMPLETE;
-			tfp_printf("transferred %d of %d\r\n", transferred, length);
+			printf("transferred %d of %d\r\n", transferred, length);
 		}
 #endif // USBD_DEBUG_ERRORS
 		// ACK packet
@@ -996,7 +996,7 @@ static int8_t usbd_check_ep(USBD_ENDPOINT_NUMBER ep_number)
 	if (ep_number >= USBD_MAX_ENDPOINT_COUNT)
 	{
 #ifdef USBD_DEBUG_ERRORS
-		tfp_printf("EP%d not legal\r\n", ep_number);
+		printf("EP%d not legal\r\n", ep_number);
 #endif // USBD_DEBUG_ERRORS
 		return USBD_ERR_INVALID_PARAMETER;
 	}
@@ -1005,7 +1005,7 @@ static int8_t usbd_check_ep(USBD_ENDPOINT_NUMBER ep_number)
 	{
 		// Endpoint is not configured.
 #ifdef USBD_DEBUG_ERRORS
-		tfp_printf("EP%d not configured\r\n", ep_number);
+		printf("EP%d not configured\r\n", ep_number);
 #endif // USBD_DEBUG_ERRORS
 		return USBD_ERR_NOT_CONFIGURED;
 	}
@@ -1082,7 +1082,7 @@ static void usbd_hw_enable(void)
 	#endif // USBD_USE_INTERRUPTS
 
 	#ifdef USBD_DEBUG_CONFIGURE
-		tfp_printf ("Interrupt mask for %d endpoints %x\r\n", USBD_MAX_ENDPOINT_COUNT, USBD_REG(epie));
+		printf ("Interrupt mask for %d endpoints %x\r\n", USBD_MAX_ENDPOINT_COUNT, USBD_REG(epie));
 	#endif // USBD_DEBUG_CONFIGURE
 	}
 	CRITICAL_SECTION_END;
@@ -1149,7 +1149,7 @@ static int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t 
 	{
 
 #ifdef USBD_DEBUG_IN_PACKET
-		tfp_printf("IN %d: ", length);
+		printf("IN %d: ", length);
 #endif // USBD_DEBUG_IN_PACKET
 
 #ifdef USBD_USE_STREAMS
@@ -1186,7 +1186,7 @@ static int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t 
 		{
 #ifdef USBD_DEBUG_IN_PACKET
 			USBD_EP_FIFO_REG(ep_number) = *buffer;
-			tfp_printf("%x ", *buffer);
+			printf("%x ", *buffer);
 			buffer++;
 #else // USBD_DEBUG_IN_PACKET
 			USBD_EP_FIFO_REG(ep_number) = *buffer++;
@@ -1197,7 +1197,7 @@ static int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t 
 #endif // USBD_USE_STREAMS
 
 #ifdef USBD_DEBUG_IN_PACKET
-		tfp_printf("\r\n");
+		printf("\r\n");
 #endif // USBD_DEBUG_IN_PACKET
 	}
 	CRITICAL_SECTION_END;
@@ -1234,7 +1234,7 @@ static int32_t usbd_out_request(uint8_t ep_number, uint8_t *buffer, size_t lengt
 		}
 
 #ifdef USBD_DEBUG_OUT_PACKET
-		tfp_printf("OUT %d/%d: ", length, buff_size);
+		printf("OUT %d/%d: ", length, buff_size);
 #endif // USBD_DEBUG_OUT_PACKET
 
 		// Only read as many bytes as we have space for.
@@ -1275,7 +1275,7 @@ static int32_t usbd_out_request(uint8_t ep_number, uint8_t *buffer, size_t lengt
 		{
 #ifdef USBD_DEBUG_OUT_PACKET
 			*buffer = USBD_EP_FIFO_REG(ep_number);
-			tfp_printf("%x ", *buffer);
+			printf("%x ", *buffer);
 			buffer++;
 #else // USBD_DEBUG_OUT_PACKET
 			*buffer++ = USBD_EP_FIFO_REG(ep_number);
@@ -1285,7 +1285,7 @@ static int32_t usbd_out_request(uint8_t ep_number, uint8_t *buffer, size_t lengt
 #endif // USBD_USE_STREAMS
 
 #ifdef USBD_DEBUG_OUT_PACKET
-		tfp_printf("\r\n");
+		printf("\r\n");
 #endif // USBD_DEBUG_OUT_PACKET
 	}
 	CRITICAL_SECTION_END;
@@ -1315,10 +1315,10 @@ static void usbd_process_setup_packet(void)
 	{
 		uint8_t *buffer = (uint8_t *)&USBD_received_setup_packet;
 		int i;
-		tfp_printf("SETUP REQ: ");
+		printf("SETUP REQ: ");
 		for (i = 0; i < sizeof(USB_device_request); i++)
-			tfp_printf("%x ", *buffer++);
-		tfp_printf("\r\n");
+			printf("%x ", *buffer++);
+		printf("\r\n");
 	}
 #endif // USBD_DEBUG_SETUP_REQ
 
@@ -1357,14 +1357,14 @@ static void usbd_process_setup_packet(void)
 		status = cb(&USBD_received_setup_packet);
 
 #ifdef USBD_DEBUG_SETUP_REQ
-		tfp_printf("SETUP status %d\r\n", status);
+		printf("SETUP status %d\r\n", status);
 #endif // USBD_DEBUG_SETUP_REQ
 	}
 
 	if (status != 0)
 	{
 #ifdef USBD_DEBUG_SETUP_REQ
-		tfp_printf("SETUP stall\r\n");
+		printf("SETUP stall\r\n");
 #endif // USBD_DEBUG_SETUP_REQ
 		// Request is unrecognised, or handler failed.
 		USBD_stall_endpoint(0);
@@ -1413,7 +1413,7 @@ static void determine_usb_speed(void)
 #endif
 		USBD_REG(fctrl) = fctrl_val;
 #ifdef USBD_DEBUG_CONFIGURE
-		tfp_printf("Force set to full speed\r\n");
+		printf("Force set to full speed\r\n");
 #endif // USBD_DEBUG_CONFIGURE
 		return;
 	}
@@ -1441,7 +1441,7 @@ static void determine_usb_speed(void)
 		USBD_SPEED_HIGH : USBD_SPEED_FULL;
 #endif /* !__FT930__ */
 #ifdef USBD_DEBUG_CONFIGURE
-	tfp_printf("Detect as highspeed:%d\r\n", USBD_speed);
+	printf("Detect as highspeed:%d\r\n", USBD_speed);
 #endif // USBD_DEBUG_CONFIGURE
 }
 
@@ -1568,7 +1568,7 @@ int8_t USBD_create_endpoint(USBD_ENDPOINT_NUMBER ep_num,
 #ifdef USBD_DEBUG_CONFIGURE
 		else
 		{
-			tfp_printf("Configuring ep[%d], Total RAM used: %d\n",ep_num,ramTot);
+			printf("Configuring ep[%d], Total RAM used: %d\n",ep_num,ramTot);
 		}
 #endif
 
@@ -1818,26 +1818,26 @@ void USBD_set_test_mode(USBD_TESTMODE_SELECT test_selector)
 	{
 		case USBD_TEST_J:
 			#ifdef USBD_DEBUG_TEST_MODE
-				tfp_printf ("USBD_TEST_J!\r\n");
+				printf ("USBD_TEST_J!\r\n");
 			#endif // USBD_DEBUG_TEST_MODE
 			mask = MASK_USBD_FCTRL_TST_MODE_SELECT0;
 			break;
 		case USBD_TEST_K:
 			#ifdef USBD_DEBUG_TEST_MODE
-				tfp_printf ("USBD_TEST_K!\r\n");
+				printf ("USBD_TEST_K!\r\n");
 			#endif // USBD_DEBUG_TEST_MODE
 			mask = MASK_USBD_FCTRL_TST_MODE_SELECT1;
 			break;
 		case USBD_TEST_SE0_NAK:
 			#ifdef USBD_DEBUG_TEST_MODE
-					tfp_printf ("USBD_TEST_SE0_NAK!\r\n");
+					printf ("USBD_TEST_SE0_NAK!\r\n");
 			#endif // USBD_DEBUG_TEST_MODE
 			mask = (MASK_USBD_FCTRL_TST_MODE_SELECT0 | MASK_USBD_FCTRL_TST_MODE_SELECT1);
 			clear_bit = 1;
 			break;
 		case USBD_TEST_PACKET:
 			#ifdef USBD_DEBUG_TEST_MODE
-					tfp_printf ("USBD_TEST_PACKET!\r\n");
+					printf ("USBD_TEST_PACKET!\r\n");
 			#endif // USBD_DEBUG_TEST_MODE
 			mask = (MASK_USBD_FCTRL_TST_MODE_SELECT0 | MASK_USBD_FCTRL_TST_MODE_SELECT1);
 			//Fill the EP0 FIFO with Test pattern
@@ -1859,7 +1859,7 @@ void USBD_set_test_mode(USBD_TESTMODE_SELECT test_selector)
 				}
 
 				#ifdef USBD_DEBUG_TEST_MODE
-						tfp_printf ("USBD_TEST_PACKET pattern on IN!\r\n");
+						printf ("USBD_TEST_PACKET pattern on IN!\r\n");
 				#endif // USBD_DEBUG_TEST_MODE
 				// Place the data to transmit into the endpoint buffer.
 				usbd_in_request(USBD_EP_0, USBD_test_pattern_bytes, 53, 0);
@@ -2167,7 +2167,7 @@ int32_t /*__attribute__((optimize("O0")))*/ USBD_transfer_ex(USBD_ENDPOINT_NUMBE
 							usbd_wait_epx_in_ready(ep_number);
 
 #ifdef USBD_DEBUG_TRANSFER
-							tfp_printf ("%d:zlp sr=0x%x\n", ep_number, USBD_EP_SR_REG(ep_number));
+							printf ("%d:zlp sr=0x%x\n", ep_number, USBD_EP_SR_REG(ep_number));
 #endif //USBD_DEBUG_TRANSFER
 							(void) usbd_in_request(ep_number, NULL, 0, 0);
 						}

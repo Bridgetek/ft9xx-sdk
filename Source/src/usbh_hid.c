@@ -59,7 +59,7 @@
 #undef HID_DEBUG
 
 #if defined(HID_DEBUG)
-#include <tfp_printf.h>
+#include <printf.h>
 #endif
 
 /* CONSTANTS ***********************************************************************/
@@ -95,7 +95,7 @@ int8_t USBH_HID_init(USBH_device_handle hHIDDevice, USBH_interface_handle hHIDIn
     {
         ctx->hidInterfaceNumber = ifInfo.interface_number;
 #ifdef HID_DEBUG
-        tfp_printf("HID - Using interface number %d\n", ctx->hidInterfaceNumber);
+        printf("HID - Using interface number %d\n", ctx->hidInterfaceNumber);
 #endif // HID_DEBUG
 
         status = USBH_get_endpoint_list(hHIDInterface, &hEp);
@@ -113,7 +113,7 @@ int8_t USBH_HID_init(USBH_device_handle hHIDDevice, USBH_interface_handle hHIDIn
                             ctx->hHIDEpOut = hEp;
                             ctx->reportOutSize = epInfo.max_packet_size;
 #ifdef HID_DEBUG
-                            tfp_printf("HID - Found OUT endpoint %d bytes\n", ctx->reportOutSize);
+                            printf("HID - Found OUT endpoint %d bytes\n", ctx->reportOutSize);
 #endif // HID_DEBUG
                         }
                     }
@@ -124,7 +124,7 @@ int8_t USBH_HID_init(USBH_device_handle hHIDDevice, USBH_interface_handle hHIDIn
                             ctx->hHIDEpIn = hEp;
                             ctx->reportInSize = epInfo.max_packet_size;
 #ifdef HID_DEBUG
-                            tfp_printf("HID - Found IN endpoint %d bytes\n", ctx->reportInSize);
+                            printf("HID - Found IN endpoint %d bytes\n", ctx->reportInSize);
 #endif // HID_DEBUG
                         }
                     }

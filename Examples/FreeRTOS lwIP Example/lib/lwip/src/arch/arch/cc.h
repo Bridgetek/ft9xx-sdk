@@ -53,11 +53,6 @@
 #endif // defined(__FT32__)
 
 //#define CC_DEBUG
-#ifdef CC_DEBUG
-#undef TINYPRINTF_OVERRIDE_LIBC
-#define TINYPRINTF_OVERRIDE_LIBC 0
-#include "tinyprintf.h"
-#endif
 
 #ifndef BYTE_ORDER
 #define BYTE_ORDER LITTLE_ENDIAN
@@ -100,8 +95,8 @@ typedef uintptr_t   mem_ptr_t;
 
 // Diagnostic output
 #ifdef CC_DEBUG
-#define LWIP_PLATFORM_DIAG(x) tfp_printf x
-#define LWIP_PLATFORM_ASSERT(x) do { tfp_printf("Assertion Failed %s:%d:%s\n",__FILE__,__LINE__,x); for(;;); } while(0)
+#define LWIP_PLATFORM_DIAG(x) printf x
+#define LWIP_PLATFORM_ASSERT(x) do { printf("Assertion Failed %s:%d:%s\n",__FILE__,__LINE__,x); for(;;); } while(0)
 #endif
 
 #define LWIP_RAND() ((u32_t)rand())

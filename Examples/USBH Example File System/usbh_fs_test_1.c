@@ -48,15 +48,13 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <ft900.h>
 #include <ft900_usb.h>
 #include <ft900_usbh_boms.h>
 #include <ft900_startup_dfu.h>
-
-/* UART support for printf output. */
-#include "tinyprintf.h"
 
 /* Support for FATFS */
 #include "ff.h"
@@ -124,16 +122,6 @@ DRESULT disk_write (BYTE pdrv, const BYTE* buff, DWORD sector, UINT count);
 DRESULT disk_ioctl (BYTE pdrv, BYTE cmd, void* buff);
 DWORD get_fattime(void);
 
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}
-
 void ISR_timer(void)
 {
     if (timer_is_interrupted(timer_select_a))
@@ -168,8 +156,8 @@ FRESULT dir(char* path)
     if (FR_OK == res)
     {
         /* Display a header */
-        tfp_printf("ls(path = \"%s\"):\r\n",path);
-        tfp_printf("DD/MM/YYYY HH:MM               Size Filename\r\n");
+        printf("ls(path = \"%s\"):\r\n",path);
+        printf("DD/MM/YYYY HH:MM               Size Filename\r\n");
                        
         for(;;)
         {
@@ -208,7 +196,7 @@ FRESULT dir(char* path)
             totalsize += info.fsize;
             
             /* Display the item */
-            tfp_printf("%02d/%02d/%04d %02d:%02d   %s %10ld %s\r\n",
+            printf("%02d/%02d/%04d %02d:%02d   %s %10ld %s\r\n",
                        day, month, year, hour, min, 
                        (info.fattrib & AM_DIR) ? "<DIR>" : "     ",
                        info.fsize,
@@ -218,7 +206,7 @@ FRESULT dir(char* path)
         if (FR_OK == res)
         {
             /* Display the summary if things were ok */
-            tfp_printf("  %10ld File(s)     %10ld bytes\r\n",
+            printf("  %10ld File(s)     %10ld bytes\r\n",
                        totalfiles, totalsize);
         }
         
@@ -242,7 +230,7 @@ DSTATUS disk_initialize(BYTE pdrv)
 
     if (status != USBH_BOMS_OK)
     {
-    	tfp_printf("BOMS device could not be initialised: %d\r\n", status);
+    	printf("BOMS device could not be initialised: %d\r\n", status);
 		stat = STA_NOINIT;
 		hOpenDisk = 0;
     }
@@ -353,10 +341,10 @@ int8_t fs_testing(USBH_interface_handle hBOMS)
     hOpenDisk = hBOMS;
     if ((res = f_mount(&fs, "", 1)) != FR_OK)
     {
-    	tfp_printf("Unable to mount File System\r\n");
+    	printf("Unable to mount File System\r\n");
     	if (res == FR_NO_FILESYSTEM)
     	{
-    		tfp_printf("   --> No FAT32 File System in the disk\r\n");
+    		printf("   --> No FAT32 File System in the disk\r\n");
     	}
     	return -1;
     }
@@ -364,25 +352,25 @@ int8_t fs_testing(USBH_interface_handle hBOMS)
     /* List the root directory */
     res = dir("");
 
-    tfp_printf("\r\n\r\n"); delayms(1000);
+    printf("\r\n\r\n"); delayms(1000);
 
     /* Check to see if the example file is there */
     res = f_stat(EXAMPLE_FILE, NULL);
     if (FR_OK == res)
     {
-        tfp_printf("File " EXAMPLE_FILE " already exists. Deleting\r\n");
+        printf("File " EXAMPLE_FILE " already exists. Deleting\r\n");
         if (FR_OK != f_unlink(EXAMPLE_FILE))
         {
-        	tfp_printf("Problem deleting " EXAMPLE_FILE "\r\n");
+        	printf("Problem deleting " EXAMPLE_FILE "\r\n");
         }
     }
 
     /* Write some data to the SD Card */
-    tfp_printf( "Opening " EXAMPLE_FILE " for writing\r\n");
+    printf( "Opening " EXAMPLE_FILE " for writing\r\n");
     res = f_open(&f, EXAMPLE_FILE, FA_WRITE | FA_CREATE_NEW);
     if (FR_OK != res)
     {
-    	tfp_printf("Problem creating file " EXAMPLE_FILE "\r\n");
+    	printf("Problem creating file " EXAMPLE_FILE "\r\n");
     }
 
     data = (char *)LOREM_IPSUM;
@@ -396,23 +384,23 @@ int8_t fs_testing(USBH_interface_handle hBOMS)
         towrite -= written;
         data += written;
 
-        tfp_printf("Wrote %d bytes\r\n", written);
+        printf("Wrote %d bytes\r\n", written);
     }
 
-    tfp_printf( "Closing " EXAMPLE_FILE "\r\n");
+    printf( "Closing " EXAMPLE_FILE "\r\n");
     if (FR_OK != f_close(&f))
     {
-    	tfp_printf("Error closing " EXAMPLE_FILE "\r\n");
+    	printf("Error closing " EXAMPLE_FILE "\r\n");
     }
 
 
-    tfp_printf("\r\n\r\n"); delayms(1000);
+    printf("\r\n\r\n"); delayms(1000);
 
     /* Open the file and dump out the contents */
-    tfp_printf( "Opening " EXAMPLE_FILE " for reading\r\n\r\n");
+    printf( "Opening " EXAMPLE_FILE " for reading\r\n\r\n");
     if (FR_OK != f_open(&f, EXAMPLE_FILE, FA_READ))
     {
-    	tfp_printf("Error opening " EXAMPLE_FILE " for reading\r\n");
+    	printf("Error opening " EXAMPLE_FILE " for reading\r\n");
     }
 
     do
@@ -423,11 +411,11 @@ int8_t fs_testing(USBH_interface_handle hBOMS)
     while(read == 128);
 
 
-    tfp_printf( "\r\n" "Closing " EXAMPLE_FILE "\r\n");
+    printf( "\r\n" "Closing " EXAMPLE_FILE "\r\n");
     f_close(&f);
 
 
-    tfp_printf("\r\n\r\n");
+    printf("\r\n\r\n");
 
     return 0;
 }
@@ -453,7 +441,7 @@ void hub_scan_for_boms(USBH_device_handle hDev, int level)
                     (usbSubclass == USB_SUBCLASS_MASS_STORAGE_SCSI) &&
                     (usbProtocol == USB_PROTOCOL_MASS_STORAGE_BOMS))
        			{
-       			    tfp_printf("BOMS device found at level %d\r\n", level);
+       			    printf("BOMS device found at level %d\r\n", level);
        				fs_testing(hInterface);
        			}
 	        }
@@ -493,7 +481,7 @@ uint8_t usbh_testing(void)
 		USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
 		if (connect == USBH_STATE_NOTCONNECTED)
 		{
-			tfp_printf("\r\nPlease plug in a USB Device\r\n");
+			printf("\r\nPlease plug in a USB Device\r\n");
 
 			// Detect usb device connect
 			do
@@ -502,21 +490,21 @@ uint8_t usbh_testing(void)
 				USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
 			} while (connect == USBH_STATE_NOTCONNECTED);
 		}
-		tfp_printf("\r\nUSB Device Detected\r\n");
+		printf("\r\nUSB Device Detected\r\n");
 
 		do{
 			status = USBH_process();
 			USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
 		} while (connect != USBH_STATE_ENUMERATED);
 
-		tfp_printf("USB Device Enumerated\r\n");
+		printf("USB Device Enumerated\r\n");
 
 		// Get the first device (device on root hub)
 		status = USBH_get_device_list(USBH_ROOT_HUB_HANDLE, &hRootDev);
 		if (status != USBH_OK)
 		{
 			// Report the error code.
-			tfp_printf("%d\r\n", status);
+			printf("%d\r\n", status);
 		}
 		else
 		{
@@ -524,7 +512,7 @@ uint8_t usbh_testing(void)
 			hub_scan_for_boms(hRootDev, 1);
 		}
 
-		tfp_printf("\r\nPlease remove the USB Device\r\n");
+		printf("\r\nPlease remove the USB Device\r\n");
 		// Detect usb device disconnect
 		do
 		{
@@ -564,9 +552,6 @@ int main(int argc, char *argv[])
         "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
     	);
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0, tfp_putc);
-
     sys_enable(sys_device_timer_wdt);
 
     interrupt_attach(interrupt_timers, (int8_t)interrupt_timers, ISR_timer);
@@ -578,7 +563,7 @@ int main(int argc, char *argv[])
     timer_enable_interrupt(timer_select_a);
     timer_start(timer_select_a);
 
-    tfp_printf("Copyright (C) Bridgetek Pte Ltd \r\n"
+    printf("Copyright (C) Bridgetek Pte Ltd \r\n"
         "--------------------------------------------------------------------- \r\n"
         "Welcome to USBH File System Tester Example 1... \r\n"
         "\r\n"

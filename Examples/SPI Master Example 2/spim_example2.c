@@ -51,10 +51,8 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
-
-
 
 #if defined(__FT900__)
 
@@ -183,9 +181,6 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0,myputc);
-
     /* Enable the SPI Master device... */
     sys_enable(sys_device_spi_master);
 
@@ -207,10 +202,10 @@ void setup(void)
 /** Loop */
 void loop(void)
 {
-    tfp_printf("Displaying the current contents of EEPROM\r\n");
+    printf("Displaying the current contents of EEPROM\r\n");
     ee_dump();
 
-    tfp_printf("\r\n" "Writing every Odd location with 1\r\n");
+    printf("\r\n" "Writing every Odd location with 1\r\n");
     {
         uint8_t i;
         for (i = 0; i < EEPROM_SIZE; i+=2)
@@ -220,7 +215,7 @@ void loop(void)
     }
     ee_dump();
 
-    tfp_printf("\r\n" "Filling with example text\r\n");
+    printf("\r\n" "Filling with example text\r\n");
     {
         uint8_t i;
         for(i = 0; i < sizeof(LOREM_IPSUM); ++i)
@@ -230,7 +225,7 @@ void loop(void)
     }
     ee_dump();
 
-    tfp_printf("\r\n" "Clear all values to 0xFF\r\n");
+    printf("\r\n" "Clear all values to 0xFF\r\n");
     {
         uint8_t i;
         for (i = 0; i < EEPROM_SIZE; i++)
@@ -340,39 +335,34 @@ void hexdump(uint8_t *data, uint16_t len)
     j = 0;
     do
     {
-        tfp_printf("0x%04x: ", j);
+        printf("0x%04x: ", j);
         for (i = 0; i < col_width; i++)
         {
             if (i+j < len)
-                tfp_printf("%02X ", data[i+j]);
+                printf("%02X ", data[i+j]);
             else
-                tfp_printf("   ");
+                printf("   ");
         }
 
-        tfp_printf(" | ");
+        printf(" | ");
 
         for (i = 0; i < col_width; i++)
         {
             if (i+j < len)
             {
                 if (data[i+j] < ' ' || data[i+j] > '~' )
-                    tfp_printf(".");
+                    printf(".");
                 else
-                    tfp_printf("%c", data[i+j]);
+                    printf("%c", data[i+j]);
             }
             else
             {
-                tfp_printf(" ");
+                printf(" ");
             }
         }
-        tfp_printf("\r\n");
+        printf("\r\n");
 
         j += col_width;
     }
     while(j < len);
-}
-
-void myputc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
 }

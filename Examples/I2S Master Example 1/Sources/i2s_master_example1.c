@@ -46,8 +46,8 @@
  * ============================================================================
  */
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 
 #if defined(__FT900__)
 #define GPIO_UART0_TX 	48
@@ -204,10 +204,8 @@ void setup()
               uart_data_bits_8,         /* No. Data Bits */
               uart_parity_none,         /* Parity */
               uart_stop_bits_1);        /* No. Stop Bits */
-    /* Initialise printf functionality */
-    init_printf(UART0, myputc);
-
-    /* Print out a welcome message... */
+    
+	/* Print out a welcome message... */
     uart_puts(UART0,
         "\x1B[2J" /* ANSI/VT100 - Clear the Screen */
         "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
@@ -310,7 +308,7 @@ void setup()
     {
         int8_t retval = 0;
 
-        tfp_printf("I2C Write: addr 0x%02x, reg 0x%02x, data 0x%02x\r\n",
+        printf("I2C Write: addr 0x%02x, reg 0x%02x, data 0x%02x\r\n",
                 WM8731_WR_ADDR, i2c_data[i].addr, i2c_data[i].data);
 
         retval = i2cm_write(WM8731_WR_ADDR, i2c_data[i].addr, &(i2c_data[i].data), 1);
@@ -320,13 +318,13 @@ void setup()
             uint8_t status = i2cm_get_status();
             int i;
 
-            tfp_printf("i2cm_write() returned %d\r\n", retval);
+            printf("i2cm_write() returned %d\r\n", retval);
 
             for(i=0; i<8; ++i)
             {
                 if (status & (1<<i))
                 {
-                    tfp_printf("    %s\r\n",I2C_statusbits[i]);
+                    printf("    %s\r\n",I2C_statusbits[i]);
                 }
             }
         }
@@ -382,10 +380,4 @@ void i2s_ISR(void)
 		i2s_write((uint8_t*)sinwave_16, sizeof(sinwave_16));
 #endif
     }
-}
-
-/* putc function for printf */
-void myputc(void* p, char c)
-{
-    uart_write(p,c);
 }

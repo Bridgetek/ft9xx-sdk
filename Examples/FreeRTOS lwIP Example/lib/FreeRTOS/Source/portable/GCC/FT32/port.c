@@ -125,9 +125,6 @@
 
 /* Hardware includes. */
 #include "ft900.h"
-#ifdef __TFP_PRINTF__
-#include "tinyprintf.h"
-#endif
 
 #define WATCHDOG_ENABLE		0
 

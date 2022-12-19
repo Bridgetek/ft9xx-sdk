@@ -46,8 +46,8 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 
 void setup(void);
 void loop(void);
@@ -88,9 +88,6 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
-
     /* Enable CAN0 and CAN1... */
     sys_enable(sys_device_can0);
     sys_enable(sys_device_can1);
@@ -124,7 +121,7 @@ void loop(void)
     static can_msg_t rx;
 
     /* Output the transmitted message... */
-    tfp_printf("CAN0 TX-> ");
+    printf("CAN0 TX-> ");
     print_can_msg_t(&tx);
 
     /* Transmit the message on CAN0 to CAN1... */
@@ -137,7 +134,7 @@ void loop(void)
     if (ok && can_read(CAN1, &rx) != -1)
     {
         /* Output the received message... */
-        tfp_printf("CAN1 RX<- ");
+        printf("CAN1 RX<- ");
         print_can_msg_t(&rx);
 
         /* Change the data in the received message... */
@@ -147,7 +144,7 @@ void loop(void)
         }
 
         /* Output the transmitted message... */
-        tfp_printf("CAN1 TX-> ");
+        printf("CAN1 TX-> ");
         print_can_msg_t(&rx);
 
         /* Transmit the new message on CAN1 to CAN0... */
@@ -166,7 +163,7 @@ void loop(void)
     if (ok && can_read(CAN0, &rx) != -1)
     {
         /* Output the received message... */
-        tfp_printf("CAN0 RX<- ");
+        printf("CAN0 RX<- ");
         print_can_msg_t(&rx);
 
         /* Store the received data so that it can be transmitted again
@@ -191,12 +188,12 @@ void loop(void)
     {
         can_perror(can_ecode(CAN0));
         can_perror(can_ecode(CAN1));
-        tfp_printf("HALTING.\r\n");
+        printf("HALTING.\r\n");
         for(;;);
     }
 
     /* Insert an empty line so the output can be read easier... */
-    tfp_printf("\r\n");
+    printf("\r\n");
 
     /* Wait a bit... */
     delayms(500);
@@ -221,23 +218,23 @@ void print_can_msg_t(can_msg_t *msg)
     uint8_t i = 0;
 
     if (msg->type == can_type_standard)
-        tfp_printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
+        printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
     else
-        tfp_printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
+        printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
 
     if (msg->rtr == can_rtr_remote_request)
-        tfp_printf("RTR ");
+        printf("RTR ");
     else
-        tfp_printf("    ");
+        printf("    ");
 
-    tfp_printf("{");
+    printf("{");
     for (i = 0; i < msg->dlc; ++i)
     {
-        tfp_printf("0x%02x", msg->data[i]);
+        printf("0x%02x", msg->data[i]);
         if (i < (msg->dlc - 1))
-            tfp_printf(",");
+            printf(",");
     }
-    tfp_printf("}"
+    printf("}"
            "\r\n");
 }
 
@@ -262,24 +259,19 @@ void can_perror(uint8_t errno)
 
     if (errno & 0xDF)
     {
-        tfp_printf("Error whilst ");
+        printf("Error whilst ");
 
         if (errno & (1 << 5))
-            tfp_printf("%s : \r\n",direction[0]);
+            printf("%s : \r\n",direction[0]);
         else
-            tfp_printf("%s : \r\n",direction[1]);
+            printf("%s : \r\n",direction[1]);
 
-        if (errno & (1 << 7)) tfp_printf("\t%s \r\n", error_codes[0]);
-        if (errno & (1 << 6)) tfp_printf("\t%s \r\n", error_codes[1]);
-        if (errno & (1 << 4)) tfp_printf("\t%s \r\n", error_codes[2]);
-        if (errno & (1 << 3)) tfp_printf("\t%s \r\n", error_codes[3]);
-        if (errno & (1 << 2)) tfp_printf("\t%s \r\n", error_codes[4]);
-        if (errno & (1 << 1)) tfp_printf("\t%s \r\n", error_codes[5]);
-        if (errno & (1 << 0)) tfp_printf("\t%s \r\n", error_codes[6]);
+        if (errno & (1 << 7)) printf("\t%s \r\n", error_codes[0]);
+        if (errno & (1 << 6)) printf("\t%s \r\n", error_codes[1]);
+        if (errno & (1 << 4)) printf("\t%s \r\n", error_codes[2]);
+        if (errno & (1 << 3)) printf("\t%s \r\n", error_codes[3]);
+        if (errno & (1 << 2)) printf("\t%s \r\n", error_codes[4]);
+        if (errno & (1 << 1)) printf("\t%s \r\n", error_codes[5]);
+        if (errno & (1 << 0)) printf("\t%s \r\n", error_codes[6]);
     }
-}
-
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
 }

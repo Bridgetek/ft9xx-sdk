@@ -46,8 +46,8 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include "ft900.h"
-#include "tinyprintf.h"
 
 #if defined(__FT930__)
 #define USBD_VBUS_DTC_PIN			39
@@ -119,23 +119,23 @@ void __attribute__((optimize("O0"))) ft900_bcd_detection(void)
 		if (reg & 1)
 		{
 			/* DCP mode found */
-			tfp_printf("DCP mode found \r\n");
+			printf("DCP mode found \r\n");
 		}
 		else if (reg & 2)
 		{
 			/* CDP mode found */
-			tfp_printf("CDP mode found \r\n");
+			printf("CDP mode found \r\n");
 		}
 		else if (reg & 4)
 		{
 			/* SDP mode found */
-			tfp_printf("SDP mode found \r\n");
+			printf("SDP mode found \r\n");
 		}
 		else
 		{
 			/* No charging port detected */
 			/* or Wrong mode detected */
-			tfp_printf("No charging port detected !!!!, reg: %02X \r\n", reg);
+			printf("No charging port detected !!!!, reg: %02X \r\n", reg);
 		}
 	}
 
@@ -176,12 +176,9 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0,myputc);
-
-/* This example performs BCD detection whenever a USB connection is detected.
- * Otherwise, BCD is independent of VBUS detection.
- */
+	/* This example performs BCD detection whenever a USB connection is detected.
+	 * Otherwise, BCD is independent of VBUS detection.
+	 */
 	// Disable device connect/disconnect/host reset detection.
 	SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_DIS_DEV;
 	SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_CONN_DEV;
@@ -206,7 +203,7 @@ void setup(void)
 	delayms(1);
 	if (vbus_detect == 0)
 	{
-		tfp_printf("Please plug in your USB cable \r\n");
+		printf("Please plug in your USB cable \r\n");
 	}
 
 }
@@ -239,10 +236,4 @@ void loop(void)
 		bcd_detect = 0;
 		ft900_bcd_detection();
 	}
-}
-
-void myputc(void* p, char c)
-{
-
-	uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
 }

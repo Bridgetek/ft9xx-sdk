@@ -46,9 +46,9 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h> /* For memset */
 #include <ft900.h>
-#include "tinyprintf.h"
 
 #define EEPROM_ADDR (0xA0)
 #define EEPROM_SIZE (128/8)
@@ -99,10 +99,8 @@ void setup(void)
         "Read and write to the on-board MAC address EEPROM (24AA02E48T) \r\n"
         "--------------------------------------------------------------------- \r\n"
         );
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0,myputc);
-
-    /* Enable the I2C Slave device... */
+    
+	/* Enable the I2C Slave device... */
     sys_enable(sys_device_i2c_master);
 
 #if I2C_CHANNEL == 0
@@ -135,12 +133,12 @@ void loop(void)
     uint8_t eeprom_buffer[EEPROM_SIZE] = {0};
 
     /* Read all of EEPROM and dump it out to the user... */
-    tfp_printf("\r\n" "Reading all %d bytes of EEPROM\r\n",EEPROM_SIZE);
+    printf("\r\n" "Reading all %d bytes of EEPROM\r\n",EEPROM_SIZE);
 
     ee_dump();
 
     /* Set all of EEPROM... */
-    tfp_printf("\r\n" "Setting the EEPROM to 0xBB\r\n");
+    printf("\r\n" "Setting the EEPROM to 0xBB\r\n");
 
     memset(eeprom_buffer, 0xBB, EEPROM_SIZE);
     ee_write(0, eeprom_buffer, EEPROM_SIZE);
@@ -201,40 +199,34 @@ void hexdump(uint8_t *data, uint16_t len)
     j = 0;
     do
     {
-        tfp_printf("0x%04x: ", j);
+        printf("0x%04x: ", j);
         for (i = 0; i < col_width; i++)
         {
             if (i+j < len)
-                tfp_printf("%02X ", data[i+j]);
+                printf("%02X ", data[i+j]);
             else
-                tfp_printf("   ");
+                printf("   ");
         }
 
-        tfp_printf(" | ");
+        printf(" | ");
 
         for (i = 0; i < col_width; i++)
         {
             if (i+j < len)
             {
                 if (data[i+j] < ' ' || data[i+j] > '~' )
-                    tfp_printf(".");
+                    printf(".");
                 else
-                    tfp_printf("%c", data[i+j]);
+                    printf("%c", data[i+j]);
             }
             else
             {
-                tfp_printf(" ");
+                printf(" ");
             }
         }
-        tfp_printf("\r\n");
+        printf("\r\n");
 
         j += col_width;
     }
     while(j < len);
-}
-
-/** Printf putc */
-void myputc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
 }

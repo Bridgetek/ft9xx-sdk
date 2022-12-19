@@ -45,8 +45,8 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include "ft900.h"
-#include "tinyprintf.h"
 
 #define QCIF_HBLANK (12)
 #define QCIF_WIDTH (176+QCIF_HBLANK)
@@ -94,32 +94,32 @@ void hexdump(uint8_t *data, uint16_t len)
     j = 0;
     do
     {
-        tfp_printf("0x%04x: ", j);
+        printf("0x%04x: ", j);
         for (i = 0; i < 32; i++)
         {
             if (i+j < len)
-                tfp_printf("%02X ", data[i+j]);
+                printf("%02X ", data[i+j]);
             else
-                tfp_printf("   ");
+                printf("   ");
         }
 
-        tfp_printf(" | ");
+        printf(" | ");
 
         for (i = 0; i < 32; i++)
         {
             if (i+j < len)
             {
                 if (data[i+j] < ' ' || data[i+j] > '~' )
-                    tfp_printf(".");
+                    printf(".");
                 else
-                    tfp_printf("%c", data[i+j]);
+                    printf("%c", data[i+j]);
             }
             else
             {
-                tfp_printf(" ");
+                printf(" ");
             }
         }
-        tfp_printf("\r\n");
+        printf("\r\n");
 
         j += 32;
     }
@@ -152,9 +152,6 @@ void setup(void)
         "Get a frame from a CMOS Camera and print it out to the console.\r\n"
         "--------------------------------------------------------------------- \r\n"
         );
-
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
 
     /* Set up the Camera Interface */
     cam_disable_interrupt();
@@ -259,7 +256,7 @@ void loop(void)
 
     /* Wait for a frame to be captured... */
     while(camera_line < QCIF_HEIGHT);
-    tfp_printf("%d by %d ASCII Art\r\n", QCIF_HEIGHT/LINE_STEP, QCIF_WIDTH/COL_STEP);
+    printf("%d by %d ASCII Art\r\n", QCIF_HEIGHT/LINE_STEP, QCIF_WIDTH/COL_STEP);
 
     for (line = 0; line < QCIF_HEIGHT; line+=LINE_STEP)
     {
@@ -580,9 +577,4 @@ void ov9650_init(void)
     delayms(250);
 
     i2cm_write(OV9650_I2C_ADDR, 0, init_qcif, sizeof(init_qcif));
-}
-
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
 }

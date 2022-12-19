@@ -47,9 +47,9 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 
 #define MIN(a,b) (((a)<(b))?a:b)
 #define MAX(a,b) (((a)>(b))?a:b)
@@ -233,9 +233,6 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0,myputc);
-
     /* Enable the SPI Master device... */
     sys_enable(sys_device_spi_master);
 
@@ -244,7 +241,7 @@ void setup(void)
     spi_option(SPIM, spi_option_bus_width, 4);
 
     /* Initialise the LCD... */
-    tfp_printf("Initialising the LCD\r\n");
+    printf("Initialising the LCD\r\n");
 
     gpio_function(GPIO_RS, PAD_RS); gpio_dir(GPIO_RS, pad_dir_output);
     gpio_function(GPIO_E, PAD_E); gpio_dir(GPIO_E, pad_dir_output);
@@ -423,9 +420,4 @@ void lcd_puts(char* s)
 void lcd_goto(uint8_t line, uint8_t col)
 {
     lcd_write8(0, HD44780_SET_DDRAM_ADDR(HD44780_DDRAM_ADDR(line,col)));
-}
-
-void myputc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
 }

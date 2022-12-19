@@ -48,6 +48,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include "ft900.h"
 
 /* Change this value in order to change the size of the buffer being used */

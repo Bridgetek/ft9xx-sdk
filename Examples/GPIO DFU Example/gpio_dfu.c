@@ -47,7 +47,7 @@
  */
 
 #include <stdint.h>
-
+#include <stdio.h>
 #include <ft900.h>
 #include <ft900_startup_dfu.h>
 

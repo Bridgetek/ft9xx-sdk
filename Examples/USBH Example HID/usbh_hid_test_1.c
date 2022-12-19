@@ -49,6 +49,7 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include <ft900.h>
 #include <ft900_usb.h>
@@ -56,9 +57,6 @@
 #include <ft900_usbh_hid.h>
 // For startup DFU mode optional feature.
 #include <ft900_startup_dfu.h>
-
-/* UART support for printf output. */
-#include "tinyprintf.h"
 
 /* CONSTANTS ***********************************************************************/
 
@@ -72,19 +70,9 @@
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}
-
 void ISR_timer(void)
 {
-	//tfp_printf("ISR_timer");;
+	//printf("ISR_timer");;
     if (timer_is_interrupted(timer_select_a))
     {
     	// Call USB timer handler to action transaction and hub timers.
@@ -111,28 +99,28 @@ void hid_testing(USBH_device_handle hHIDdev, USBH_interface_handle hHID)
 
 	if (USBH_device_get_vid_pid(hHIDdev, &usbVid, &usbPid) == USBH_OK)
 	{
-		tfp_printf("VID: %04x PID: %04x\r\n", usbVid, usbPid);
+		printf("VID: %04x PID: %04x\r\n", usbVid, usbPid);
 	}
 	if (USBH_device_get_info(hHIDdev, &devInfo) == USBH_OK)
 	{
-		tfp_printf("Speed: %d %s \r\n", devInfo.speed, speed[devInfo.speed]);
-	    tfp_printf("Address: %d \r\n", devInfo.addr);
+		printf("Speed: %d %s \r\n", devInfo.speed, speed[devInfo.speed]);
+	    printf("Address: %d \r\n", devInfo.addr);
 	}
 
 	hidDesc = (USB_hid_descriptor *)&hidDescBuffer;
 	if (USBH_HID_get_hid_descriptor(&hidCtx, sizeof(USB_hid_descriptor), hidDescBuffer) == USBH_OK)
 	{
-		tfp_printf("Number of report descriptors %d\r\n", hidDesc->bNumDescriptors);
+		printf("Number of report descriptors %d\r\n", hidDesc->bNumDescriptors);
 
 		// If there are multiple descriptor get them all.
 		if (hidDesc->bNumDescriptors > 1)
 		{
 			USBH_HID_get_hid_descriptor(&hidCtx, hidDesc->bLength, hidDescBuffer);
 		}
-		tfp_printf("HID descriptor: ");
+		printf("HID descriptor: ");
 		for (i = 0; i < hidDesc->bLength; i++)
-			tfp_printf("%02x ", hidDescBuffer[i]);
-		tfp_printf("\r\n");
+			printf("%02x ", hidDescBuffer[i]);
+		printf("\r\n");
 
 		// For each report descriptor read it in.
 		for (desc = 1; desc <= hidDesc->bNumDescriptors; desc++)
@@ -142,21 +130,21 @@ void hid_testing(USBH_device_handle hHIDdev, USBH_interface_handle hHID)
 			uint8_t type = hidDescBuffer[(3 * (desc - 1)) + 6];
 			uint16_t size = hidDescBuffer[(3 * (desc - 1)) + 7] + (hidDescBuffer[(3 * (desc - 1)) + 8] << 8);
 
-			tfp_printf("Report descriptor %d type 0x%x size %u\r\n", desc, type, size);
+			printf("Report descriptor %d type 0x%x size %u\r\n", desc, type, size);
 
 			if (USBH_HID_get_report_descriptor(&hidCtx, desc, size, buffer) == USBH_OK)
 			{
-				tfp_printf("Report descriptor %d: ", desc);
+				printf("Report descriptor %d: ", desc);
 				for (i = 0; i < size; i++)
-					tfp_printf("%02x ", buffer[i]);
-				tfp_printf("\r\n");
+					printf("%02x ", buffer[i]);
+				printf("\r\n");
 			}
 		}
 	}
 
-	tfp_printf("Setting idle\r\n");
+	printf("Setting idle\r\n");
     USBH_HID_set_idle(&hidCtx, 0);
-    tfp_printf("Reports from device %d bytes:\r\n", USBH_HID_get_report_size_in(&hidCtx));
+    printf("Reports from device %d bytes:\r\n", USBH_HID_get_report_size_in(&hidCtx));
 
     while (1)
     {
@@ -167,29 +155,29 @@ void hid_testing(USBH_device_handle hHIDdev, USBH_interface_handle hHID)
         if (status == USBH_OK)
         {
             for (i = 0; i < count; i++)
-                tfp_printf("%02x ", buffer[i]);
-            tfp_printf("\r\n");
+                printf("%02x ", buffer[i]);
+            printf("\r\n");
         }
         else
         {
             switch (status)
             {
             case USBH_ERR_TIMEOUT:
-                tfp_printf("Timeout\r\n"); break;
+                printf("Timeout\r\n"); break;
             case USBH_ERR_HALTED:
-                tfp_printf("Halted\r\n"); break;
+                printf("Halted\r\n"); break;
             case USBH_ERR_NOT_FOUND:
-                tfp_printf("Not found\r\n"); break;
+                printf("Not found\r\n"); break;
             case USBH_ERR_REMOVED:
-                tfp_printf("Removed\r\n"); break;
+                printf("Removed\r\n"); break;
             case USBH_ERR_DATA_BUF:
-                tfp_printf("Data buf error\r\n"); break;
+                printf("Data buf error\r\n"); break;
             case USBH_ERR_RESOURCES:
-                tfp_printf("Resources\r\n"); break;
+                printf("Resources\r\n"); break;
             case USBH_ERR_USBERR:
-                tfp_printf("USB error\r\n"); break;
+                printf("USB error\r\n"); break;
             default:
-                tfp_printf("Unknown error\r\n"); break;
+                printf("Unknown error\r\n"); break;
             }
             if (status != USBH_ERR_TIMEOUT)
             	break; //exit while loop if any error
@@ -217,7 +205,7 @@ int8_t hub_scan_for_hid(USBH_device_handle hDev, int level)
        			if (usbClass == USB_CLASS_HID)
        			//if (usbClass == USB_CLASS_VENDOR)
        			{
-       			    tfp_printf("HID device found at level %d\r\n", level);
+       			    printf("HID device found at level %d\r\n", level);
        				hid_testing(hDev, hInterface);
        			}
 	        }
@@ -257,7 +245,7 @@ uint8_t usbh_testing(void)
 		USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
 		if (connect == USBH_STATE_NOTCONNECTED)
 		{
-			tfp_printf("\r\nPlease plug in a USB Device\r\n");
+			printf("\r\nPlease plug in a USB Device\r\n");
 
 			// Detect usb device connect
 			do
@@ -266,7 +254,7 @@ uint8_t usbh_testing(void)
 				USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
 			} while (connect == USBH_STATE_NOTCONNECTED);
 		}
-		tfp_printf("\r\nUSB Device Detected\r\n");
+		printf("\r\nUSB Device Detected\r\n");
 
 		do{
 			status = USBH_process();
@@ -275,11 +263,11 @@ uint8_t usbh_testing(void)
 
 		if (connect == USBH_STATE_ENUMERATED)
 		{
-			tfp_printf("USB Devices Enumerated\r\n");
+			printf("USB Devices Enumerated\r\n");
 		}
 		else
 		{
-			tfp_printf("USB Devices Partially Enumerated\r\n");
+			printf("USB Devices Partially Enumerated\r\n");
 		}
 
 		// Get the first device (device on root hub)
@@ -287,7 +275,7 @@ uint8_t usbh_testing(void)
 		if (status != USBH_OK)
 		{
 			// Report the error code.
-			tfp_printf("%d\r\n", status);
+			printf("%d\r\n", status);
 		}
 		else
 		{
@@ -299,9 +287,9 @@ uint8_t usbh_testing(void)
 		{
 			if(status == USBH_ERR_NOT_FOUND)
 			{
-				tfp_printf("HID device isn't found!\r\n");
+				printf("HID device isn't found!\r\n");
 			}
-			tfp_printf("\r\nPlease remove the connected USB Device\r\n");
+			printf("\r\nPlease remove the connected USB Device\r\n");
 		}
 		// Detect usb device disconnect
 		do
@@ -344,10 +332,7 @@ int main(void)
         "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
     	);
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0, tfp_putc);
-
-	sys_enable(sys_device_timer_wdt);
+    sys_enable(sys_device_timer_wdt);
 
     interrupt_attach(interrupt_timers, (int8_t)interrupt_timers, ISR_timer);
     interrupt_enable_globally();
@@ -358,7 +343,7 @@ int main(void)
     timer_enable_interrupt(timer_select_a);
     timer_start(timer_select_a);
 
-    tfp_printf("Copyright (C) Bridgetek Pte Ltd \r\n"
+    printf("Copyright (C) Bridgetek Pte Ltd \r\n"
         "--------------------------------------------------------------------- \r\n"
         "Welcome to USBH HID Tester Example 1... \r\n"
         "\r\n"

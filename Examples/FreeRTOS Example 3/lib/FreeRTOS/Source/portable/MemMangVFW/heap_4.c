@@ -90,7 +90,6 @@ task.h is included from an application file. */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "kernel.h"
-#include "tinyprintf.h"
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
@@ -216,9 +215,9 @@ void *pvReturn = NULL;
 				mtCOVERAGE_TEST_MARKER();
 			}
 #if (VFW_HEAP_DEBUG == 1)
-		    tfp_printf("----------------\n");
-		    tfp_printf("xWantedSize: %u\n", xWantedSize);
-		    tfp_printf("ucHeap =%08lX\n", ((uint32_t)&ucHeap[ portBYTE_ALIGNMENT ] ));
+		    printf("----------------\n");
+		    printf("xWantedSize: %u\n", xWantedSize);
+		    printf("ucHeap =%08lX\n", ((uint32_t)&ucHeap[ portBYTE_ALIGNMENT ] ));
 #endif
 
 			if( ( xWantedSize > 0 ) && ( xWantedSize <= xFreeBytesRemaining[CurHeapIdx] ) )
@@ -320,7 +319,7 @@ void *pvReturn = NULL;
 
 	configASSERT( ( ( ( uint32_t ) pvReturn ) & portBYTE_ALIGNMENT_MASK ) == 0 );
 #if (VFW_HEAP_DEBUG == 1)
-	 tfp_printf("pvReturn =%08lX, %08X\n", (uint32_t)pvReturn, pxBlock->xBlockSize );
+	 printf("pvReturn =%08lX, %08X\n", (uint32_t)pvReturn, pxBlock->xBlockSize );
 #endif
 
 	return pvReturn;
@@ -332,7 +331,7 @@ void vPortFree( void *pv )
 uint8_t *puc = ( uint8_t * ) pv;
 BlockLink_t *pxLink;
 
-	tfp_printf("FREE: %08lX\n", (uint32_t)pv);
+	printf("FREE: %08lX\n", (uint32_t)pv);
 	if( pv != NULL )
 	{
 		/* The memory being freed will have an BlockLink_t structure immediately
@@ -342,7 +341,7 @@ BlockLink_t *pxLink;
 		/* This casting is to keep the compiler from issuing warnings. */
 		pxLink = ( void * ) puc;
 #if (VFW_HEAP_DEBUG == 1)
-		tfp_printf("Block Size: %08X\n",  pxLink->xBlockSize);
+		printf("Block Size: %08X\n",  pxLink->xBlockSize);
 #endif
 		/* Check the block is actually allocated. */
 		configASSERT( ( pxLink->xBlockSize & xBlockAllocatedBit ) != 0 );
@@ -511,7 +510,7 @@ bool xPortSwitchHeap(e_HeapTypes heap, uint32_t heapStartAdr)
 {
 	if(heap == User_Heap){
 #if (VFW_HEAP_DEBUG == 1)
-		tfp_printf("switched to user heap!\n");
+		printf("switched to user heap!\n");
 #endif
 		heapStartAdr += 1024; // A buffer of 1KB
 		CurHeapIdx = (uint8_t)User_Heap;
@@ -529,7 +528,7 @@ bool xPortSwitchHeap(e_HeapTypes heap, uint32_t heapStartAdr)
 		CurHeapIdx = (uint8_t)Kernel_Heap;
 		ucHeap = KernelHeap;
 #if (VFW_HEAP_DEBUG == 1)
-		tfp_printf("switched to kernel heap!\n");
+		printf("switched to kernel heap!\n");
 #endif
 		return true;
 	}

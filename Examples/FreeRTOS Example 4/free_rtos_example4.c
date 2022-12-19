@@ -54,9 +54,6 @@
 #include "timers.h"
 #include "semphr.h"
 #include "list.h"
-#include "tinyprintf.h"
-
-
 
 #ifdef __FT930__
 #define MAX_TASK 5
@@ -79,15 +76,6 @@ static void prvPrintTask(void *pvParameters);
 extern int memcmp(const void*, const void*, size_t);
 extern size_t strlen(const char *);
 
-
-
-/** tfp_printf putc
- *  @param p Parameters
- *  @param c The character to write */
-void myputc(void* p, char c) {
-	uart_write((ft900_uart_regs_t*) p, (uint8_t) c);
-}
-
 int main(void)
 {
 	/* Peripheral reset */
@@ -109,9 +97,6 @@ int main(void)
 		UART_DIVIDER_19200_BAUD, uart_data_bits_8, uart_parity_none,
 		uart_stop_bits_1);
 
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, myputc);
-
 	/* Print out a welcome message... */
 	uart_puts(UART0,
 		"\x1B[2J" /* ANSI/VT100 - Clear the Screen */
@@ -124,7 +109,7 @@ int main(void)
 		"--------------------------------------------------------------------- \r\n\r\n");
 	frt_demo_setup();
 
-	tfp_printf("Should never reach here!\n");
+	printf("Should never reach here!\n");
 	for (;;);
 }
 
@@ -251,7 +236,7 @@ static void DisplayTask(tskTCB* tcb, eTaskState state, uint32_t runTime)
 			break;
 	}
 
-	tfp_printf("%02d %7s 0x%08x %d %s 0x%08x 0x%08x %04d 0x%08x %d%%\r\n",
+	printf("%02d %7s 0x%08x %d %s 0x%08x 0x%08x %04d 0x%08x %d%%\r\n",
 		uxTCBNumber,
 		tcb->pcTaskName,
 		(unsigned int)tcb,
@@ -267,7 +252,7 @@ static void DisplayTask(tskTCB* tcb, eTaskState state, uint32_t runTime)
 
 static void DisplayTaskInfo()
 {
-	tfp_printf("FreeRTOS Tasks\r\n");
+	printf("FreeRTOS Tasks\r\n");
 	uint32_t runTime = 0;
 
 	// get the total runtime counter
@@ -315,7 +300,7 @@ static void DisplayTaskInfo()
 	}
 #endif
 
-	tfp_printf("\r\n");
+	printf("\r\n");
 }
 
 
@@ -387,7 +372,7 @@ static void DisplayQueueInfo()
 
 #endif /* configQUEUE_REGISTRY_SIZE */
 
-	tfp_printf("FreeRTOS Queues\r\n");
+	printf("FreeRTOS Queues\r\n");
 #if ( configQUEUE_REGISTRY_SIZE > 0 )
 	for (int i=0; i<configQUEUE_REGISTRY_SIZE; i++) {
 		xQUEUE* myQueue = (xQUEUE*)xQueueRegistry[i].xHandle;
@@ -402,7 +387,7 @@ static void DisplayQueueInfo()
 #else
 			char* ucQueueType = "Unknown";
 #endif
-			tfp_printf("%s 0x%08x %d %d %d %d %d %s\r\n",
+			printf("%s 0x%08x %d %d %d %d %d %s\r\n",
 					xQueueRegistry[i].pcQueueName,
 					(unsigned int)myQueue,
 					(int)myQueue->xTasksWaitingToSend.uxNumberOfItems,
@@ -415,15 +400,15 @@ static void DisplayQueueInfo()
 		}
 	}
 #endif
-	tfp_printf("\r\n");
+	printf("\r\n");
 }
 
 void TimerCallbackOneShot( TimerHandle_t xTimer ) {
-	tfp_printf("timer oneshot\r\n");
+	printf("timer oneshot\r\n");
 }
 
 void TimerCallbackAutoReload( TimerHandle_t xTimer ) {
-	tfp_printf("timer autoreload\r\n");
+	printf("timer autoreload\r\n");
 }
 
 
@@ -453,11 +438,11 @@ static void DisplayTimerInfo()
 		#endif
 	} xTIMER;
 
-	tfp_printf("FreeRTOS Timers\r\n");
+	printf("FreeRTOS Timers\r\n");
 	for (int i=0; i<10; i++) {
 		xTIMER* myTimer = (xTIMER*)timer[i];
 		if (myTimer != NULL) {
-			tfp_printf("0x%08x %s 0x%08x %06d %s %s\r\n",
+			printf("0x%08x %s 0x%08x %06d %s %s\r\n",
 				(int)myTimer->pvTimerID,
 				myTimer->pcTimerName,
 				(unsigned int)myTimer,
@@ -468,7 +453,7 @@ static void DisplayTimerInfo()
 				);
 		}
 	}
-	tfp_printf("\r\n");
+	printf("\r\n");
 }
 
 
@@ -489,10 +474,10 @@ void DisplayHeapInfo()
 	} BlockLink_t;
 
 
-	tfp_printf("FreeRTOS Heap Usage\r\n");
+	printf("FreeRTOS Heap Usage\r\n");
 
 	//if (id != NULL) {
-	//	tfp_printf(id);
+	//	printf(id);
 	//}
 
 	unsigned int totalBytes = 0;
@@ -507,7 +492,7 @@ void DisplayHeapInfo()
 
 #if (FT32_PORT_HEAP == 1)
 	int heapCurrSize = pvPortGetHeapEnd() - pvPortGetHeapStart();
-	tfp_printf("Heap 1 0x%08x 0x%08x %d %d\r\n",
+	printf("Heap 1 0x%08x 0x%08x %d %d\r\n",
 		pvPortGetHeapStart(),
 		pvPortGetHeapEnd(),
 		heapCurrSize,
@@ -515,7 +500,7 @@ void DisplayHeapInfo()
 	);
 	totalBytes += heapCurrSize;
 
-	tfp_printf("Heap 1 0x%08x 0x%08x %d %d\r\n",
+	printf("Heap 1 0x%08x 0x%08x %d %d\r\n",
 		pvPortGetHeapEnd(),
 		pvPortGetHeapStart() + configTOTAL_HEAP_SIZE,
 		configTOTAL_HEAP_SIZE - heapCurrSize,
@@ -529,7 +514,7 @@ void DisplayHeapInfo()
 	{
 		unsigned int size = ptr->pxNextFreeBlock > 0 ?
 			(int)ptr->pxNextFreeBlock - (int)ptr : 0;
-		tfp_printf("Heap 2 0x%08x 0x%08x %d %d\r\n",
+		printf("Heap 2 0x%08x 0x%08x %d %d\r\n",
 			ptr,
 			ptr->pxNextFreeBlock,
 			size,
@@ -557,7 +542,7 @@ void DisplayHeapInfo()
 	{
 		if (ptr->pxNextFreeBlock != NULL) {
 			unsigned int size = (int)ptr->pxNextFreeBlock - (int)ptr;
-			tfp_printf("Heap %d 0x%08x 0x%08x %05d %05d\r\n",
+			printf("Heap %d 0x%08x 0x%08x %05d %05d\r\n",
 				FT32_PORT_HEAP,
 				(unsigned int)ptr,
 				(unsigned int)ptr->pxNextFreeBlock,
@@ -569,8 +554,8 @@ void DisplayHeapInfo()
 	}
 #endif
 
-	tfp_printf("TotalBytes %d\r\n", totalBytes);
-	tfp_printf("\r\n");
+	printf("TotalBytes %d\r\n", totalBytes);
+	printf("\r\n");
 }
 
 
@@ -579,7 +564,7 @@ static int deleteQueue(int index)
 {
 	if (index < sizeof(queue)/sizeof(queue[0])) {
 		if (queue[index] != NULL) {
-			//tfp_printf("Delete queue %d\r\n", index);
+			//printf("Delete queue %d\r\n", index);
 			vQueueDelete(queue[index]);
 			queue[index] = NULL;
 			return 1;
@@ -593,7 +578,7 @@ static int deleteTask(int index)
 #if ( INCLUDE_vTaskDelete == 1 )
 	if (index < sizeof(task)/sizeof(task[0])) {
 		if (task[index] != NULL) {
-			tfp_printf("Delete task %d\r\n", index);
+			printf("Delete task %d\r\n", index);
 			vTaskDelete(task[index]);
 			task[index] = NULL;
 			return 1;
@@ -613,7 +598,7 @@ static int createTask()
 	if (index < MAX_TASK) {
 		char* taskName = "Print ";
 		taskName[strlen(taskName)-1] = '0'+ index++;
-		tfp_printf("Create task %s\r\n", taskName);
+		printf("Create task %s\r\n", taskName);
 		xTaskCreate(prvPrintTask, taskName, 1024,
 				"PrintX pppppppppppppppppppppppppppppppppppppppppp\r\n", 1, &task[index]);
 		return 1;
@@ -628,7 +613,7 @@ static void prvNewPrintString(portCHAR *pcString)
 	// Add a breakpoint on xSemaphoreTake or xSemaphoreGive
 	xSemaphoreTake(xMutex, delay);
 
-	tfp_printf("\r\n%s\r\n", pcString);
+	printf("\r\n%s\r\n", pcString);
 	DisplayTaskInfo();
 	DisplayQueueInfo();
 	DisplayTimerInfo();

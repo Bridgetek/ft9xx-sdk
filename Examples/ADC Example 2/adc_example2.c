@@ -46,8 +46,8 @@
  * ============================================================================
  */
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 #include <string.h>
 
 void setup(void);
@@ -156,8 +156,6 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
     /* Enable the ADCs... */
     sys_enable(sys_device_adc);
 
@@ -179,11 +177,6 @@ void setup(void)
     /* Start the ADC and use ADC1... */
     adc_start(1);
     
-}
-
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
 }
 
 void adcISR()
@@ -241,9 +234,9 @@ void loop(void)
 		/* We will only output samples for every LOOP_COUNT count */
 		if (!uLoopCount) {
 			for (uint32_t i=0; i<ADC_INTERRUPT_READ_SAMPLE; i++) {
-				tfp_printf("%03d ", (uint16_t)g_u16AppBuffer[i]);
+				printf("%03d ", (uint16_t)g_u16AppBuffer[i]);
 			}
-			tfp_printf("\n\n");
+			printf("\n\n");
 		}
 	}
 	else {

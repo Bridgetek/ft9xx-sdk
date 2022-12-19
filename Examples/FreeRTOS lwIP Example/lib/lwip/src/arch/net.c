@@ -56,8 +56,7 @@
 
 //#define NET_DEBUG
 #ifdef NET_DEBUG
-#include "tinyprintf.h"
-#define NET_DEBUG_PRINTF(...) do {tfp_printf(__VA_ARGS__);} while (0)
+#define NET_DEBUG_PRINTF(...) do {printf(__VA_ARGS__);} while (0)
 #else
 #define NET_DEBUG_PRINTF(...)
 #endif

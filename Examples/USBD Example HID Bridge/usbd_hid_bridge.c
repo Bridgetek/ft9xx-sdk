@@ -49,6 +49,7 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -58,9 +59,6 @@
 #include <ft900_usb_dfu.h>
 #include <ft900_usbd_dfu.h>
 #include <ft900_usbdx.h>
-
-/* UART support for printf output. */
-#include "tinyprintf.h"
 
 /* For MikroC const qualifier will place variables in Flash
  * not just make them constant.
@@ -810,16 +808,6 @@ void USBDX_pipe_isr(uint16_t pipe_bitfields)
 		USBDX_pipe_process(get_pipe(USBD_EP_1));
 }
 
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-	uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}
-
 void ISR_timer(void)
 {
 	if (timer_is_interrupted(timer_select_a))
@@ -1314,7 +1302,7 @@ void reset_cb(uint8_t status)
 /* For debugging endpoint transactions. */
 void ep_cb(USBD_ENDPOINT_NUMBER ep_number)
 {
-	tfp_printf("EP%d\r\n", ep_number);
+	printf("EP%d\r\n", ep_number);
 }
 
 #define HID_URB_INT_COUNT	4
@@ -1378,9 +1366,9 @@ void keyboard(void)
 #ifdef USBD_HID_UART_KEYS
 							// For debugging display character sent.
 							if (isgraph(msg))// || isspace(msg))
-								tfp_printf("%c", msg);
+								printf("%c", msg);
 							else
-								tfp_printf("\\x%02x", msg);
+								printf("\\x%02x", msg);
 #endif // USBD_HID_UART_KEYS
 
 							// 0x1b is an escape character.
@@ -1438,7 +1426,7 @@ void keyboard(void)
 
 								send_report = 1;
 #ifdef USBD_HID_KEYSCAN_CODES
-								tfp_printf("<%d/%x", keyscan, report_buffer.arrayMap);
+								printf("<%d/%x", keyscan, report_buffer.arrayMap);
 #endif // USBD_HID_KEYSCAN_CODES
 
 								escape = 0;
@@ -1462,7 +1450,7 @@ void keyboard(void)
 
 								send_report = 1;
 #ifdef USBD_HID_KEYSCAN_CODES
-								tfp_printf("<ESC");
+								printf("<ESC");
 #endif // USBD_HID_KEYSCAN_CODES
 							}
 							escape = 0;
@@ -1480,7 +1468,7 @@ void keyboard(void)
 
 						send_report = 1;
 #ifdef USBD_HID_KEYSCAN_CODES
-						tfp_printf(">");
+						printf(">");
 #endif // USBD_HID_KEYSCAN_CODES
 						break;
 
@@ -1571,7 +1559,7 @@ uint8_t usbd_testing(void)
 				keyboard();
 			}
 			delayms(1000); //1s delay to get the device configured
-			tfp_printf("Restarting\r\n");
+			printf("Restarting\r\n");
 		}
 	}
 
@@ -1643,9 +1631,6 @@ int main(void)
 			"\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
 	);
 
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, tfp_putc);
-
 	sys_enable(sys_device_timer_wdt);
 
 	interrupt_attach(interrupt_timers, (int8_t)interrupt_timers, ISR_timer);
@@ -1657,13 +1642,13 @@ int main(void)
 	timer_start(timer_select_a);
 
 	interrupt_attach(interrupt_0, (int8_t)interrupt_0, powermanagement_ISR);
-	tfp_printf("(C) Copyright, Bridgetek Pte Ltd \r\n");
-	tfp_printf("--------------------------------------------------------------------- \r\n");
-	tfp_printf("Welcome to USBD HID Bridge Example 1... \r\n");
-	tfp_printf("\r\n");
-	tfp_printf("Emulate a HID device connected to the USB Device Port, bridge buffer\r\n");
-	tfp_printf("from the UART to the HID device.\r\n");
-	tfp_printf("--------------------------------------------------------------------- \r\n");
+	printf("(C) Copyright, Bridgetek Pte Ltd \r\n");
+	printf("--------------------------------------------------------------------- \r\n");
+	printf("Welcome to USBD HID Bridge Example 1... \r\n");
+	printf("\r\n");
+	printf("Emulate a HID device connected to the USB Device Port, bridge buffer\r\n");
+	printf("from the UART to the HID device.\r\n");
+	printf("--------------------------------------------------------------------- \r\n");
 
 	/* Attach the interrupt so it can be called... */
 	interrupt_attach(interrupt_uart0, (uint8_t) interrupt_uart0, uart0ISR);

@@ -34,29 +34,29 @@ rtc_result ext_rtc_reg_dump()
 
 	iRet = i2cm_read(ADDR_RTCC,ADDR_SEC,(uint8_t*)&regs,0x17);checkStatus(iRet);
 
-	tfp_printf("RTCsec 		= %x\r\n",regs.RTCsec);
-	tfp_printf("RTCmin 		= %x\r\n",regs.RTCmin);
-	tfp_printf("RTChour 	= %x\r\n",regs.RTChour);
-	tfp_printf("RTCday 		= %x\r\n",regs.RTCday);
-	tfp_printf("RTCdate 	= %x\r\n",regs.RTCdate);
-	tfp_printf("RTCmth 		= %x\r\n",regs.RTCmth);
-	tfp_printf("RTCyear 	= %x\r\n",regs.RTCyear);
-	tfp_printf("RTCcontrol 	= %x\r\n",regs.RTCcontrol);
-	tfp_printf("RTCosctrim 	= %x\r\n",regs.RTCosctrim);
-	tfp_printf("reserved0 	= %x\r\n",regs.reserved0);
-	tfp_printf("alm0sec 	= %x\r\n",regs.alm0sec);
-	tfp_printf("alm0min 	= %x\r\n",regs.alm0min);
-	tfp_printf("alm0hour 	= %x\r\n",regs.alm0hour);
-	tfp_printf("alm0wkday 	= %x\r\n",regs.alm0wkday);
-	tfp_printf("alm0date 	= %x\r\n",regs.alm0date);
-	tfp_printf("alm0mnth 	= %x\r\n",regs.alm0mnth);
-	tfp_printf("reserved1 	= %x\r\n",regs.reserved1);
-	tfp_printf("alm1sec 	= %x\r\n",regs.alm1sec);
-	tfp_printf("alm1min 	= %x\r\n",regs.alm1min);
-	tfp_printf("alm1hour 	= %x\r\n",regs.alm1hour);
-	tfp_printf("alm1wkday 	= %x\r\n",regs.alm1wkday);
-    tfp_printf("alm1date 	= %x\r\n",regs.alm1date);
-	tfp_printf("alm1mnth 	= %x\r\n",regs.alm1mnth);
+	printf("RTCsec 		= %x\r\n",regs.RTCsec);
+	printf("RTCmin 		= %x\r\n",regs.RTCmin);
+	printf("RTChour 	= %x\r\n",regs.RTChour);
+	printf("RTCday 		= %x\r\n",regs.RTCday);
+	printf("RTCdate 	= %x\r\n",regs.RTCdate);
+	printf("RTCmth 		= %x\r\n",regs.RTCmth);
+	printf("RTCyear 	= %x\r\n",regs.RTCyear);
+	printf("RTCcontrol 	= %x\r\n",regs.RTCcontrol);
+	printf("RTCosctrim 	= %x\r\n",regs.RTCosctrim);
+	printf("reserved0 	= %x\r\n",regs.reserved0);
+	printf("alm0sec 	= %x\r\n",regs.alm0sec);
+	printf("alm0min 	= %x\r\n",regs.alm0min);
+	printf("alm0hour 	= %x\r\n",regs.alm0hour);
+	printf("alm0wkday 	= %x\r\n",regs.alm0wkday);
+	printf("alm0date 	= %x\r\n",regs.alm0date);
+	printf("alm0mnth 	= %x\r\n",regs.alm0mnth);
+	printf("reserved1 	= %x\r\n",regs.reserved1);
+	printf("alm1sec 	= %x\r\n",regs.alm1sec);
+	printf("alm1min 	= %x\r\n",regs.alm1min);
+	printf("alm1hour 	= %x\r\n",regs.alm1hour);
+	printf("alm1wkday 	= %x\r\n",regs.alm1wkday);
+    printf("alm1date 	= %x\r\n",regs.alm1date);
+	printf("alm1mnth 	= %x\r\n",regs.alm1mnth);
 
 __exit:
 	return iRet;

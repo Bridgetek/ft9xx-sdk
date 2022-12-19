@@ -166,7 +166,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.build.config.ft930.debug.d2xx.302436148" name="FT930_Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=" parent="com.brtchip.build.config.ft930.debug.d2xx">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.build.config.ft930.debug.d2xx.302436148" name="FT930_Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="com.brtchip.build.config.ft930.debug.d2xx">
 					<folderInfo id="com.brtchip.build.config.ft930.debug.d2xx.302436148." name="/" resourcePath="">
 						<toolChain id="com.brtchip.toolchain.ft930.debug.d2xx.154176195" name="Bridgetek FT90x GCC" superClass="com.brtchip.toolchain.ft930.debug.d2xx">
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.622899789" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash"/>
@@ -300,7 +300,20 @@
 		<project id="Free RTOS D2XX Example.com.brtchip.ft9xx.build.gcc.proj.d2xx.1659625936" name="FT9xx D2XX Project"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="FT900_Debug">
+			<resource resourceType="PROJECT" workspacePath="/FreeRTOS D2XX Example"/>
+		</configuration>
+		<configuration configurationName="FT930_Debug">
+			<resource resourceType="PROJECT" workspacePath="/FreeRTOS D2XX Example"/>
+		</configuration>
+		<configuration configurationName="FT930_Release">
+			<resource resourceType="PROJECT" workspacePath="/FreeRTOS D2XX Example"/>
+		</configuration>
+		<configuration configurationName="FT900_Release">
+			<resource resourceType="PROJECT" workspacePath="/FreeRTOS D2XX Example"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>

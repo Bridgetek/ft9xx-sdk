@@ -81,9 +81,8 @@
  *
  * See http://www.freertos.org/a00110.html.
  *----------------------------------------------------------*/
-#include "tinyprintf.h"
 
-#define DPrintf	tfp_printf
+#define DPrintf	printf
 /* Tick timer configuration. */
 #define MHz                                         (1000000)
 #define SYSCLK                                      ((unsigned long)100*MHz)

@@ -450,7 +450,7 @@ void init_printf(void *putp, putcf putf)
     stdout_putp = putp;
 }
 
-void tfp_printf(char *fmt, ...)
+void printf(char *fmt, ...)
 {
     va_list va;
     va_start(va, fmt);

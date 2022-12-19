@@ -51,6 +51,7 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -63,8 +64,7 @@
 #define DEBUG
 
 #ifdef DEBUG
-#include "tinyprintf.h"
-#define dbg(s,...)	tfp_printf ((s), ##__VA_ARGS__)
+#define dbg(s,...)	printf ((s), ##__VA_ARGS__)
 #else
 #define dbg(s,...)
 #endif
@@ -184,7 +184,6 @@ int no_of_uarts = MAX_UARTS;
 
 void setup(void);
 void debug_uart_init(void);
-void tfp_putc(void* p, char c);
 void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* param2);
 void power_management_ISR(void);
 #ifdef GPIO_REMOTE_WAKEUP
@@ -285,7 +284,7 @@ int main(void)
 #ifndef BDFU
 			STARTUP_DFU(0);
 #else
-			tfp_printf("Switching to DFU");
+			printf("Switching to DFU");
 			if (USBD_DFU_is_runtime()) /* to ward off linkage issue */
 			{
 				GO_BDFU(0x0403, 0x0FDE, 0x2300); // use default VID, PID and REL
@@ -683,11 +682,6 @@ void setup(void)
 		uart_init(i);
 	}
 
-#ifdef DEBUG
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, tfp_putc);
-#endif
-
     /* Print out a welcome message... */
 	dbg("(C) Copyright, Bridgetek Pte. Ltd. \r\n"
 			"--------------------------------------------------------------------- \r\n"
@@ -699,16 +693,6 @@ void setup(void)
 	);
 	dbg("D2XX_Init() called, Result: %d Interfaces: %d\r\n", retVal, D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces);
 
-}
-
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-	uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
 }
 
 /** @name d2xx_callback
@@ -830,13 +814,8 @@ void debug_uart_init(void)
 			"\x1B[2J" /* ANSI/VT100 - Clear the Screen */
 			"\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
 	);
-
-#ifdef DEBUG
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, tfp_putc);
-#endif
-
 }
+
 #if 0
 /* function to calculate the expected XOR checksum for the d2xx configuration */
 uint16_t xorChecksum(const char str[], uint16_t length) {

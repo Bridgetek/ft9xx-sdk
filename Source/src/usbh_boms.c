@@ -177,14 +177,14 @@ int8_t USBH_BOMS_init(USBH_interface_handle hBomsInterface, uint8_t lun, USBH_BO
         }
 
 #ifdef BOMS_DEBUG
-        tfp_printf("BOMS - Device 0x%x\r\n", USBH_HANDLE_ADDR(hBomsDev));
+        printf("BOMS - Device 0x%x\r\n", USBH_HANDLE_ADDR(hBomsDev));
         usbDev = (USBH_device *)USBH_HANDLE_ADDR(hBomsDev);
         usbEp = usbDev->endpoint0;
-        tfp_printf("BOMS - Interface Number %d\r\n", ctx->bomsInterfaceNumber);
-        tfp_printf("BOMS - Finding endpoints in interface 0x%x\r\n", USBH_HANDLE_ADDR(ctx->hBomsInterface));
+        printf("BOMS - Interface Number %d\r\n", ctx->bomsInterfaceNumber);
+        printf("BOMS - Finding endpoints in interface 0x%x\r\n", USBH_HANDLE_ADDR(ctx->hBomsInterface));
 
-        tfp_printf("BOMS - Found Endpoints 0x%x and 0x%x\r\n", USBH_HANDLE_ADDR(hEp1), USBH_HANDLE_ADDR(hEp2));
-        tfp_printf("BOMS - Getting Endpoint Information for 0x%x\r\n", USBH_HANDLE_ADDR(hEp1));
+        printf("BOMS - Found Endpoints 0x%x and 0x%x\r\n", USBH_HANDLE_ADDR(hEp1), USBH_HANDLE_ADDR(hEp2));
+        printf("BOMS - Getting Endpoint Information for 0x%x\r\n", USBH_HANDLE_ADDR(hEp1));
 #endif // BOMS_DEBUG
 
         if (USBH_endpoint_get_info(hEp1, &epInfo) == USBH_OK)
@@ -201,7 +201,7 @@ int8_t USBH_BOMS_init(USBH_interface_handle hBomsInterface, uint8_t lun, USBH_BO
             }
 
 #ifdef BOMS_DEBUG
-            tfp_printf("BOMS - Getting Max LUN 0x%04x 0x%04x 0x%04x 0x%04x\n", ctx, usbDev, usbEp, usbEp->hc_queue);
+            printf("BOMS - Getting Max LUN 0x%04x 0x%04x 0x%04x 0x%04x\n", ctx, usbDev, usbEp, usbEp->hc_queue);
 #endif // BOMS_DEBUG
 
             delayms(50);
@@ -213,33 +213,33 @@ int8_t USBH_BOMS_init(USBH_interface_handle hBomsInterface, uint8_t lun, USBH_BO
 
             ctx->maxLun = maxLun;
 #ifdef BOMS_DEBUG
-            tfp_printf("BOMS - Max LUN %d\n", ctx->maxLun);
+            printf("BOMS - Max LUN %d\n", ctx->maxLun);
 #endif // BOMS_DEBUG
 
             if (lun > maxLun)
             {
 #ifdef BOMS_DEBUG
-            	tfp_printf("BOMS - Getting Max LUN 0x%04x 0x%04x 0x%04x 0x%04x\n", ctx, usbDev, usbEp, usbEp->hc_queue);
+            	printf("BOMS - Getting Max LUN 0x%04x 0x%04x 0x%04x 0x%04x\n", ctx, usbDev, usbEp, usbEp->hc_queue);
 #endif // BOMS_DEBUG
             	return USBH_BOMS_ERR_LUN;
             }
 
 #ifdef BOMS_DEBUG
-            tfp_printf("BOMS - Inquiry LUN %d\n", cLun);
+            printf("BOMS - Inquiry LUN %d\n", cLun);
 #endif // BOMS_DEBUG
             status = boms_scsiInquiry(ctx);
             if (status == USBH_BOMS_OK)
             {
 #ifdef BOMS_DEBUG
-            	tfp_printf("BOMS - Getting Capacity pass %d\n", i);
+            	printf("BOMS - Getting Capacity pass %d\n", i);
 #endif // BOMS_DEBUG
             	status = boms_scsiReadCapacity(ctx);
 
 #ifdef BOMS_DEBUG
             	if (status == USBH_BOMS_OK)
             	{
-            		tfp_printf("BOMS - Capacity 0x%04x%04x LBAs\n", ctx->lba_count >> 16, ctx->lba_count);
-            		tfp_printf("BOMS - LBA size 0x%04x%04x\n", ctx->lba_size >> 16, ctx->lba_size);
+            		printf("BOMS - Capacity 0x%04x%04x LBAs\n", ctx->lba_count >> 16, ctx->lba_count);
+            		printf("BOMS - LBA size 0x%04x%04x\n", ctx->lba_size >> 16, ctx->lba_size);
             	}
 #endif // BOMS_DEBUG
             }
@@ -247,7 +247,7 @@ int8_t USBH_BOMS_init(USBH_interface_handle hBomsInterface, uint8_t lun, USBH_BO
     }
 
 #ifdef BOMS_DEBUG
-    tfp_printf("BOMS - Initialisation finished %x\n", status);
+    printf("BOMS - Initialisation finished %x\n", status);
 #endif // BOMS_DEBUG
     return status;
 }

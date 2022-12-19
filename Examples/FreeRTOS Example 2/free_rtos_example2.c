@@ -48,11 +48,11 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ft900.h>
 #include "assert.h"
-#include "tinyprintf.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
@@ -172,7 +172,7 @@ TaskHandle_t xCreatedTask;
 		{
 			/* An error has been detected in one of the tasks - flash faster. */
 			xDelayPeriod = mainERROR_FLASH_PERIOD;
-			tfp_printf("%s", "*******ERROR!******* Tests Failed!\r\n");
+			printf("%s", "*******ERROR!******* Tests Failed!\r\n");
 			//while(1);
 		}
 
@@ -258,14 +258,14 @@ long lErrorOccurred = pdFALSE;
 		{
 			/* We have never seen an error so increment the counter. */
 			( *pulMemCheckTaskRunningCounter )++;
-			//tfp_printf( "mem check cnt = %d\n",*pulMemCheckTaskRunningCounter );
+			//printf( "mem check cnt = %d\n",*pulMemCheckTaskRunningCounter );
 		}
 		else
 		{
 			/* There has been an error so reset the counter so the check task
 			can tell that an error occurred. */
 			*pulMemCheckTaskRunningCounter = mainCOUNT_INITIAL_VALUE;
-			tfp_printf("%s", "*******ERROR!******* memCheck Error!!!\n");
+			printf("%s", "*******ERROR!******* memCheck Error!!!\n");
 		}
 
 		/* Allocate some memory - just to give the allocator some extra
@@ -277,7 +277,7 @@ long lErrorOccurred = pdFALSE;
 			if( pvMem1 == NULL )
 			{
 				lErrorOccurred = pdTRUE;
-				tfp_printf("%s", "Siz 1 Error!!!\n");
+				printf("%s", "Siz 1 Error!!!\n");
 			}
 			else
 			{
@@ -294,7 +294,7 @@ long lErrorOccurred = pdFALSE;
 			if( pvMem2 == NULL )
 			{
 				lErrorOccurred = pdTRUE;
-				tfp_printf("%s", "Siz 2 Error!!!\n");
+				printf("%s", "Siz 2 Error!!!\n");
 			}
 			else
 			{
@@ -310,7 +310,7 @@ long lErrorOccurred = pdFALSE;
 			pvMem3 = pvPortMalloc( mainMEM_CHECK_SIZE_3 );
 			if( pvMem3 == NULL )
 			{
-				tfp_printf("%s", "Siz 3 Error!!!\n");
+				printf("%s", "Siz 3 Error!!!\n");
 				lErrorOccurred = pdTRUE;
 			}
 			else
@@ -384,29 +384,11 @@ void setup(void)
 					"Test use of Semaphores, Queues, Events, Dynamic Priority Assignment\r\n"
 					"--------------------------------------------------------------------- \r\n");
 
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, myputc);
-
 	frt_start();
 
 	// Control never comes here
 	while(1);
 }
-
-
-
-
-
-
-/** Printf putc
- *  @param p Parameters
- *  @param c The character to write */
-void myputc(void* p, char c)
-{
-	uart_write((ft900_uart_regs_t*) p, (uint8_t) c);
-}
-
-
 
 /*
  * watch dog -- print message and hang about

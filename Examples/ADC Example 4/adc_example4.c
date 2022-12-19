@@ -47,8 +47,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 
 void setup(void);
 void loop(void);
@@ -94,9 +94,6 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
-
     /* Enable the ADCs... */
     sys_enable(sys_device_adc);
 
@@ -121,11 +118,6 @@ void loop(void)
 	delayms(1);
     /* Check that a new sample is available... */
 	adc_read(&adcsample);
-	tfp_printf("ADC 1 = %04d\r", adcsample);
+	printf("ADC 1 = %04d\r", adcsample);
     adc_stop();
-}
-
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
 }

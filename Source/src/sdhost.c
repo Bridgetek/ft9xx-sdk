@@ -507,7 +507,7 @@
 #define COMM_TIMEOUT_U32		(uint32_t)(10000000)
 
 #ifdef SD_HOST_DEBUG
-#define DBG_TIMEOUT()			if(timeout == 0) {tfp_printf("Timeout ERROR @"); tfp_printf(__FILE__); tfp_printf("%d", __LINE__); sdhost_registerdump();}
+#define DBG_TIMEOUT()			if(timeout == 0) {printf("Timeout ERROR @"); printf(__FILE__); printf("%d", __LINE__); sdhost_registerdump();}
 #else /* SD_HOST_DEBUG */
 #define DBG_TIMEOUT()
 #endif /* SD_HOST_DEBUG */
@@ -1287,9 +1287,9 @@ static SDHOST_STATUS sdhost_get_response(uint32_t *response,
 #ifdef SD_HOST_DEBUG
 		for (int i = 0; i < 1; i++)
 		{
-			tfp_printf("%08X", *((unsigned char*) response + i));
+			printf("%08X", *((unsigned char*) response + i));
 		}
-		tfp_printf("\r\n--------------------------------\r\n");
+		printf("\r\n--------------------------------\r\n");
 #endif /* SD_HOST_DEBUG */
 	}
 	else
@@ -1313,9 +1313,9 @@ static SDHOST_STATUS sdhost_get_response(uint32_t *response,
 #ifdef SD_HOST_DEBUG
 			for (int i = 0; i < 4*4; i++)
 			{
-				tfp_printf("0x%02X,", *((unsigned char*) response + i));
+				printf("0x%02X,", *((unsigned char*) response + i));
 			}
-			tfp_printf("\r\n--------------------------------\r\n");
+			printf("\r\n--------------------------------\r\n");
 #endif /* SD_HOST_DEBUG */
 		}
 		else
@@ -1325,9 +1325,9 @@ static SDHOST_STATUS sdhost_get_response(uint32_t *response,
 
 			for (int i = 0; i < 1; i++)
 			{
-				tfp_printf("%08X", *((unsigned char*) response + i));
+				printf("%08X", *((unsigned char*) response + i));
 			}
-			tfp_printf("\r\n--------------------------------\r\n");
+			printf("\r\n--------------------------------\r\n");
 #endif /* SD_HOST_DEBUG */
 		}
 	}
@@ -1506,8 +1506,8 @@ static SDHOST_STATUS sdhost_send_command(uint8_t cmd_index, sdhost_cmd_t cmd_typ
 		uint8_t sdio_special_op, uint32_t cmd_arg, uint32_t *response)
 {
 #ifdef SD_HOST_DEBUG
-	tfp_printf("--------------------------------\r\n");
-	tfp_printf("CMD:%d\r\n",cmd_index );
+	printf("--------------------------------\r\n");
+	printf("CMD:%d\r\n",cmd_index );
 #endif /* SD_HOST_DEBUG */
 	uint32_t timeout;
 	SDHOST_STATUS sdhost_status;
@@ -1605,7 +1605,7 @@ static SDHOST_STATUS sdhost_send_command(uint8_t cmd_index, sdhost_cmd_t cmd_typ
 			/* perform error recovery */
 			sdhost_error_recovery();
 			#ifdef SD_HOST_DEBUG
-				tfp_printf("SDHOST_CMD_TIMEOUT");
+				printf("SDHOST_CMD_TIMEOUT");
 			#endif
 			sdhost_status = SDHOST_CMD_TIMEOUT;
 			goto __exit;
@@ -1700,7 +1700,7 @@ static SDHOST_STATUS sdhost_send_command(uint8_t cmd_index, sdhost_cmd_t cmd_typ
 	{
 		/* Clear error flag */
 #ifdef SD_HOST_DEBUG
-		tfp_printf("\r\nerrStatus = "); printNum((uint32_t) errStatus, 'h', 1);
+		printf("\r\nerrStatus = "); printNum((uint32_t) errStatus, 'h', 1);
 #endif /* SD_HOST_DEBUG */
 		errStatus = 0;
 		sdhost_status = SDHOST_ERROR;
@@ -1712,7 +1712,7 @@ static SDHOST_STATUS sdhost_send_command(uint8_t cmd_index, sdhost_cmd_t cmd_typ
 	{
 		/* Recover SD Host from error */
 #ifdef SD_HOST_DEBUG
-		tfp_printf("SDH_ERR_INT_STATUS");
+		printf("SDH_ERR_INT_STATUS");
 #endif /* SD_HOST_DEBUG */
 		sdhost_error_recovery();
 		sdhost_status = SDHOST_ERROR;
@@ -1803,7 +1803,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 	if (sdhost_status != SDHOST_OK)
 	{
 #ifdef SD_HOST_DEBUG
-		tfp_printf("ERROR %d\r\n", sdhost_status);
+		printf("ERROR %d\r\n", sdhost_status);
 #endif /* SD_HOST_DEBUG */
 		goto __exit;
 	}
@@ -2439,7 +2439,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 SDHOST_STATUS sdhost_abort(void)
 {
 #ifdef SD_HOST_DEBUG
-	tfp_printf("sdhost_abort\r\n");
+	printf("sdhost_abort\r\n");
 #endif /* SD_HOST_DEBUG */
 	SDHOST_STATUS sdhost_status = SDHOST_OK;
 	uint32_t response;
@@ -2450,7 +2450,7 @@ SDHOST_STATUS sdhost_abort(void)
 	if (sdhost_status != SDHOST_OK)
 	{
 #ifdef SD_HOST_DEBUG
-		tfp_printf("ERROR %d\r\n", sdhost_status);
+		printf("ERROR %d\r\n", sdhost_status);
 #endif /* SD_HOST_DEBUG */
 		goto __exit;
 	}
@@ -2490,8 +2490,8 @@ static SDHOST_STATUS sdhost_send_wide_data_cmd(uint8_t cmd_id, uint32_t arg, uin
     SDHOST_STATUS ret = SDHOST_OK;
 
 #ifdef SD_HOST_DEBUG
-	tfp_printf("\r\n--------------------------------\r\n");
-	tfp_printf("\r\nCMD:%d\r\n",cmd_id );
+	printf("\r\n--------------------------------\r\n");
+	printf("\r\nCMD:%d\r\n",cmd_id );
 #endif /* SD_HOST_DEBUG */
 
     /*
@@ -2633,7 +2633,7 @@ static SDHOST_STATUS sdhost_chk_mmc_ext_csd(uint8_t* mmc_highspeed_support, uint
 	if (sdhost_status != SDHOST_OK)
 	{
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("ERROR %X \r\n", sdhost_status);
+			printf("ERROR %X \r\n", sdhost_status);
 		#endif /* SD_HOST_DEBUG */
 	}
 	else
@@ -2678,12 +2678,12 @@ bool sdhost_cmd6(void)
     /* Device command class bits [95:84] in 128 bit wide CSD register.*/
     ccc = UNSTUFF_BITS(sdhost_context.CSD,84,12);
 #ifdef SD_HOST_DEBUG
-    tfp_printf("CCC = %04X\n", ccc);
+    printf("CCC = %04X\n", ccc);
 #endif
     if((ccc & (1 << 10)) != (1 << 10))
     {
 #ifdef SD_HOST_DEBUG
-        tfp_printf("CMD6 not supported\n");
+        printf("CMD6 not supported\n");
 #endif
         return false;
     }
@@ -2693,7 +2693,7 @@ bool sdhost_cmd6(void)
     if (sdhost_status != SDHOST_OK)
 	{
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("ERROR %X \r\n", sdhost_status);
+			printf("ERROR %X \r\n", sdhost_status);
 		#endif /* SD_HOST_DEBUG */
 	}
 
@@ -2706,15 +2706,15 @@ bool sdhost_cmd6(void)
         if (sdhost_status != SDHOST_OK)
     	{
     		#ifdef SD_HOST_DEBUG
-    			tfp_printf("ERROR %X \r\n", sdhost_status);
+    			printf("ERROR %X \r\n", sdhost_status);
     		#endif /* SD_HOST_DEBUG */
     	}
         /* read out the bits:*/
 #ifdef SD_HOST_DEBUG
-        tfp_printf("SD FUNCTION STATUS = \n");
+        printf("SD FUNCTION STATUS = \n");
         for (int i = 0; i < 64; i++)
         {
-            tfp_printf("0x%02X,", *((uint8_t*) pBuff + i));
+            printf("0x%02X,", *((uint8_t*) pBuff + i));
         }
 #endif
 
@@ -2728,7 +2728,7 @@ bool sdhost_cmd6(void)
         else
         {
 #ifdef SD_HOST_DEBUG
-            tfp_printf("Error while switching to HS mode!");
+            printf("Error while switching to HS mode!");
 #endif
         }
 
@@ -2736,7 +2736,7 @@ bool sdhost_cmd6(void)
     else
     {
 #ifdef SD_HOST_DEBUG
-        tfp_printf("Couldn't switch to HS mode!");
+        printf("Couldn't switch to HS mode!");
 #endif
     }
     return false;
@@ -2776,11 +2776,11 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 			/*Bits [113:112] decodes card type*/
 			if(UNSTUFF_BITS(sdhost_context.CID, 112, 2) == 0x01)
 			{
-				tfp_printf("\r\nDevice type e•MMC detected..\r\n");
+				printf("\r\nDevice type e•MMC detected..\r\n");
 			}
 			else
 			{
-				tfp_printf("\r\nDevice type MMC detected..\r\n");
+				printf("\r\nDevice type MMC detected..\r\n");
 			}
 		#endif
 	}
@@ -2836,7 +2836,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 			/* Set SD host bus width to 4-bit mode */
 			write_sdhost_reg(SD_BUS_WIDTH_4, SDH_HST_CNTL_1);
 			#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\n4-bit mode set\r\n");
+				printf("\r\n4-bit mode set\r\n");
 			#endif
 		}
 		/* (8) Send CMD6 to switch the card to HIGH SPEED */
@@ -2851,7 +2851,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 		else
 		{
 			#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\nMMC HIGH SPEED mode set \r\n");
+				printf("\r\nMMC HIGH SPEED mode set \r\n");
 			#endif
 		}
 
@@ -2889,7 +2889,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 			mult = (1 << (c_size_mult + 2));
 			sdhost_context.capacity = (c_size + 1) * mult * (blen / SDHOST_BLK_SIZE);
 			#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\nCSD Info: C_SIZE = 0x%lX, C_SIZE_MULT = 0x%lX, READ_BL_LEN = 0x%lX\r\n",
+				printf("\r\nCSD Info: C_SIZE = 0x%lX, C_SIZE_MULT = 0x%lX, READ_BL_LEN = 0x%lX\r\n",
 								c_size, c_size_mult, read_blk_len);
 			#endif /* SD_HOST_DEBUG */
 		}
@@ -2902,7 +2902,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 			sdhost_context.capacity= mmc_sector_count*(512/SDHOST_BLK_SIZE);
 		}
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("\r\nMMC capacity: 0x%08lX blocks\r\n", sdhost_context.capacity);
+			printf("\r\nMMC capacity: 0x%08lX blocks\r\n", sdhost_context.capacity);
 		#endif /* SD_HOST_DEBUG */
 	}
 	else
@@ -2914,7 +2914,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 	if(mmc_highspeed_support)
 	{
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("\r\nTry 50MHz\r\n");
+			printf("\r\nTry 50MHz\r\n");
 		#endif
 
 		/*  Disable SD clock */
@@ -2930,7 +2930,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 	else
 	{
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("\r\nTry 25MHz\r\n");
+			printf("\r\nTry 25MHz\r\n");
 		#endif
 		 /*  Disable SD clock */
 		 write_sdhost_reg(read_sdhost_reg(SDH_CLK_CNTL) & 0xFFFB, SDH_CLK_CNTL);
@@ -3072,7 +3072,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 						SDHOST_APP_SPECIFIC_CMD, NOT_IN_USE,
 						sdhost_context.OCR | 0x50000000, &(sdhost_context.OCR));
 				#ifdef SD_HOST_DEBUG
-						tfp_printf("Inside ACMD loop:%08lX\r\n", sdhost_context.OCR);
+						printf("Inside ACMD loop:%08lX\r\n", sdhost_context.OCR);
 				#endif /* SD_HOST_DEBUG */
 
 				if (sdhost_status != SDHOST_OK) /* (24) */
@@ -3107,20 +3107,20 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 				{
 					sdhost_context.isSDSCCard = false;
 					#ifdef SD_HOST_DEBUG
-						tfp_printf("Detected SDHC\r\n");
+						printf("Detected SDHC\r\n");
 					#endif /* SD_HOST_DEBUG */
 				}
 				else
 				{
 					sdhost_context.isSDSCCard = true; /* (27) */
 					#ifdef SD_HOST_DEBUG
-						tfp_printf("Detected SDSC\r\n");
+						printf("Detected SDSC\r\n");
 					#endif /* SD_HOST_DEBUG */
 				}
 			}
 		}
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("ACMD loop exit, OCR:%08lX\r", sdhost_context.OCR);
+			printf("ACMD loop exit, OCR:%08lX\r", sdhost_context.OCR);
 		#endif // SD_HOST_DEBUG
 		/* (32) Issue CMD2 to get CID */
 		sdhost_status = sdhost_send_command(SD_MMC_CMD_ALL_SEND_CID, SDHOST_BUS_CMD,
@@ -3145,7 +3145,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 		/* RCA is stored in the upper 16 bits of CMD3 response */
 		sdhost_context.RCA = response >> 16;
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("\r\nRCA = %08X\r\n",sdhost_context.RCA);
+			printf("\r\nRCA = %08X\r\n",sdhost_context.RCA);
 		#endif /* SD_HOST_DEBUG */
 		/* Issue CMD9 to get CSD */
 		sdhost_status = sdhost_send_command(SD_MMC_CMD_SEND_CSD, SDHOST_BUS_CMD,
@@ -3170,7 +3170,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 			mult = (1 << (c_size_mult + 2));
 			sdhost_context.capacity = (c_size + 1) * mult * (blen / SDHOST_BLK_SIZE);
 			#ifdef SD_HOST_DEBUG
-						tfp_printf("\r\nSD CSD Info v1: C_SIZE = 0x%lX, C_SIZE_MULT = 0x%lX, READ_BL_LEN = 0x%lX\r\n",
+						printf("\r\nSD CSD Info v1: C_SIZE = 0x%lX, C_SIZE_MULT = 0x%lX, READ_BL_LEN = 0x%lX\r\n",
 								c_size, c_size_mult, read_blk_len);
 			#endif /* SD_HOST_DEBUG */
 		}
@@ -3182,12 +3182,12 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 			sdhost_context.capacity = (c_size + 1) * ((512 * 1024) / SDHOST_BLK_SIZE);
 
 			#ifdef SD_HOST_DEBUG
-						tfp_printf("\r\nSD CSD Info v2: C_SIZE = 0x%08lX\r\n", c_size);
+						printf("\r\nSD CSD Info v2: C_SIZE = 0x%08lX\r\n", c_size);
 			#endif /* SD_HOST_DEBUG */
 		}
 
 		#ifdef SD_HOST_DEBUG
-					tfp_printf("\r\nSD Capacity: 0x%08lX blocks\r\n", sdhost_context.capacity);
+					printf("\r\nSD Capacity: 0x%08lX blocks\r\n", sdhost_context.capacity);
 		#endif /* SD_HOST_DEBUG */
 
 		/* Send CMD7 to set the card in Data Transfer mode */
@@ -3236,7 +3236,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 		if(sdhost_cmd6())
 		{
 			#ifdef SD_HOST_DEBUG
-					tfp_printf("\r\nTry 50MHz\r\n");
+					printf("\r\nTry 50MHz\r\n");
 			#endif /* SD_HOST_DEBUG */
 
 			/*  Disable SD clock */
@@ -3253,7 +3253,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 		else
 		{
 			#ifdef SD_HOST_DEBUG
-					tfp_printf("\r\nTry 25MHz\r\n");
+					printf("\r\nTry 25MHz\r\n");
 			#endif /* SD_HOST_DEBUG */
 			 /*  Disable SD clock */
 			 write_sdhost_reg(read_sdhost_reg(SDH_CLK_CNTL) & 0xFFFB, SDH_CLK_CNTL);
@@ -3277,7 +3277,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 	else
 	{
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("\r\nUnusable Card.. \r\n");
+			printf("\r\nUnusable Card.. \r\n");
 		#endif /* SD_HOST_DEBUG */
 		sdhost_status = SDHOST_UNUSABLE_CARD;
 	}
@@ -3346,7 +3346,7 @@ SDHOST_STATUS sdhost_card_init(void)
 				/* Legacy card detected, clear F8 flag - SDv1 or MMCv3 */
 				flag8 = 0;
 		#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\nSDv1 detected.. \r\n");
+				printf("\r\nSDv1 detected.. \r\n");
 		#endif /* SD_HOST_DEBUG */
 				sdhost_context.cardType = SD_V1;
 			}
@@ -3368,7 +3368,7 @@ SDHOST_STATUS sdhost_card_init(void)
 					flag8 = 1;
 					sdhost_context.cardType = SD_V2;
 					#ifdef SD_HOST_DEBUG
-						tfp_printf("SDCv2 detected..\r\n");
+						printf("SDCv2 detected..\r\n");
 					#endif /* SD_HOST_DEBUG */
 				}
 			}
@@ -3382,7 +3382,7 @@ SDHOST_STATUS sdhost_card_init(void)
 				sdhost_status = sdhost_send_command(SD_MMC_CMD_SEND_OP_COND, SDHOST_BUS_CMD,
 										NOT_IN_USE, SDHOST_CMD1_ARG_OCR, &(sdhost_context.OCR));
 				#ifdef SD_HOST_DEBUG
-					tfp_printf("CMD1: response = %08lX \r\n", sdhost_context.OCR);
+					printf("CMD1: response = %08lX \r\n", sdhost_context.OCR);
 				#endif /* SD_HOST_DEBUG */
 				if (sdhost_status != SDHOST_OK)
 				{
@@ -3423,13 +3423,13 @@ SDHOST_STATUS sdhost_card_init(void)
 	if (sdhost_status != SDHOST_OK)
 	{
 		#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\n---------------- SD HOST CARD INIT ERROR -----------\r\n");
+				printf("\r\n---------------- SD HOST CARD INIT ERROR -----------\r\n");
 		#endif /* SD_HOST_DEBUG */
 	}
 	else
 	{
 		#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\n************* SD HOST CARD INIT OK **********\r\n");
+				printf("\r\n************* SD HOST CARD INIT OK **********\r\n");
 		#endif /* SD_HOST_DEBUG */
 	}
 
@@ -3576,10 +3576,10 @@ void sdhost_get_card_status_reg(uint32_t* pBuff)
 	SDH_NRML_INT_STATUS);
 #endif
 #ifdef SD_HOST_DEBUG
-	tfp_printf("SD STATUS = ");
+	printf("SD STATUS = ");
 	for (int i = 0; i < 64; i++)
 	{
-		tfp_printf("0x%02X,", *((uint8_t*) pBuff + i));
+		printf("0x%02X,", *((uint8_t*) pBuff + i));
 	}
 #endif /* SD_HOST_DEBUG */
 __exit:
@@ -3619,7 +3619,7 @@ uint32_t sdhost_get_erase_block_count(void)
 		sdhost_context.block_size = (erase_sector_size + 1);
 
 #ifdef SD_HOST_DEBUG
-		tfp_printf("V1 erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
+		printf("V1 erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
 #endif /* SD_HOST_DEBUG */
 	}
 	else if(sdhost_context.cardType == MMC)
@@ -3630,7 +3630,7 @@ uint32_t sdhost_get_erase_block_count(void)
 			/* Erase Unit Size in blocks = (512Kbyte × HC_ERASE_GRP_SIZE)/SDHOST_BLK_SIZE */
 			sdhost_context.block_size = 512*sdhost_erase_grp_size*(1024/SDHOST_BLK_SIZE);
 #ifdef SD_HOST_DEBUG
-		tfp_printf("MMC erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
+		printf("MMC erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
 #endif /* SD_HOST_DEBUG */
 		}
 	}
@@ -3666,8 +3666,8 @@ uint32_t sdhost_get_erase_block_count(void)
 		/*sdhost_context.block_size = 16 * 1024 / SDHOST_BLK_SIZE;*/
 
 #ifdef SD_HOST_DEBUG
-		tfp_printf("V2 erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
-		tfp_printf("V2 erase: AU SIZE = 0x%lx\r\n", au_size);
+		printf("V2 erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
+		printf("V2 erase: AU SIZE = 0x%lx\r\n", au_size);
 #endif /* SD_HOST_DEBUG */
 	}
 
@@ -3692,10 +3692,10 @@ uint32_t sdhost_get_block_size(void)
 
 void sdhost_registerdump(void)
 {
-	tfp_printf("PRESENT STATE: %08lX\r\n", read_sdhost_reg(SDH_PRESENT_STATE));
-	tfp_printf("HOST CNTL 1: %08lX\r\n", read_sdhost_reg(SDH_HST_CNTL_1));
-	tfp_printf("NRM INT STATUS: %08lX\r\n", read_sdhost_reg(SDH_NRML_INT_STATUS));
-	tfp_printf("ERROR INT STATUS: %08lX\r\n", read_sdhost_reg(SDH_ERR_INT_STATUS));
+	printf("PRESENT STATE: %08lX\r\n", read_sdhost_reg(SDH_PRESENT_STATE));
+	printf("HOST CNTL 1: %08lX\r\n", read_sdhost_reg(SDH_HST_CNTL_1));
+	printf("NRM INT STATUS: %08lX\r\n", read_sdhost_reg(SDH_NRML_INT_STATUS));
+	printf("ERROR INT STATUS: %08lX\r\n", read_sdhost_reg(SDH_ERR_INT_STATUS));
 }
 
 void sdhost_analyze_r1_status(uint32_t response_r1)
@@ -3703,97 +3703,97 @@ void sdhost_analyze_r1_status(uint32_t response_r1)
 
 	if (response_r1 & SD_OCR_ADDR_OUT_OF_RANGE)
 	{
-		tfp_printf("SD_ADDR_OUT_OF_RANGE");
+		printf("SD_ADDR_OUT_OF_RANGE");
 	}
 
 	if (response_r1 & SD_OCR_ADDR_MISALIGNED)
 	{
-		tfp_printf("SD_ADDR_MISALIGNED");
+		printf("SD_ADDR_MISALIGNED");
 	}
 
 	if (response_r1 & SD_OCR_BLOCK_LEN_ERR)
 	{
-		tfp_printf("SD_BLOCK_LEN_ERR");
+		printf("SD_BLOCK_LEN_ERR");
 	}
 
 	if (response_r1 & SD_OCR_ERASE_SEQ_ERR)
 	{
-		tfp_printf("SD_ERASE_SEQ_ERR");
+		printf("SD_ERASE_SEQ_ERR");
 	}
 
 	if (response_r1 & SD_OCR_BAD_ERASE_PARAM)
 	{
-		tfp_printf("SD_BAD_ERASE_PARAM");
+		printf("SD_BAD_ERASE_PARAM");
 	}
 
 	if (response_r1 & SD_OCR_WRITE_PROT_VIOLATION)
 	{
-		tfp_printf("SD_WRITE_PROT_VIOLATION");
+		printf("SD_WRITE_PROT_VIOLATION");
 	}
 
 	if (response_r1 & SD_OCR_LOCK_UNLOCK_FAILED)
 	{
-		tfp_printf("SD_LOCK_UNLOCK_FAILED");
+		printf("SD_LOCK_UNLOCK_FAILED");
 	}
 
 	if (response_r1 & SD_OCR_COM_CRC_FAILED)
 	{
-		tfp_printf("SD_COM_CRC_FAILED");
+		printf("SD_COM_CRC_FAILED");
 	}
 
 	if (response_r1 & SD_OCR_ILLEGAL_CMD)
 	{
-		tfp_printf("SD_ILLEGAL_CMD");
+		printf("SD_ILLEGAL_CMD");
 	}
 
 	if (response_r1 & SD_OCR_CARD_ECC_FAILED)
 	{
-		tfp_printf("SD_CARD_ECC_FAILED");
+		printf("SD_CARD_ECC_FAILED");
 	}
 
 	if (response_r1 & SD_OCR_CC_ERROR)
 	{
-		tfp_printf("SD_CC_ERROR");
+		printf("SD_CC_ERROR");
 	}
 
 	if (response_r1 & SD_OCR_GENERAL_UNKNOWN_ERROR)
 	{
-		tfp_printf("SD_GENERAL_UNKNOWN_ERROR");
+		printf("SD_GENERAL_UNKNOWN_ERROR");
 	}
 
 	if (response_r1 & SD_OCR_STREAM_READ_UNDERRUN)
 	{
-		tfp_printf("SD_STREAM_READ_UNDERRUN");
+		printf("SD_STREAM_READ_UNDERRUN");
 	}
 
 	if (response_r1 & SD_OCR_STREAM_WRITE_OVERRUN)
 	{
-		tfp_printf("SD_STREAM_WRITE_OVERRUN");
+		printf("SD_STREAM_WRITE_OVERRUN");
 	}
 
 	if (response_r1 & SD_OCR_CID_CSD_OVERWRIETE)
 	{
-		tfp_printf("SD_CID_CSD_OVERWRITE");
+		printf("SD_CID_CSD_OVERWRITE");
 	}
 
 	if (response_r1 & SD_OCR_WP_ERASE_SKIP)
 	{
-		tfp_printf("SD_WP_ERASE_SKIP");
+		printf("SD_WP_ERASE_SKIP");
 	}
 
 	if (response_r1 & SD_OCR_CARD_ECC_DISABLED)
 	{
-		tfp_printf("SD_CARD_ECC_DISABLED");
+		printf("SD_CARD_ECC_DISABLED");
 	}
 
 	if (response_r1 & SD_OCR_ERASE_RESET)
 	{
-		tfp_printf("SD_ERASE_RESET");
+		printf("SD_ERASE_RESET");
 	}
 
 	if (response_r1 & SD_OCR_AKE_SEQ_ERROR)
 	{
-		tfp_printf("SD_AKE_SEQ_ERROR");
+		printf("SD_AKE_SEQ_ERROR");
 	}
 
 }

@@ -52,7 +52,7 @@
     do {                                \
         if ((a) != (b))                 \
         {                               \
-            tfp_printf("Assert Failed:" \
+            printf("Assert Failed:" \
                __FILE__ ":%d: "         \
                msg,                     \
                __LINE__);               \

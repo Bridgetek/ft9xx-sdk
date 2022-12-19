@@ -445,7 +445,7 @@ static void arch_ft900_ethernet_ISR(void)
 		 */
 		if (rlen < FT900_MAX_PACKET)
 		{
-			//tfp_printf("rlen(%d) < FT900_MAX_PACKET(%d)\r\n", rlen, FT900_MAX_PACKET);
+			//printf("rlen(%d) < FT900_MAX_PACKET(%d)\r\n", rlen, FT900_MAX_PACKET);
 
 			/* No room left for a full packet.
 			 * It will get read in the next time.
@@ -485,7 +485,7 @@ static void arch_ft900_ethernet_ISR(void)
 		 */
 		dst = (uint32_t *)(((uint8_t *)dst) + w0);
 
-		//tfp_printf("w0=%d\r\n", w0);
+		//printf("w0=%d\r\n", w0);
 
 		/* Reduce available space for new packets. */
 		rlen -= w0;

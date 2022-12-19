@@ -46,8 +46,8 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 
 void setup(void);
 void loop(void);
@@ -89,9 +89,6 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
-
     /* Enable CAN0 and CAN1... */
     sys_enable(sys_device_can0);
     sys_enable(sys_device_can1);
@@ -130,14 +127,14 @@ void loop(void)
 
 
     /* Output the transmitted message... */
-    tfp_printf("CAN0 TX-> ");
+    printf("CAN0 TX-> ");
     print_can_msg_t(&tx);
 
     /* Transmit the message on CAN0 to CAN1... */
     can_write(CAN0, &tx);
 
     /* Insert an empty line so the output can be read easier... */
-    tfp_printf("\r\n");
+    printf("\r\n");
 
     /* Manipulate the data */
     tx.data[8] = tx.data[7];
@@ -161,7 +158,7 @@ void can1ISR(void)
     if (can_is_interrupted(CAN1, can_interrupt_receive))
     {
         can_read(CAN1, &rx);
-        tfp_printf("CAN1 RX<- ");
+        printf("CAN1 RX<- ");
         print_can_msg_t(&rx);
     }
 }
@@ -185,27 +182,22 @@ void print_can_msg_t(can_msg_t *msg)
     uint8_t i = 0;
 
     if (msg->type == can_type_standard)
-        tfp_printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
+        printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
     else
-        tfp_printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
+        printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
 
     if (msg->rtr == can_rtr_remote_request)
-        tfp_printf("RTR ");
+        printf("RTR ");
     else
-        tfp_printf("    ");
+        printf("    ");
 
-    tfp_printf("{");
+    printf("{");
     for (i = 0; i < msg->dlc; ++i)
     {
-        tfp_printf("0x%02x", msg->data[i]);
+        printf("0x%02x", msg->data[i]);
         if (i < (msg->dlc - 1))
-            tfp_printf(",");
+            printf(",");
     }
-    tfp_printf("}"
+    printf("}"
            "\r\n");
-}
-
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
 }

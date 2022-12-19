@@ -60,16 +60,15 @@ uint8_t INT_1 = 0;
 uint8_t INT_2 = 0;
 static inline void print_time(ext_rtc_time_t time)
 {
-	tfp_printf("%02d/%02d/%02d%s  %02d:%02d:%02d",time.date,time.month,time.year,days[time.day],time.hour,time.min,time.sec);
+	printf("%02d/%02d/%02d%s  %02d:%02d:%02d",time.date,time.month,time.year,days[time.day],time.hour,time.min,time.sec);
 	if(time.fmt_12_24)
-		tfp_printf("%s",t_conv[time.AM_PM]);
-	tfp_printf(" \r\n");
+		printf("%s",t_conv[time.AM_PM]);
+	printf(" \r\n");
 }
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 void setup(void);
 void loop(void);
-void tfp_putc(void* p, char c);
 
 /* FUNCTIONS ***********************************************************************/
 
@@ -108,12 +107,9 @@ void setup()
 			"--------------------------------------------------------------------- \r\n"
 			);
 
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, tfp_putc);
-
 	if(!sys_check_ft900_revB())
 	{
-		tfp_printf("External RTC is supported only in FT900 Revision B \r\n");
+		printf("External RTC is supported only in FT900 Revision B \r\n");
 		exit(1);
 	}
    /* Enable I2C*/
@@ -142,7 +138,7 @@ void setup()
 	time.AM_PM		= AM_HOUR_FORMAT;
 	iRet = ext_rtc_write(time);checkStat(iRet,"updating time");
 
-	tfp_printf("RTC Time: ");
+	printf("RTC Time: ");
 	ext_rtc_read(&time);checkStat(iRet,"getting time");
 	PRINT_TIME(time);
 
@@ -156,14 +152,4 @@ void loop()
 	iRet = ext_rtc_read(&time);checkStat(iRet,"getting time");
 	PRINT_TIME(time);
 	delayms(1000);
-}
-
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-	uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
 }

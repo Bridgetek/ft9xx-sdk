@@ -78,6 +78,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
 
 void setup(void);

@@ -52,10 +52,10 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include "ft900.h"
-#include "tinyprintf.h"
 
 /* CONFIGURATION OPTIONS ......................... */
 /** Defines if byte swapping should occur on this device.
@@ -281,7 +281,7 @@ uint16_t inet_checksum16(uint16_t *data, uint16_t len);
 
 #if VERBOSE > 0
 #   define raw_dump(d,l) hexdump(d,l)
-#   define verbose_printf(...) tfp_printf(__VA_ARGS__)
+#   define verbose_printf(...) printf(__VA_ARGS__)
 #else
 #   define raw_dump(d,l)
 #   define verbose_printf(...)
@@ -326,11 +326,8 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0,myputc);
-
     /* Enable Ethernet... */
-    tfp_printf("MAC address = %02X:%02X:%02X:%02X:%02X:%02X\r\n"
+    printf("MAC address = %02X:%02X:%02X:%02X:%02X:%02X\r\n"
                "IP address = %d.%d.%d.%d\r\n",
                 my_mac[0], my_mac[1], my_mac[2], my_mac[3], my_mac[4], my_mac[5],
                 my_ip[0], my_ip[1], my_ip[2], my_ip[3]);
@@ -356,9 +353,9 @@ void setup(void)
     interrupt_enable_globally();
 
     /* Wait until the ethernet link comes up */
-    tfp_printf("Please plug in your Ethernet cable\r\n");
+    printf("Please plug in your Ethernet cable\r\n");
     while (!ethernet_is_link_up());
-    tfp_printf("Ethernet Link Up\r\n");
+    printf("Ethernet Link Up\r\n");
 
     /* Send out a gratuitous ARP so people know where we are... */
     arp_gratuitous();
@@ -394,7 +391,7 @@ void loop(void)
         {
             struct arp_hdr *arp_hdr = PTR_AFTER(eth_hdr, struct eth_hdr, struct arp_hdr);
 
-            tfp_printf("Got an ARP Packet\r\n");
+            printf("Got an ARP Packet\r\n");
 
             arp_process(arp_hdr);
         }
@@ -411,7 +408,7 @@ void loop(void)
             {
                 struct icmp_hdr *icmp_hdr = PTR_AFTER(ip4_hdr, struct ip4_hdr, struct icmp_hdr);
 
-                tfp_printf("Got an ICMP Packet\r\n");
+                printf("Got an ICMP Packet\r\n");
 
                 icmp_process(eth_hdr, ip4_hdr, icmp_hdr);
             }
@@ -468,12 +465,6 @@ void eth_ISR(void)
     }
 }
 
-/** Function used to facilitate printf */
-void myputc(void* p, char c)
-{
-    uart_write(p, (uint8_t)c);
-}
-
 /* CODE - Debugging .............................. */
 
 /** Dump out a block of data in a human readable format
@@ -487,21 +478,21 @@ void hexdump(uint8_t *data, uint16_t len)
     {
         for (i = 0; i < 16; i++)
         {
-            if (i+j < len) { tfp_printf("%02X ", data[i+j]); }
-            else           { tfp_printf("   "); }
+            if (i+j < len) { printf("%02X ", data[i+j]); }
+            else           { printf("   "); }
         }
 
-        tfp_printf(" | ");
+        printf(" | ");
 
         for (i = 0; i < 16; i++)
         {
             if (i+j < len)
             {
-                if (isalpha(data[i+j])) { tfp_printf("%c", data[i+j]); }
-                else                    { tfp_printf("."); }
+                if (isalpha(data[i+j])) { printf("%c", data[i+j]); }
+                else                    { printf("."); }
             }
         }
-        tfp_printf("\r\n");
+        printf("\r\n");
 
         j += 16;
     }
@@ -539,7 +530,7 @@ void eth_hdr_set(struct eth_hdr *hdr,
 void eth_hdr_dump(struct eth_hdr *hdr)
 {
 #if VERBOSE > 0
-    tfp_printf("+- ETHERNET --------------------+\r\n"
+    printf("+- ETHERNET --------------------+\r\n"
                "|  %02X : %02X : %02X : %02X : %02X : %02X  | (Source MAC)\r\n"
                "+-------------------------------+\r\n"
                "|  %02X : %02X : %02X : %02X : %02X : %02X  | (Destination MAC)\r\n"
@@ -573,7 +564,7 @@ void arp_process(struct arp_hdr *hdr)
         eth_hdr_set(eth_txhdr, my_mac, hdr->src_mac, ETHERTYPE_ARP);
         arp_hdr_set(arp_txhdr, ARP_OPER_ARP_REPLY, my_mac, my_ip, hdr->src_mac, hdr->src_ip);
 
-        tfp_printf("Sending Reply ARP\r\n");
+        printf("Sending Reply ARP\r\n");
         eth_hdr_dump(eth_txhdr);
         arp_hdr_dump(arp_txhdr);
 
@@ -596,7 +587,7 @@ void arp_gratuitous(void)
     eth_hdr_set(eth_hdr, my_mac, bcast_mac, ETHERTYPE_ARP);
     arp_hdr_set(arp_hdr, ARP_OPER_ARP_REPLY, my_mac, my_ip, my_mac, my_ip);
 
-    tfp_printf("Sending gratuitous ARP\r\n");
+    printf("Sending gratuitous ARP\r\n");
 
     ethernet_write(pkt, sizeof(struct hw_hdr) + sizeof(struct eth_hdr) + sizeof(struct arp_hdr));
 }
@@ -697,7 +688,7 @@ void arp_hdr_set(struct arp_hdr *hdr,
 void arp_hdr_dump(struct arp_hdr *hdr)
 {
 #if VERBOSE > 0
-    tfp_printf("+- ARP ---------+---------------+ \r\n"
+    printf("+- ARP ---------+---------------+ \r\n"
                "|         %5d (0x%04X)        | (Hardware type)\r\n"
                "+---------------+---------------+ \r\n"
                "|         %5d (0x%04X)        | (Protocol type)\r\n"
@@ -780,7 +771,7 @@ void ip4_hdr_set(struct ip4_hdr *hdr,
 void ip4_hdr_dump(struct ip4_hdr *hdr)
 {
 #if VERBOSE > 0
-    tfp_printf("+- IPv4 ----+-----------+-----------+-----------+ \r\n"
+    printf("+- IPv4 ----+-----------+-----------+-----------+ \r\n"
                "| %2d  | %2d  |   0x%02X    |         %5d         | (Ver, Hdr len, ToS, Total len)\r\n"
                "+-----------+-----------+-----------+-----------+ \r\n"
                "|     %5d (0x%04X)    | %1d %1d %1d |     %5d     | (ID, Flags, Frag Offset)\r\n"
@@ -857,7 +848,7 @@ void icmp_process(struct eth_hdr *eth_hdr, struct ip4_hdr *ip4_hdr,
         icmp_hdr_set(icmp_txhdr, ICMP_TYPE_ECHOREPLY, 0, ntohs(icmp_hdr->id),
                      ntohs(icmp_hdr->seq), icmp_payload_len);
 
-        tfp_printf("Sending ICMP Echo Reply\r\n");
+        printf("Sending ICMP Echo Reply\r\n");
         eth_hdr_dump(eth_txhdr);
         ip4_hdr_dump(ip4_txhdr);
         icmp_hdr_dump(icmp_txhdr);
@@ -897,7 +888,7 @@ void icmp_hdr_set(struct icmp_hdr *hdr, uint8_t type, uint8_t code, uint16_t id,
 void icmp_hdr_dump(struct icmp_hdr *hdr)
 {
 #if VERBOSE > 0
-    tfp_printf("+- ICMP ----+-----------+-----------+-----------+ \r\n"
+    printf("+- ICMP ----+-----------+-----------+-----------+ \r\n"
                "|    %3d    |    %3d    |         0x%04X        | (Type, Code, Checksum)\r\n"
                "+-----------+-----------+-----------+-----------+ \r\n"
                "|         %5d         |         %5d         | (ID, Sequence)\r\n"

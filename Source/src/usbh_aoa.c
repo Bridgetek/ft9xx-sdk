@@ -101,7 +101,7 @@ static int8_t usbh_aoa_get_protocol(USBH_device_handle hDevAccessory, uint16_t *
 
     status = USBH_device_setup_transfer(hDevAccessory, &devReq, (uint8_t *)protocol, 500);
 #ifdef USBH_AOA_DEBUG
-    tfp_printf("AOA - Get Protocol Status %d\r\n", status);
+    printf("AOA - Get Protocol Status %d\r\n", status);
 #endif // USBH_AOA_DEBUG
     if (status < 0)
         return USBH_AOA_ERR_CLASS;
@@ -174,7 +174,7 @@ int8_t USBH_AOA_init(USBH_AOA_context *ctx, USBH_device_handle hAOADevice, USBH_
 	// Copy aligned value to return value.
 	ctx->hDevAccessory = hAOADevice;
 #ifdef USBH_AOA_DEBUG
-	tfp_printf("AOA - device %x\r\n", ctx->hDevAccessory);
+	printf("AOA - device %x\r\n", ctx->hDevAccessory);
 #endif // USBH_AOA_DEBUG
 
 	// Switch to AOA mode only if required.
@@ -182,7 +182,7 @@ int8_t USBH_AOA_init(USBH_AOA_context *ctx, USBH_device_handle hAOADevice, USBH_
 	ctx->vid = vid;
 	ctx->pid = pid;
 #ifdef USBH_AOA_DEBUG
-	tfp_printf("AOA - vid %04x pid %04x\r\n", ctx->vid, ctx->pid);
+	printf("AOA - vid %04x pid %04x\r\n", ctx->vid, ctx->pid);
 #endif // USBH_AOA_DEBUG
 
 	// Read the protocol from this device.
@@ -191,7 +191,7 @@ int8_t USBH_AOA_init(USBH_AOA_context *ctx, USBH_device_handle hAOADevice, USBH_
 		ctx->protocol = aoaProtocolRev;
 
 #ifdef USBH_AOA_DEBUG
-		tfp_printf("AOA - AOA protocol %04x\r\n", ctx->protocol);
+		printf("AOA - AOA protocol %04x\r\n", ctx->protocol);
 #endif // USBH_AOA_DEBUG
 
 		if (ctx->protocol != 0)
@@ -213,34 +213,34 @@ int8_t USBH_AOA_init(USBH_AOA_context *ctx, USBH_device_handle hAOADevice, USBH_
 				// Switch to AOA mode. May not want to send manufacturer or model.
 				// Not sending these prevents an app from starting.
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("M: %s\r\n", descriptors->manufacturer);
+				printf("M: %s\r\n", descriptors->manufacturer);
 #endif // USBH_AOA_DEBUG
 				if (descriptors->manufacturer)
 					status = usbh_aoa_send_string(ctx->hDevAccessory, USB_AOA_STRING_MANUFACTURER, descriptors->manufacturer);
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("%d,M: %s\r\n", status, descriptors->model);
+				printf("%d,M: %s\r\n", status, descriptors->model);
 #endif // USBH_AOA_DEBUG
 				if (descriptors->model)
 					status = usbh_aoa_send_string(ctx->hDevAccessory, USB_AOA_STRING_MODEL, descriptors->model);
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("%d,D: %s\r\n", status, descriptors->description);
+				printf("%d,D: %s\r\n", status, descriptors->description);
 #endif // USBH_AOA_DEBUG
 
 				status = usbh_aoa_send_string(ctx->hDevAccessory, USB_AOA_STRING_DESCRIPTION, descriptors->description);
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("%d,V: %s\r\n", status, descriptors->version);
+				printf("%d,V: %s\r\n", status, descriptors->version);
 #endif // USBH_AOA_DEBUG
 				status = usbh_aoa_send_string(ctx->hDevAccessory, USB_AOA_STRING_VERSION, descriptors->version);
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("%d,U: %s\r\n", status, descriptors->uri);
+				printf("%d,U: %s\r\n", status, descriptors->uri);
 #endif // USBH_AOA_DEBUG
 				status = usbh_aoa_send_string(ctx->hDevAccessory, USB_AOA_STRING_URI, descriptors->uri);
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("%d,S: %s\r\n", status, descriptors->serial);
+				printf("%d,S: %s\r\n", status, descriptors->serial);
 #endif // USBH_AOA_DEBUG
 				status = usbh_aoa_send_string(ctx->hDevAccessory, USB_AOA_STRING_SERIAL_NUMBER, descriptors->serial);
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("%d,", status);
+				printf("%d,", status);
 #endif // USBH_AOA_DEBUG
 				if (audio != USB_AOA_SET_AUDIO_MODE_NONE)
 				{
@@ -251,7 +251,7 @@ int8_t USBH_AOA_init(USBH_AOA_context *ctx, USBH_device_handle hAOADevice, USBH_
 				}
 				status = usbh_aoa_send_start(ctx->hDevAccessory);
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("usbh_aoa_send_start returned %d\r\n", status);
+				printf("usbh_aoa_send_start returned %d\r\n", status);
 #endif // USBH_AOA_DEBUG
 					// Another short wait.
 					delayms(100);
@@ -286,7 +286,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 	if (ctx->protocol == 0)
 	{
 #ifdef USBH_AOA_DEBUG
-		tfp_printf("AOA - AOA Accessory Protocol 0\r\n");
+		printf("AOA - AOA Accessory Protocol 0\r\n");
 #endif // USBH_AOA_DEBUG
 		return USBH_AOA_ERR_PROTOCOL;
 	}
@@ -300,7 +300,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 		if (status != USBH_OK)
 		{
 #ifdef USBH_AOA_DEBUG
-			tfp_printf("USBH_get_device_list returned %d\r\n", status);
+			printf("USBH_get_device_list returned %d\r\n", status);
 #endif // USBH_AOA_DEBUG
 			return USBH_AOA_ERR_USB;
 		}
@@ -319,7 +319,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 		    if ((status = USBH_get_next_device(hDev, &hDev)) != USBH_OK)
 		    {
 #ifdef USBH_AOA_DEBUG
-			tfp_printf("USBH_get_next_device returned %d\r\n", status);
+			printf("USBH_get_next_device returned %d\r\n", status);
 #endif // USBH_AOA_DEBUG
 		    	break;
 		    }
@@ -339,7 +339,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 	if ((ctx->vid == USB_VID_GOOGLE) && (ctx->protocol > 0))
 	{
 #ifdef USBH_AOA_DEBUG
-		tfp_printf("VID google\r\n");
+		printf("VID google\r\n");
 #endif
 		// check ranges for protocol version 1
 		if (ctx->protocol == USB_AOA_PROTOCOL_1)
@@ -349,7 +349,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 			{
 				status = USBH_AOA_DETECTED;
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("Protocol 1 google\r\n");
+				printf("Protocol 1 google\r\n");
 #endif
 			}
 		}
@@ -361,7 +361,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 			{
 				status = USBH_AOA_DETECTED;
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("Protocol 2 google\r\n");
+				printf("Protocol 2 google\r\n");
 #endif
 			}
 		}
@@ -369,7 +369,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 	else
 	{
 #ifdef USBH_AOA_DEBUG
-		tfp_printf("USBH_device_get_vid_pid returned %d\r\n", status);
+		printf("USBH_device_get_vid_pid returned %d\r\n", status);
 #endif // USBH_AOA_DEBUG
     	return USBH_AOA_ERR_CLASS_NOT_SUPPORTED;
 	}
@@ -379,7 +379,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
     status = USBH_get_interface_list(ctx->hDevAccessory, &hInterface);
 
 #ifdef USBH_AOA_DEBUG
-	tfp_printf("AOA - device %x if %x status %d\r\n", ctx->hDevAccessory, hInterface, status);
+	printf("AOA - device %x if %x status %d\r\n", ctx->hDevAccessory, hInterface, status);
 #endif // USBH_AOA_DEBUG
 
 	while (hInterface)
@@ -387,14 +387,14 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 		if (USBH_interface_get_class_info(hInterface, &class, &subclass, &protocol) == USBH_OK)
 		{
 #ifdef USBH_AOA_DEBUG
-			tfp_printf("AOA - class %x subclass %x\r\n", class, subclass);
+			printf("AOA - class %x subclass %x\r\n", class, subclass);
 #endif // USBH_AOA_DEBUG
 			// Confirm this is the accessory interface.
 			if ((class == USB_CLASS_VENDOR) &&
 					(subclass == USB_SUBCLASS_VENDOR_VENDOR))
 			{
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("AOA - AOA Accessory Interface\r\n");
+				printf("AOA - AOA Accessory Interface\r\n");
 #endif // USBH_AOA_DEBUG
 				ctx->hAccessoryInterface = hInterface;
 
@@ -424,7 +424,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 					(subclass == USB_SUBCLASS_AUDIO_AUDIOSTREAMING))
 			{
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("AOA - Audio Streaming Interface\r\n");
+				printf("AOA - Audio Streaming Interface\r\n");
 #endif // USBH_AOA_DEBUG
 
 				USBH_interface_get_info(hInterface, &ifInfo);
@@ -448,7 +448,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 								ctx->maxIsoSize = epInfo.max_packet_size;
 
 #ifdef USBH_AOA_DEBUG
-								tfp_printf("AOA - Audio Streaming Endpoint %d\r\n", epInfo.index);
+								printf("AOA - Audio Streaming Endpoint %d\r\n", epInfo.index);
 #endif // USBH_AOA_DEBUG
 							}
 						}
@@ -458,7 +458,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 					(subclass == USB_SUBCLASS_VENDOR_ADB))
 			{
 #ifdef USBH_AOA_DEBUG
-				tfp_printf("AOA - ADB Interface\r\n");
+				printf("AOA - ADB Interface\r\n");
 #endif // USBH_AOA_DEBUG
 
 				ctx->hAdbInterface = hInterface;
@@ -501,8 +501,8 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 			 (ctx->hAccessoryEpOut == 0)))
     {
 #ifdef USBH_AOA_DEBUG
-		tfp_printf("AOA - Error Accessory Interface and Endpoints not found!\r\n");
-		tfp_printf("AOA - IF %x EPIN %x EPOUT %x\r\n",ctx->hAccessoryInterface, ctx->hAccessoryEpIn, ctx->hAccessoryEpOut);
+		printf("AOA - Error Accessory Interface and Endpoints not found!\r\n");
+		printf("AOA - IF %x EPIN %x EPOUT %x\r\n",ctx->hAccessoryInterface, ctx->hAccessoryEpIn, ctx->hAccessoryEpOut);
 #endif // USBH_AOA_DEBUG
     	status = USBH_AOA_ERR_CONFIG;
     }
@@ -513,7 +513,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
 			 (ctx->hAdbEpOut == 0)))
     {
 #ifdef USBH_AOA_DEBUG
-    	tfp_printf("AOA - Error adb Interface and Endpoints not found!\r\n");
+    	printf("AOA - Error adb Interface and Endpoints not found!\r\n");
 #endif // USBH_AOA_DEBUG
     	status = USBH_AOA_ERR_CONFIG;
     }
@@ -523,7 +523,7 @@ int8_t USBH_AOA_attach(USBH_AOA_context *ctx)
     		 (ctx->hAudioEp == 0)))
     {
 #ifdef USBH_AOA_DEBUG
-    	tfp_printf("AOA - Error Audio Interface and Endpoints not found!\r\n");
+    	printf("AOA - Error Audio Interface and Endpoints not found!\r\n");
 #endif // USBH_AOA_DEBUG
     	status = USBH_AOA_ERR_CONFIG;
     }

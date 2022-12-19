@@ -330,10 +330,10 @@ static void rndis_handle_command(void)
 	union rndis_msg *resp = (union rndis_msg *)__builtin_assume_aligned(rndis_response, sizeof(uint32_t));
 
 #ifdef RNDIS_COMMAND_DEBUG
-	tfp_printf("CMD: ");
+	printf("CMD: ");
 	for (int i = 0; i < rndis_commandLen; i++)
-		tfp_printf("%02x%s", rndis_command[((i/4)*4)+3-(i%4)], i%4==3?" ":"");
-	tfp_printf("\r\n");
+		printf("%02x%s", rndis_command[((i/4)*4)+3-(i%4)], i%4==3?" ":"");
+	printf("\r\n");
 #endif // RNDIS_COMMAND_DEBUG
 
 	if (msg->header.MessageLength != rndis_commandLen)
@@ -350,7 +350,7 @@ static void rndis_handle_command(void)
 	{
 	case REMOTE_NDIS_INITIALIZE_MSG:
 #ifdef RNDIS_COMMAND_DEBUG
-		tfp_printf("REMOTE_NDIS_INITIALIZE_MSG\r\n");
+		printf("REMOTE_NDIS_INITIALIZE_MSG\r\n");
 #endif // RNDIS_COMMAND_DEBUG
 
 		resp->initialise_cmplt.Status = RNDIS_STATUS_SUCCESS;
@@ -390,7 +390,7 @@ static void rndis_handle_command(void)
 
 	case REMOTE_NDIS_HALT_MSG:
 #ifdef RNDIS_COMMAND_DEBUG
-		tfp_printf("REMOTE_NDIS_HALT_MSG\r\n");
+		printf("REMOTE_NDIS_HALT_MSG\r\n");
 #endif // RNDIS_COMMAND_DEBUG
 
 		// Set the interface to be uninitalised.
@@ -403,7 +403,7 @@ static void rndis_handle_command(void)
 
 	case REMOTE_NDIS_QUERY_MSG:
 #ifdef RNDIS_COMMAND_DEBUG
-		tfp_printf("REMOTE_NDIS_QUERY_MSG\r\n");
+		printf("REMOTE_NDIS_QUERY_MSG\r\n");
 #endif // RNDIS_COMMAND_DEBUG
 
 		resp->query_cmplt.Status = RNDIS_STATUS_SUCCESS;
@@ -431,7 +431,7 @@ static void rndis_handle_command(void)
 
 	case REMOTE_NDIS_SET_MSG:
 #ifdef RNDIS_COMMAND_DEBUG
-		tfp_printf("REMOTE_NDIS_SET_MSG ");
+		printf("REMOTE_NDIS_SET_MSG ");
 #endif // RNDIS_COMMAND_DEBUG
 
 		resp->set_cmplt.Status = RNDIS_STATUS_SUCCESS;
@@ -442,14 +442,14 @@ static void rndis_handle_command(void)
 		if (msg->set.MessageLength < sizeof(struct rndis_set_msg))
 		{
 #ifdef RNDIS_COMMAND_DEBUG
-			tfp_printf("Failed\r\n");
+			printf("Failed\r\n");
 #endif // RNDIS_COMMAND_DEBUG
 			resp->set_cmplt.Status = RNDIS_STATUS_FAILURE;
 		}
 		else
 		{
 #ifdef RNDIS_COMMAND_DEBUG
-			tfp_printf("Handling\r\n");
+			printf("Handling\r\n");
 #endif // RNDIS_COMMAND_DEBUG
 			rndis_set_handler(msg->query.Oid,
 					((uint8_t *)msg) + 8 + msg->set.InformationBufferOffset,
@@ -465,7 +465,7 @@ static void rndis_handle_command(void)
 
 	case REMOTE_NDIS_RESET_MSG:
 #ifdef RNDIS_COMMAND_DEBUG
-		tfp_printf("REMOTE_NDIS_RESET_MSG ");
+		printf("REMOTE_NDIS_RESET_MSG ");
 #endif // RNDIS_COMMAND_DEBUG
 
 		resp->reset_cmplt.Status = RNDIS_STATUS_SUCCESS;
@@ -476,7 +476,7 @@ static void rndis_handle_command(void)
 		if (msg->reset.MessageLength < sizeof(struct rndis_reset_msg))
 		{
 #ifdef RNDIS_COMMAND_DEBUG
-			tfp_printf("Failed\r\n");
+			printf("Failed\r\n");
 #endif // RNDIS_COMMAND_DEBUG
 			resp->reset_cmplt.Status = RNDIS_STATUS_FAILURE;
 			resp->reset_cmplt.AddressingReset = 0;
@@ -484,7 +484,7 @@ static void rndis_handle_command(void)
 		else
 		{
 #ifdef RNDIS_COMMAND_DEBUG
-		tfp_printf("Addressing Reset\r\n");
+		printf("Addressing Reset\r\n");
 #endif // RNDIS_COMMAND_DEBUG
 			resp->reset_cmplt.AddressingReset = 1;
 		}
@@ -497,7 +497,7 @@ static void rndis_handle_command(void)
 
 	case REMOTE_NDIS_KEEPALIVE_MSG:
 #ifdef RNDIS_COMMAND_DEBUG
-		tfp_printf("REMOTE_NDIS_KEEPALIVE_MSG\r\n");
+		printf("REMOTE_NDIS_KEEPALIVE_MSG\r\n");
 #endif // RNDIS_COMMAND_DEBUG
 
 		resp->keepalive_cmplt.Status = RNDIS_STATUS_SUCCESS;
@@ -521,16 +521,16 @@ static void rndis_handle_command(void)
 
 	default:
 #ifdef RNDIS_COMMAND_DEBUG
-		tfp_printf("REMOTE_NDIS_MSG UNKNOWN!\r\n");
+		printf("REMOTE_NDIS_MSG UNKNOWN!\r\n");
 #endif // RNDIS_COMMAND_DEBUG
 		break;
 	}
 
 #ifdef RNDIS_COMMAND_DEBUG
-	tfp_printf("RESP: ");
+	printf("RESP: ");
 	for (int i = 0; i < rndis_responseLen; i++)
-		tfp_printf("%02x%s", rndis_response[((i/4)*4)+3-(i%4)], i%4==3?" ":"");
-	tfp_printf("\r\n");
+		printf("%02x%s", rndis_response[((i/4)*4)+3-(i%4)], i%4==3?" ":"");
+	printf("\r\n");
 	#endif // RNDIS_COMMAND_DEBUG
 }
 
@@ -550,7 +550,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 	{
 	case OID_GEN_SUPPORTED_LIST:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_SUPPORTED_LIST\r\n");
+		printf("OID_GEN_SUPPORTED_LIST\r\n");
 #endif // RNDIS_OID_DEBUG
 		// oid_supported_list is const and only initialised with uint32_t
 		for (i = 0; i < (sizeof(oid_supported_list)/sizeof(uint32_t)); i++)
@@ -564,7 +564,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_HARDWARE_STATUS:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_HARDWARE_STATUS\r\n");
+		printf("OID_GEN_HARDWARE_STATUS\r\n");
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = 0;
 		bufferLen += sizeof(uint32_t);
@@ -573,7 +573,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_PHYSICAL_MEDIUM:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_PHYSICAL_MEDIUM\r\n");
+		printf("OID_GEN_PHYSICAL_MEDIUM\r\n");
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = NDIS_MEDIUM_802_3;
 		bufferLen += sizeof(uint32_t);
@@ -582,7 +582,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_MEDIA_IN_USE:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_MEDIA_IN_USE\r\n");
+		printf("OID_GEN_MEDIA_IN_USE\r\n");
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = NDIS_MEDIUM_802_3;
 		bufferLen += sizeof(uint32_t);
@@ -593,7 +593,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 	case OID_GEN_TRANSMIT_BLOCK_SIZE:
 	case OID_GEN_RECEIVE_BLOCK_SIZE:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_MAXIMUM_FRAME/TRANSMIT/RECEIVE_SIZE %d\r\n", rndis_mtu_size);
+		printf("OID_GEN_MAXIMUM_FRAME/TRANSMIT/RECEIVE_SIZE %d\r\n", rndis_mtu_size);
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = rndis_mtu_size;
 		bufferLen += sizeof(uint32_t);
@@ -602,7 +602,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_LINK_SPEED:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_LINK_SPEED %d\r\n", rndis_link_speed);
+		printf("OID_GEN_LINK_SPEED %d\r\n", rndis_link_speed);
 #endif // RNDIS_OID_DEBUG
 		//if (rndis_connected == NDIS_MEDIA_STATE_CONNECTED)
 		//{
@@ -618,7 +618,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_MEDIA_CONNECT_STATUS:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_MEDIA_CONNECT_STATUS %x\r\n", rndis_connected);
+		printf("OID_GEN_MEDIA_CONNECT_STATUS %x\r\n", rndis_connected);
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = rndis_connected;
 		bufferLen += sizeof(uint32_t);
@@ -628,7 +628,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_CURRENT_PACKET_FILTER:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_CURRENT_PACKET_FILTER %x\r\n", rndis_packet_filter);
+		printf("OID_GEN_CURRENT_PACKET_FILTER %x\r\n", rndis_packet_filter);
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = rndis_packet_filter;
 		bufferLen += sizeof(uint32_t);
@@ -637,7 +637,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_802_3_MAXIMUM_LIST_SIZE:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_802_3_MAXIMUM_LIST_SIZE\r\n");
+		printf("OID_802_3_MAXIMUM_LIST_SIZE\r\n");
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = 1;
 		bufferLen += sizeof(uint32_t);
@@ -646,7 +646,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_802_3_CURRENT_ADDRESS:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_802_3_CURRENT_ADDRESS\r\n");
+		printf("OID_802_3_CURRENT_ADDRESS\r\n");
 #endif // RNDIS_OID_DEBUG
 		*pBuf8++ = rndis_current_mac[0];
 		*pBuf8++ = rndis_current_mac[1];
@@ -660,7 +660,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_802_3_PERMANENT_ADDRESS:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_802_3_PERMANENT_ADDRESS\r\n");
+		printf("OID_802_3_PERMANENT_ADDRESS\r\n");
 #endif // RNDIS_OID_DEBUG
 		*pBuf8++ = rndis_current_mac[0];
 		*pBuf8++ = rndis_current_mac[1];
@@ -674,7 +674,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_MAXIMUM_TOTAL_SIZE:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_MAXIMUM_TOTAL_SIZE %d\r\n", rndis_max_total_size);
+		printf("OID_GEN_MAXIMUM_TOTAL_SIZE %d\r\n", rndis_max_total_size);
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = rndis_max_total_size;
 		bufferLen += sizeof(uint32_t);
@@ -683,7 +683,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_802_3_MULTICAST_LIST:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_802_3_MULTICAST_LIST\r\n");
+		printf("OID_802_3_MULTICAST_LIST\r\n");
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = 0xE0000000;
 		bufferLen += sizeof(uint32_t);
@@ -692,7 +692,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_802_3_MAC_OPTIONS:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_802_3_MAC_OPTIONS\r\n");
+		printf("OID_802_3_MAC_OPTIONS\r\n");
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = NDIS_MAC_OPTION_SUPPORTS_MAC_ADDRESS_OVERWRITE |
 				NDIS_MAC_OPTION_NO_LOOPBACK;
@@ -702,7 +702,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_XMIT_OK:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_XMIT_OK %d\r\n", rndis_stats.tx_packets - rndis_stats.tx_errors - rndis_stats.tx_dropped);
+		printf("OID_GEN_XMIT_OK %d\r\n", rndis_stats.tx_packets - rndis_stats.tx_errors - rndis_stats.tx_dropped);
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = rndis_stats.tx_packets - rndis_stats.tx_errors - rndis_stats.tx_dropped;
 		bufferLen += sizeof(uint32_t);
@@ -711,7 +711,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_RCV_OK:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_RCV_OK %d\r\n", rndis_stats.rx_packets - rndis_stats.rx_errors - rndis_stats.rx_dropped);
+		printf("OID_GEN_RCV_OK %d\r\n", rndis_stats.rx_packets - rndis_stats.rx_errors - rndis_stats.rx_dropped);
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = rndis_stats.rx_packets - rndis_stats.rx_errors - rndis_stats.rx_dropped;
 		bufferLen += sizeof(uint32_t);
@@ -720,7 +720,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_XMIT_ERROR:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_XMIT_ERROR %d\r\n", rndis_stats.tx_errors);
+		printf("OID_GEN_XMIT_ERROR %d\r\n", rndis_stats.tx_errors);
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = rndis_stats.tx_errors;
 		bufferLen += sizeof(uint32_t);
@@ -729,7 +729,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_RCV_ERROR:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_RCV_ERROR %d\r\n", rndis_stats.rx_errors);
+		printf("OID_GEN_RCV_ERROR %d\r\n", rndis_stats.rx_errors);
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = rndis_stats.rx_errors;
 		bufferLen += sizeof(uint32_t);
@@ -738,7 +738,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_RCV_NO_BUFFER:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_RCV_NO_BUFFER %d\r\n", rndis_stats.rx_dropped);
+		printf("OID_GEN_RCV_NO_BUFFER %d\r\n", rndis_stats.rx_dropped);
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = rndis_stats.rx_dropped;
 		bufferLen += sizeof(uint32_t);
@@ -747,7 +747,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_MEDIA_SUPPORTED:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_MEDIA_SUPPORTED\r\n");
+		printf("OID_GEN_MEDIA_SUPPORTED\r\n");
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = NDIS_MEDIUM_802_3;
 		bufferLen += sizeof(uint32_t);
@@ -756,7 +756,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_PNP_CAPABILITIES:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_PNP_CAPABILITIES\r\n");
+		printf("OID_PNP_CAPABILITIES\r\n");
 #endif // RNDIS_OID_DEBUG
 		*pBuf32++ = 0; // Flags
 		*pBuf32++ = 0; // Magic Packet Wakeup
@@ -768,14 +768,14 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_PNP_QUERY_POWER:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_PNP_QUERY_POWER\r\n");
+		printf("OID_PNP_QUERY_POWER\r\n");
 #endif // RNDIS_OID_DEBUG
 		status = RNDIS_STATUS_SUCCESS;
 		break;
 
 	case OID_GEN_VENDOR_DESCRIPTION:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_VENDOR_DESCRIPTION\r\n");
+		printf("OID_GEN_VENDOR_DESCRIPTION\r\n");
 #endif // RNDIS_OID_DEBUG
 		strcpy((char *)pBuf8, rndis_vendor_description);
 		bufferLen += (strlen(rndis_vendor_description) + 1);
@@ -784,7 +784,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_VENDOR_ID:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_VENDOR_ID\r\n");
+		printf("OID_GEN_VENDOR_ID\r\n");
 #endif // RNDIS_OID_DEBUG
 		memcpy(pBuf8, rndis_vendor_id, 3);
 		bufferLen += 3;
@@ -793,7 +793,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	case OID_GEN_VENDOR_DRIVER_VERSION:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_VENDOR_DRIVER_VERSION\r\n");
+		printf("OID_GEN_VENDOR_DRIVER_VERSION\r\n");
 #endif // RNDIS_OID_DEBUG
 		*pBuf32 = rndis_driver_version;
 		bufferLen += sizeof(uint32_t);
@@ -802,7 +802,7 @@ static uint32_t rndis_query_handler(uint32_t OID, uint8_t *query, uint32_t query
 
 	default:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID QUERY UNKNOWN!\r\n");
+		printf("OID QUERY UNKNOWN!\r\n");
 #endif // RNDIS_OID_DEBUG
 		break;
 	}
@@ -830,7 +830,7 @@ static void rndis_update_packet_filter(void)
 			rndis_rx_enable_cb(1, rndis_packet_filter);
 		}
 #ifdef RNDIS_STATE_DEBUG
-        tfp_printf("Packet filter ON P %c M %c\r\n",
+        printf("Packet filter ON P %c M %c\r\n",
 				rndis_packet_filter & NDIS_PACKET_TYPE_PROMISCUOUS?'Y':'N',
 				rndis_packet_filter & NDIS_PACKET_TYPE_MULTICAST?'Y':'N');
 #endif // RNDIS_STATE_DEBUG
@@ -846,7 +846,7 @@ static void rndis_update_packet_filter(void)
 			rndis_rx_enable_cb(0, rndis_packet_filter);
 		}
 #ifdef RNDIS_STATE_DEBUG
-        tfp_printf("Packet filter OFF\r\n");
+        printf("Packet filter OFF\r\n");
 #endif // RNDIS_STATE_DEBUG
 	}
 }
@@ -863,19 +863,19 @@ static uint32_t rndis_set_handler(uint32_t OID, uint8_t *set, uint32_t setLen, s
 	{
 	case OID_GEN_CURRENT_PACKET_FILTER:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_GEN_CURRENT_PACKET_FILTER\r\n");
+		printf("OID_GEN_CURRENT_PACKET_FILTER\r\n");
 #endif // RNDIS_OID_DEBUG
 		rndis_packet_filter = *pSet32;
 		rndis_update_packet_filter();
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("Packet filter set to %x\r\n", rndis_packet_filter);
+		printf("Packet filter set to %x\r\n", rndis_packet_filter);
 #endif // RNDIS_OID_DEBUG
 		status = RNDIS_STATUS_SUCCESS;
 		break;
 
 	case OID_802_3_MULTICAST_LIST:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_802_3_MULTICAST_LIST ignored\r\n");
+		printf("OID_802_3_MULTICAST_LIST ignored\r\n");
 #endif // RNDIS_OID_DEBUG
 		// Case for ignoring this is strong.
 		status = RNDIS_STATUS_SUCCESS;
@@ -883,7 +883,7 @@ static uint32_t rndis_set_handler(uint32_t OID, uint8_t *set, uint32_t setLen, s
 
 	case OID_PNP_SET_POWER:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID_PNP_SET_POWER\r\n");
+		printf("OID_PNP_SET_POWER\r\n");
 #endif // RNDIS_OID_DEBUG
 		switch (*pSet32)
 		{
@@ -893,11 +893,11 @@ static uint32_t rndis_set_handler(uint32_t OID, uint8_t *set, uint32_t setLen, s
 #ifdef RNDIS_STATE_DEBUG
 			if (rndis_packet_filter != 0)
 			{
-				tfp_printf("Device State D0 ON\r\n");
+				printf("Device State D0 ON\r\n");
 			}
 			else
 			{
-				tfp_printf("Device State D0 OFF\r\n");
+				printf("Device State D0 OFF\r\n");
 			}
 #endif // RNDIS_STATE_DEBUG
 			break;
@@ -908,10 +908,10 @@ static uint32_t rndis_set_handler(uint32_t OID, uint8_t *set, uint32_t setLen, s
 			rndis_packet_filter = *pSet32;
 			rndis_update_packet_filter();
 #ifdef RNDIS_OID_DEBUG
-			tfp_printf("Packet filter set to %x\r\n", rndis_packet_filter);
+			printf("Packet filter set to %x\r\n", rndis_packet_filter);
 #endif // RNDIS_OID_DEBUG
 #ifdef RNDIS_STATE_DEBUG
-			tfp_printf("Device State D1-3\r\n");
+			printf("Device State D1-3\r\n");
 #endif // RNDIS_STATE_DEBUG
 			break;
 		}
@@ -921,7 +921,7 @@ static uint32_t rndis_set_handler(uint32_t OID, uint8_t *set, uint32_t setLen, s
 
 	default:
 #ifdef RNDIS_OID_DEBUG
-		tfp_printf("OID SET UNKNOWN!\r\n");
+		printf("OID SET UNKNOWN!\r\n");
 #endif // RNDIS_OID_DEBUG
 		break;
 	}
@@ -945,7 +945,7 @@ static void rndis_notification(void)
 	{
 		USBD_transfer(rndis_ep_not, (uint8_t *) &responseAvail, sizeof(struct rndis_notification_msg));
 #ifdef RNDIS_NOTIFICATION_DEBUG
-		tfp_printf("Notification sent.\r\n");
+		printf("Notification sent.\r\n");
 #endif // RNDIS_NOTIFICATION_DEBUG
 	}
 }
@@ -1071,7 +1071,7 @@ void USBD_RNDIS_link(int speed)
 	if (speed > 0)
 	{
 #ifdef RNDIS_STATE_DEBUG
-		tfp_printf("Cable connected %d Mb/sec\r\n", speed);
+		printf("Cable connected %d Mb/sec\r\n", speed);
 #endif // RNDIS_STATE_DEBUG
 		if (speed == 100)
 			rndis_link_speed = NDIS_LINK_SPEED_100MBPS;
@@ -1091,7 +1091,7 @@ void USBD_RNDIS_link(int speed)
 	else
 	{
 #ifdef RNDIS_STATE_DEBUG
-		tfp_printf("Cable disconnected\r\n");
+		printf("Cable disconnected\r\n");
 #endif // RNDIS_STATE_DEBUG
 		if (rndis_connected == NDIS_MEDIA_STATE_CONNECTED)
 		{
@@ -1172,12 +1172,12 @@ int8_t USBD_RNDIS_write(uint8_t *buffer, size_t len)
     }
 
 #ifdef RNDIS_PACKET_DEBUG
-	tfp_printf("Rx: ");
+	printf("Rx: ");
 	for (i = 0; i < len; i++)
 	{
-		tfp_printf("[%x]%02x ", i, buffer[i]);
+		printf("[%x]%02x ", i, buffer[i]);
 	}
-	tfp_printf("\r\n");
+	printf("\r\n");
 #endif // RNDIS_PACKET_DEBUG
 
 	// Create a packet message header.
@@ -1251,7 +1251,7 @@ int8_t USBD_RNDIS_read(uint8_t *buffer, size_t *len)
 				if (transferred != msg.MessageLength - read_bytes)
 				{
 #ifdef RNDIS_ERROR_DEBUG
-			tfp_printf("Recovery received packet too short: %d\r\n", transferred);
+			printf("Recovery received packet too short: %d\r\n", transferred);
 #endif // RNDIS_ERROR_DEBUG
 					data_len = msg.MessageLength - read_bytes - transferred;
 					read_bytes = read_bytes + transferred;
@@ -1262,18 +1262,18 @@ int8_t USBD_RNDIS_read(uint8_t *buffer, size_t *len)
 				status = USBD_RNDIS_OK;
 
 #ifdef RNDIS_PACKET_DEBUG
-				tfp_printf("Tx: ");
+				printf("Tx: ");
 				for (i = 0; i < data_len; i++)
 				{
-					tfp_printf("%02x ", buffer[i]);
+					printf("%02x ", buffer[i]);
 				}
-				tfp_printf("\r\n");
+				printf("\r\n");
 #endif // RNDIS_PACKET_DEBUG
 			}
 			else
 			{
 #ifdef RNDIS_ERROR_DEBUG
-				tfp_printf("Recovery packet length too long: %d\r\n", read_bytes);
+				printf("Recovery packet length too long: %d\r\n", read_bytes);
 #endif // RNDIS_ERROR_DEBUG
 				goto recovery;
 			}
@@ -1281,7 +1281,7 @@ int8_t USBD_RNDIS_read(uint8_t *buffer, size_t *len)
 		else
 		{
 #ifdef RNDIS_ERROR_DEBUG
-			tfp_printf("Recovery message type incorrect: %08x\r\n", msg.MessageType);
+			printf("Recovery message type incorrect: %08x\r\n", msg.MessageType);
 #endif // RNDIS_ERROR_DEBUG
 			// read until end of packet.
 			data_len = maxp - read_bytes;

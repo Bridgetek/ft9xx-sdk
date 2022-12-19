@@ -104,7 +104,6 @@ Changes from V2.0.0
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
-#include "tinyprintf.h"
 
 /* Demo program include files. */
 #include "print.h"
@@ -130,7 +129,7 @@ void vPrintDisplayMessage( const char * const * ppcMessageToSend )
     	/* Stop warnings. */
 		//( void ) ppcMessageToSend;
 		vTaskSuspendAll ();
-		tfp_printf("%s", *ppcMessageToSend);
+		printf("%s", *ppcMessageToSend);
 		xTaskResumeAll ();
 	#endif
 }
