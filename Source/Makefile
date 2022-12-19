@@ -67,8 +67,6 @@ CFLAGS += -std=gnu99 #-std=c99
 ifeq ($(CONFIG), Release)
 # Release settings
 CFLAGS += -Os
-#CFLAGS += -ffunction-sections
-#CFLAGS += -Wall -Wextra
 LDFLAGS +=
 DESTDIR := Release/$(TARGET)
 
@@ -90,6 +88,7 @@ ifeq ($(TARGET), ft900)
 CFLAGS += -D__FT900__
 
 SRCFILES := src/adc.c \
+		src/bootstrap.c \
         src/cam.c \
         src/can.c \
         src/dac.c \
@@ -129,6 +128,7 @@ ifeq ($(TARGET), ft930)
 CFLAGS += -D__FT930__ -mcompress -mft32b
 
 SRCFILES := src/adc.c \
+		src/bootstrap.c \
 		src/dac.c \
 		src/delay.c \
 		src/gpio.c \
