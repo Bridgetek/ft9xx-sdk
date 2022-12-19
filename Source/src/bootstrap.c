@@ -1,16 +1,18 @@
 /**
-    @file
+    @file bootstrap.c
 
     @brief
-    General Purpose IO and Pad control
-
-    
+    Code to satisfy undeclared externals in newlib. These will allow
+    functions that would normally integrate with the operating system to
+    be used. File system functions will return error codes. Memory 
+    allocation will be pointed to an area for the heap. Standard I/O, 
+	printf, fprintf etc, will be directed to work with UART0. The UART 
+    must be setup before use.    
 **/
 /*
  * ============================================================================
  * History
  * =======
- * 09 FEB 15: Bug #181 Optimise constants to get put into .rodata.
  *
  * Copyright (C) Bridgetek Pte Ltd
  * ============================================================================
@@ -47,587 +49,232 @@
  */
 
 /* INCLUDES ************************************************************************/
-#include <stddef.h>
-#include <ft900_gpio.h>
-#include <registers/ft900_registers.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <sys/times.h>
+
+#include <ft900.h>
 
 /* CONSTANTS ***********************************************************************/
-#if defined(__FT900__)
-#define MAX_GPIO (66)
-#elif defined(__FT930__)
-#define MAX_GPIO (39)
-#endif
 
 /* GLOBAL VARIABLES ****************************************************************/
 
+// Start of available memory from linker script.
+extern unsigned char *_edata;
+
 /* LOCAL VARIABLES *****************************************************************/
-#if defined(__FT900__)
-static uint32_t volatile * const valRegs[] =
-{
-        &(GPIO->GPIO00_31_VAL),
-        &(GPIO->GPIO32_63_VAL),
-        &(GPIO->GPIO64_66_VAL),
-        NULL
-};
-
-static uint32_t volatile * const intenRegs[] =
-{
-        &(GPIO->GPIO00_31_INT_EN),
-        &(GPIO->GPIO32_63_INT_EN),
-        &(GPIO->GPIO64_66_INT_EN),
-        NULL
-};
-
-static uint32_t volatile * const intpendRegs[] =
-{
-        &(GPIO->GPIO00_31_INT_PEND),
-        &(GPIO->GPIO32_63_INT_PEND),
-        &(GPIO->GPIO64_66_INT_PEND),
-        NULL
-};
-
-static uint32_t volatile * const configRegs[] =
-{
-        &(GPIO->GPIO00_07_CFG),
-        &(GPIO->GPIO08_15_CFG),
-        &(GPIO->GPIO16_23_CFG),
-        &(GPIO->GPIO24_31_CFG),
-        &(GPIO->GPIO32_39_CFG),
-        &(GPIO->GPIO40_47_CFG),
-        &(GPIO->GPIO48_55_CFG),
-        &(GPIO->GPIO56_63_CFG),
-        &(GPIO->GPIO64_71_CFG),
-        NULL
-};
-#elif defined(__FT930__)
-
-static uint32_t volatile * const valRegs[] =
-{
-        &(GPIO->GPIO00_31_VAL),
-        &(GPIO->GPIO32_39_VAL),
-        NULL
-};
-
-static uint32_t volatile * const intenRegs[] =
-{
-        &(GPIO->GPIO00_31_INT_EN),
-        &(GPIO->GPIO32_39_INT_EN),
-        NULL
-};
-
-static uint32_t volatile * const intpendRegs[] =
-{
-        &(GPIO->GPIO00_31_INT_PEND),
-        &(GPIO->GPIO32_39_INT_PEND),
-        NULL
-};
-
-static uint32_t volatile * const configRegs[] =
-{
-        &(GPIO->GPIO00_07_CFG),
-        &(GPIO->GPIO08_15_CFG),
-        &(GPIO->GPIO16_23_CFG),
-        &(GPIO->GPIO24_31_CFG),
-        &(GPIO->GPIO32_39_CFG),
-        NULL
-};
-
-#else
-
-#error -- processor type not defined
-
-#endif
 
 /* MACROS **************************************************************************/
-#define GPIO_PAD(x) *(&(GPIO->PAD00_CFG)+x)
-
-#define determine_val_reg(num, reg) determine_reg(valRegs, num, reg)
-#define determine_inten_reg(num, reg) determine_reg(intenRegs, num, reg)
-#define determine_intpend_reg(num, reg) determine_reg(intpendRegs, num, reg)
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
-static inline int8_t not_valid_gpio(uint8_t num)
-{
-    return (num > MAX_GPIO);
-}
-
-static inline void determine_reg(uint32_t volatile * const * array, uint8_t* num, uint32_t volatile ** reg)
-{
-    while((*num > 31) && (*array))
-    {
-        *num -= 32;
-        array++;
-    }
-    *reg = (uint32_t volatile *)(*array);
-}
-
-static inline void determine_config_reg(uint8_t* num, uint32_t volatile ** reg)
-{
-    uint32_t volatile * const * array = configRegs;
-
-    while((*num > 7) && (*array))
-    {
-        *num -= 8;
-        array++;
-    }
-    *reg = (uint32_t volatile *)(*array);
-}
-
 
 /* FUNCTIONS ***********************************************************************/
 
-/** @brief Configure the direction of a pin
- *  @param num The GPIO number
- *  @param dir The direction
- *  @returns On success a 0, otherwise -1
- */
-int8_t gpio_dir(uint8_t num, pad_dir_t dir)
+_ssize_t _read_r (struct _reent *ptr, int fd, void *buf, size_t size)
 {
-    int8_t iRet = 0;
-    volatile uint32_t *pReg = 0;
-    uint8_t iShift = 0;
-
-    if (not_valid_gpio(num))
+    (void)ptr;
+    if (fd == 0) 
     {
-        iRet = -1;
+		// stdin
+        return (_ssize_t)uart_readn(UART0, buf, size);
     }
-
-    if (iRet == 0)
-    {
-        pReg = (&(GPIO->GPIO00_07_CFG) + (num / 8));
-        iShift = (num % 8) * 4;
-
-        if (dir == pad_dir_input)
-        {
-            *pReg &= ~((MASK_GPIOXX_XX_CFG_DIR1 | MASK_GPIOXX_XX_CFG_DIR0) << iShift);
-        }
-        else if (dir == pad_dir_output)
-        {
-            *pReg &= ~((MASK_GPIOXX_XX_CFG_DIR1) << iShift);
-            *pReg |= ((MASK_GPIOXX_XX_CFG_DIR0) << iShift);
-        }
-        else if (dir == pad_dir_open_drain)
-        {
-            *pReg |= ((MASK_GPIOXX_XX_CFG_DIR1) << iShift);
-        }
-        else
-        {
-            iRet = -1;
-        }
-
-    }
-
-    return iRet;
+	else if ((fd == 1) || (fd == 2))
+	{
+		// stdout and stderr
+		return 0;
+	}
+    errno = EBADF;
+    return -1;
 }
 
-
-/** @brief Configure the slew rate for a pin
- *  @param num The GPIO number
- *  @param slew The slew rate of the pin
- *  @returns On success a 0, otherwise -1
- */
-int8_t gpio_slew(uint8_t num, pad_slew_t slew)
+_ssize_t _write_r (struct _reent *ptr, int fd, void *buf, size_t size)
 {
-    int8_t iRet = 0;
-
-    if (not_valid_gpio(num))
+    (void)ptr;
+    if (fd == 0)
+	{
+		// stdin
+		return 0;
+	}
+	else if ((fd == 1) || (fd == 2))
     {
-        iRet = -1;
+		// stdout and stderr
+        return (_ssize_t)uart_writen(UART0, buf, size);
     }
-
-    if (iRet == 0)
-    {
-        if (slew == pad_slew_fast)
-        {
-            GPIO_PAD(num) &= ~MASK_PADXX_CFG_SLEW;
-        }
-        else if (slew == pad_slew_slow)
-        {
-            GPIO_PAD(num) |= MASK_PADXX_CFG_SLEW;
-        }
-        else
-        {
-            iRet = -1;
-        }
-    }
-
-    return iRet;
+    errno = EBADF;
+    return -1;
 }
 
-
-/** @brief Configure the schmitt trigger for a pin
- *  @param num The GPIO number
- *  @param schmitt The Schmitt trigger configuration
- *  @returns On success a 0, otherwise -1
- */
-int8_t gpio_schmitt(uint8_t num, pad_schmitt_t schmitt)
+int _close_r (struct _reent *ptr, int fd)
 {
-    int8_t iRet = 0;
-
-    if (not_valid_gpio(num))
+    (void)ptr;
+    if ((fd == 0) || (fd == 1) || (fd == 2))
     {
-        iRet = -1;
+        return 0;
     }
-
-    if (iRet == 0)
-    {
-        if (schmitt == pad_schmitt_off)
-        {
-            GPIO_PAD(num) &= ~MASK_PADXX_CFG_SCHMITT;
-        }
-        else if (schmitt == pad_schmitt_on)
-        {
-            GPIO_PAD(num) |= MASK_PADXX_CFG_SCHMITT;
-        }
-        else
-        {
-            iRet = -1;
-        }
-    }
-
-    return iRet;
+    errno = EBADF;
+    return -1;
 }
 
-
-/** @brief Configure the pull up/down for a pin
- *  @param num The GPIO number
- *  @param pull The pullup/down configuration
- *  @returns On success a 0, otherwise -1
- */
-int8_t gpio_pull(uint8_t num, pad_pull_t pull)
+int _fstat_r (struct _reent *ptr, int fd, struct stat *st)
 {
-    int8_t iRet = 0;
-
-    if (not_valid_gpio(num))
+    (void)ptr;
+    if ((fd == 0) || (fd == 1) || (fd == 2))
     {
-        iRet = -1;
+		// character-orientated device file
+		st->st_mode = S_IFCHR;
+        return 0;
     }
-
-    if (iRet == 0)
-    {
-        if (pull == pad_pull_none)
-        {
-            GPIO_PAD(num) &= ~(MASK_PADXX_CFG_PULL1 | MASK_PADXX_CFG_PULL0);
-        }
-        else if (pull == pad_pull_pullup)
-        {
-            GPIO_PAD(num) |= MASK_PADXX_CFG_PULL1;
-            GPIO_PAD(num) &= ~MASK_PADXX_CFG_PULL0;
-        }
-        else if (pull == pad_pull_pulldown)
-        {
-            GPIO_PAD(num) &= ~MASK_PADXX_CFG_PULL1;
-            GPIO_PAD(num) |= MASK_PADXX_CFG_PULL0;
-        }
-        else if (pull == pad_pull_keeper)
-        {
-            GPIO_PAD(num) |= (MASK_PADXX_CFG_PULL1 | MASK_PADXX_CFG_PULL0);
-        }
-        else
-        {
-            iRet = -1;
-        }
-    }
-
-    return iRet;
+    errno = EBADF;
+    return -1;
 }
 
-
-/** @brief Configure the maximum current drive for a pin
- *  @param num The GPIO number
- *  @param drive The maximum current
- *  @returns On success a 0, otherwise -1
- */
-int8_t gpio_idrive(uint8_t num, pad_drive_t drive)
+int _getpid_r (struct _reent *ptr)
 {
-    int8_t iRet = 0;
-
-    if (not_valid_gpio(num))
-    {
-        iRet = -1;
-    }
-
-    if (iRet == 0)
-    {
-        if (drive == pad_drive_4mA)
-        {
-            GPIO_PAD(num) &= ~(MASK_PADXX_CFG_DRV1 | MASK_PADXX_CFG_DRV0);
-        }
-        else if (drive == pad_drive_8mA)
-        {
-            GPIO_PAD(num) &= ~MASK_PADXX_CFG_DRV1;
-            GPIO_PAD(num) |= MASK_PADXX_CFG_DRV0;
-        }
-        else if (drive == pad_drive_12mA)
-        {
-            GPIO_PAD(num) |= MASK_PADXX_CFG_DRV1;
-            GPIO_PAD(num) &= ~MASK_PADXX_CFG_DRV0;
-        }
-        else if (drive == pad_drive_16mA)
-        {
-            GPIO_PAD(num) |= (MASK_PADXX_CFG_DRV1 | MASK_PADXX_CFG_DRV0);
-        }
-        else
-        {
-            iRet = -1;
-        }
-    }
-
-    return iRet;
+    (void)ptr;
+    return 0;
 }
 
-
-/** @brief Configure the alternative function for a pin
- *  @param num The GPIO number
- *  @param func The function that the pin should use
- *  @returns On success a 0, otherwise -1
- */
-int8_t gpio_function(uint8_t num, pad_func_t func)
+int _isatty_r (struct _reent *ptr, int fd)
 {
-    int8_t iRet = 0;
-
-    if (not_valid_gpio(num))
-    {
-        iRet = -1;
-    }
-
-    if (iRet == 0)
-    {
-        if (func == pad_func_0)
-        {
-            GPIO_PAD(num) &= ~(MASK_PADXX_CFG_FUNC1 | MASK_PADXX_CFG_FUNC0);
-        }
-        else if (func == pad_func_1)
-        {
-            GPIO_PAD(num) &= ~MASK_PADXX_CFG_FUNC1;
-            GPIO_PAD(num) |= MASK_PADXX_CFG_FUNC0;
-        }
-        else if (func == pad_func_2)
-        {
-            GPIO_PAD(num) |= MASK_PADXX_CFG_FUNC1;
-            GPIO_PAD(num) &= ~MASK_PADXX_CFG_FUNC0;
-        }
-        else if (func == pad_func_3)
-        {
-            GPIO_PAD(num) |= (MASK_PADXX_CFG_FUNC1 | MASK_PADXX_CFG_FUNC0);
-        }
-        else
-        {
-            iRet = -1;
-        }
-    }
-
-    return iRet;
+    (void)ptr;
+    if ((fd == 0) || (fd == 1) || (fd == 2))
+        return 1;
+    errno = ENOTTY;
+    return 0;
 }
 
-
-/** @brief Write a value to a GPIO pin
- *  @param num The GPIO number
- *  @param val The value to write
- *  @returns On success a 0, otherwise -1
- */
-int8_t gpio_write(uint8_t num, uint8_t val)
+int _kill_r (struct _reent *ptr, int pid, int sig)
 {
-    int8_t iRet = 0;
-    volatile uint32_t *pReg = 0;
-
-    if (not_valid_gpio(num))
-    {
-        iRet = -1;
-    }
-
-    if (iRet == 0)
-    {
-        determine_val_reg(&num, &pReg);
-
-        if (pReg)
-        {
-            if (val == 0)
-            {
-                /* Clear */
-                *pReg &= ~(1 << num);
-            }
-            else if (val == 1)
-            {
-                /* Set */
-                *pReg |= (1 << num);
-            }
-            else
-            {
-                iRet = -1;
-            }
-        }
-        else
-        {
-            iRet = -1;
-        }
-    }
-
-    return iRet;
+    (void)ptr;
+    (void)pid;
+    (void)sig;
+    errno = ESRCH;
+    return -1;
 }
 
-
-/** @brief Read a value from a GPIO pin
- *  @param num The GPIO number
- *  @param val The value to write
- *  @returns The value of the pin (1 = high, 0 = low), otherwise -1
- */
-int8_t gpio_read(uint8_t num)
+_off_t _lseek_r (struct _reent *ptr, int fd, _off_t offset, int whence)
 {
-    int8_t iRet = 0;
-    volatile uint32_t *pReg = 0;
-
-    if (not_valid_gpio(num))
-    {
-        iRet = -1;
-    }
-
-    if (iRet == 0)
-    {
-        determine_val_reg(&num, &pReg);
-
-        if (*pReg & (1 << num))
-        {
-            iRet = 1;
-        }
-        else
-        {
-            iRet = 0;
-        }
-    }
-
-    return iRet;
+    (void)ptr;
+    (void)offset;
+    (void)whence;
+    if ((fd == 0) || (fd == 1) || (fd == 2))
+        return (off_t)0;
+    errno = EBADF;
+    return (off_t)-1;
 }
 
-
-/** @brief Toggle the value of a GPIO pin
- *  @param num The GPIO number
- *  @returns On success a 0, otherwise -1
- */
-int8_t gpio_toggle(uint8_t num)
+void *_sbrk_r (struct _reent *ptr, ptrdiff_t diff)
 {
-    int8_t iRet = 0;
-    volatile uint32_t *pReg = 0;
-
-    if (not_valid_gpio(num))
+    (void)ptr;
+    (void)diff;
+    static unsigned char *p_heap = NULL;
+    void *ret;
+    // first time in here return address immediately above data section.
+    if (p_heap == NULL) 
     {
-        iRet = -1;
+        p_heap = (unsigned char *)&_edata;
     }
-
-    if (iRet == 0)
-    {
-        determine_val_reg(&num, &pReg);
-
-        if (pReg) *pReg = *pReg ^ (1 << num);
-        else iRet = -1;
-    }
-
-    return iRet;
+    ret = (void *)p_heap;
+    // pointer difference is in bytes.
+    // always allow more data, cannot check for clash with stacks
+    p_heap += diff;
+    return ret;
 }
 
-
-/** @brief Enable an interrupt on a GPIO pin
- *  @param num The GPIO number
- *  @returns On success a 0, otherwise -1
- */
-int8_t gpio_interrupt_enable(uint8_t num, gpio_int_edge_t edge)
+int _execve_r (struct _reent *ptr, const char *path, char *const *argv, char *const *envp)
 {
-    int8_t iRet = 0;
-    volatile uint32_t *enreg = 0, *cfgreg = 0;
-    uint8_t i;
-
-    if (not_valid_gpio(num))
-    {
-        iRet = -1;
-    }
-
-    if (iRet == 0)
-    {
-
-        i = num;
-        determine_config_reg(&i, &cfgreg);
-
-        if (edge == gpio_int_edge_raising)
-        {
-            *cfgreg |= MASK_GPIOXX_XX_CFG_INTEDGE << (4 * i);
-        }
-        else
-        {
-            *cfgreg &= ~(MASK_GPIOXX_XX_CFG_INTEDGE << (4 * i));
-        }
-
-        *cfgreg |= MASK_GPIOXX_XX_CFG_INTEN << (4 * i);
-
-        /* Enable interrupts on the pad */
-        i = num;
-        determine_inten_reg(&i, &enreg);
-
-        *enreg = *enreg | (1 << i);
-
-    }
-
-    return iRet;
+    (void)ptr;
+    (void)path;
+    (void)argv;
+    (void)envp;
+    errno = EACCES;
+    return -1;
 }
 
-
-/** @brief Disable an interrupt on a GPIO pin
- *  @param num The GPIO number
- *  @returns On success a 0, otherwise -1
- */
-int8_t gpio_interrupt_disable(uint8_t num)
+int _fcntl_r (struct _reent *ptr, int fd, int cmd, int args)
 {
-    int8_t iRet = 0;
-    volatile uint32_t *enreg = 0, *cfgreg = 0;
-    uint8_t i;
-
-    if (not_valid_gpio(num))
-    {
-        iRet = -1;
-    }
-
-    if (iRet == 0)
-    {
-        i = num;
-        determine_inten_reg(&i, &enreg);
-
-        *enreg = *enreg & ~(1 << i);
-
-        i = num;
-        determine_config_reg(&i, &cfgreg);
-
-        *cfgreg &= ~(MASK_GPIOXX_XX_CFG_INTEN << (4 * i));
-    }
-
-    return iRet;
+    (void)ptr;
+    (void)fd;
+    (void)cmd;
+    (void)args;
+    errno = EACCES;
+    return -1;
 }
 
-
-/** @brief Check if an interrupt has happened on a GPIO pin
- *  @param num The GPIO number
- *  @returns On no interrupt 0, on an interrupt 1, otherwise -1
- */
-int8_t gpio_is_interrupted(uint8_t num)
+int _fork_r (struct _reent *ptr)
 {
-    int8_t iRet = 0;
-    volatile uint32_t *pReg = 0;
+    (void)ptr;
+    errno = ENOSYS;
+    return -1;
+}
 
-    if (not_valid_gpio(num))
-    {
-        iRet = -1;
-    }
+int _link_r (struct _reent *ptr, const char *old, const char *new)
+{
+    (void)ptr;
+    (void)old;
+    (void)new;
+    errno = EACCES;
+    return -1;
+}
 
-    if (iRet == 0)
-    {
-        determine_intpend_reg(&num, &pReg);
+int _mkdir_r (struct _reent *ptr, const char *path, int mode)
+{
+    (void)ptr;
+    (void)path;
+    (void)mode;
+    errno = EACCES;
+    return -1;
+}
 
-        if (*pReg & (1 << num))
-        {
-            /* Interrupted, clear the interrupt */
-            iRet = 1;
-            *pReg = *pReg | (1 << num);
-        }
+int _open_r (struct _reent *ptr, const char *path, int flags, int mode)
+{
+    (void)ptr;
+    (void)path;
+    (void)flags;
+    (void)mode;
+    errno = EACCES;
+    return -1;
+}
 
-    }
+int _rename_r (struct _reent *ptr, const char *old, const char *new)
+{
+    (void)ptr;
+    (void)old;
+    (void)new;
+    errno = EACCES;
+    return -1;
+}
 
-    return iRet;
+int _stat_r (struct _reent *ptr, const char *path, struct stat *st)
+{
+    (void)ptr;
+    (void)path;
+    (void)st;
+    errno = EACCES;
+    return -1;
+}
+
+_CLOCK_T_ _times_r (struct _reent *ptr, struct tms *time)
+{
+    (void)ptr;
+    (void)time;
+    errno = ECHILD;
+    return (clock_t) -1;
+}
+
+int _unlink_r (struct _reent *ptr, const char *path)
+{
+    (void)ptr;
+    (void)path;
+    errno = EACCES;
+    return -1;
+}
+
+int _wait_r (struct _reent *ptr, int *pid)
+{
+    (void)ptr;
+    (void)pid;
+    errno = ECHILD;
+    return -1;
 }
