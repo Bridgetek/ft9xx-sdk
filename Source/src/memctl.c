@@ -377,7 +377,7 @@ void __attribute__((optimize("O0"))) memcpy_pm2dat( void *dest, const __flash__ 
     uint32_t newLen;
     uint32_t endLen;
     uint32_t longLen;
-    __flash__ uint32_t *pLongSrc;
+    const __flash__ uint32_t *pLongSrc;
     uint32_t *pLongDest;
     uint32_t longWord1;
     uint32_t longWord2;
@@ -415,12 +415,12 @@ void __attribute__((optimize("O0"))) memcpy_pm2dat( void *dest, const __flash__ 
     if ( srcCnt <= destCnt )
     {
         // Advance to pSrc at the start of the next full word
-        pLongSrc = (__flash__ uint32_t*) ( pSrc + srcCnt );
+        pLongSrc = (const __flash__ uint32_t*) ( pSrc + srcCnt );
     }
     else // There are still source bytes remaining in the first word
     {
         // Set pSrc to the start of the first full word
-        pLongSrc = (__flash__ uint32_t*) ( pSrc + srcCnt - 4 );
+        pLongSrc = (const __flash__ uint32_t*) ( pSrc + srcCnt - 4 );
     }
 #pragma GCC diagnostic pop
 
