@@ -402,8 +402,9 @@ typedef struct USBD_ctx
 	 * using this callback. **/
 	USBD_sof_callback sof_cb;
 
-	/** Endpoint size for control endpoints. Section 3.3.1 FT900 USB Program Manual.
-    Sets DC_EP0_CONTROL register in Table 3.6.\n
+	/** Endpoint size for control endpoints.
+	This may only be in the range of 8, 16, 32 or 64 bytes. For high speed
+	operation it must be 64 bytes.\n
         0: 8 bytes.
         1: 16 bytes.
         2: 32 bytes.
@@ -416,7 +417,8 @@ typedef struct USBD_ctx
 	void *ep0_cb;
 
 	/** Device configuration section.
-    High speed/full speed select. Section 3.2.2 FT900 USB Program Manual.\n
+    High speed/full speed select. The device will only operate in high speed
+    mode if selected by this option.\n
         0: Full speed only.
         1: High speed if available.
 	 **/
@@ -813,10 +815,12 @@ int32_t USBD_transfer_ep0( USBD_ENDPOINT_DIR dir,
 
 /**
     @brief      USB process (Deprecated)
-    @details    To be continuously called by the user application or USB device
-                thread. Checks for control endpoint transfer activity and
-                invokes relevant callback. Manages suspend and resume states
-                and power management.
+    @details    Previously continuously called by the user application or USB
+    			device thread. Checked for control endpoint transfer activity
+    			and invoked relevant callback. Managed suspend and resume
+    			states and power management.
+    			NOTE: This is not required now as the actions are performed
+    			during the interrupt handler.
     @return     Non-zero if USB transaction has been processed.
  **/
 __attribute__ ((deprecated)) int8_t USBD_process(void);
