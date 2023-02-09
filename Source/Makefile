@@ -1,4 +1,5 @@
 #
+#
 #    @file
 #
 #    @brief
@@ -49,12 +50,23 @@ ifndef PREFIX
 PREFIX := ft32-elf-
 endif
 
+ifndef LIBDIR
+LIBDIR := lib
+endif
+
 CC := $(PREFIX)gcc
 LD := $(PREFIX)ld
 AS := $(PREFIX)as
 AR := $(PREFIX)ar
-MKDIR := gmkdir -p
 
+UNAME := $(shell uname)
+ifeq ($(UNAME), Linux)
+MKDIR := mkdir -p
+else
+MKDIR := gmkdir -p
+endif
+
+SRC_DIR := ./src
 INCLUDE_DIR := ./include
 
 # Set up flags and a destination directory....
@@ -63,12 +75,20 @@ CFLAGS += -fmessage-length=0 -ffunction-sections
 CFLAGS += -Wall -Wextra
 #extension for named address spaces is only supported by gcc for plain C only, not for C99
 CFLAGS += -std=gnu99 #-std=c99
+ifdef INSTALL
+# Release settings
+ifeq ($(UNAME), Linux)
+LOCALDIR := ${CURDIR}
+else
+LOCALDIR := echo $(CURDIR) | sed -e "s/\/\([a-z]\)\//\1:\//g"
+endif
+CFLAGS += -ffile-prefix-map="${LOCALDIR}"="${INSTALL}"
+endif # ifneq INSTALL
 
 ifeq ($(CONFIG), Release)
 # Release settings
 CFLAGS += -Os
 LDFLAGS +=
-DESTDIR := Release/$(TARGET)
 
 else
 ifeq ($(CONFIG), Debug)
@@ -77,91 +97,98 @@ CFLAGS += -g3
 CFLAGS += -DDEBUG
 CFLAGS += -Og
 LDFLAGS +=
-DESTDIR := Debug/$(TARGET)
 
 else
 $(error Please choose CONFIG=Debug or CONFIG=Release)
+
 endif # ifeq ($(CONFIG), Debug)
 endif # ifeq ($(CONFIG), Release)
 
-ifeq ($(TARGET), ft900)
-CFLAGS += -D__FT900__
+DESTDIR := $(LIBDIR)/$(CONFIG)/$(TARGET)
 
-SRCFILES := src/adc.c \
-		src/bootstrap.c \
-        src/cam.c \
-        src/can.c \
-        src/dac.c \
-        src/delay.c \
-        src/ethernet.c \
-        src/gpio.c \
-        src/i2cm.c \
-        src/i2cs.c \
-        src/i2s.c \
-        src/interrupt.c \
-        src/memctl.c \
-        src/pwm.c \
-        src/pwm_pcm.c \
-        src/rtc.c \
-        src/sdhost.c \
-        src/spi.c \
-        src/sys.c \
-        src/timers.c \
-        src/usbd.c \
-        src/usbdx.c \
-        src/usbd_hbw.c\
-        src/usbd_dfu.c \
-        src/usbd_rndis.c \
-        src/usbd_startup_dfu.c \
-        src/usbh.c \
-        src/usbhx.c \
-        src/usbh_boms.c \
-        src/usbh_cdcacm.c \
-        src/usbh_hid.c \
-        src/usbh_aoa.c \
-        src/uart_simple.c \
-        src/wdt.c \
-        src/dlog.c
+ifeq ($(TARGET), ft900)
+CFLAGS += -D__FT900__ 
+
+SRCFILES := adc.c \
+		bootstrap.c \
+        cam.c \
+        can.c \
+        dac.c \
+        delay.c \
+        ethernet.c \
+        gpio.c \
+        i2cm.c \
+        i2cs.c \
+        i2s.c \
+        interrupt.c \
+        memctl.c \
+        pwm.c \
+        pwm_pcm.c \
+        rtc.c \
+        sdhost.c \
+        spi.c \
+        sys.c \
+        timers.c \
+        usbd.c \
+        usbdx.c \
+        usbd_hbw.c\
+        usbd_dfu.c \
+        usbd_rndis.c \
+        usbd_startup_dfu.c \
+        usbh.c \
+        usbhx.c \
+        usbh_boms.c \
+        usbh_cdcacm.c \
+        usbh_hid.c \
+        usbh_aoa.c \
+        uart_simple.c \
+        wdt.c \
+        dlog.c
 
 else
 ifeq ($(TARGET), ft930)
 CFLAGS += -D__FT930__ -mcompress -mft32b
 
-SRCFILES := src/adc.c \
-		src/bootstrap.c \
-		src/dac.c \
-		src/delay.c \
-		src/gpio.c \
-		src/i2cm.c \
-		src/i2cs.c \
-		src/interrupt.c \
-		src/memctl.c \
-		src/pwm.c \
-		src/pwm_pcm.c \
-		src/rtc.c \
-		src/sdhost.c \
-		src/spi.c \
-		src/sys.c \
-		src/timers.c \
-		src/usbd.c \
-		src/usbdx.c \
-		src/usbd_dfu.c \
-		src/usbd_rndis.c \
-		src/usbd_startup_dfu.c \
-		src/uart_simple.c \
-		src/wdt.c \
-		src/dlog.c 
+SRCFILES := adc.c \
+		bootstrap.c \
+		dac.c \
+		delay.c \
+		gpio.c \
+		i2cm.c \
+		i2cs.c \
+		interrupt.c \
+		memctl.c \
+		pwm.c \
+		pwm_pcm.c \
+		rtc.c \
+		sdhost.c \
+		spi.c \
+		sys.c \
+		timers.c \
+		usbd.c \
+		usbdx.c \
+		usbd_dfu.c \
+		usbd_rndis.c \
+		usbd_startup_dfu.c \
+		uart_simple.c \
+		wdt.c \
+		dlog.c 
 
 else
 $(error Please choose TARGET=ft900 or TARGET=ft930)
 endif # ifeq ($(TARGET), ft900)
 endif # ifeq ($(TARGET), ft930)
 
-OBJFILES := $(addprefix $(DESTDIR)/,$(notdir $(SRCFILES:.c=.o)))
-
-
+RELSRCFILES := $(addprefix $(SRC_DIR)/,$(SRCFILES))
+OBJFILES := $(addprefix $(DESTDIR)/,$(notdir $(RELSRCFILES:.c=.o)))
 
 all: $(DESTDIR)/lib$(TARGET).a
+ifeq ($(CONFIG), Debug)
+ifeq ($(TARGET), ft900)
+	cp  $^ $(LIBDIR)
+endif # ifeq ($(TARGET), ft900)
+endif # ifeq ($(CONFIG), Debug)
+	mv $^ $(LIBDIR)/$(CONFIG)
 
 clean:
 	-$(RM) $(OBJFILES)
@@ -170,6 +197,6 @@ clean:
 
 $(DESTDIR)/lib$(TARGET).a: $(OBJFILES) | $(DESTDIR) ; $(AR) rv $@ $^
 
-$(DESTDIR)/%.o:        src/%.c     | $(DESTDIR) ; $(CC) $(CFLAGS) $^ -o $@
+$(DESTDIR)/%.o:        $(SRC_DIR)/%.c     | $(DESTDIR) ; $(CC) $(CFLAGS) $^ -o $@
 
 $(DESTDIR):                                     ; $(MKDIR) $@
