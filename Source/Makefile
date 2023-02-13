@@ -43,6 +43,13 @@
 # has no liability in relation to those amendments.
 # ============================================================================
 
+# The TARGET and CONFIG parameters are required (they are case-sensitive). 
+# The INSTALL parameter allows the source code path to be set for object files to facilitate debugging.
+# Example Windows builds:
+# make -B TARGET=ft900 CONFIG=Debug INSTALL="C:\Program Files (x86)\Bridgetek\FT9xx Toolchain\Toolchain\hardware"
+# Example Linux builds:
+# make -B TARGET=ft900 CONFIG=Debug INSTALL="/opt/ft9xx-toolchain/hardware"
+
 .PHONY := clean all 
 
 # Determine what GCC version to use
@@ -80,10 +87,10 @@ ifdef INSTALL
 ifeq ($(UNAME), Linux)
 LOCALDIR := ${CURDIR}
 else
-LOCALDIR := echo $(CURDIR) | sed -e "s/\/\([a-z]\)\//\1:\//g"
+LOCALDIR := $(subst /,\,$(subst /c/,C:\,$(CURDIR)))
 endif
 CFLAGS += -ffile-prefix-map="${LOCALDIR}"="${INSTALL}"
-endif # ifneq INSTALL
+endif # ifdef INSTALL
 
 ifeq ($(CONFIG), Release)
 # Release settings
