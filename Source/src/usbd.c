@@ -164,36 +164,35 @@ typedef struct USBD_endpoint
 	 **/
 	uint8_t enabled;
 	/** IN or OUT endpoint. Not applicable for control endpoint.
-    Section 3.4.1 FT900 USB Program Manual.
-    From DC_EP_CONTROL register in Table 3.10.\n
-        0: EP direction OUT.
+    From DC_EP_CONTROL register, see Table 9.6 in AN_324 for Rev B devices or Table 8.6 in BRT_AN_020 for Rev C devices.\n
+        0: EP direction OUT.\n
         1: EP direction IN.
 	 **/
 	USBD_ENDPOINT_DIR direction;
 	/** Endpoint max packet size.
-    Control endpoints from from DC_EP0_CONTROL register in Section 3.3.1 FT900
-    USB Program Manual, Table 3.6.
     Control endpoints are maximum of 64 bytes.\n
-    Non-control endpoints from DC_EP_CONTROL register in Section 3.4.1 FT900
-    USB Program Manual.Table 3.10.
+    Control endpoints values are obtained from from DC_EP0_CONTROL register. 
+    See Table 9.6 in AN_324 for Rev B devices or Table 8.6 in BRT_AN_020 for Rev C devices.\n
+    Non-control endpoints from DC_EP_CONTROL register.
+    See Table 9.10 in AN_324 for Rev B devices or Table 8.10 in BRT_AN_020 for Rev C devices.\n
     Low-speed and full-speed non-isochronous endpoints are maximum of 64 bytes.\n
-        0: 8 bytes.
-        1: 16 bytes.
-        2: 32 bytes.
-        3: 64 bytes.
-        4: 128 bytes.
-        5: 256 bytes.
-        6: 512 bytes.
-        7: 1024 bytes.
+        0: 8 bytes.\n
+        1: 16 bytes.\n
+        2: 32 bytes.\n
+        3: 64 bytes.\n
+        4: 128 bytes.\n
+        5: 256 bytes.\n
+        6: 512 bytes.\n
+        7: 1024 bytes.\n
 	 **/
 	USBD_ENDPOINT_SIZE max_packet_size;
-	/** BULK, ISO, INT (or CTRL) endpoint. Section 3.4.1 FT900 USB Program Manual.
-    From DC_EP_CONTROL register in Table 3.10.\n
-        0: disabled.
-        1: BULK.
-        2: INTERRUPT.
-        3: ISOCHRONOUS.
-        4: CONTROL.
+	/** BULK, ISO, INT (or CTRL) endpoint.
+    From DC_EP_CONTROL register, see Table 9.10 in AN_324 for Rev B devices or Table 8.10 in BRT_AN_020 for Rev C devices.\n
+        0: disabled.\n
+        1: BULK.\n
+        2: INTERRUPT.\n
+        3: ISOCHRONOUS.\n
+        4: CONTROL.\n
 	 **/
 	USBD_ENDPOINT_TYPE type;
 	/** Enable Double Buffering for this endpoint.
@@ -205,14 +204,14 @@ typedef struct USBD_endpoint
 	 */
 	volatile uint8_t process;
 	/** Last Transaction Status for endpoint. NOT CURRENTLY USED.
-        Control endpoints: Section 3.3.2 FT900 USB Program Manual.
-        Updated by interrupt handler from register DC_EP0_STATUS in Table 3.7.\n
+        Control endpoints: 
+        From DC_EP0_STATUS register, see Table 9.7 in AN_324 for Rev B devices or Table 8.7 in BRT_AN_020 for Rev C devices.\n
         Bit 3: STALL sent in response to Setup token.
         Bit 2: Setup token received.
         Bit 1: In packet ready.
         Bit 0: Out packet ready.
-        Non-control endpoints: Section 3.4.2 FT900 USB Program Manual.
-        Updated by interrupt handler from register DC_EP_STATUS in Table 3.11.\n
+        Non-control endpoints:
+        From DC_EP_STATUS register, see Table 9.11 in AN_324 for Rev B devices or Table 8.11 in BRT_AN_020 for Rev C devices.\n
         Bit 5: Data error.
         Bit 4: Endpoint stalled.
         Bit 3: Data underrun.
