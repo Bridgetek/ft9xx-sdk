@@ -1503,7 +1503,7 @@ int8_t USBD_create_endpoint(USBD_ENDPOINT_NUMBER ep_num,
 {
 	// Deprecated parameter.
 	(void)ep_cb;
-	// Refer to section 6.2.5 for information on obtaining endpoints.
+
 	uint8_t ep_data = 0x00;
 	USBD_endpoint *new_ep;
 
