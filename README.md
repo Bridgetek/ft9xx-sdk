@@ -21,3 +21,7 @@ This branch is provided from the v2.7.0 source code and has modification for the
 * Fixes for pedantic compiler options in header and source files, e.g. cast-align, strict-prototypes and pedantic.
 * Adding missing required header file includes to usbd_startup_dfu.c, usbhx.c.
 * Use of gcc builtin macros in ethernet.c, i2cm.c, memctrl.c, usbd_rndis.c, usbh_cdcacm.c, to prevent cast-align warnings.
+
+# 3rd Party Ports
+
+A number of 3rd party ports are provided. Typically only the required FT9xx specific files are supplied.

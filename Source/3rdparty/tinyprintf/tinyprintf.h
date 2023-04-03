@@ -177,9 +177,9 @@ int tfp_sprintf(char *str, const char *fmt, ...) \
 
 #if TINYPRINTF_DEFINE_TFP_PRINTF
 void init_printf(void *putp, putcf putf);
-void printf(char *fmt, ...) _TFP_SPECIFY_PRINTF_FMT(1, 2);
+void tfp_printf(char *fmt, ...) _TFP_SPECIFY_PRINTF_FMT(1, 2);
 # if TINYPRINTF_OVERRIDE_LIBC
-#  define printf printf
+#  define printf tfp_printf
 # endif
 #endif
 
