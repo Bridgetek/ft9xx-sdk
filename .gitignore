@@ -46,3 +46,16 @@ Source/3rdparty/lwip/src/*
 # Exclude non-FT9xx files from mbedtls
 Source/3rdparty/mbedtls/*
 !Source/3rdparty/mbedtls/arch
+
+# Test builds
+FT90x_Debug
+FT93x_Debug
+FT90x_Release
+FT93x_Release
+
+# Library Eclipse settings
+Source/.settings
+Source/.project
+Source/.cproject
+
+

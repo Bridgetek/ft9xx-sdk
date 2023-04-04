@@ -528,17 +528,17 @@ extern "C" {
 #define USB_AUDIO_SPACIAL_TFR (1 << 14) // D14: Top Front Right - TFR (V2.0 only)
 #define USB_AUDIO_SPACIAL_TBL (1 << 15) // D15: Top Back Left - TBL (V2.0 only)
 #define USB_AUDIO_SPACIAL_TBC (1 << 16) // D16: Top Back Center - TBC (V2.0 only)
-#define USB_AUDIO_SPACIAL_TBR (1 << 17) // D17: Top Back Right – TBR (V2.0 only)
-#define USB_AUDIO_SPACIAL_TFLC (1 << 18) // D18: Top Front Left of Center – TFLC (V2.0 only)
-#define USB_AUDIO_SPACIAL_TFRC (1 << 19) // D19: Top Front Right of Center – TFRC (V2.0 only)
-#define USB_AUDIO_SPACIAL_LLFE (1 << 20) // D20: Left Low Frequency Effects– LLFE (V2.0 only)
-#define USB_AUDIO_SPACIAL_RLFE (1 << 21) // D21: Right Low Frequency Effects– RLFE (V2.0 only)
-#define USB_AUDIO_SPACIAL_TSL (1 << 22) // D22: Top Side Left – TSL (V2.0 only)
-#define USB_AUDIO_SPACIAL_TSR (1 << 23) // D23: Top Side Right – TSR (V2.0 only)
-#define USB_AUDIO_SPACIAL_BTC (1 << 24) // D24: Bottom Center – BC (V2.0 only)
-#define USB_AUDIO_SPACIAL_BLC (1 << 25) // D25: Back Left of Center – BLC (V2.0 only)
-#define USB_AUDIO_SPACIAL_BRC (1 << 26) // D26: Back Right of Center – BRC (V2.0 only)
-#define USB_AUDIO_SPACIAL_RD (1 << 31) // D31: Raw Data – RD; Mutually exclusive with all other spatial locations (V2.0 only)
+#define USB_AUDIO_SPACIAL_TBR (1 << 17) // D17: Top Back Right ï¿½ TBR (V2.0 only)
+#define USB_AUDIO_SPACIAL_TFLC (1 << 18) // D18: Top Front Left of Center ï¿½ TFLC (V2.0 only)
+#define USB_AUDIO_SPACIAL_TFRC (1 << 19) // D19: Top Front Right of Center ï¿½ TFRC (V2.0 only)
+#define USB_AUDIO_SPACIAL_LLFE (1 << 20) // D20: Left Low Frequency Effectsï¿½ LLFE (V2.0 only)
+#define USB_AUDIO_SPACIAL_RLFE (1 << 21) // D21: Right Low Frequency Effectsï¿½ RLFE (V2.0 only)
+#define USB_AUDIO_SPACIAL_TSL (1 << 22) // D22: Top Side Left ï¿½ TSL (V2.0 only)
+#define USB_AUDIO_SPACIAL_TSR (1 << 23) // D23: Top Side Right ï¿½ TSR (V2.0 only)
+#define USB_AUDIO_SPACIAL_BTC (1 << 24) // D24: Bottom Center ï¿½ BC (V2.0 only)
+#define USB_AUDIO_SPACIAL_BLC (1 << 25) // D25: Back Left of Center ï¿½ BLC (V2.0 only)
+#define USB_AUDIO_SPACIAL_BRC (1 << 26) // D26: Back Right of Center ï¿½ BRC (V2.0 only)
+#define USB_AUDIO_SPACIAL_RD (1 << 31) // D31: Raw Data ï¿½ RD; Mutually exclusive with all other spatial locations (V2.0 only)
 
 // Standard Audio Control (AC) Interrupt Endpoint Descriptor
 // Standard Audio Streaming (AS) Isochronous Audio Data Endpoint Descriptor
@@ -1455,6 +1455,104 @@ typedef struct PACK _usb_audioHiResPresentationTimeStamp_20_t
 #define USB_AUDIO_TERMINAL_TYPE_OUTPUT_LOW_FREQ_EFFECTS 0x0307 // Speaker designed for low frequencies (subwoofer).
 
 /* TYPES ***************************************************************************/
+
+/* GLOBAL VARIABLES ****************************************************************/
+
+/* MACROS **************************************************************************/
+
+/* FUNCTION PROTOTYPES *************************************************************/
+
+/* GLOBAL VARIABLES ****************************************************************/
+
+/* MACROS **************************************************************************/
+
+/* FUNCTION PROTOTYPES *************************************************************/
+
+// *************************************************************************************************
+//
+// MIDI class definitions
+// Definitions to extend the audio class for MIDI streaming.
+//
+// *************************************************************************************************
+
+/* CONSTANTS ***********************************************************************/
+
+// A.1 MS Class-Specific Interface Descriptor Subtypes
+#define USB_DESCRIPTOR_SUBTYPE_MIDI_MS_DESCRIPTOR_UNDEFINED 0x00
+#define USB_DESCRIPTOR_SUBTYPE_MIDI_MS_HEADER 0x01
+#define USB_DESCRIPTOR_SUBTYPE_MIDI_IN_JACK 0x02
+#define USB_DESCRIPTOR_SUBTYPE_MIDI_OUT_JACK 0x03
+#define USB_DESCRIPTOR_SUBTYPE_MIDI_ELEMENT 0x04
+
+// A.2 MS Class-Specific Endpoint Descriptor Subtypes
+#define USB_ENDPOINT_DESCRIPTOR_MIDI_CS_DESCRIPTOR_UNDEFINED 0x00
+#define USB_ENDPOINT_DESCRIPTOR_MIDI_CS_MS_GENERAL 0x01
+
+// A.3 MS MIDI IN and OUT Jack types
+#define USB_AUDIO_MIDI_JACK_TYPE_UNDEFINED 0x00
+#define USB_AUDIO_MIDI_JACK_TYPE_EMBEDDED 0x01
+#define USB_AUDIO_MIDI_JACK_TYPE_EXTERNAL 0x02
+
+// Table 4-1: Code Index Number Classifications
+#define USB_AUDIO_MIDI_EVENT_CIN_NOTE_ON 0x9
+#define USB_AUDIO_MIDI_EVENT_CIN_NOTE_OFF 0x8
+
+/* TYPES ***************************************************************************/
+
+// External and Embedded.
+typedef struct PACK _usb_audioMidiInJackDescriptor_t {
+    unsigned char  bLength;
+    unsigned char  bDescriptorType;
+    unsigned char  bDescriptorSubtype;
+    unsigned char  bJackType;
+    unsigned char  bJackID;
+    unsigned char  iJack; // Unused.
+} usb_audioMidiJackInDescriptor_t;
+
+// External and Embedded.
+#define usb_audioMidiOutJackDescriptor_t(A) \
+struct PACK \
+{ \
+    unsigned char  bLength; \
+    unsigned char  bDescriptorType; \
+    unsigned char  bDescriptorSubtype; \
+    unsigned char  bJackType; \
+    unsigned char  bJackID; \
+    unsigned char  bNrInputPins; \
+    struct { \
+    	unsigned char  ID; \
+    	unsigned char  Pin; \
+    } BaSource[A]; \
+    unsigned char  iJack; \
+}
+
+#define usb_audioMidiStreamingBulkEpDescriptor_t(A) \
+struct PACK \
+{ \
+    unsigned char  bLength; \
+    unsigned char  bDescriptorType; \
+    unsigned char  bDescriptorSubtype; \
+    unsigned char  bNumEmbMIDIJack; \
+    unsigned char  BaAssocJackID[A]; \
+}
+
+// V1.0 Table 4-2: Class-Specific AC Interface Header Descriptor
+typedef struct PACK _usb_audioMidiStreamingInterfaceHeaderDescriptor_t
+{
+    unsigned char  bLength;
+    unsigned char  bDescriptorType;
+    unsigned char  bDescriptorSubtype;
+    unsigned short bcdADC;
+    unsigned short wTotalLength;
+} usb_audioMidiStreamingInterfaceHeaderDescriptor_t;
+
+typedef struct PACK _usb_audioMidiEventPacket
+{
+	unsigned char bmCIN_CN;
+	unsigned char bMIDI_0;
+	unsigned char bMIDI_1;
+	unsigned char bMIDI_2;
+} usb_audioMidiEventPacket;
 
 /* GLOBAL VARIABLES ****************************************************************/
 
