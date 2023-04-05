@@ -60,6 +60,7 @@
 #include <registers/ft900_interrupt_registers.h>
 #include <registers/ft900_pwm_registers.h>
 #include <registers/ft900_rtc_registers.h>
+#include <registers/ft900_sdhost_registers.h>
 #include <registers/ft900_spi_registers.h>
 #include <registers/ft900_sys_registers.h>
 #include <registers/ft900_timer_wdt_registers.h>
@@ -70,6 +71,7 @@
 
 #include <registers/ft900_can_registers.h>
 #include <registers/ft900_cam_registers.h>
+#include <registers/ft900_sdhost_registers.h>
 #include <registers/ft900_spi_registers.h>
 #include <registers/ft900_sys_registers.h>
 #include <registers/ft900_gpio_registers.h>
@@ -103,6 +105,8 @@
 #define INTERRUPT   ((ft900_interrupt_regs_t *)     0x10100) /*Changed */
 #define USBD        ((ft900_usbd_regs_t *)          0x10200) /*Changed */
 #define RTC         ((ft900_rtc_regs_t *)           0x10400) /*Changed */
+#define SDHOST      ((ft900_sdhost_regs_t *)        0x10600) /*Changed */
+#define SDHOSTVENDOR ((ft900_sdhost_vendor_regs_t *) 0x10700) /*Changed */
 #define SPIM        ((ft900_spi_regs_t *)           0x10440) /*Changed */
 #define SPIS0       ((ft900_spi_regs_t *)           0x10480) /*Changed */
 #define SPIS1       ((ft900_spi_regs_t *)           0x104C0) /*Changed */
@@ -129,6 +133,8 @@
 #define CAN1        ((ft900_can_regs_t *)           0x10260)
 #define RTCL        ((ft900_rtc_legacy_regs_t *)    0x10280) /* for FT900 Rev B */
 #define RTC         ((ft900_rtc_regs_t *)           0x10900) /* for FT900 Rev C onwards */
+#define SDHOST      ((ft900_sdhost_regs_t *)        0x10400)
+#define SDHOSTVENDOR ((ft900_sdhost_vendor_regs_t *) 0x10500)
 #define SPIM        ((ft900_spi_regs_t *)           0x102A0) /* for FT900 Rev B */
 #define SPIM_EX     ((ft900_spi_regs_ex_t *)        0x102A0) /* for FT900 Rev C onwards */
 #define SPIS0       ((ft900_spi_regs_t *)           0x102C0) /* for FT900 Rev B */

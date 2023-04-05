@@ -165,58 +165,58 @@
 /** @brief Register mappings for SPI registers - for FT900 Rev B  */
 typedef struct
 {
-    volatile uint32_t SPI_CNTL;
-    volatile uint32_t SPI_STATUS;
-    volatile uint32_t SPI_DATA;
-    volatile uint32_t SPI_SLV_SEL_CNTL;
-    volatile uint32_t SPI_FIFO_CNTL;
-    volatile uint32_t SPI_TNSFR_FRMT_CNTL;
-    volatile uint32_t SPI_ALT_DATA;
-    volatile uint32_t SPI_RCV_FIFO_COUNT;
+    volatile uint32_t CNTL;
+    volatile uint32_t STATUS;
+    volatile uint32_t DATA;
+    volatile uint32_t SLV_SEL_CNTL;
+    volatile uint32_t FIFO_CNTL;
+    volatile uint32_t TNSFR_FRMT_CNTL;
+    volatile uint32_t ALT_DATA;
+    volatile uint32_t RCV_FIFO_COUNT;
 } ft900_spi_regs_t;
 
 
 /** @brief Register mappings for SPI registers - for FT900 Rev C */
 typedef struct
 {
-    volatile uint32_t SPI_CNTL;
-    volatile uint32_t SPI_STATUS;
-    volatile uint32_t SPI_DATA;
-    volatile uint32_t SPI_SLV_SEL_CNTL;
-    volatile uint32_t SPI_FIFO_CNTL;
-    volatile uint32_t SPI_TNSFR_FRMT_CNTL;
-    volatile uint32_t SPI_ALT_DATA;
-    volatile uint32_t SPI_RCV_FIFO_COUNT;
+    volatile uint32_t CNTL;
+    volatile uint32_t STATUS;
+    volatile uint32_t DATA;
+    volatile uint32_t SLV_SEL_CNTL;
+    volatile uint32_t FIFO_CNTL;
+    volatile uint32_t TNSFR_FRMT_CNTL;
+    volatile uint32_t ALT_DATA;
+    volatile uint32_t RCV_FIFO_COUNT;
 
-    volatile uint32_t reservedaccess[416];	//SPI_CNTL_2 starts at a different address base.
+    volatile uint32_t reservedaccess[416];	//CNTL_2 starts at a different address base.
     /* Below are extension to the SPI register set */
-    volatile uint32_t SPI_CNTL_2;
+    volatile uint32_t CNTL_2;
     volatile uint32_t reserved[3];
-    volatile uint32_t SPI_STATUS_2;
-    volatile uint32_t SPI_FIFO_CNTL_2;
-    volatile uint32_t SPI_TX_FIFO_COUNT;
-    volatile uint32_t SPI_BAUD;
+    volatile uint32_t STATUS_2;
+    volatile uint32_t FIFO_CNTL_2;
+    volatile uint32_t TX_FIFO_COUNT;
+    volatile uint32_t BAUD;
 } ft900_spi_regs_ex_t;
 #else
 /** @brief Register mappings for SPI registers - for FT930*/
 typedef struct
 {
-    volatile uint32_t SPI_CNTL;
-    volatile uint32_t SPI_STATUS;
-    volatile uint32_t SPI_DATA;
-    volatile uint32_t SPI_SLV_SEL_CNTL;
-    volatile uint32_t SPI_FIFO_CNTL;
-    volatile uint32_t SPI_TNSFR_FRMT_CNTL;
-    volatile uint32_t SPI_ALT_DATA;
-    volatile uint32_t SPI_RCV_FIFO_COUNT;
+    volatile uint32_t CNTL;
+    volatile uint32_t STATUS;
+    volatile uint32_t DATA;
+    volatile uint32_t SLV_SEL_CNTL;
+    volatile uint32_t FIFO_CNTL;
+    volatile uint32_t TNSFR_FRMT_CNTL;
+    volatile uint32_t ALT_DATA;
+    volatile uint32_t RCV_FIFO_COUNT;
 
     /* Below are extension to the SPI register set */
-    volatile uint32_t SPI_CNTL_2;
+    volatile uint32_t CNTL_2;
     volatile uint32_t reserved[3];
-    volatile uint32_t SPI_STATUS_2;
-    volatile uint32_t SPI_FIFO_CNTL_2;
-    volatile uint32_t SPI_TX_FIFO_COUNT;
-    volatile uint32_t SPI_BAUD;
+    volatile uint32_t STATUS_2;
+    volatile uint32_t FIFO_CNTL_2;
+    volatile uint32_t TX_FIFO_COUNT;
+    volatile uint32_t BAUD;
 } ft900_spi_regs_t;
 #endif
 

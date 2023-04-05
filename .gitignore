@@ -28,6 +28,8 @@
 
 # Editor backup files
 *.bak
+*.c.bak
+*.h.bak
 
 # Exclude non-FT9xx files from FreeRTOS
 Source/3rdparty/FreeRTOS/*
@@ -57,5 +59,3 @@ FT93x_Release
 Source/.settings
 Source/.project
 Source/.cproject
-
-

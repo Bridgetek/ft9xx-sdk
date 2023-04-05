@@ -210,7 +210,10 @@ void setup(void)
     printf("SD Card Inserted\r\n");
 
     /* Initialise FatFS */
-    ASSERT_P(FR_OK, f_mount(&fs, "", 0), "Unable to mount File System");
+    if (FR_OK != f_mount(&fs, "", 0))
+    {
+    	printf("Unable to mount File System\r\n");
+    }
 
 #   if _USE_LABEL == 1
     {
@@ -247,13 +250,23 @@ void loop(void)
     if (FR_OK == res)
     {
     	printf(EXAMPLE_FILE " already exists. Deleting\r\n");
-        ASSERT_P(FR_OK, f_unlink(EXAMPLE_FILE), "Problem deleting " EXAMPLE_FILE);
+        if (FR_OK != f_unlink(EXAMPLE_FILE))
+        {
+        	printf("Problem deleting " EXAMPLE_FILE "\r\n");
+        	delayms(1000);
+        	return;
+        }
     }
 
     /* Write some data to the SD Card */
     printf("Opening " EXAMPLE_FILE " for writing\r\n");
     res = f_open(&f, EXAMPLE_FILE, FA_WRITE | FA_CREATE_NEW);
-    ASSERT_P(FR_OK, res, "Problem creating " EXAMPLE_FILE);
+    if (FR_OK != res)
+    {
+    	printf("Problem creating " EXAMPLE_FILE "\r\n");
+    	delayms(1000);
+    	return;
+    }
 
     testdata = (char *) LOREM_IPSUM;
     towrite = strlen(testdata);
@@ -270,14 +283,23 @@ void loop(void)
     }
 
     printf("Closing " EXAMPLE_FILE "\r\n");
-    ASSERT_P(FR_OK, f_close(&f), "Error closing " EXAMPLE_FILE);
-
+    if (FR_OK != f_close(&f))
+    {
+    	printf("Error closing " EXAMPLE_FILE "\r\n");
+    	delayms(1000);
+    	return;
+    }
 
     printf("\r\n\r\n"); delayms(1000);
 
     /* Open the file and dump out the contents */
     printf("Opening " EXAMPLE_FILE " for reading\r\n\r\n");
-    ASSERT(FR_OK, f_open(&f, EXAMPLE_FILE, FA_READ));
+    if (FR_OK != f_open(&f, EXAMPLE_FILE, FA_READ))
+    {
+        printf("\r\n" "Could not open " EXAMPLE_FILE " for reading\r\n");
+        delayms(1000);
+        return;
+    }
 
     do
     {
@@ -289,7 +311,6 @@ void loop(void)
 
     printf("\r\n" "Closing " EXAMPLE_FILE "\r\n");
     f_close(&f);
-
 
     printf("\r\n\r\n");
 

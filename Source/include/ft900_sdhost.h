@@ -56,7 +56,100 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <registers/ft900_registers.h>
+
 /* CONSTANTS ***********************************************************************/
+
+/** @brief SD host registers.
+ *
+ *  These constants are used to identify the individual sdhost registers, whatever their size.
+ *  These are used to symbolically address registers via the functions read_sdhost_reg()
+ *  and write_sdhost_reg().
+ *
+ *  This is all necessary due to the fact we can only access the registers with 32bit values.
+ */
+/** @brief Auto CMD23 Argument 2 Register */
+#define SDH_AUTO_CMD23_ARG2                  1
+/** @brief Block Size Register */
+#define SDH_BLK_SIZE                         2
+/** @brief Block Count Register */
+#define SDH_BLK_COUNT                        3
+/** @brief Argument 1 Register */
+#define SDH_ARG_1                            4
+/** @brief Transfer Mode Register */
+#define SDH_TNSFER_MODE                      5
+/** @brief Command Register */
+#define SDH_CMD                              6
+/** @brief Response Registers 0 */
+#define SDH_RESPONSE0                        7
+/** @brief Response Registers 1 */
+#define SDH_RESPONSE1                        8
+/** @brief Response Registers 2 */
+#define SDH_RESPONSE2                        9
+/** @brief Response Registers 3 */
+#define SDH_RESPONSE3                       10
+/** @brief Buffer Data Port Register */
+#define SDH_BUF_DATA                        11
+/** @brief Present State Register */
+#define SDH_PRESENT_STATE                   12
+/** @brief Host Control 1 Register */
+#define SDH_HST_CNTL_1                      13
+/** @brief Power Control Register */
+#define SDH_PWR_CNTL                        14
+/** @brief Block Gap Control Register */
+#define SDH_BLK_GAP_CNTL                    15
+/** @brief Clock Control Register */
+#define SDH_CLK_CNTL                        16
+/** @brief Timeout Control Register */
+#define SDH_TIMEOUT_CNTL                    17
+/** @brief Software Reset Register */
+#define SDH_SW_RST                          18
+/** @brief Normal Interrupt Status Register */
+#define SDH_NRML_INT_STATUS                 19
+/** @brief Error Interrupt Status Register */
+#define SDH_ERR_INT_STATUS                  20
+/** @brief Normal Interrupt Status Enable Register */
+#define SDH_NRML_INT_STATUS_ENABLE          21
+/** @brief Error Interrupt Status Enable Register */
+#define SDH_ERR_INT_STATUS_ENABLE           22
+/** @brief Normal Interrupt Signal Enable Register */
+#define SDH_NRML_INT_SGNL_ENABLE            23
+/** @brief Error Interrupt Signal Enable Register */
+#define SDH_ERR_INT_SGNL_ENABLE             24
+/** @brief Auto CMD12 Error Status Register */
+#define SDH_AUTO_CMD12_ERR_STATUS           25
+/** @brief Host Control 2 Register */
+#define SDH_HST_CNTL_2                      26
+/** @brief Capabilities Register 1 */
+#define SDH_CAP_1                           27
+/** @brief Capabilities Register 2 */
+#define SDH_CAP_2                           28
+/** @brief Reserved Register 1 */
+#define SDH_RSRV_1                          29
+/** @brief Reserved Register 2 */
+#define SDH_RSRV_2                          30
+/** @brief Force Event Register for Auto CMD12 Error Status */
+#define SDH_FORCE_EVENT_CMD_ERR_STATUS      31
+/** @brief Force Event Register for Error Interrupt Status */
+#define SDH_FORCE_EVENT_ERR_INT_STATUS      32
+/** @brief Reserved Register 3 */
+#define SDH_RSRV_3                          33
+/** @brief Reserved register 4 */
+#define SDH_RSRV_4                          34
+/** @brief Preset Value Register 3 */
+#define SDH_PRST_INIT                       35
+/** @brief Preset Value Register 3 */
+#define SDH_PRST_DFLT_SPD                   36
+/** @brief Preset Value Register 3 */
+#define SDH_PRST_HIGH_SPD                   37
+/** @brief Preset Value Register 3 */
+#define SDH_PRST_SDR12                      38
+/** @brief Vendor-defined Register 0 */
+#define SDH_VNDR_0                          39
+/** @brief Vendor-defined Register 1 */
+#define SDH_VNDR_1                          40
+/** @brief Vendor-defined Register 5 */
+#define SDH_VNDR_5                          41
 
 /*
  *  Data block (sector) size.
