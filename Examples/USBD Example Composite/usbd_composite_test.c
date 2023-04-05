@@ -1706,6 +1706,7 @@ static void send_midi_note_packet(uint8_t cin, uint8_t cn, uint8_t note, uint8_t
 	if (free >= MIDI_DATA_IN_PACKET_SIZE)
 	{
 		usb_audioMidiEventPacket *pmsg = (usb_audioMidiEventPacket *)urb->ptr;
+		urb->ptr += sizeof(usb_audioMidiEventPacket);
 
 		pmsg->bmCIN_CN = ((cn & 0xf) << 4) | (cin & 0xf);
 		pmsg->bMIDI_0 = (cin & 0xf) << 4;
