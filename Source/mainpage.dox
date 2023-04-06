@@ -56,7 +56,7 @@
 
 \page readme Release Notes
 \section sec_readme Release Notes File
-\verbinclude "Release Notes.txt"
+Click here to view the current [Release Notes](../Documents/Release Notes.txt).
 
 \page api_modules Hardware API Modules
 
