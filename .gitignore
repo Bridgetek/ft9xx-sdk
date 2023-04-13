@@ -57,5 +57,5 @@ FT93x_Release
 
 # Library Eclipse settings
 Source/.settings
-Source/.project
-Source/.cproject
+!Source/.project
+!Source/.cproject
