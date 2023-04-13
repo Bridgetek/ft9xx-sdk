@@ -58,7 +58,7 @@
 							<tool id="com.brtchip.compiler.ft900.debug.base.1099243117" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.debug.base.1914920327">
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.2047098058" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../lib/tinyprintf&quot;"/>
+
 									<listOptionValue builtIn="false" value="&quot;../Includes&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.297788751" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -133,7 +133,7 @@
 							<tool id="com.brtchip.compiler.ft900.release.base.152293648" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.release.base.1906765127">
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.614306390" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../lib/tinyprintf&quot;"/>
+
 									<listOptionValue builtIn="false" value="&quot;../Includes&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.134556715" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>

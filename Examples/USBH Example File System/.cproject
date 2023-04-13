@@ -28,7 +28,7 @@
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.372032462" name="Include paths (-I)" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
 									<listOptionValue builtIn="false" value="../lib/fatfs"/>
-									<listOptionValue builtIn="false" value="../lib/tinyprintf"/>
+
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.507123292" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -84,7 +84,7 @@
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.348824758" name="Include paths (-I)" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
 									<listOptionValue builtIn="false" value="../lib/fatfs"/>
-									<listOptionValue builtIn="false" value="../lib/tinyprintf"/>
+
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1776690425" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

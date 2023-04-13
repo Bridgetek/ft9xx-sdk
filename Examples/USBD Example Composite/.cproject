@@ -30,7 +30,7 @@
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;../Includes&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;../lib&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../lib/tinyprintf&quot;"/>
+
 									<listOptionValue builtIn="false" value="&quot;../lib/fatfs&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;../lib/lwip/src/arch&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;../lib/lwip/src/include&quot;"/>
