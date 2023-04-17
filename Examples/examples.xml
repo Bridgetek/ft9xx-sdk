@@ -89,26 +89,34 @@
         <example>
 			<name>FreeRTOS Example 1</name>
 			<desc>Run a series of tasks using queues, switching with the pre-emptive scheduler.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
 		</example>
         <example>
 			<name>FreeRTOS Example 2</name>
 			<desc>Run a series of tasks using queues, semaphores, events and priority assignment.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
 		</example>
         <example>
 			<name>FreeRTOS Example 3</name>
 			<desc>Run a series of tasks using time slicing, pre-emptive scheduling using a mutex.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
 		</example>
         <example>
 			<name>FreeRTOS Example 4</name>
 			<desc>Run a series of tasks demonstrating FreeRTOS kernel aware debugging.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
 		</example>
         <example>
 			<name>FreeRTOS D2XX Example</name>
 			<desc>Within FreeRTOS, configure and enumerate as a D2XX device with data loopback.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
+			<thirdparty>tinyprintf</thirdparty>
 		</example>
         <example>
 			<name>FreeRTOS lwIP Example</name>
 			<desc>Use lwIP (lightweight IP stack) from FreeRTOS to perform Ethernet networking.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
+			<thirdparty>lwIP</thirdparty>
 		</example>
     </group>
     <group name="GPIO Examples" desc="Show how the GPIO Interface can be used." ft900="yes" ft930="yes" >
@@ -189,6 +197,7 @@
         <example>
 			<name>SD Host Example 1</name>
 			<desc>Reads a filesystem on an SD card. Writes, reads and deletes a file.</desc>
+			<thirdparty>fatFS</thirdparty>
 		</example>
     </group>
     <group name="SPI Examples" desc="Send and Receive Data on the SPI Interfaces." ft900="yes" ft930="yes" >
@@ -287,6 +296,7 @@
         <example>
 			<name>USBH Example File System</name>
 			<desc>Reads a filesystem on an Flash disk. Writes, reads and deletes a file.</desc>
+			<thirdparty>fatFS</thirdparty>
 		</example>
         <example>
 			<name>USBH Example Hub</name>

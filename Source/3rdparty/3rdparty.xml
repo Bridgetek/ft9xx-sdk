@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<examples
+	name = "Third Party Libraries for FT9xx" desc = "v2.7.0">
+	<example>
+		<name>FatFs</name>
+		<desc>Embedded FAT file system library.</desc>
+	</example>
+	<example>
+		<name>FreeRTOS</name>
+		<desc>Embedded RTOS.</desc>
+	</example>
+	<example>
+		<name>tinyprintf</name>
+		<desc>Very small footprint library providing printf, sprintf etc.</desc>
+	</example>
+	<example>
+		<name>lwIP</name>
+		<desc>Lightweight Internet Protocol.</desc>
+	</example>
+	<example>
+		<name>mbedTLS</name>
+		<desc>Embedded secure socket implementation.</desc>
+	</example>
+ </examples>
