@@ -140,14 +140,9 @@ SRCFILES := adc.c \
         usbdx.c \
         usbd_hbw.c\
         usbd_dfu.c \
-        usbd_rndis.c \
         usbd_startup_dfu.c \
         usbh.c \
         usbhx.c \
-        usbh_boms.c \
-        usbh_cdcacm.c \
-        usbh_hid.c \
-        usbh_aoa.c \
         uart_simple.c \
         wdt.c \
         dlog.c
@@ -175,7 +170,6 @@ SRCFILES := adc.c \
 		usbd.c \
 		usbdx.c \
 		usbd_dfu.c \
-		usbd_rndis.c \
 		usbd_startup_dfu.c \
 		uart_simple.c \
 		wdt.c \
