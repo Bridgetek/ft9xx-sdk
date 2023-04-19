@@ -2,7 +2,7 @@
 <libraries
 	name = "Layered Driver Libraries for FT9xx" desc = "v2.7.0">
 	<library>
-		<name>All USB Header Files</name>
+		<name>USB Header Files</name>
 		<desc>USB header files.</desc>
 		<include>usb/include</include>
 		<file dest="usb/include/ft900_usb_cdc.h" src="ft900_usb_cdc.h" />

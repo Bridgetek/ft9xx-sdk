@@ -258,32 +258,39 @@
         <example>
 			<name>USBD Example BOMS to SDcard</name>
 			<desc>Implement a BOMS device (Flash disk) on the USB bridged to the file system on an SD card.</desc>
+			<driver>USB Header Files</driver>
 		</example>
         <example>
 			<name>USBD Example CDCACM</name>
 			<desc>Enumerate as a CDC device on the USB which supports the ACM protocol.</desc>
+			<driver>USB Header Files</driver>
 		</example>
         <example>
 			<name>USBD Example HID</name>
 			<desc>Make a USB keyboard device appear on the host and send a series of key presses.</desc>
+			<driver>USB Header Files</driver>
 		</example>
         <example>
 			<name>USBD Example HID Bridge</name>
 			<desc>A USB keyboard device that will send a series of key presses translated from UART input characters.</desc>
+			<driver>USB Header Files</driver>
 		</example>
         <example>
 			<name>USBD Example Composite</name>
 			<desc>Demonstrate how to make a composite USB device.</desc>
+			<driver>USB Header Files</driver>
 		</example>
     </group>
     <group name="USB Host Examples" desc="Examples for the USB Host Interface." ft900="yes" ft930="no" >
         <example>
 			<name>USBH Example BOMS</name>
 			<desc>Read a BOMS device (Flash disk) plugged into the USB host.</desc>
+			<driver>USB Host BOMS</driver>
 		</example>
         <example>
 			<name>USBH Example CDCACM</name>
 			<desc>Connect to and send data to and from a CDC device on the USB.</desc>
+			<driver>USB Host CDCACM</driver>
 		</example>
         <example>
 			<name>USBH Example FT232</name>
@@ -292,15 +299,18 @@
         <example>
 			<name>USBH Example HID</name>
 			<desc>Find USB HIDs on the USB and display report data from the device.</desc>
+			<driver>USB Host HID</driver>
 		</example>
         <example>
 			<name>USBH Example File System</name>
 			<desc>Reads a filesystem on an Flash disk. Writes, reads and deletes a file.</desc>
 			<thirdparty>fatFS</thirdparty>
+			<driver>USB Host BOMS</driver>
 		</example>
         <example>
 			<name>USBH Example Hub</name>
 			<desc>Finds devices connected to the USB and shows information about them.</desc>
+			<driver>USB Header Files</driver>
 		</example>
     </group>
     <group name="Watchdog Examples" desc="Internal Watchdog Examples." ft900="yes" ft930="no" >
