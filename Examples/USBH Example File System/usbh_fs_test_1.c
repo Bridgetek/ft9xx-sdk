@@ -277,7 +277,6 @@ DRESULT disk_read (BYTE pdrv, BYTE* buff, DWORD sector, UINT count)
 	return res;
 }
 
-#if _USE_WRITE
 /** Write sector(s) to the disk
  *  @param pdrv Physical Drive number
  *  @param buff Data buffer to write to the disk
@@ -295,9 +294,7 @@ DRESULT disk_write (BYTE pdrv, const BYTE* buff, DWORD sector, UINT count)
 
 	return res;
 }
-#endif
 
-#if _USE_IOCTL
 /** Disk IO Control
  *  @param pdrv Physical Drive Number
  *  @param cmd Control Code
@@ -311,9 +308,7 @@ DRESULT disk_ioctl (BYTE pdrv, BYTE cmd, void* buff)
 
 	return res;
 }
-#endif
 
-#if _FS_READONLY == 0
 /** Get the current time
  *  @return The time in the following format:
  *          bit[31:25] = Year from 1980 (0..127),
@@ -326,7 +321,6 @@ DWORD get_fattime(void)
 {
     return 0; /* Invalid timestamp */
 }
-#endif
 
 int8_t fs_testing(USBH_interface_handle hBOMS)
 {
