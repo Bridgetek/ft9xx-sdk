@@ -8,8 +8,6 @@
 		<file dest="usb/include/ft900_usb_cdc.h" src="ft900_usb_cdc.h" />
 		<file dest="usb/include/ft900_usb_hid.h" src="ft900_usb_hid.h" />
 		<file dest="usb/include/ft900_usb_boms.h" src="ft900_usb_boms.h" />
-		<file dest="usb/include/ft900_usb_aoa.h" src="ft900_usb_aoa.h" />
-		<file dest="usb/include/ft900_usb_rndis.h" src="ft900_usb_rndis.h" />
 		<file dest="usb/include/ft900_usb_audio.h" src="ft900_usb_audio.h" />
 		<file dest="usb/include/ft900_usb_uvc.h" src="ft900_usb_uvc.h" />
 	</library>
