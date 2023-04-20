@@ -47,6 +47,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "ft900.h"
 #include "FreeRTOS.h"
 #include "task.h"
@@ -439,7 +440,7 @@ static void DisplayTimerInfo()
 	} xTIMER;
 
 	printf("FreeRTOS Timers\r\n");
-	for (int i=0; i<10; i++) {
+	for (int i = 0; i< MAX_TIMER; i++) {
 		xTIMER* myTimer = (xTIMER*)timer[i];
 		if (myTimer != NULL) {
 			printf("0x%08x %s 0x%08x %06d %s %s\r\n",

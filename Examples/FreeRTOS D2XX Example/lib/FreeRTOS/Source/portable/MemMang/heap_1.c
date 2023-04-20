@@ -171,4 +171,14 @@ size_t xPortGetFreeHeapSize( void )
 	return ( configADJUSTED_HEAP_SIZE - xNextFreeByte );
 }
 
+void* pvPortGetHeapStart()
+{
+	return &ucHeap;
+}
+
+void* pvPortGetHeapEnd()
+{
+	return (uint8_t*)&ucHeap + xNextFreeByte;
+}
+
 #endif  //FT32_PORT_HEAP

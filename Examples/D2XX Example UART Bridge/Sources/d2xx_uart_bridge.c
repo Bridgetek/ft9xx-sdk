@@ -375,7 +375,8 @@ int main(void)
 			dbg("Exit sleep:%02X... \r\n", wkupSource);
 			if (SetRemoteWakeup)
 			{
-				D2XX_IOCTL(0, D2XX_IOCTL_SYS_REMOTE_WAKEUP, &SetRemoteWakeup, NULL);
+				uint8_t wake = SetRemoteWakeup;
+				D2XX_IOCTL(0, D2XX_IOCTL_SYS_REMOTE_WAKEUP, &wake, NULL);
 				SetRemoteWakeup = 0;
 				dbg("Sending remote wakeup to host.. \r\n");
 			}
@@ -644,20 +645,15 @@ void setup(void)
 #endif
 
 #if defined(__FT930__)
-	retVal =
-			D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
-
+	retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
 
     /*slave sub-system control register setup*/
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_D2XX_MODE);    // turn-on D2XX_mode
     *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_SLV_RESET); // de-assert bit to allow slave CPU to start
 #else
-
-	retVal =
-
-			D2XX_Init(__pD2XXDefaultConfiguration, d2xx_callback, NULL);
-	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig.ConfigDesc, (uint32_t)&__pD2XXDefaultConfiguration->ConfigDesc, sizeof(TConfigDescriptors));
+	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig.ConfigDesc, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration->ConfigDesc, sizeof(TConfigDescriptors));
+	retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
 #endif
 
 	sys_enable(sys_device_timer_wdt);
@@ -712,7 +708,7 @@ void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* para
 		param = (*(uint8_t *)param1);
 	}
 	//dbg("~%d",eventID);
-	//dbg("%s\n", D2XXTest_EventStrings[eventID]);
+	dbg("%s\n", D2XXTest_EventStrings[eventID]);
 	switch(eventID)
 	{
 	case D2XX_EVT_SUSPEND:

@@ -99,7 +99,11 @@ task.h is included from an application file. */
 static void prvHeapInit( void );
 
 /* Allocate the memory for the heap. */
+#if defined(FT32_PORT_HEAP)
+uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
+#else // defined(FT32_PORT_HEAP)
 static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
+#endif // defined(FT32_PORT_HEAP)
 
 /* Define the linked list structure.  This is used to link free blocks in order
 of their size. */
@@ -114,7 +118,11 @@ static const uint16_t heapSTRUCT_SIZE	= ( ( sizeof ( BlockLink_t ) + ( portBYTE_
 #define heapMINIMUM_BLOCK_SIZE	( ( size_t ) ( heapSTRUCT_SIZE * 2 ) )
 
 /* Create a couple of list links to mark the start and end of the list. */
+#if defined(FT32_PORT_HEAP)
+BlockLink_t xStart, xEnd;
+#else // defined(FT32_PORT_HEAP)
 static BlockLink_t xStart, xEnd;
+#endif // defined(FT32_PORT_HEAP)
 
 /* Keeps track of the number of free bytes remaining, but says nothing about
 fragmentation. */
@@ -303,5 +311,15 @@ uint8_t *pucAlignedHeap;
 	pxFirstFreeBlock->pxNextFreeBlock = &xEnd;
 }
 /*-----------------------------------------------------------*/
+
+void* pvPortGetHeapStart()
+{
+	return &xStart;
+}
+
+void* pvPortGetHeapEnd()
+{
+	return &xEnd;
+}
 
 #endif  //FT32_PORT_HEAP

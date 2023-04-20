@@ -422,7 +422,7 @@ DESCRIPTOR_QUALIFIER struct config_descriptor_keyboard config_descriptor_keyboar
  @brief HID Report descriptor for keyboard.
 
  See Device Class Definition for Human Interface Devices (HID) Version 1.11
- from USB Implementers’ Forum USB.org
+ from USB Implementers' Forum USB.org
 
  0x05, 0x01,             Usage Page: Generic Desktop Controls
  0x09, 0x06,             Usage: Keyboard
@@ -666,7 +666,7 @@ const struct key_mappings ASCII_scancode[] =
 		{'z', 29, 0, 0, 0 }, {'Z', 29, 1, 0, 0 }, {0x1a, 29, 0, 1, 0 },
 		{'1', 30, 0, 0, 0 }, {'!', 30, 1, 0, 0 },
 		{'2', 31, 0, 0, 0 }, {'"', 31, 1, 0, 0 },
-		{'3', 32, 0, 0, 0 }, {'£', 32, 1, 0, 0 },
+		{'3', 32, 0, 0, 0 }, //{'£', 32, 1, 0, 0 },
 		{'4', 33, 0, 0, 0 }, {'$', 33, 1, 0, 0 },
 		{'5', 34, 0, 0, 0 }, {'%', 34, 1, 0, 0 },
 		{'6', 35, 0, 0, 0 }, {'^', 35, 1, 0, 0 },
@@ -1233,6 +1233,7 @@ void keyboard(void)
 	unsigned char key = 0xFF;
 	unsigned char keyscan;
 	unsigned char shift;
+	int msg;
 	const char *pmsg = tty_message; // Pointer to message to send to host
 
 	USBD_create_endpoint(USBD_EP_1, USBD_EP_INT, USBD_DIR_IN,
@@ -1304,7 +1305,8 @@ void keyboard(void)
 
 #ifdef USBD_HID_KEYS
 								// For debugging display character sent.
-								if (isgraph(*pmsg) || isspace(*pmsg))
+								msg = *pmsg;
+								if (isgraph(msg) || isspace(msg))
 									printf("%c",*pmsg);
 								else
 									printf("\\x%02x",*pmsg);

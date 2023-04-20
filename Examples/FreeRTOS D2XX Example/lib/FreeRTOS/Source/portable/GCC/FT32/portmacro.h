@@ -116,7 +116,9 @@
 
 /* Hardware includes. */
 #include <ft900.h>
+#ifdef __TFP_PRINTF__
 #include <tinyprintf.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -205,13 +207,6 @@ void vPortAssert_vTaskEnterCriticalInISR(void);
 #define portEXIT_CRITICAL                     portENABLE_INTERRUPTS
 #endif
 
-#define portIRQ_RESTORE_MASK_All()                                  \
-    do {                                                            \
-            /* Undo the mask all since the state is unmask all. */  \
-            portIRQ_SET_UNMASK_ALL();                               \
-            portNOP();												\
-            portNOP();												\
-    } while(0)
 
 /*==============================================================================
  * Kernel utilities.
@@ -241,6 +236,18 @@ uint32_t ulPortSysTickGet(void);
  * Debug utilities.
  *==============================================================================
  */
+
+#define portENTER_ISR                           (0x1122)
+#define portEXIT_ISR                            (0x3344)
+
+#define portIRQ_RESTORE_MASK_All()                                  \
+    do {                                                            \
+            /* Undo the mask all since the state is unmask all. */  \
+            portIRQ_SET_UNMASK_ALL();                               \
+            portNOP();												\
+            portNOP();												\
+    } while(0)
+
 uint32_t uPortIsInISR(void);
 
 /* Tracing APIs. */

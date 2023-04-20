@@ -144,6 +144,7 @@ void uart0ISR()
 	{
 		/* !!! read the 9-bit address, only then data could be read !!! */
 		uint8_t tmp = UART1->RHR_THR_DLL;
+		(void)tmp;
 		valid = 0;
 	}
 

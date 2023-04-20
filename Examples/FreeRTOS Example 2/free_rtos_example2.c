@@ -62,6 +62,7 @@
 #include "dynamic.h"
 #include "mevents.h"
 #include "death.h"
+#include "semtest.h"
 
 
 /* Constants for the ComTest tasks. */
