@@ -155,7 +155,7 @@ void setup(void)
     /* Load the first 8 bytes into the SPIS0 buffer... */
 	for(i=0;i<APP_BUFFER_SIZE;i++)
 	{
-		SPIS0->SPI_DATA = spis_dev_buffer[i];
+		SPIS0->DATA = spis_dev_buffer[i];
 	}
 
 	/* Example use for interrupts - either interrupt mechanism shall be used or polling mechanism */
@@ -175,8 +175,8 @@ void loop(void)
 	volatile uint8_t rdwrbyte = 0;
 
 	/* Check for the data present in the receive fifo */
-	rcvfifolen = SPIS0->SPI_RCV_FIFO_COUNT;
-	rcvfifolen = SPIS0->SPI_RCV_FIFO_COUNT;
+	rcvfifolen = SPIS0->RCV_FIFO_COUNT;
+	rcvfifolen = SPIS0->RCV_FIFO_COUNT;
 
 	/* Check for the number of bytes received */
 	if(rcvfifolen >= APP_BUFFER_SIZE )
@@ -186,8 +186,8 @@ void loop(void)
 		/* Read followed by write */
 		for(i=0;i<bufflen;i++)
 		{
-			rdwrbyte  = SPIS0->SPI_DATA;
-			SPIS0->SPI_DATA = rdwrbyte;
+			rdwrbyte  = SPIS0->DATA;
+			SPIS0->DATA = rdwrbyte;
 		}
 	}
 }
@@ -208,7 +208,7 @@ void spis_dev_ISR(void)
     if (spi_is_interrupted(SPIS0, spi_interrupt_transmit_empty))
     {
         /* Read in the arrived data */
-        spis_dev_buffer[spis_dev_buffer_ptr] = SPIS0->SPI_DATA;
+        spis_dev_buffer[spis_dev_buffer_ptr] = SPIS0->DATA;
 
         /* Increment the buffer pointer */
         spis_dev_buffer_ptr++;
@@ -218,6 +218,6 @@ void spis_dev_ISR(void)
         }
 
         /* Set up the new data to send */
-        SPIS0->SPI_DATA = spis_dev_buffer[spis_dev_buffer_ptr];
+        SPIS0->DATA = spis_dev_buffer[spis_dev_buffer_ptr];
     }
 }
