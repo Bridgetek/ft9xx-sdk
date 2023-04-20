@@ -574,6 +574,7 @@ err_t net_tick(void)
 {
 	return arch_ft900_tick(&g_netif);
 }
+#endif
 
 /** @brief Query the link status for the interface.
  *  @details The link status is up when there is a valid connection to another
@@ -607,7 +608,6 @@ uint8_t net_is_up()
 {
     return netif_is_up(&g_netif);
 }
-#endif
 
 /** @brief Initialises the network interface.
  *  @details Configures lwIP to use the network configuration passed in

@@ -97,11 +97,13 @@ int8_t net_update_eeprom(ip_addr_t ip, ip_addr_t gw, ip_addr_t mask, uint8_t dhc
 int8_t net_get_eeprom(ip_addr_t *ip, ip_addr_t *gw, ip_addr_t *mask, uint8_t *dhcp);
 #if !defined(NO_SYS) || (NO_SYS!=0)
 err_t net_tick(void);
+#else
+void net_tick(void *);
+#endif
 uint8_t net_is_link_up(void);
 void net_set_link_up();
 void net_set_link_down();
 uint8_t net_is_up();
-#endif
 #if defined(NET_USE_EEPROM) && (!NET_USE_EEPROM)
 extern void net_supply_mac(uint8_t *);
 #endif // NET_USE_EEPROM
