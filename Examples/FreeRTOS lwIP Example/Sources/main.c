@@ -153,7 +153,7 @@ static char msg[] = "Hello client\n\0";
 #define TASK_NOTIFY_LINK_UP     0x02
 #define TASK_NOTIFY_LINK_DOWN   0x03
 
-static void app_ethif_status_cb(int netif_up, int link_up, int packet_available);
+static void app_ethif_status_cb(int callback);
 
 #if DEMO_TYPE == CLIENT
 void vTaskClient(void *pvParameters);
@@ -250,9 +250,9 @@ int main(void)
  * This callback is executed in task TCP/IP.
  * @param [in]      up                  0: interface is down, 1: interface is up.
  */
-static void app_ethif_status_cb(int netif_up, int link_up, int packet_available)
+static void app_ethif_status_cb(int callback)
 {
-    if (netif_up) {
+    if (callback == NET_CALLBACK_READY) {
         //DEBUG_PRINTF("NETIF UP\r\n");
         // Notify task that the interface is UP and IP address is acquired
         xTaskNotify(gx_Task_Handle,TASK_NOTIFY_NETIF_UP,eSetBits);
@@ -261,15 +261,18 @@ static void app_ethif_status_cb(int netif_up, int link_up, int packet_available)
         //DEBUG_PRINTF("NETIF DOWN\r\n");
     }
 
-    if (link_up) {
-        //DEBUG_PRINTF("LINK UP\r\n");
-        // Notify task that the interface is UP and IP address is acquired
-        xTaskNotify(gx_Task_Handle,TASK_NOTIFY_LINK_UP,eSetBits);
-    }
-    else {
+    if (callback == NET_CALLBACK_LINK_DOWN)
+    {
         //DEBUG_PRINTF("LINK DOWN\r\n");
         // Notify task that the interface is UP and IP address is acquired
         xTaskNotify(gx_Task_Handle,TASK_NOTIFY_LINK_DOWN,eSetBits);
+    }
+
+    if (callback == NET_CALLBACK_LINK_UP)
+    {
+    	//DEBUG_PRINTF("LINK UP\r\n");
+        // Notify task that the interface is UP and IP address is acquired
+        xTaskNotify(gx_Task_Handle,TASK_NOTIFY_LINK_UP,eSetBits);
     }
 }
 
@@ -296,7 +299,7 @@ void vTaskConnect(void *pvParameters)
         }
         for (int i = 0; i < 10; i++)
         {
-            net_tick();/* 10 ms delay */
+            net_tick(NULL);/* 10 ms delay */
             vTaskDelay(1 * portTICK_PERIOD_MS);
         }
     }
@@ -362,6 +365,7 @@ void vTaskServer(void *pvParameters)
     ip_addr_t ip_addr = {0};
     ip_addr_t gw_addr = {0};
     ip_addr_t net_mask = {0};
+    ip_addr_t dns_addr = {0};
 #else
     ip_addr_t ip_addr = {IP_ADDR};
     ip_addr_t gw_addr = {IP_ADDR_GATEWAY};
@@ -372,7 +376,7 @@ void vTaskServer(void *pvParameters)
     DEBUG_PRINTF("\r\n%s\r\n\r\n", __FUNCTION__);
 
     /* Initialise Ethernet module and LwIP service. */
-    net_init(ip_addr, gw_addr, net_mask, USE_DHCP, "FT90x_lwIP_Example",
+    net_init(ip_addr, gw_addr, net_mask, USE_DHCP, dns_addr, "FT90x_lwIP_Example",
             app_ethif_status_cb);
 
     DEBUG_PRINTF("Waiting for netif to come up...\r\n");

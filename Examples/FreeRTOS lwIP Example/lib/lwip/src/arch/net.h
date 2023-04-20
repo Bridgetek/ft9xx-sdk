@@ -6,14 +6,14 @@
  * ============================================================================
  * History
  * =======
- * 2017-03-15 : Created
+ * 2017-12-06 : Created
  *
  * (C) Copyright Bridgetek Pte Ltd
  * ============================================================================
  *
  * This source code ("the Software") is provided by Bridgetek Pte Ltd
- * ("Bridgetek") subject to the licence terms set out
- * http://www.ftdichip.com/FTSourceCodeLicenceTerms.htm ("the Licence Terms").
+ *  ("Bridgetek ") subject to the licence terms set out
+ * http://brtchip.com/BRTSourceCodeLicenseAgreement/ ("the Licence Terms").
  * You must read the Licence Terms before downloading or using the Software.
  * By installing or using the Software you agree to the Licence Terms. If you
  * do not agree to the Licence Terms then do not download or use the Software.
@@ -61,6 +61,7 @@
 #include <lwip/dhcp.h>
 #include <lwip/ip_addr.h>
 #include <lwip/igmp.h>
+#include <lwip/dns.h>
 
 #include "netif_arch.h"
 
@@ -72,64 +73,46 @@ extern "C" {
  @brief Write the IP address configuration information to the EEPROM.
  @details Define macro to make an address change event update the EEPROM.
  */
-#define NET_USE_EEPROM // lets make this enabled by default same as DHCP
-
-
-#ifdef NET_USE_EEPROM
-/**
- @brief Structure to hold IP address configuration in EEPROM.
- @details This is used to both keep settings stored persistently in EEPROM.
- */
-struct eeprom_net_config {
-	uint16_t key; // Must contain EEPROM_VALID_KEY
-	uint8_t dhcp;
-	ip_addr_t ip;
-	ip_addr_t gw;
-	ip_addr_t mask;
-} __attribute__((packed));
-/**
- @brief Key value to signify valid data in EEPROM.
- @details This must be unique to the layout of the eeprom_net_config structure.
- It is safest, when using this code as an example to build on, to assign a new
- unique number whenever the base structure changes.
- */
-#define EEPROM_VALID_KEY 0x5A45
-
-/**
- @brief Address of EEPROM on I2C bus.
- */
-#define NET_EEPROM_ADDR 0xA0
-
-/**
- @brief Offset in EEPROM for MAC address.
-*/
-#define NET_EEPROM_OFFSET_MACADDRESS 0xfa
+#ifndef NET_USE_EEPROM
+#define NET_USE_EEPROM 1
 #endif
 
 /**
  @brief Callback function for network available/unavailable signal and packet available.
 */
-typedef void (*fn_status_cb)(int netif_up, int link_up, int packet_available);
+#define NET_CALLBACK_LINK_UP 1
+#define NET_CALLBACK_LINK_DOWN 2
+#define NET_CALLBACK_READY 4
+#define NET_CALLBACK_PACKET_AVAILABLE 8
+typedef void (*fn_status_cb)(int callback);
 
+void net_setup();
 err_t net_init(ip_addr_t ip,
 		ip_addr_t gw, ip_addr_t mask,
-		int dhcp, char *hostname,
+		int dhcp, ip_addr_t dns,char *hostname,
 		fn_status_cb pfn_status);
+struct netif* net_get_netif();
+uint8_t net_is_ready(void);
+int8_t net_update_eeprom(ip_addr_t ip, ip_addr_t gw, ip_addr_t mask, uint8_t dhcp);
+int8_t net_get_eeprom(ip_addr_t *ip, ip_addr_t *gw, ip_addr_t *mask, uint8_t *dhcp);
+#if !defined(NO_SYS) || (NO_SYS!=0)
 err_t net_tick(void);
-
+#else
+void net_tick(void *);
+#endif
 uint8_t net_is_link_up(void);
 void net_set_link_up();
 void net_set_link_down();
 uint8_t net_is_up();
+#if defined(NET_USE_EEPROM) && (!NET_USE_EEPROM)
+extern void net_supply_mac(uint8_t *);
+#endif // NET_USE_EEPROM
 
-int8_t net_get_eeprom(struct eeprom_net_config *getval);
-int8_t net_update_eeprom(struct eeprom_net_config *setval);
-uint8_t net_get_dhcp();
 uint8_t *net_get_mac();
 ip_addr_t net_get_ip();
 ip_addr_t net_get_gateway();
 ip_addr_t net_get_netmask();
-struct netif* net_get_netif();
+uint8_t net_get_dhcp();
 void net_packet_available();
 
 #ifdef __cplusplus

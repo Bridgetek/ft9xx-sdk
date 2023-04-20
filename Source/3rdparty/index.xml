@@ -27,8 +27,10 @@
 		<name>lwIP</name>
 		<desc>Lightweight Internet Protocol. Version 2.1.2.</desc>
 		<dir dest="lib/lwIP" src="lwIP" />
-		<include>lib/lwip/src/arch</include>
-		<include>lib/lwip/src/include</include>
+		<include>lib/lwIP/src/arch</include>
+		<include>lib/lwIP/src/include</include>
+		<exclude>lib/lwIP/src/apps</exclude>
+		<exclude>lib/lwIP/src/core/ipv6</exclude>
 	</library>
 	<library>
 		<name>mbedTLS</name>

@@ -52,21 +52,23 @@ struct fsdata_chksum {
 
 #define FS_FILE_FLAGS_HEADER_INCLUDED     0x01
 #define FS_FILE_FLAGS_HEADER_PERSISTENT   0x02
+#define FS_FILE_FLAGS_HEADER_HTTPVER_1_1  0x04
+#define FS_FILE_FLAGS_SSI                 0x08
+
+/** Define FS_FILE_EXTENSION_T_DEFINED if you have typedef'ed to your private
+ * pointer type (defaults to 'void' so the default usage is 'void*')
+ */
+#ifndef FS_FILE_EXTENSION_T_DEFINED
+typedef void fs_file_extension;
+#endif
 
 struct fs_file {
-#if LWIP_HTTPD_DYNAMIC_FILE_READ
-  char *data;
-#if !LWIP_HTTPD_FT9XX_FLASH_FS
-  const char *src;
-#else // LWIP_HTTPD_FT9XX_FLASH_FS
-  const __flash__ char *src;
-#endif // LWIP_HTTPD_FT9XX_FLASH_FS
-#else // LWIP_HTTPD_DYNAMIC_FILE_READ
   const char *data;
-#endif // LWIP_HTTPD_DYNAMIC_FILE_READ
   int len;
   int index;
-  void *pextension;
+  /* pextension is free for implementations to hold private (extensional)
+     arbitrary data, e.g. holding some file state or file system handle */
+  fs_file_extension *pextension;
 #if HTTPD_PRECALCULATED_CHECKSUM
   const struct fsdata_chksum *chksum;
   u16_t chksum_count;
@@ -104,6 +106,18 @@ void *fs_state_init(struct fs_file *file, const char *name);
 /** This user-defined function is called when a file is closed. */
 void fs_state_free(struct fs_file *file, void *state);
 #endif /* #if LWIP_HTTPD_FILE_STATE */
+
+struct fsdata_file {
+  const struct fsdata_file *next;
+  const unsigned char *name;
+  const unsigned char *data;
+  int len;
+  u8_t flags;
+#if HTTPD_PRECALCULATED_CHECKSUM
+  u16_t chksum_count;
+  const struct fsdata_chksum *chksum;
+#endif /* HTTPD_PRECALCULATED_CHECKSUM */
+};
 
 #ifdef __cplusplus
 }

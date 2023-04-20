@@ -5,14 +5,14 @@
  * ============================================================================
  * History
  * =======
- * 2017-03-15 : Created
+ * 2017-12-06 : Created
  *
  * (C) Copyright Bridgetek Pte Ltd
  * ============================================================================
  *
  * This source code ("the Software") is provided by Bridgetek Pte Ltd
- * ("Bridgetek") subject to the licence terms set out
- * http://www.ftdichip.com/FTSourceCodeLicenceTerms.htm ("the Licence Terms").
+ *  ("Bridgetek ") subject to the licence terms set out
+ * http://brtchip.com/BRTSourceCodeLicenseAgreement/ ("the Licence Terms").
  * You must read the Licence Terms before downloading or using the Software.
  * By installing or using the Software you agree to the Licence Terms. If you
  * do not agree to the Licence Terms then do not download or use the Software.
@@ -45,17 +45,6 @@
 #define LWIP_FT900_OPTS_H_
 
 /* ---------- Memory options ---------- */
-
-/**
- * MEMP_OVERFLOW_CHECK: memp overflow protection reserves a configurable
- * amount of bytes before and after each memp element in every pool and fills
- * it with a prominent default value.
- *    MEMP_OVERFLOW_CHECK == 0 no checking
- *    MEMP_OVERFLOW_CHECK == 1 checks each element when it is freed
- *    MEMP_OVERFLOW_CHECK >= 2 checks each element in every pool every time
- *      memp_malloc() or memp_free() is called (useful but slow!)
- */
-#define MEMP_OVERFLOW_CHECK             1
 
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
    lwIP is compiled. 4 byte alignment -> define MEM_ALIGNMENT to 4, 2

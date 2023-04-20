@@ -82,6 +82,7 @@
  * See http://www.freertos.org/a00110.html.
  *----------------------------------------------------------*/
 
+#include <stdio.h>
 #define DPrintf	printf
 /* Tick timer configuration. */
 #define MHz                                         (1000000)

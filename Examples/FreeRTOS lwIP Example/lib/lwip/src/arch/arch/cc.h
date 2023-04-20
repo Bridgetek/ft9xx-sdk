@@ -5,14 +5,14 @@
  * ============================================================================
  * History
  * =======
- * 2017-03-15 : Created
+ * 2017-12-06 : Created
  *
  * (C) Copyright Bridgetek Pte Ltd
  * ============================================================================
  *
  * This source code ("the Software") is provided by Bridgetek Pte Ltd
- * ("Bridgetek") subject to the licence terms set out
- * http://www.ftdichip.com/FTSourceCodeLicenceTerms.htm ("the Licence Terms").
+ *  ("Bridgetek ") subject to the licence terms set out
+ * http://brtchip.com/BRTSourceCodeLicenseAgreement/ ("the Licence Terms").
  * You must read the Licence Terms before downloading or using the Software.
  * By installing or using the Software you agree to the Licence Terms. If you
  * do not agree to the Licence Terms then do not download or use the Software.
@@ -52,7 +52,16 @@
 #include <ft900_asm.h>
 #endif // defined(__FT32__)
 
-//#define CC_DEBUG
+#ifndef CC_DEBUG
+// Disabled by default due to issue in asm_memcpy8
+//#define CC_DEBUG 1
+#endif
+
+#if CC_DEBUG
+#undef TINYPRINTF_OVERRIDE_LIBC
+#define TINYPRINTF_OVERRIDE_LIBC 0
+#include "tinyprintf.h"
+#endif
 
 #ifndef BYTE_ORDER
 #define BYTE_ORDER LITTLE_ENDIAN
@@ -94,12 +103,23 @@ typedef uintptr_t   mem_ptr_t;
 //#define PACK_STRUCT_END
 
 // Diagnostic output
-#ifdef CC_DEBUG
-#define LWIP_PLATFORM_DIAG(x) printf x
-#define LWIP_PLATFORM_ASSERT(x) do { printf("Assertion Failed %s:%d:%s\n",__FILE__,__LINE__,x); for(;;); } while(0)
+#if CC_DEBUG
+#define LWIP_PLATFORM_DIAG(x) tfp_printf x
+#define LWIP_PLATFORM_ASSERT(x) do { tfp_printf("Assertion Failed %s:%d:%s\n",__FILE__,__LINE__,x); for(;;); } while(0)
 #endif
 
 #define LWIP_RAND() ((u32_t)rand())
+
+#define MEMCPY(dest,src,len) { \
+		CRITICAL_SECTION_BEGIN;\
+		asm_memcpy8(src, dest, len);\
+		CRITICAL_SECTION_END;\
+		}
+#define SMEMCPY(dest,src,len) { \
+		CRITICAL_SECTION_BEGIN;\
+		asm_memcpy8(src, dest, len);\
+		CRITICAL_SECTION_END;\
+		}
 
 #else
 #define PACK_STRUCT_FIELD(x)  x

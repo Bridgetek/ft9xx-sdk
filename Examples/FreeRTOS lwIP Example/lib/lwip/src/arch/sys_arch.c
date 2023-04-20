@@ -835,13 +835,12 @@ void sys_assert( const char *pcMessage )
     }
 }
 
-void *my_mem_calloc(mem_size_t count, mem_size_t size)
+void *sys_mem_calloc(mem_size_t count, mem_size_t size)
 {
-	int len = count*size;
-	void *pmem = mem_clib_malloc(len);
+    void *pmem = mem_malloc(size * count);
 	if (pmem)
 	{
-		memset(pmem, 0, len);
+		memset(pmem, 0, size * count);
 	}
 	return pmem;
 }

@@ -75,7 +75,6 @@
 void setup(void);
 void loop(void);
 void spis_dev_ISR(void);
-void myputc(void* p, char c);
 
 #define APP_BUFFER_SIZE (8)
 #define APP_BUFFER_LOOP_CHUNK	(4)	//Check for min of this size and loopback
