@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+<libraries
+	name = "Hardware Source Code Libraries for FT9xx" desc = "v2.7.0">
+    <library name="Complete Library" desc="All source and include files for the Hardware Library." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<dir dest="hw/include/" src="include" />
+		<dir dest="hw/src/" src="src" />
+	</library>
+    <library name="ADC Driver" desc="Analog to Digital Converter Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_adc.h" src="include/ft900_adc.h" />
+		<file dest="hw/src/adc.c" src="src/adc.c" />
+	</library>
+    <library name="Bootstrap Driver" desc="Simple stdio Mappings for newlib." ft900="yes" ft930="yes" >
+		<file dest="hw/src/bootstrap.c" src="src/bootstrap.c" />
+	</library>
+    <library name="CAM Driver" desc="Camera Port Driver." ft900="yes" ft930="no" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_cam.h" src="include/ft900_cam.h" />
+		<file dest="hw/src/cam.c" src="src/cam.c" />
+	</library>
+    <library name="CAN Driver" desc="Controller Area Network Driver." ft900="yes" ft930="no" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_can.h" src="include/ft900_can.h" />
+		<file dest="hw/src/can.c" src="src/can.c" />
+	</library>
+    <library name="DAC Driver" desc="Digital to Analog Converter Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_dac.h" src="include/ft900_dac.h" />
+		<file dest="hw/src/dac.c" src="src/dac.c" />
+	</library>
+    <library name="Preset Delays" desc="Predefined Calibrated Delay Loops." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_delay.h" src="include/ft900_delay.h" />
+		<file dest="hw/src/delay.c" src="src/delay.c" />
+	</library>
+    <library name="Datalogging Driver" desc="Flash Memory Datalogger Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_dlog.h" src="include/ft900_dlog.h" />
+		<file dest="hw/src/dlog.c" src="src/dlog.c" />
+	</library>
+    <library name="Ethernet Driver" desc="Ethernet Interface Driver." ft900="yes" ft930="no" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_eth.h" src="include/ft900_eth.h" />
+		<file dest="hw/src/eth.c" src="src/eth.c" />
+	</library>
+    <library name="GPIO Driver" desc="General Purpose I/O Interface Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_gpio.h" src="include/ft900_gpio.h" />
+		<file dest="hw/src/gpio.c" src="src/gpio.c" />
+	</library>
+    <library name="I2C Master Driver" desc="I2C Master Interface Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_i2cm.h" src="include/ft900_i2cm.h" />
+		<file dest="hw/src/i2cm.c" src="src/i2cm.c" />
+	</library>
+    <library name="I2C Slave Driver" desc="I2C Slave Interface Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_i2cs.h" src="include/ft900_i2cs.h" />
+		<file dest="hw/src/i2cs.c" src="src/i2cs.c" />
+	</library>
+    <library name="I2S Driver" desc="I2S Audio Interface Driver." ft900="yes" ft930="no" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_i2s.h" src="include/ft900_i2s.h" />
+		<file dest="hw/src/i2s.c" src="src/i2s.c" />
+	</library>
+    <library name="Interrupt Driver" desc="Interrupt Vector Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_interrupt.h" src="include/ft900_interrupt.h" />
+		<file dest="hw/src/interrupt.c" src="src/interrupt.c" />
+	</library>
+    <library name="MEMCTL Driver" desc="Memory Controller Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_memctl.h" src="include/ft900_memctl.h" />
+		<file dest="hw/src/memctl.c" src="src/memctl.c" />
+	</library>
+    <library name="PWM and PCM Driver" desc="Pulse Width Modulation and Audio Output Controller Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_pwm.h" src="include/ft900_pwm.h" />
+		<file dest="hw/src/pwm.c" src="src/pwm.c" />
+		<file dest="hw/include/ft900_pwm_pcm.h" src="include/ft900_pwm_pcm.h" />
+		<file dest="hw/src/pwm_pcm.c" src="src/pwm_pcm.c" />
+	</library>
+    <library name="RTC Driver" desc="Real Time Clock Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_rtc.h" src="include/ft900_rtc.h" />
+		<file dest="hw/src/rtc.c" src="src/rtc.c" />
+	</library>
+    <library name="SDHost Driver" desc="SD Card Host Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_sdhost.h" src="include/ft900_sdhost.h" />
+		<file dest="hw/src/sdhost.c" src="src/sdhost.c" />
+	</library>
+    <library name="SPI Driver" desc="SPI Bus Interface Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_spi.h" src="include/ft900_spi.h" />
+		<file dest="hw/src/spi.c" src="src/spi.c" />
+	</library>
+    <library name="DFU Driver" desc="Driver for DFU Functions at Program Start." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_startup_dfu.h" src="include/ft900_startup_dfu.h" />
+		<file dest="hw/include/ft900_usbd_dfu.h" src="include/ft900_usbd_dfu.h" />
+		<file dest="hw/src/startup_dfu.c" src="src/startup_dfu.c" />
+		<file dest="hw/src/usbd_dfu.c" src="src/usbd_dfu.c" />
+	</library>
+    <library name="SYS Driver" desc="Top-level System Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_sys.h" src="include/ft900_sys.h" />
+		<file dest="hw/src/sys.c" src="src/sys.c" />
+	</library>
+    <library name="Timers Driver" desc="System-level Timers Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_timers.h" src="include/ft900_timers.h" />
+		<file dest="hw/src/timers.c" src="src/timers.c" />
+	</library>
+    <library name="UART Driver" desc="Simple UART Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_uart_simple.h" src="include/ft900_uart_simple.h" />
+		<file dest="hw/src/uart_simple.c" src="src/uart_simple.c" />
+	</library>
+    <library name="USB Device Driver" desc="Driver for Implementing a USB Device." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_usbd.h" src="include/ft900_usbd.h" />
+		<file dest="hw/include/ft900_usbdx.h" src="include/ft900_usbdx.h" />
+		<file dest="hw/include/ft900_usbd_hbw.h" src="include/ft900_usbd_hbw.h" />
+		<file dest="hw/src/usbd.c" src="src/usbd.c" />
+		<file dest="hw/src/usbdx.c" src="src/usbdx.c" />
+	</library>
+    <library name="USB Host Driver" desc="Driver for Controlling a Devices on the USB Host Interface." ft900="yes" ft930="no" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_usbh.h" src="include/ft900_usbh.h" />
+		<file dest="hw/src/usbh.c" src="src/usbh.c" />
+		<file dest="hw/include/private/ft900_usbh_internal.h" src="include/private/ft900_usbh_internal.h" />
+	</library>
+    <library name="Watchdog Driver" desc="System Watchdog Driver." ft900="yes" ft930="yes" >
+		<include>hw/include</include>
+		<file dest="hw/include/ft900_wdt.h" src="include/ft900_wdt.h" />
+		<file dest="hw/src/wdt.c" src="src/wdt.c" />
+	</library>
+ </libraries>
