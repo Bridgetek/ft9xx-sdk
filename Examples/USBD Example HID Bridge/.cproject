@@ -14,7 +14,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.1997675513" name="FT90x_Debug" parent="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.1997675513" name="FT90x_Debug" optionalBuildProperties="" parent="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base">
 					<folderInfo id="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.1997675513." name="/" resourcePath="">
 						<toolChain id="com.brtchip.toolchain.ft900.debug.base.419050159" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft900.debug.base">
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.2088346792" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
@@ -25,9 +25,9 @@
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags.1308028709" name="Other optimization flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-Og" valueType="string"/>
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.1376304995" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false"/>
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other.1847893358" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.1273150115" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.1273150115" name="Include paths (-I)" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/USBD Example HID Bridge/usb/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
-
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.885274221" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -70,7 +70,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.1439118126" name="FT90x_Release" parent="com.brtchip.managedbuild.config.gnu.cross.ft900release.base">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.1439118126" name="FT90x_Release" optionalBuildProperties="" parent="com.brtchip.managedbuild.config.gnu.cross.ft900release.base">
 					<folderInfo id="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.1439118126." name="/" resourcePath="">
 						<toolChain id="com.brtchip.toolchain.ft900.release.base.1117969960" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft900.release.base">
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.373308511" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
@@ -80,9 +80,9 @@
 							<tool id="com.brtchip.compiler.ft900.release.base.61242621" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.release.base">
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level.1283429693" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.938744766" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.839454333" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.839454333" name="Include paths (-I)" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/USBD Example HID Bridge/usb/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
-
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1040313597" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -124,7 +124,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft930debug.base.881343958" name="FT93x_Debug" parent="com.brtchip.managedbuild.config.gnu.cross.ft930debug.base">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft930debug.base.881343958" name="FT93x_Debug" optionalBuildProperties="" parent="com.brtchip.managedbuild.config.gnu.cross.ft930debug.base">
 					<folderInfo id="com.brtchip.managedbuild.config.gnu.cross.ft930debug.base.881343958." name="/" resourcePath="">
 						<toolChain id="com.brtchip.toolchain.ft930.debug.base.1251341863" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft930.debug.base">
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.481309811" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
@@ -135,9 +135,9 @@
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags.660770133" name="Other optimization flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-Og" valueType="string"/>
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.1279508491" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false"/>
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other.2015231011" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.21948239" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.21948239" name="Include paths (-I)" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/USBD Example HID Bridge/usb/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
-
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1455253571" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -180,7 +180,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft930release.base.1699359815" name="FT93x_Release" parent="com.brtchip.managedbuild.config.gnu.cross.ft930release.base">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft930release.base.1699359815" name="FT93x_Release" optionalBuildProperties="" parent="com.brtchip.managedbuild.config.gnu.cross.ft930release.base">
 					<folderInfo id="com.brtchip.managedbuild.config.gnu.cross.ft930release.base.1699359815." name="/" resourcePath="">
 						<toolChain id="com.brtchip.toolchain.ft930.release.base.805157286" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft930.release.base">
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.1989071153" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
@@ -190,9 +190,9 @@
 							<tool id="com.brtchip.compiler.ft930.release.base.352904482" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft930.release.base">
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level.679851929" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.759597770" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.218648223" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.218648223" name="Include paths (-I)" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/USBD Example HID Bridge/usb/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
-
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.249124650" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -223,7 +223,7 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="USBD Example HID Bridge.com.brtchip.ft9xx.build.gcc.ft9xxproj.base.2142383328" name="Executable" projectType="com.brtchip.ft90x.build.gcc.ft9xxproj.base"/>
+		<project id="USBD Example HID Bridge.com.brtchip.ft9xx.build.gcc.ft9xxproj.base.2142383328" name="Executable"/>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
