@@ -14,12 +14,11 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.build.config.d2xx.ft900.debug.base.692404863" name="FT90x_Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="com.brtchip.build.config.d2xx.ft900.debug.base.692404863">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.build.config.d2xx.ft900.debug.base.692404863" name="FT90x_Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base">
 					<folderInfo id="com.brtchip.build.config.d2xx.ft900.debug.base.692404863." name="/" resourcePath="">
 						<toolChain id="com.brtchip.toolchain.ft900.d2xx.debug.1794599106" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft900.d2xx.debug">
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.1221327538" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize.256021210" name="Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.path.996778543" name="Toolchain Path" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.path" useByScannerDiscovery="true" value="C:/Program Files (x86)/FTDI/FT90x Toolchain/Toolchain/tools/bin" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x.988895039" isAbstract="false" osList="all" superClass="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
 							<builder buildPath="${workspace_loc:/Free RTOS D2XX Example}/FT90x_Debug" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.811059680" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool id="com.brtchip.compiler.ft900.debug.d2xx.983964594" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.debug.d2xx">
@@ -28,6 +27,7 @@
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other.294786200" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.compiler.ft900.debug.d2xx.option.include.paths.708154937" name="Include paths (-I)" superClass="com.brtchip.compiler.ft900.debug.d2xx.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/tinyprintf}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Includes}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/portable/GCC/FT32}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/include}&quot;"/>
@@ -88,12 +88,11 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.brtchip.build.config.ft900.release.d2xx.1376161851" name="FT90x_Release" optionalBuildProperties="" parent="com.brtchip.build.config.ft900.release.d2xx.1376161851">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.brtchip.build.config.ft900.release.d2xx.1376161851" name="FT90x_Release" optionalBuildProperties="" parent="com.brtchip.managedbuild.config.gnu.cross.ft900release.base">
 					<folderInfo id="com.brtchip.build.config.ft900.release.d2xx.1376161851." name="/" resourcePath="">
 						<toolChain id="com.brtchip.toolchain.ft900.release.d2xx.1629479784" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft900.release.d2xx">
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.691542301" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize.1372906107" name="Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.path.1167709142" name="Toolchain Path" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.path" useByScannerDiscovery="true" value="C:/Program Files (x86)/FTDI/FT90x Toolchain/Toolchain/tools/bin" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x.915525174" isAbstract="false" osList="all" superClass="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
 							<builder buildPath="${workspace_loc:/Free RTOS D2XX Example}/FT90x_Release" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.1302037302" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool id="com.brtchip.compiler.ft900.release.d2xx.344807476" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.release.d2xx">
@@ -101,6 +100,7 @@
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.1752657532" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.compiler.ft900.release.d2xx.option.include.paths.688553676" name="Include paths (-I)" superClass="com.brtchip.compiler.ft900.release.d2xx.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/tinyprintf}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Includes}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/portable/GCC/FT32}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/include}&quot;"/>
@@ -160,12 +160,11 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.build.config.ft930.debug.d2xx.302436148" name="FT93x_Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="com.brtchip.build.config.ft930.debug.d2xx.302436148">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.build.config.ft930.debug.d2xx.302436148" name="FT93x_Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="com.brtchip.managedbuild.config.gnu.cross.ft930debug.base">
 					<folderInfo id="com.brtchip.build.config.ft930.debug.d2xx.302436148." name="/" resourcePath="">
 						<toolChain id="com.brtchip.toolchain.ft930.debug.d2xx.154176195" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft930.debug.d2xx">
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.622899789" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash"/>
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize.1141652632" name="Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize" value="true" valueType="boolean"/>
-							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.path.1909966648" name="Toolchain Path" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.path" value="C:/Program Files (x86)/FTDI/FT90x Toolchain/Toolchain/tools/bin" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x.1785597650" isAbstract="false" osList="all" superClass="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
 							<builder buildPath="${workspace_loc:/Free RTOS D2XX Example}/FT93x_Debug" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.783789637" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool id="com.brtchip.compiler.ft930.cust.debug.d2xx.8627101" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft930.cust.debug.d2xx">
@@ -174,6 +173,7 @@
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other.1282451845" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.compiler.ft930.debug.d2xx.option.include.paths.325881854" name="Include paths (-I)" superClass="com.brtchip.compiler.ft930.debug.d2xx.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/tinyprintf}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Includes}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/portable/GCC/FT32}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/include}&quot;"/>
@@ -229,12 +229,11 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.brtchip.build.config.ft930.release.d2xx.1771276815" name="FT93x_Release" optionalBuildProperties="" parent="com.brtchip.build.config.ft930.release.d2xx.1771276815">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.brtchip.build.config.ft930.release.d2xx.1771276815" name="FT93x_Release" optionalBuildProperties="" parent="com.brtchip.managedbuild.config.gnu.cross.ft930release.base">
 					<folderInfo id="com.brtchip.build.config.ft930.release.d2xx.1771276815." name="/" resourcePath="">
 						<toolChain id="com.brtchip.toolchain.ft930.d2xx.1666171796" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft930.d2xx">
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.1786885659" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
 							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize.1871422095" name="Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.path.550460746" name="Toolchain Path" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.path" useByScannerDiscovery="true" value="C:/Program Files (x86)/FTDI/FT90x Toolchain/Toolchain/tools/bin" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x.262158885" isAbstract="false" osList="all" superClass="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
 							<builder buildPath="${workspace_loc:/Free RTOS D2XX Example}/FT93x_Release" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.972751272" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool id="com.brtchip.compiler.ft900.cust.release.d2xx.597219205" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.cust.release.d2xx">
@@ -242,6 +241,7 @@
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.271923940" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.compiler.ft930.release.d2xx.option.include.paths.306032735" name="Include paths (-I)" superClass="com.brtchip.compiler.ft930.release.d2xx.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/tinyprintf}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Includes}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/portable/GCC/FT32}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/lib/FreeRTOS/Source/include}&quot;"/>
@@ -311,7 +311,7 @@
 		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft930.release.d2xx.1382608150;com.brtchip.build.config.ft930.release.d2xx.1382608150.;com.brtchip.compiler.ft900.cust.release.d2xx.1335862853;cdt.managedbuild.tool.gnu.c.compiler.input.177606947">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.d2xx.ft900.debug.base.1170135989;com.brtchip.build.config.d2xx.ft900.debug.base.1170135989.;com.brtchip.managedbuild.gnu.cross.ft90x.tool.c.compiler.188399893;cdt.managedbuild.tool.gnu.c.compiler.input.1329921302">
+		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.d2xx.ft900.debug.base.692404863;com.brtchip.build.config.d2xx.ft900.debug.base.692404863.;com.brtchip.managedbuild.gnu.cross.ft90x.tool.c.compiler.188399893;cdt.managedbuild.tool.gnu.c.compiler.input.1329921302">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft900.release.d2xx.819813001;com.brtchip.build.config.ft900.release.d2xx.819813001.;com.brtchip.managedbuild.gnu.cross.ft90x.tool.c.compiler.158469771;cdt.managedbuild.tool.gnu.c.compiler.input.1394305308">
