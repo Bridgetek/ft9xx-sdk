@@ -60,7 +60,7 @@
 			<driver>USB Header Files</driver>
 		</project>
     </group>
-    <group name="ADC/DAC/PWM Examples" desc="Analog Digital Converter Examples." ft900="yes" ft930="yes" >
+    <group name="ADC Examples" desc="Analog to Digital Converter Examples." ft900="yes" ft930="yes" >
         <project>
 			<name>ADC Example 1</name>
 			<desc>Continuously poll one ADC channel for a new value and write the value to the UART interface.</desc>
