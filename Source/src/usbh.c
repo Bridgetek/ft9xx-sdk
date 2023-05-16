@@ -437,6 +437,9 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 	USBH_endpoint *epThis = xferThis->endpoint;
 	USBH_qtd *hc_prev_qtd;
 
+	// This is called when there is a timeout on the transfer,
+	// or the transfer needs to be finished and disposed of.
+
 	// Check transfer endpoint queues match.
 	if (hc_this_qh != epThis->hc_entry.qh)
 	{
@@ -447,31 +450,31 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 	}
 
 	// Deactivate target qTD.
-	//CRITICAL_SECTION_BEGIN
 	token = EHCI_MEM(hc_this_qtd->token);
 	token &= (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
 	// Deactivate it.
 	EHCI_MEM(hc_this_qtd->token) = token;
-	//CRITICAL_SECTION_END
 
 	// Check if the qh->current_qtd points to the qTD of the transfer.
 	// If it does then the overlay is from the qTD we need to unlink.
 	if (EHCI_HC_TO_CPU(EHCI_MEM(hc_this_qh->qtd_current)) == (uint32_t)hc_this_qtd)
 	{
+#ifdef USBH_DEBUG_XFER
+		printf("Stopping in overlay\r\n");
+#endif // USBH_DEBUG_XFER
+
 		// Stop the transfer in the overlay.
 		token &= (~MASK_EHCI_QUEUE_TD_TOKEN_TOGGLE);
 		token |= (EHCI_MEM(hc_this_qh->transfer_overlay.token) & MASK_EHCI_QUEUE_TD_TOKEN_TOGGLE);
 
-		//CRITICAL_SECTION_BEGIN
 		EHCI_MEM(hc_this_qh->transfer_overlay.token) = token;
-		//CRITICAL_SECTION_END
+
 		// Wait for a short time to ensure that the controller passes this
 		// qTD and writes back the overlay.
 		delayms(1);
 		// Re-write the overlay.
 		EHCI_MEM(hc_this_qh->transfer_overlay.token) = token;
 	};
-
 
 	// Go through queue headers list of qTDs to find the right qTD to remove.
 	hc_prev_qtd = epThis->hc_head_qtd;
@@ -525,6 +528,24 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 #endif // USBH_DEBUG_XFER
 		}
 	}
+
+	do {
+		// If the next entry is the qTD to unlink then stop.
+		if (EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)) == EHCI_CPU_TO_HC(epThis->hc_dummy_qtd))
+		{
+			// Free the current dummy and make this qTD the new dummy.
+			// Under all circumstances this qTD is gone but still linked.
+			usbh_free_hc_1_block(epThis->hc_dummy_qtd);
+			epThis->hc_dummy_qtd = hc_this_qtd;
+			break;
+		}
+		if (EHCI_TERMINATE_TD(EHCI_MEM(hc_prev_qtd->next)))
+		{
+			break;
+		}
+		hc_prev_qtd = (USBH_qtd *)EHCI_HC_TO_CPU(EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)));
+		// Stop if we reach the right qTD.
+	} while (1);
 }
 
 static uint16_t usbh_xfer_iso_td_insert(USBH_xfer *xferNew, uint16_t advance)
