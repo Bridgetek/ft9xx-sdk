@@ -49,6 +49,11 @@
 			<driver>USB Host HID</driver>
 		</project>
         <project>
+			<name>USBH Example HID to UART</name>
+			<desc>Find USB HID keyboard or barcode scanners on the USB and translate report data from the device.</desc>
+			<driver>USB Host HID</driver>
+		</project>
+        <project>
 			<name>USBH Example File System</name>
 			<desc>Reads a filesystem on an Flash disk. Writes, reads and deletes a file.</desc>
 			<thirdparty>FatFs</thirdparty>
