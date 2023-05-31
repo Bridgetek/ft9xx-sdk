@@ -47,8 +47,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "ft900_sdhost.h"
-#include "ft900_delay.h"
+
 #include "ft900.h"
 
 /** @brief Enable to debug. Note that Debugging relies on tinyprintf */

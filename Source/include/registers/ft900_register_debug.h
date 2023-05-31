@@ -124,13 +124,13 @@ typedef struct  {
 											/* 0x810519 size 0x07 */
 	  	  uint8_t:8; uint16_t:16; uint32_t:32;
 	  ft900_uart_regs_t _UART0;				/* 0x810520 size 0x08 */
-	  	  uint32_t:32; uint32_t:32; 		/* 0x810529 size 0x08 */
+	  	  uint32_t:32; uint32_t:32; 		/* 0x810528 size 0x08 */
 	  ft900_uart_regs_t _UART1;				/* 0x810530 size 0x08 */
-		  uint32_t:32; uint32_t:32; 		/* 0x810539 size 0x08 */
+		  uint32_t:32; uint32_t:32; 		/* 0x810538 size 0x08 */
 	  ft900_uart_regs_t _UART2;				/* 0x810540 size 0x08 */
-		  uint32_t:32; uint32_t:32; 		/* 0x810549 size 0x08 */
+		  uint32_t:32; uint32_t:32; 		/* 0x810548 size 0x08 */
 	  ft900_uart_regs_t _UART3;				/* 0x810550 size 0x08 */
-		  uint32_t:32; uint32_t:32; 		/* 0x810559 size 0x08 */
+		  uint32_t:32; uint32_t:32; 		/* 0x810558 size 0x08 */
 	  ft900_timer_wdt_regs_t _TIMER;		/* 0x810560 size 0x10 */
 	  	  	  	  	  	  	  	  	  	  	/* 0x810570 size 0x40 */
 		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
@@ -138,6 +138,20 @@ typedef struct  {
 		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
 		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
 	  ft900_pwm_regs_t _PWM;				/* 0x8105B0 size 0x3E */
+		  uint16_t:16;						/* 0x8105EE size 0x12 */
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+	  ft900_sdhost_regs_t _SDHOST;			/* 0x810600 size 0x70 */
+											/* 0x810670 size 0x90 */
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+	  ft900_sdhost_regs_t _SDHOSTVENDOR;	/* 0x810700 size 0x18 */
 } ft930_register_block_t;
 
 #else // __FT930__
@@ -173,9 +187,9 @@ typedef struct  {
 											/* 0x810319 size 0x07 */
 	  	  uint8_t:8; uint16_t:16; uint32_t:32;
 	  ft900_uart_regs_t _UART0;				/* 0x810320 size 0x08 */
-	  	  uint32_t:32; uint32_t:32; 		/* 0x810319 size 0x08 */
+	  	  uint32_t:32; uint32_t:32; 		/* 0x810328 size 0x08 */
 	  ft900_uart_regs_t _UART1;				/* 0x810330 size 0x08 */
-	  	  uint32_t:32; uint32_t:32; 		/* 0x810319 size 0x08 */
+	  	  uint32_t:32; uint32_t:32; 		/* 0x810338 size 0x08 */
 	  ft900_timer_wdt_regs_t _TIMER;		/* 0x810340 size 0x10 */
 	  ft900_i2s_regs_t _I2S;				/* 0x810350 size 0x10 */
 	  ft900_cam_regs_t _CAM;				/* 0x810360 size 0x10 */
@@ -186,6 +200,19 @@ typedef struct  {
 		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
 		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
 	  ft900_pwm_regs_t _PWM;				/* 0x8103C0 size 0x3E */
+		  uint16_t:16;						/* 0x8103FE size 0x02 */
+	  ft900_sdhost_regs_t _SDHOST;			/* 0x810400 size 0x70 */
+											/* 0x810470 size 0x90 */
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+		  uint32_t:32; uint32_t:32; uint32_t:32; uint32_t:32;
+	  ft900_sdhost_regs_t _SDHOSTVENDOR;	/* 0x810500 size 0x18 */
 } ft900_register_block_t;
 
 #endif // !__FT930__
