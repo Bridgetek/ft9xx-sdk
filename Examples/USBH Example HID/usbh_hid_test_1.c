@@ -149,7 +149,14 @@ void hid_testing(USBH_device_handle hHIDdev, USBH_interface_handle hHID)
     while (1)
     {
         count = USBH_transfer(hidCtx.hHIDEpIn, buffer, USBH_HID_get_report_size_in(&hidCtx), 1000);
-        if (count >= 0) status = USBH_OK;
+        if (count >= 0){
+        	status = USBH_OK;
+        }
+        else
+		{
+            /* Negative values returned from USBH_transfer are errors. */
+        	status = count;
+		}
         //status = USBH_HID_get_report(&hidCtx, buffer);
 
         if (status == USBH_OK)
@@ -163,7 +170,9 @@ void hid_testing(USBH_device_handle hHIDdev, USBH_interface_handle hHID)
             switch (status)
             {
             case USBH_ERR_TIMEOUT:
-                printf("Timeout\r\n"); break;
+                /* HIDs will timeout frequently and expectedly. */
+                /*printf("Timeout\r\n");*/
+                 break;
             case USBH_ERR_HALTED:
                 printf("Halted\r\n"); break;
             case USBH_ERR_NOT_FOUND:
@@ -179,8 +188,10 @@ void hid_testing(USBH_device_handle hHIDdev, USBH_interface_handle hHID)
             default:
                 printf("Unknown error\r\n"); break;
             }
+            /* Exit while loop if there is any unexpected error. */
+            /* This will force the calling function to reconnect. */
             if (status != USBH_ERR_TIMEOUT)
-            	break; //exit while loop if any error
+            	break;
         }
     }
 }
@@ -339,7 +350,7 @@ int main(void)
 
     /* Timer A = 1ms */
 	timer_prescaler(timer_select_a, 1000);
-    timer_init(timer_select_a, 1000, timer_direction_down, timer_prescaler_select_on, timer_mode_continuous);
+    timer_init(timer_select_a, 100, timer_direction_down, timer_prescaler_select_on, timer_mode_continuous);
     timer_enable_interrupt(timer_select_a);
     timer_start(timer_select_a);
 
