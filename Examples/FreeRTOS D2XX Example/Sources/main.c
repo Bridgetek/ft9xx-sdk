@@ -242,8 +242,8 @@ void setup(void)
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_D2XX_MODE);    // turn-on D2XX_mode
     *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_SLV_RESET); // de-assert bit to allow slave CPU to start
 #else
-	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig.ConfigDesc, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration->ConfigDesc, sizeof(TConfigDescriptors));
-	retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
+	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
+	retVal = D2XX_Init(&__pD2XXDefaultConfiguration, d2xx_callback, NULL);
 #endif
 
 	interrupt_enable_globally(); //needed for interrupts
