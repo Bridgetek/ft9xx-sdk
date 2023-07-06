@@ -376,16 +376,19 @@ void setup(void)
 			"--------------------------------------------------------------------- \r\n"
 	);
 
-#if defined(__FT930__)
+	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
 	retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
 
+	if (retVal != 0)
+	{
+		dbg("Error with configuration file\r\n");
+		while(1) {};
+	}
+#if defined(__FT930__)
     /*slave sub-system control register setup*/
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_D2XX_MODE);    // turn-on D2XX_mode
     *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_SLV_RESET); // de-assert bit to allow slave CPU to start
-#else
-	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
-	retVal = D2XX_Init(&__pD2XXDefaultConfiguration, d2xx_callback, NULL);
 #endif
 
 	sys_enable(sys_device_timer_wdt);
