@@ -152,7 +152,7 @@ typedef enum
  *  @param None
  *  @returns True if Rev B, otherwise (if Rev C or more, or FT930) returns False
  */
-#define sys_check_ft900_revB()	(((SYS->HIPID | 0x000F0000U) == 0x090F0000U) || ((SYS->HIPID | 0x000F0000U) == 0x090F0001U))
+#define sys_check_ft900_revB()	(((SYS->CHIPID | 0x000F0000U) == 0x090F0000U) || ((SYS->CHIPID | 0x000F0000U) == 0x090F0001U))
 
 /* FUNCTION PROTOTYPES *************************************************************/
 
