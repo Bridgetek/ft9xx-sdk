@@ -429,8 +429,12 @@ void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* para
 		param = (*(uint8_t *)param1);
 	}
 #ifdef DEBUG_EVENT
-	dbg("~%d",eventID);
-	dbg("%s\n", D2XXTest_EventStrings[eventID]);
+	dbg("~%d ",eventID);
+	if (eventID <= D2XX_EVT_INTF_RESET)
+	{
+		dbg("%s", D2XXTest_EventStrings[eventID]);
+	}
+	dbg("\n");
 #endif // DEBUG_EVENT
 	switch(eventID)
 	{

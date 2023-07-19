@@ -98,6 +98,7 @@ init:
         jmp    1b
 2:
         memset $r4,$r1,$r2
+.if 0
 .ifdef __FT930__
 /*##############################################################*/
 		# copy UserConfig DATA from flash to mailbox memory
@@ -127,7 +128,8 @@ init:
         # Copy RAM[$r1] to Mailbox $r4, for $r2 bytes
         streamouti.b   $r4,$r1,$r2
 /*############################################################*/
-.endif
+.endif /* __FT930__ */
+.endif /* 0 */
         sub.l   $sp,$sp,24  # Space for the caller argument frame
         call    main
 

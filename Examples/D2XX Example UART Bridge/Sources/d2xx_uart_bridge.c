@@ -121,6 +121,7 @@ __attribute__ ((aligned (4))) TD2XX_DeviceConfiguration D2XXTEST_UserD2xxConfig 
 
 /* LOCAL VARIABLES *****************************************************************/
 #ifdef DEBUG
+#ifdef DEBUG_EVENT
 static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] = {	"SUSPEND",    	/**< SUSPEND EVENT from USB Host */
 																	"RESUME",	 	/**< RESUME EVENT from USB Host */
 																	"BUS_RESET",	 		/**< USB Bus Reset */
@@ -130,7 +131,8 @@ static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] = {	"SUSPEND",    	/**< SU
 																	"TESTMODE",	 	/**< D2XX enters Test Mode. Exit is via power cycle*/
 																	"INTF_RESET"	/**< Interface RESET Vendor Command from D2XX Application */
 																};
-#endif
+#endif // DEBUG_EVENT
+#endif // DEBUG
 uint8_t D2XXTEST__DfuDetach = 0;
 uint8_t D2XXTEST__Ready = 0;
 volatile uint8_t SetRemoteWakeup = 0;
@@ -644,16 +646,19 @@ void setup(void)
 	interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
 #endif
 
-#if defined(__FT930__)
+	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
 	retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
 
+	if (retVal != 0)
+	{
+		dbg("Error with configuration file\r\n");
+		while(1) {};
+	}
+#if defined(__FT930__)
     /*slave sub-system control register setup*/
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_D2XX_MODE);    // turn-on D2XX_mode
     *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_SLV_RESET); // de-assert bit to allow slave CPU to start
-#else
-	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
-	retVal = D2XX_Init(&__pD2XXDefaultConfiguration, d2xx_callback, NULL);
 #endif
 
 	sys_enable(sys_device_timer_wdt);
@@ -707,8 +712,14 @@ void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* para
 	{
 		param = (*(uint8_t *)param1);
 	}
-	//dbg("~%d",eventID);
-	dbg("%s\n", D2XXTest_EventStrings[eventID]);
+#ifdef DEBUG_EVENT
+	dbg("~%d ",eventID);
+	if (eventID <= D2XX_EVT_INTF_RESET)
+	{
+		dbg("%s", D2XXTest_EventStrings[eventID]);
+	}
+	dbg("\n");
+#endif // DEBUG_EVENT
 	switch(eventID)
 	{
 	case D2XX_EVT_SUSPEND:
@@ -717,7 +728,9 @@ void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* para
 			D2XXTEST__Suspend = 1;
 			D2XXTEST__Sleep = 0;
 			RemoteWakeupEnable = param;
-			//dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
+#ifdef DEBUG_EVENT
+			dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
+#endif // DEBUG_EVENT
 		}
 		break;
 	case D2XX_EVT_RESUME:

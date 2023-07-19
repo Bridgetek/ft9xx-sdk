@@ -98,7 +98,7 @@ static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] = {	"SUSPEND",    	/**< SU
 																	"TESTMODE",	 	/**< D2XX enters Test Mode. Exit is via power cycle*/
 																	"INTF_RESET"	/**< Interface RESET Vendor Command from D2XX Application */
 																};
-#endif
+#endif // DEBUG_EVENT
 uint8_t D2XXTEST__DfuDetach = 0;
 uint8_t D2XXTEST__Ready = 0;
 volatile uint8_t SetRemoteWakeup = 0;
@@ -234,16 +234,19 @@ void setup(void)
 			"--------------------------------------------------------------------- \r\n"
 	);
 
-#if defined(__FT930__)
+	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
 	retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
 
+	if (retVal != 0)
+	{
+		dbg("Error with configuration file\r\n");
+		while(1) {};
+	}
+#if defined(__FT930__)
     /*slave sub-system control register setup*/
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_D2XX_MODE);    // turn-on D2XX_mode
     *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_SLV_RESET); // de-assert bit to allow slave CPU to start
-#else
-	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
-	retVal = D2XX_Init(&__pD2XXDefaultConfiguration, d2xx_callback, NULL);
 #endif
 
 	interrupt_enable_globally(); //needed for interrupts
@@ -286,8 +289,12 @@ void d2xx_callback (ED2XX_EventCode ec, void *ref, void *param1, void *param2)
 		param = (*(uint8_t *)param1);
 	}
 #ifdef DEBUG_EVENT
-	dbg("~%d",eventID);
-	dbg("%s\n", D2XXTest_EventStrings[eventID]);
+	dbg("~%d ",eventID);
+	if (eventID <= D2XX_EVT_INTF_RESET)
+	{
+		dbg("%s", D2XXTest_EventStrings[eventID]);
+	}
+	dbg("\n");
 #endif // DEBUG_EVENTS
 	switch (ec)
 	{
