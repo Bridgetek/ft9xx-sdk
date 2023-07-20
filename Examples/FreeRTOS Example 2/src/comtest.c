@@ -362,7 +362,10 @@ portBASE_TYPE xError = pdFALSE;
 /* This is called to check that all the created tasks are still running. */
 portBASE_TYPE xAreComTestTasksStillRunning( void )
 {
-static short sLastTxCount = 0, sLastRxCount = 0, sLastSemCount = 0;
+static short sLastTxCount = 0, sLastRxCount = 0;
+#ifdef ENABLE_SEM_TEST
+static short sLastSemCount = 0;
+#endif
 portBASE_TYPE xReturn;
 
 	/* Not too worried about mutual exclusion on these variables as they are 16 
@@ -383,8 +386,9 @@ portBASE_TYPE xReturn;
 
 	sLastTxCount = sTxCount;
 	sLastRxCount = sRxCount;
+#ifdef ENABLE_SEM_TEST
 	sLastSemCount = sSemCount;
-
+#endif
 	return xReturn;
 }
 /*-----------------------------------------------------------*/
