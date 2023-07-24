@@ -83,6 +83,7 @@
 #include "queue.h"
 #include "task.h"
 #include "semphr.h"
+#include "comtest.h"
 
 /* Demo application includes. */
 #include "serial.h"
