@@ -137,7 +137,7 @@ void loop(void)
     printf("\r\n");
 
     /* Manipulate the data */
-    tx.data[8] = tx.data[7];
+    /* We lose tx.data[7] */
     tx.data[7] = tx.data[6];
     tx.data[6] = tx.data[5];
     tx.data[5] = tx.data[4];
