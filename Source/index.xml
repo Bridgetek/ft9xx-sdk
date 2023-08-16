@@ -125,8 +125,9 @@
 		<file dest="hw/include/ft900_usbd_hbw.h" src="include/ft900_usbd_hbw.h" />
 		<file dest="hw/src/usbd.c" src="src/usbd.c" />
 		<file dest="hw/src/usbdx.c" src="src/usbdx.c" />
+		<file dest="hw/src/usbd_hbw.c" src="src/usbd_hbw.c" />
 	</library>
-    <library name="USB Host Driver" desc="Driver for Controlling a Devices on the USB Host Interface." ft900="yes" ft930="no" >
+    <library name="USB Host Driver" desc="Driver for Controlling Devices on the USB Host Interface." ft900="yes" ft930="no" >
 		<include>hw/include</include>
 		<file dest="hw/include/ft900_usbh.h" src="include/ft900_usbh.h" />
 		<file dest="hw/src/usbh.c" src="src/usbh.c" />
