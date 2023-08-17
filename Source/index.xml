@@ -130,7 +130,9 @@
     <library name="USB Host Driver" desc="Driver for Controlling Devices on the USB Host Interface." ft900="yes" ft930="no" >
 		<include>hw/include</include>
 		<file dest="hw/include/ft900_usbh.h" src="include/ft900_usbh.h" />
+		<file dest="hw/include/ft900_usbhx.h" src="include/ft900_usbhx.h" />
 		<file dest="hw/src/usbh.c" src="src/usbh.c" />
+		<file dest="hw/src/usbhx.c" src="src/usbhx.c" />
 		<file dest="hw/include/private/ft900_usbh_internal.h" src="include/private/ft900_usbh_internal.h" />
 	</library>
     <library name="Watchdog Driver" desc="System Watchdog Driver." ft900="yes" ft930="yes" >
