@@ -6,19 +6,20 @@ BUILD?=debug
 # On command line call "make TARGET=ft93x" to change.
 TARGET?=ft90x
 
-# All include directories required (you may change this).
-INCDIRS+= .
-INCDIRS+= hardware/include
-INCDIRS+= usb/include
-INCDIRS+= drivers
+# All include directories required (you may change these).
+# The add function formats the directory path to help make cope with spaces.
+INCDIRS+= $(call add,.)
+INCDIRS+= $(call add,hardware/include)
+INCDIRS+= $(call add,usb/include)
+INCDIRS+= $(call add,drivers)
 
-# All source directories required (you may change this).
-# NO files with spaces are allowed in any of these directories.
-SRCDIRS+= .
-SRCDIRS+= src
-SRCDIRS+= usb/src
-SRCDIRS+= hw/src
-SRCDIRS+= drivers
+# All source directories required (you may change these).
+# The add function formats the directory path to help make cope with spaces.
+SRCDIRS+=$(call add,.)
+SRCDIRS+=$(call add,usb/src)
+SRCDIRS+=$(call add,hw/src)
+SRCDIRS+=$(call add,src)
+SRCDIRS+=$(call add,drivers)
 
 # Output directories (you may override these).
 ifeq ($(BUILD),release)
@@ -35,17 +36,26 @@ else
 	endif
 endif
 
+# Nothing to change below this point...
+
+# Protect spaces from make.
+add=$(subst $(empty) ,?,$1)
+
 # Project name (this forms part of the filename for the output files).
 # It is formed from the name of the current directory. This can be overridden.
 PROJECT:= $(subst ?,\ ,$(basename $(notdir $(addsuffix .c,$(subst $(empty) ,?,$(CURDIR))))))
 
-# Nothing to change below this point...
-
-# Find all *.c files in the top directory, then all the other directories that contian your sources.
-SRCS:= $(foreach SRCDIR,$(SRCDIRS),$(wildcard $(SRCDIR)/*.c))
+# Find all *.c files in all the directories that contian your sources.
+# On Windows 'ls' and 'sed' are installed by the FT9xx Toolchain.
+# The '?' is substituted to help make cope with spaces in files.
+SRCS:=$(foreach SRCDIR,$(SRCDIRS),$(shell ls -b "$(subst ?, ,$(SRCDIR))/"*.c 2>/dev/null | sed 's/ /\?/g'))
 
 # Make a list of object files from the list of source files.
 OBJS:= $(patsubst %.c, $(OUTDIR)/%.o, $(SRCS))
+
+# Remove the '?' which helped make cope with spaces in files.
+SRCS:= $(subst ?, ,$(SRCS))
+OBJS:= $(subst ?, ,$(OBJS))
 
 # FT9xx specific files.
 CC=ft32-elf-gcc
@@ -62,7 +72,7 @@ else
 	CFLAGS+=-D__FT900__ 
 endif
 # relative paths to include files that are needed. The search order is important.
-CFLAGS+=$(patsubst %, -I "%", $(INCDIRS))
+CFLAGS+=$(subst ?, ,$(patsubst %, -I "%", $(INCDIRS)))
 # Compilation output options
 ifeq ($(BUILD),release)
 	CFLAGS+=-Os
@@ -91,8 +101,6 @@ endif
 FINAL:=$(OUTDIR)/$(PROJECT)
 
 all: $(FINAL).elf
-	echo $(FINAL)
-	echo $(PROJECT)
 	@echo Invoking: FT9xx Flash File Generator
 	$(OBJCOPY) --output-target binary "$<" "$(patsubst %.elf,%.bin,$<)"
 	@echo Invoking: FT9xx Display Image Size
@@ -115,3 +123,10 @@ $(OUTDIR)/%.o: %.c
 
 clean:
 	$(RM) $(OUTDIR)/*
+
+info: 
+	# Project: $(PROJECT)
+	# Final target: $(FINAL)
+	# Source dirs: $(SRCDIRS)
+	# Sources: $(SRCS)
+	# Objects: $(OBJS)
