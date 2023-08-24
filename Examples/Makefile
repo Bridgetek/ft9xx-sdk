@@ -1,19 +1,15 @@
-# Note: In user configurable variables: No quotes, escape spaces (e.g. my\ directory).
-
-# Build type, can be debug or release.
+# Build type (case sensitive), can be debug (default) or release.
 # On command line call "make BUILD=release" to change.
 BUILD?=debug
 
-# Target device type, can be ft90x or ft93x.
+# Target device type (case sensitive), can be ft90x (default) or ft93x.
 # On command line call "make TARGET=ft93x" to change.
 TARGET?=ft90x
 
-# Project name (this forms part of the filename for the output files).
-PROJECT=firmware\ test
-
 # All include directories required (you may change this).
-INCDIRS+= hardware\include
-INCDIRS+= usb\include
+INCDIRS+= .
+INCDIRS+= hardware/include
+INCDIRS+= usb/include
 INCDIRS+= drivers
 
 # All source directories required (you may change this).
@@ -24,7 +20,7 @@ SRCDIRS+= usb/src
 SRCDIRS+= hw/src
 SRCDIRS+= drivers
 
-# Output directory (you may change this).
+# Output directories (you may override these).
 ifeq ($(BUILD),release)
 	ifeq ($(TARGET),ft93x)
 		OUTDIR=FT93x_Release
@@ -39,13 +35,11 @@ else
 	endif
 endif
 
-# Nothing to change below this point...
+# Project name (this forms part of the filename for the output files).
+# It is formed from the name of the current directory. This can be overridden.
+PROJECT:= $(subst ?,\ ,$(basename $(notdir $(addsuffix .c,$(subst $(empty) ,?,$(CURDIR))))))
 
-# Make a version of dir and notdir that is safe with spaces (since it is passed a list).
-s? = $(subst $(empty) ,?,$1)
-?s = $(subst ?, ,$1)
-notdirx = $(call ?s,$(notdir $(call s?,$1)))
-dirx = $(call ?s,$(dir $(call s?,$1)))
+# Nothing to change below this point...
 
 # Find all *.c files in the top directory, then all the other directories that contian your sources.
 SRCS:= $(foreach SRCDIR,$(SRCDIRS),$(wildcard $(SRCDIR)/*.c))
@@ -88,13 +82,19 @@ else
 	LDLIB=ft900
 endif
 # Toolchain default library directory incase it does not find anything in the other areas.
-TOOLCHAINLIB= -L"$(FT9XX_TOOLCHAIN)\hardware\lib\Debug"
+ifeq ($(BUILD),release)
+	TOOLCHAINLIB= -L"$(FT9XX_TOOLCHAIN)/hardware/lib/Release"
+else
+	TOOLCHAINLIB= -L"$(FT9XX_TOOLCHAIN)/hardware/lib/Debug"
+endif
 
-FINAL=$(OUTDIR)/$(PROJECT)
+FINAL:=$(OUTDIR)/$(PROJECT)
 
 all: $(FINAL).elf
+	echo $(FINAL)
+	echo $(PROJECT)
 	@echo Invoking: FT9xx Flash File Generator
-	$(OBJCOPY) --output-target binary "$<"  $(FINAL).bin
+	$(OBJCOPY) --output-target binary "$<" "$(patsubst %.elf,%.bin,$<)"
 	@echo Invoking: FT9xx Display Image Size
 	$(SIZE) --format=berkeley -x "$<"
 	@echo Finished building: SIZE
@@ -107,7 +107,7 @@ $(FINAL).elf: $(OBJS)
 
 $(OUTDIR)/%.o: %.c
 # Create binary directory.
-	@-$(MKDIR) -p "$(call dirx,$@)"
+	@-$(MKDIR) -p "$(subst ?, ,$(dir $(subst $(empty) ,?,$@)))"
 # Build file in the binary directory.
 	@echo Building file: $<
 	$(CC) $(CFLAGS) $(TOOLCHAININC) -c "$<" -o "$@"
@@ -115,5 +115,3 @@ $(OUTDIR)/%.o: %.c
 
 clean:
 	$(RM) $(OUTDIR)/*
-
-
