@@ -47,8 +47,8 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 
 #if defined(__FT900__)
 
@@ -75,7 +75,6 @@
 void setup(void);
 void loop(void);
 void spis_dev_ISR(void);
-void myputc(void* p, char c);
 
 #define APP_BUFFER_SIZE (8)
 #define APP_BUFFER_LOOP_CHUNK	(4)	//Check for min of this size and loopback
@@ -126,9 +125,6 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
-
     /* Enable the SPI Slave device... */
     sys_enable(sys_device_spi_slave0);
 
@@ -158,7 +154,7 @@ void setup(void)
     /* Load the first 8 bytes into the SPIS0 buffer... */
 	for(i=0;i<APP_BUFFER_SIZE;i++)
 	{
-		SPIS0->SPI_DATA = spis_dev_buffer[i];
+		SPIS0->DATA = spis_dev_buffer[i];
 	}
 
 	/* Example use for interrupts - either interrupt mechanism shall be used or polling mechanism */
@@ -178,8 +174,8 @@ void loop(void)
 	volatile uint8_t rdwrbyte = 0;
 
 	/* Check for the data present in the receive fifo */
-	rcvfifolen = SPIS0->SPI_RCV_FIFO_COUNT;
-	rcvfifolen = SPIS0->SPI_RCV_FIFO_COUNT;
+	rcvfifolen = SPIS0->RCV_FIFO_COUNT;
+	rcvfifolen = SPIS0->RCV_FIFO_COUNT;
 
 	/* Check for the number of bytes received */
 	if(rcvfifolen >= APP_BUFFER_SIZE )
@@ -189,8 +185,8 @@ void loop(void)
 		/* Read followed by write */
 		for(i=0;i<bufflen;i++)
 		{
-			rdwrbyte  = SPIS0->SPI_DATA;
-			SPIS0->SPI_DATA = rdwrbyte;
+			rdwrbyte  = SPIS0->DATA;
+			SPIS0->DATA = rdwrbyte;
 		}
 	}
 }
@@ -211,7 +207,7 @@ void spis_dev_ISR(void)
     if (spi_is_interrupted(SPIS0, spi_interrupt_transmit_empty))
     {
         /* Read in the arrived data */
-        spis_dev_buffer[spis_dev_buffer_ptr] = SPIS0->SPI_DATA;
+        spis_dev_buffer[spis_dev_buffer_ptr] = SPIS0->DATA;
 
         /* Increment the buffer pointer */
         spis_dev_buffer_ptr++;
@@ -221,11 +217,6 @@ void spis_dev_ISR(void)
         }
 
         /* Set up the new data to send */
-        SPIS0->SPI_DATA = spis_dev_buffer[spis_dev_buffer_ptr];
+        SPIS0->DATA = spis_dev_buffer[spis_dev_buffer_ptr];
     }
-}
-
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
 }

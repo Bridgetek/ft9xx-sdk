@@ -46,8 +46,8 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 
 #if defined(__FT900__)
 #define GPIO_UART0_TX 	48
@@ -111,9 +111,6 @@ void setup(void)
         "Display a message every two seconds via an RTC interrupt.\r\n"
         "--------------------------------------------------------------------- \r\n"
         );
-
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
 
     /* Enable the RTC... */
     sys_enable(sys_device_timer_wdt);
@@ -206,7 +203,7 @@ void loop(void)
      * every 500mS and executes the ISR if the flag is set. Similarly upon wake-up from sleep, the flag must be
      * checked and ISR polled as the alarm interrupt will have been missed.
      */
-    //tfp_printf("%ld, %ld\r", RTCL->RTC_CMR,RTCL->RTC_CCVR);
+    //printf("%ld, %ld\r", RTCL->RTC_CMR,RTCL->RTC_CCVR);
 	rtcISR();
     delayms(500);
 #endif
@@ -248,7 +245,7 @@ void rtcISR(void)
             tim.tm_sec = (tim.tm_sec + 2) % 60;
             rtc_set_alarm(1,  &tim, rtc_alarm_match_sec);
         }
-        tfp_printf("%ld seconds elapsed\r", seconds);
+        printf("%ld seconds elapsed\r", seconds);
 #if SLEEP_MODE
         seconds_to_sleep = seconds;
 #endif
@@ -301,8 +298,3 @@ void power_management_ISR(void)
 }
 
 #endif	// SLEEP_MODE
-
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
-}

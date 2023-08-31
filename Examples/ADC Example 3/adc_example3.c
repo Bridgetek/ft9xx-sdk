@@ -46,8 +46,8 @@
  */
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 #include <string.h>
 void setup(void);
 void myputc(void* p, char c);
@@ -144,10 +144,8 @@ void setup(void)
               uart_parity_none,         /* Parity */
               uart_stop_bits_1);        /* No. Stop Bits */
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
     /* Print out a welcome message... */
-    tfp_printf(
+    printf(
         "\x1B[2J" /* ANSI/VT100 - Clear the Screen */
         "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
         "Copyright (C) Bridgetek Pte Ltd \r\n"
@@ -201,11 +199,6 @@ void setup(void)
 	adc_start_channel(g_nChannel);
 }
 
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
-}
-
 void adcISR()
 {
     if (adc_is_interrupted())
@@ -239,11 +232,11 @@ void loop(void)
 		memcpy(&g_u16AdcChannels[g_nChannel-1][0], &g_u16AdcBuffer[SAMPLES_TO_IGNORE], ADC_APP_DUMP_SAMPLE_COUNT*sizeof(uint16_t));
 		
 		/* Output the respective ADC Channel samples */
-		tfp_printf("ADC Channel %d\n", g_nChannel);
+		printf("ADC Channel %d\n", g_nChannel);
 		for (int i=0; i<ADC_APP_DUMP_SAMPLE_COUNT; i++) {
-			tfp_printf("%04d ", (uint16_t)g_u16AdcChannels[g_nChannel-1][i]);
+			printf("%04d ", (uint16_t)g_u16AdcChannels[g_nChannel-1][i]);
 		}
-		tfp_printf("\n");
+		printf("\n");
 
 		/* Re-initialize the global ADC buffer index pointer */
 		buffer_init();

@@ -51,6 +51,7 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -63,8 +64,7 @@
 #define DEBUG
 
 #ifdef DEBUG
-#include "tinyprintf.h"
-#define dbg(s,...)	tfp_printf ((s), ##__VA_ARGS__)
+#define dbg(s,...)	printf ((s), ##__VA_ARGS__)
 #else
 #define dbg(s,...)
 #endif
@@ -121,6 +121,7 @@ __attribute__ ((aligned (4))) TD2XX_DeviceConfiguration D2XXTEST_UserD2xxConfig 
 
 /* LOCAL VARIABLES *****************************************************************/
 #ifdef DEBUG
+#ifdef DEBUG_EVENT
 static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] = {	"SUSPEND",    	/**< SUSPEND EVENT from USB Host */
 																	"RESUME",	 	/**< RESUME EVENT from USB Host */
 																	"BUS_RESET",	 		/**< USB Bus Reset */
@@ -130,7 +131,8 @@ static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] = {	"SUSPEND",    	/**< SU
 																	"TESTMODE",	 	/**< D2XX enters Test Mode. Exit is via power cycle*/
 																	"INTF_RESET"	/**< Interface RESET Vendor Command from D2XX Application */
 																};
-#endif
+#endif // DEBUG_EVENT
+#endif // DEBUG
 uint8_t D2XXTEST__DfuDetach = 0;
 uint8_t D2XXTEST__Ready = 0;
 volatile uint8_t SetRemoteWakeup = 0;
@@ -184,7 +186,6 @@ int no_of_uarts = MAX_UARTS;
 
 void setup(void);
 void debug_uart_init(void);
-void tfp_putc(void* p, char c);
 void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* param2);
 void power_management_ISR(void);
 #ifdef GPIO_REMOTE_WAKEUP
@@ -285,7 +286,7 @@ int main(void)
 #ifndef BDFU
 			STARTUP_DFU(0);
 #else
-			tfp_printf("Switching to DFU");
+			printf("Switching to DFU");
 			if (USBD_DFU_is_runtime()) /* to ward off linkage issue */
 			{
 				GO_BDFU(0x0403, 0x0FDE, 0x2300); // use default VID, PID and REL
@@ -376,7 +377,8 @@ int main(void)
 			dbg("Exit sleep:%02X... \r\n", wkupSource);
 			if (SetRemoteWakeup)
 			{
-				D2XX_IOCTL(0, D2XX_IOCTL_SYS_REMOTE_WAKEUP, &SetRemoteWakeup, NULL);
+				uint8_t wake = SetRemoteWakeup;
+				D2XX_IOCTL(0, D2XX_IOCTL_SYS_REMOTE_WAKEUP, &wake, NULL);
 				SetRemoteWakeup = 0;
 				dbg("Sending remote wakeup to host.. \r\n");
 			}
@@ -644,21 +646,19 @@ void setup(void)
 	interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
 #endif
 
+	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
+	retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
+
+	if (retVal != 0)
+	{
+		dbg("Error with configuration file\r\n");
+		while(1) {};
+	}
 #if defined(__FT930__)
-	retVal =
-			D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
-
-
     /*slave sub-system control register setup*/
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_D2XX_MODE);    // turn-on D2XX_mode
     *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_SLV_RESET); // de-assert bit to allow slave CPU to start
-#else
-
-	retVal =
-
-			D2XX_Init(__pD2XXDefaultConfiguration, d2xx_callback, NULL);
-	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig.ConfigDesc, (uint32_t)&__pD2XXDefaultConfiguration->ConfigDesc, sizeof(TConfigDescriptors));
 #endif
 
 	sys_enable(sys_device_timer_wdt);
@@ -683,11 +683,6 @@ void setup(void)
 		uart_init(i);
 	}
 
-#ifdef DEBUG
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, tfp_putc);
-#endif
-
     /* Print out a welcome message... */
 	dbg("(C) Copyright, Bridgetek Pte. Ltd. \r\n"
 			"--------------------------------------------------------------------- \r\n"
@@ -699,16 +694,6 @@ void setup(void)
 	);
 	dbg("D2XX_Init() called, Result: %d Interfaces: %d\r\n", retVal, D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces);
 
-}
-
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-	uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
 }
 
 /** @name d2xx_callback
@@ -727,8 +712,14 @@ void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* para
 	{
 		param = (*(uint8_t *)param1);
 	}
-	//dbg("~%d",eventID);
-	//dbg("%s\n", D2XXTest_EventStrings[eventID]);
+#ifdef DEBUG_EVENT
+	dbg("~%d ",eventID);
+	if (eventID <= D2XX_EVT_INTF_RESET)
+	{
+		dbg("%s", D2XXTest_EventStrings[eventID]);
+	}
+	dbg("\n");
+#endif // DEBUG_EVENT
 	switch(eventID)
 	{
 	case D2XX_EVT_SUSPEND:
@@ -737,7 +728,9 @@ void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* para
 			D2XXTEST__Suspend = 1;
 			D2XXTEST__Sleep = 0;
 			RemoteWakeupEnable = param;
-			//dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
+#ifdef DEBUG_EVENT
+			dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
+#endif // DEBUG_EVENT
 		}
 		break;
 	case D2XX_EVT_RESUME:
@@ -830,13 +823,8 @@ void debug_uart_init(void)
 			"\x1B[2J" /* ANSI/VT100 - Clear the Screen */
 			"\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
 	);
-
-#ifdef DEBUG
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, tfp_putc);
-#endif
-
 }
+
 #if 0
 /* function to calculate the expected XOR checksum for the d2xx configuration */
 uint16_t xorChecksum(const char str[], uint16_t length) {

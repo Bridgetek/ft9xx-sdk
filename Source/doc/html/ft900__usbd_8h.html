@@ -26,7 +26,7 @@ MathJax.Hub.Config({
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="brtlogo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">libft900<span id="projectnumber">&#160;2.6.0</span>
+   <div id="projectname">libft900<span id="projectnumber">&#160;2.7.0</span>
    </div>
    <div id="projectbrief">A hardware abstraction library for the FT9xx</div>
   </td>
@@ -1388,7 +1388,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>USB process (Deprecated) </p>
-<p >To be continuously called by the user application or USB device thread. Checks for control endpoint transfer activity and invokes relevant callback. Manages suspend and resume states and power management. </p><dl class="section return"><dt>Returns</dt><dd>Non-zero if USB transaction has been processed. </dd></dl>
+<p >Previously continuously called by the user application or USB device thread. Checked for control endpoint transfer activity and invoked relevant callback. Managed suspend and resume states and power management. NOTE: This is not required now as the actions are performed during the interrupt handler. </p><dl class="section return"><dt>Returns</dt><dd>Non-zero if USB transaction has been processed. </dd></dl>
 
 </div>
 </div>
@@ -1812,7 +1812,7 @@ Functions</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Jun 7 2022 14:07:40 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
+Generated on Thu Apr 6 2023 14:42:03 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
 </small></address>
 </body>
 </html>

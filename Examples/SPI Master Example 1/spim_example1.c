@@ -47,8 +47,8 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 
 #if defined(__FT900__)
 
@@ -118,9 +118,6 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0,myputc);
-
     /* Enable the SPI Master device... */
     sys_enable(sys_device_spi_master);
 
@@ -165,17 +162,12 @@ void loop(void)
 		spi_close(SPIM, 0);
 
 		/* Print the data sent from master and received from Slave */
-		tfp_printf(" \r\n Data sent and received");
+		printf(" \r\n Data sent and received");
 		for(i=0;i<DATASIZETESTING;i++)
 		{
-			tfp_printf(" %x %x ",test_data_transfer[i],test_data_receive[i]);
+			printf(" %x %x ",test_data_transfer[i],test_data_receive[i]);
 		}
 		/* Delay of 30ms for print statements */
 		usleep(30000);
 	}
-}
-
-void myputc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
 }

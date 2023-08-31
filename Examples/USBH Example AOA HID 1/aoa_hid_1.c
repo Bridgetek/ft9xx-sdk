@@ -48,6 +48,7 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -67,7 +68,6 @@
 
 /* UART support for printf output. */
 #include <ft900_uart_simple.h>
-#include "../tinyprintf/tinyprintf.h"
 
 /* For MikroC const qualifier will place variables in Flash
  * not just make them constant.
@@ -347,16 +347,6 @@ static volatile uint16_t uart0BufferIn_avail = RINGBUFFER_SIZE;
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-	uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}
-
 /** @name my_getc
  *  @details Machine dependent getc function for.
  *  @param p Parameters (machine dependent)
@@ -472,9 +462,9 @@ int8_t keyboard(USBH_AOA_context *ctx)
 #ifdef USBH_AOA_UART_KEYS
 					// For debugging display character sent.
 					if (isgraph(msg))// || isspace(msg))
-						tfp_printf("%c", msg);
+						printf("%c", msg);
 					else
-						tfp_printf("\\x%02x", msg);
+						printf("\\x%02x", msg);
 #endif // USBH_AOA_UART_KEYS
 
 					// 0x1b is an escape character.
@@ -532,7 +522,7 @@ int8_t keyboard(USBH_AOA_context *ctx)
 
 						status = USBH_AOA_send_hid_data(ctx, 0x0403, 8, (uint8_t *) &report_buffer);
 #ifdef USBH_AOA_KEYSCAN_CODES
-						tfp_printf("<%d/%x", keyscan, report_buffer.arrayMap);
+						printf("<%d/%x", keyscan, report_buffer.arrayMap);
 #endif // USBH_AOA_KEYSCAN_CODES
 
 						escape = 0;
@@ -556,7 +546,7 @@ int8_t keyboard(USBH_AOA_context *ctx)
 
 						status = USBH_AOA_send_hid_data(ctx, 0x0403, 8, (uint8_t *) &report_buffer);
 #ifdef USBH_AOA_KEYSCAN_CODES
-						tfp_printf("<ESC");
+						printf("<ESC");
 #endif // USBH_AOA_KEYSCAN_CODES
 					}
 					escape = 0;
@@ -574,7 +564,7 @@ int8_t keyboard(USBH_AOA_context *ctx)
 
 				status = USBH_AOA_send_hid_data(ctx, 0x0403, 8, (uint8_t *) &report_buffer);
 #ifdef USBH_AOA_KEYSCAN_CODES
-				tfp_printf(">");
+				printf(">");
 #endif // USBH_AOA_KEYSCAN_CODES
 				break;
 
@@ -592,7 +582,7 @@ int8_t keyboard(USBH_AOA_context *ctx)
 
 	} while (status == USBH_OK);
 
-	tfp_printf("Done %d\r\n", status);
+	printf("Done %d\r\n", status);
 
 	// Disconnected from host.
 	return status;
@@ -615,21 +605,21 @@ void aoa_testing(USBH_AOA_context *ctx, USBH_device_handle hAOAdev)
     // Display some information on the Android accessory device.
 	if (USBH_device_get_vid_pid(hAOAdev, &usbVid, &usbPid) == USBH_OK)
 	{
-		tfp_printf("VID: %04x PID: %04x\r\n", usbVid, usbPid);
+		printf("VID: %04x PID: %04x\r\n", usbVid, usbPid);
 	}
 	if (USBH_device_get_info(hAOAdev, &devInfo) == USBH_OK)
 	{
-		tfp_printf("Speed: %d %s \r\n", devInfo.speed, speed[devInfo.speed]);
-	    tfp_printf("Address: %d \r\n", devInfo.addr);
+		printf("Speed: %d %s \r\n", devInfo.speed, speed[devInfo.speed]);
+	    printf("Address: %d \r\n", devInfo.addr);
 	}
 
 	// Display accessory interfaces supported.
 	i = USBH_AOA_has_accessory(ctx);
-    tfp_printf("Accessory: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
+    printf("Accessory: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
 	i = USBH_AOA_has_audio(ctx);
-    tfp_printf("Audio: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
+    printf("Audio: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
 	i = USBH_AOA_has_adb(ctx);
-    tfp_printf("Adb: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
+    printf("Adb: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
 
     // HID support is only available on protocol 2 and above.
     if (USBH_AOA_get_protocol(ctx, &protocol) == USBH_AOA_OK)
@@ -647,7 +637,7 @@ void aoa_testing(USBH_AOA_context *ctx, USBH_device_handle hAOAdev)
 						(uint8_t *)hid_report_descriptor_keyboard);
 				if (status == USBH_AOA_OK)
 				{
-				    tfp_printf("Keyboard:\r\n");
+				    printf("Keyboard:\r\n");
 					keyboard(ctx);
 				}
 			}
@@ -694,7 +684,7 @@ int8_t hub_scan_for_aoa(USBH_device_handle hDev, int level, int retry)
 
     (void)audio_on; (void)audio_off;
 
-	tfp_printf("!parent %d \n!port %ld \n",
+	printf("!parent %d \n!port %ld \n",
 			ctx.parentPort,
 			ctx.hDevParent);
     // Initialise the device. Try to change it into an accessory after
@@ -702,13 +692,13 @@ int8_t hub_scan_for_aoa(USBH_device_handle hDev, int level, int retry)
     // accessory.
     if (!retry)
     {
-        tfp_printf("Init AOA\r\n");
+        printf("Init AOA\r\n");
 
     	status = USBH_AOA_init(&ctx, hDev, &dsc_no_accessory, audio_off);
     }
     else
     {
-        tfp_printf("Init AOA (alternate descriptors)\r\n");
+        printf("Init AOA (alternate descriptors)\r\n");
 
     	status = USBH_AOA_init(&ctx, hDev, &dsc_alternate, audio_off);
     }
@@ -723,16 +713,16 @@ int8_t hub_scan_for_aoa(USBH_device_handle hDev, int level, int retry)
 
     	// A device in Android accessory mode is connected. We can now
     	// attach to the device before calling the testing function.
-        tfp_printf("Attaching AOA\r\n");
+        printf("Attaching AOA\r\n");
         if (USBH_AOA_attach(&ctx) == USBH_AOA_OK)
         {
         	// AOA testing function(s).
-            tfp_printf("Testing AOA\r\n");
+            printf("Testing AOA\r\n");
         	aoa_testing(&ctx, hDev);
         }
         else
         {
-            tfp_printf("Could not attach AOA\r\n");
+            printf("Could not attach AOA\r\n");
         }
     }
 
@@ -756,7 +746,7 @@ int8_t usbh_testing(void)
 		USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
 		if (connect == USBH_STATE_NOTCONNECTED)
 		{
-			tfp_printf("\r\nPlease plug in a USB Device\r\n");
+			printf("\r\nPlease plug in a USB Device\r\n");
 
 	    	// Wait for a device (any device) to connect to the USB Host.
 			do
@@ -767,7 +757,7 @@ int8_t usbh_testing(void)
 			} while (connect == USBH_STATE_NOTCONNECTED);
 		}
 		// We now have a device connected - it may not be enumerated though.
-		tfp_printf("\r\nUSB Device Detected\r\n");
+		printf("\r\nUSB Device Detected\r\n");
 
 		do
 		{
@@ -783,11 +773,11 @@ int8_t usbh_testing(void)
 			// Report this but the accessory device may still work.
 			if (connect == USBH_STATE_ENUMERATED)
 			{
-				tfp_printf("USB Devices Enumerated\r\n");
+				printf("USB Devices Enumerated\r\n");
 			}
 			else
 			{
-				tfp_printf("USB Devices Partially Enumerated\r\n");
+				printf("USB Devices Partially Enumerated\r\n");
 			}
 
 			// Get the first device (device on root hub)
@@ -795,7 +785,7 @@ int8_t usbh_testing(void)
 			if (status != USBH_OK)
 			{
 				// Report the error code.
-				tfp_printf("Device list not found. Error %d\r\n", status);
+				printf("Device list not found. Error %d\r\n", status);
 			}
 			else
 			{
@@ -812,7 +802,7 @@ int8_t usbh_testing(void)
 		// The testing has finished. The device may have been removed or the test
 		// exited normally. Ask the user to remove the device and wait for it to
 		// be removed.
-		tfp_printf("\r\nPlease remove the USB Device\r\n");
+		printf("\r\nPlease remove the USB Device\r\n");
 		// Detect usb device disconnect
 		do
 		{
@@ -856,10 +846,7 @@ int main(void)
         "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
     	);
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0, tfp_putc);
-
-	sys_enable(sys_device_timer_wdt);
+    sys_enable(sys_device_timer_wdt);
 
     interrupt_attach(interrupt_timers, (int8_t)interrupt_timers, ISR_timer);
     interrupt_enable_globally();
@@ -870,7 +857,7 @@ int main(void)
     timer_enable_interrupt(timer_select_a);
     timer_start(timer_select_a);
 
-    tfp_printf("Copyright (C) Bridgetek Pte Ltd \r\n"
+    printf("Copyright (C) Bridgetek Pte Ltd \r\n"
         "--------------------------------------------------------------------- \r\n"
         "Welcome to USBH AOA HID Tester Example 1... \r\n"
         "\r\n"

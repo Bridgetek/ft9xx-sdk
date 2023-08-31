@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<libraries
+	name = "Third Party Libraries for FT9xx" desc = "v2.7.0">
+	<library>
+		<name>FatFs</name>
+		<desc>Embedded FAT file system library. Version R0.15.</desc>
+		<include>lib/FatFs</include>
+		<dir dest="lib/FatFs" src="FatFs" />
+	</library>
+	<library>
+		<name>FreeRTOS</name>
+		<desc>Embedded Real Time Operating System. Version v9.0.0.</desc>
+		<dir dest="lib/FreeRTOS" src="FreeRTOS" />
+		<include>lib/FreeRTOS/Source/include</include>
+		<include>lib/FreeRTOS/Source/portable/GCC/FT32</include>
+		<include>lib/FreeRTOS/Demo/FT32_GCC</include>
+	</library>
+	<library>
+		<name>tinyprintf</name>
+		<desc>Very small footprint library providing printf, sprintf etc.</desc>
+		<include>lib/tinyprintf</include>
+		<file dest="lib/tinyprintf/tinyprintf.c" src="tinyprintf/tinyprintf.c" />
+		<file dest="lib/tinyprintf/tinyprintf.h" src="tinyprintf/tinyprintf.h" />
+		<file dest="lib/tinyprintf/assert.h" src="tinyprintf/assert.h" />
+	</library>
+	<library>
+		<name>lwIP</name>
+		<desc>Lightweight Internet Protocol. Version 2.1.2.</desc>
+		<dir dest="lib/lwIP" src="lwIP" />
+		<include>lib/lwIP/src/arch</include>
+		<include>lib/lwIP/src/include</include>
+		<exclude>lib/lwIP/src/apps</exclude>
+		<exclude>lib/lwIP/src/core/ipv6</exclude>
+	</library>
+	<library>
+		<name>mbedTLS</name>
+		<desc>Embedded secure socket implementation. Version 2.11.0.</desc>
+		<dir dest="lib/mbedTLS" src="mbedTLS" />
+		<include>mbedTLS/include</include>
+		<include>mbedTLS/configs</include>
+	</library>
+ </libraries>
+ 

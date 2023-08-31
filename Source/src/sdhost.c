@@ -47,8 +47,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "ft900_sdhost.h"
-#include "ft900_delay.h"
+
 #include "ft900.h"
 
 /** @brief Enable to debug. Note that Debugging relies on tinyprintf */
@@ -58,252 +57,6 @@
 #endif /* SD_HOST_DEBUG */
 
 /** MACROS **************************************************************************/
-
-/** @brief ft900 gpio registers */
-#if defined(__FT930__)
-/** @brief function 2 configuration */
-#define SYS_REGPAD00             ((volatile uint8_t  *)0x1001C) /*SD CLK*/
-#define SYS_REGPAD01             ((volatile uint8_t  *)0x1001D) /*SD CMD*/
-#define SYS_REGPAD02             ((volatile uint8_t  *)0x1001E) /*SD CD*/
-#define SYS_REGPAD03             ((volatile uint8_t  *)0x1001F) /*SD DAT0*/
-#define SYS_REGPAD04             ((volatile uint8_t  *)0x10020) /*SD DAT1*/
-#define SYS_REGPAD05             ((volatile uint8_t  *)0x10021) /*SD DAT2*/
-#define SYS_REGPAD06             ((volatile uint8_t  *)0x10022) /*SD DAT3*/
-#define SYS_REGPAD07             ((volatile uint8_t  *)0x10023) /*SD WP*/
-#else
-/** @brief function 1 configuration */
-#define SYS_REGPAD19             ((volatile uint8_t  *)0x1002f) /*SD CLK*/
-#define SYS_REGPAD20             ((volatile uint8_t  *)0x10030) /*SD CMD*/
-#define SYS_REGPAD21             ((volatile uint8_t  *)0x10031) /*SD DAT3*/
-#define SYS_REGPAD22             ((volatile uint8_t  *)0x10032) /*SD DAT2*/
-#define SYS_REGPAD23             ((volatile uint8_t  *)0x10033) /*SD DAT1*/
-#define SYS_REGPAD24             ((volatile uint8_t  *)0x10034) /*SD DAT0*/
-#define SYS_REGPAD25             ((volatile uint8_t  *)0x10035) /*SD CD*/
-#define SYS_REGPAD26             ((volatile uint8_t  *)0x10036) /*SD WP*/
-#endif
-
-#define SYS_REGCLKCFG            ((volatile uint32_t *)0x10008)
-
-/** @brief SD host registers.
- *
- *  These constants are used to identify the individual sdhost registers, whatever their size.
- *  These are used to symbolically address registers via the functions read_sdhost_reg()
- *  and write_sdhost_reg().
- *
- *  This is all necessary due to the fact we can only access the registers with 32bit values.
- */
-/** @brief Auto CMD23 Argument 2 Register */
-#define SDH_AUTO_CMD23_ARG2                  1
-/** @brief Block Size Register */
-#define SDH_BLK_SIZE                         2
-/** @brief Block Count Register */
-#define SDH_BLK_COUNT                        3
-/** @brief Argument 1 Register */
-#define SDH_ARG_1                            4
-/** @brief Transfer Mode Register */
-#define SDH_TNSFER_MODE                      5
-/** @brief Command Register */
-#define SDH_CMD                              6
-/** @brief Response Registers 0 */
-#define SDH_RESPONSE0                        7
-/** @brief Response Registers 1 */
-#define SDH_RESPONSE1                        8
-/** @brief Response Registers 2 */
-#define SDH_RESPONSE2                        9
-/** @brief Response Registers 3 */
-#define SDH_RESPONSE3                       10
-/** @brief Buffer Data Port Register */
-#define SDH_BUF_DATA                        11
-/** @brief Present State Register */
-#define SDH_PRESENT_STATE                   12
-/** @brief Host Control 1 Register */
-#define SDH_HST_CNTL_1                      13
-/** @brief Power Control Register */
-#define SDH_PWR_CNTL                        14
-/** @brief Block Gap Control Register */
-#define SDH_BLK_GAP_CNTL                    15
-/** @brief Clock Control Register */
-#define SDH_CLK_CNTL                        16
-/** @brief Timeout Control Register */
-#define SDH_TIMEOUT_CNTL                    17
-/** @brief Software Reset Register */
-#define SDH_SW_RST                          18
-/** @brief Normal Interrupt Status Register */
-#define SDH_NRML_INT_STATUS                 19
-/** @brief Error Interrupt Status Register */
-#define SDH_ERR_INT_STATUS                  20
-/** @brief Normal Interrupt Status Enable Register */
-#define SDH_NRML_INT_STATUS_ENABLE          21
-/** @brief Error Interrupt Status Enable Register */
-#define SDH_ERR_INT_STATUS_ENABLE           22
-/** @brief Normal Interrupt Signal Enable Register */
-#define SDH_NRML_INT_SGNL_ENABLE            23
-/** @brief Error Interrupt Signal Enable Register */
-#define SDH_ERR_INT_SGNL_ENABLE             24
-/** @brief Auto CMD12 Error Status Register */
-#define SDH_AUTO_CMD12_ERR_STATUS           25
-/** @brief Host Control 2 Register */
-#define SDH_HST_CNTL_2                      26
-/** @brief Capabilities Register 1 */
-#define SDH_CAP_1                           27
-/** @brief Capabilities Register 2 */
-#define SDH_CAP_2                           28
-/** @brief Reserved Register 1 */
-#define SDH_RSRV_1                          29
-/** @brief Reserved Register 2 */
-#define SDH_RSRV_2                          30
-/** @brief Force Event Register for Auto CMD12 Error Status */
-#define SDH_FORCE_EVENT_CMD_ERR_STATUS      31
-/** @brief Force Event Register for Error Interrupt Status */
-#define SDH_FORCE_EVENT_ERR_INT_STATUS      32
-/** @brief Reserved Register 3 */
-#define SDH_RSRV_3                          33
-/** @brief Reserved register 4 */
-#define SDH_RSRV_4                          34
-/** @brief Preset Value Register 3 */
-#define SDH_PRST_INIT                       35
-/** @brief Preset Value Register 3 */
-#define SDH_PRST_DFLT_SPD                   36
-/** @brief Preset Value Register 3 */
-#define SDH_PRST_HIGH_SPD                   37
-/** @brief Preset Value Register 3 */
-#define SDH_PRST_SDR12                      38
-/** @brief Vendor-defined Register 0 */
-#define SDH_VNDR_0                          39
-/** @brief Vendor-defined Register 1 */
-#define SDH_VNDR_1                          40
-/** @brief Vendor-defined Register 5 */
-#define SDH_VNDR_5                          41
-
-/** @brief FT900 32 bit registers
- *  These are used to provide the actual 32bit address of the sdhost registers
- *  These are named arbitrarily
- */
-#if defined(__FT900__)
-/** @brief Block Size Register & Block Count Register */
-#define SDHOST_BS_BC                          ((volatile uint32_t *)0x10404)
-/** @brief Argument 1 Register */
-#define SDHOST_ARG1                           ((volatile uint32_t *)0x10408)
-/** @brief Transfer Mode Register & Command Register */
-#define SDHOST_TM_CMD                         ((volatile uint32_t *)0x1040c)
-/** @brief Response Register 0 */
-#define SDHOST_RESPONSE0                      ((volatile uint32_t *)0x10410)
-/** @brief Response Register 1 */
-#define SDHOST_RESPONSE1                      ((volatile uint32_t *)0x10414)
-/** @brief Response Register 2 */
-#define SDHOST_RESPONSE2                      ((volatile uint32_t *)0x10418)
-/** @brief Response Register 3 */
-#define SDHOST_RESPONSE3                      ((volatile uint32_t *)0x1041c)
-/** @brief Buffer Data Port Register */
-#define SDHOST_BUFDATAPORT                    ((volatile uint32_t *)0x10420)
-/** @brief Present State Register */
-#define SDHOST_PRESENTSTATE                   ((volatile uint32_t *)0x10424)
-/** @brief Host Control 1 Register & Power Control Register & Block Gap Control Register */
-#define SDHOST_HOSTCTRL1_PWR_BLKGAP           ((volatile uint32_t *)0x10428)
-/** @brief Clock Control Register & Timeout Control Register & Software Reset Register */
-#define SDHOST_CLK_TIMEOUT_SWRESET            ((volatile uint32_t *)0x1042c)
-/** @brief Normal Interrupt Status Register & Error Interrupt Status Register */
-#define SDHOST_NORMINTSTATUS_ERRINTSTATUS     ((volatile uint32_t *)0x10430)
-/** @brief Normal Interrupt Status Enable Reg. & Error Interrupt Status Enable Reg. */
-#define SDHOST_NORMINTSTATUSEN_ERRINTSTATUSEN ((volatile uint32_t *)0x10434)
-/** @brief Normal Interrupt Signal Enable Reg. & Error Interrupt Signal Enable Reg. */
-#define SDHOST_NORMINTSIGEN_ERRINTSIGEN       ((volatile uint32_t *)0x10438)
-/** @brief Auto CMD12 Error Status Register & Host Control 2 Register */
-#define SDHOST_AUTOCMD12_HOSTCTRL2            ((volatile uint32_t *)0x1043c)
-/** @brief Capabilities Register 0 */
-#define SDHOST_CAP0                           ((volatile uint32_t *)0x10440)
-/** @brief Capabilities Register 1 */
-#define SDHOST_CAP1                           ((volatile uint32_t *)0x10444)
-/** @brief Maximum Current Capabilities Register 0 */
-#define SDHOST_MAXCURRENTCAP0                 ((volatile uint32_t *)0x10448)
-/** @brief Maximum Current Capabilities Register 1 */
-#define SDHOST_MAXCURRENTCAP1                 ((volatile uint32_t *)0x1044c)
-/** @brief Force Event Reg. for Auto CMD12 Error Status & Force Event Reg. for Error Interrupt Status */
-#define SDHOST_FORCEEVENTCMD12_FORCEEVENTERRINT ((volatile uint32_t *)0x10450)
-/** @brief ADMA Error Status Register */
-#define SDHOST_ADMAERRORSTATUS                ((volatile uint32_t *)0x10454)
-/** @brief ADMA System Address Register */
-#define SDHOST_ADMASYSADDR                    ((volatile uint32_t *)0x10458)
-/** @brief Preset Value Register 0 */
-#define SDHOST_PRESETVALUE0                   ((volatile uint32_t *)0x10460)
-/** @brief Preset Value Register 1 */
-#define SDHOST_PRESETVALUE1                   ((volatile uint32_t *)0x10464)
-/** @brief Preset Value Register 2 */
-#define SDHOST_PRESETVALUE2                   ((volatile uint32_t *)0x10468)
-/** @brief Preset Value Register 3 */
-#define SDHOST_PRESETVALUE3                   ((volatile uint32_t *)0x1046c)
-/** @brief Vendor-defined Register 0 */
-#define SDHOST_VENDOR0                        ((volatile uint32_t *)0x10500)
-/** @brief Vendor-defined Register 1 */
-#define SDHOST_VENDOR1                        ((volatile uint32_t *)0x10504)
-/** @brief Vendor-defined Register 5 */
-#define SDHOST_VENDOR5                        ((volatile uint32_t *)0x10514)
-
-#elif defined(__FT930__)
-/** @brief Block Size Register & Block Count Register */
-#define SDHOST_BS_BC                          ((volatile uint32_t *)0x10604)
-/** @brief Argument 1 Register */
-#define SDHOST_ARG1                           ((volatile uint32_t *)0x10608)
-/** @brief Transfer Mode Register & Command Register */
-#define SDHOST_TM_CMD                         ((volatile uint32_t *)0x1060c)
-/** @brief Response Register 0 */
-#define SDHOST_RESPONSE0                      ((volatile uint32_t *)0x10610)
-/** @brief Response Register 1 */
-#define SDHOST_RESPONSE1                      ((volatile uint32_t *)0x10614)
-/** @brief Response Register 2 */
-#define SDHOST_RESPONSE2                      ((volatile uint32_t *)0x10618)
-/** @brief Response Register 3 */
-#define SDHOST_RESPONSE3                      ((volatile uint32_t *)0x1061c)
-/** @brief Buffer Data Port Register */
-#define SDHOST_BUFDATAPORT                    ((volatile uint32_t *)0x10620)
-/** @brief Present State Register */
-#define SDHOST_PRESENTSTATE                   ((volatile uint32_t *)0x10624)
-/** @brief Host Control 1 Register & Power Control Register & Block Gap Control Register */
-#define SDHOST_HOSTCTRL1_PWR_BLKGAP           ((volatile uint32_t *)0x10628)
-/** @brief Clock Control Register & Timeout Control Register & Software Reset Register */
-#define SDHOST_CLK_TIMEOUT_SWRESET            ((volatile uint32_t *)0x1062c)
-/** @brief Normal Interrupt Status Register & Error Interrupt Status Register */
-#define SDHOST_NORMINTSTATUS_ERRINTSTATUS     ((volatile uint32_t *)0x10630)
-/** @brief Normal Interrupt Status Enable Reg. & Error Interrupt Status Enable Reg. */
-#define SDHOST_NORMINTSTATUSEN_ERRINTSTATUSEN ((volatile uint32_t *)0x10634)
-/** @brief Normal Interrupt Signal Enable Reg. & Error Interrupt Signal Enable Reg. */
-#define SDHOST_NORMINTSIGEN_ERRINTSIGEN       ((volatile uint32_t *)0x10638)
-/** @brief Auto CMD12 Error Status Register & Host Control 2 Register */
-#define SDHOST_AUTOCMD12_HOSTCTRL2            ((volatile uint32_t *)0x1063c)
-/** @brief Capabilities Register 0 */
-#define SDHOST_CAP0                           ((volatile uint32_t *)0x10640)
-/** @brief Capabilities Register 1 */
-#define SDHOST_CAP1                           ((volatile uint32_t *)0x10644)
-/** @brief Maximum Current Capabilities Register 0 */
-#define SDHOST_MAXCURRENTCAP0                 ((volatile uint32_t *)0x10648)
-/** @brief Maximum Current Capabilities Register 1 */
-#define SDHOST_MAXCURRENTCAP1                 ((volatile uint32_t *)0x1064c)
-/** @brief Force Event Reg. for Auto CMD12 Error Status & Force Event Reg. for Error Interrupt Status */
-#define SDHOST_FORCEEVENTCMD12_FORCEEVENTERRINT ((volatile uint32_t *)0x10650)
-/** @brief ADMA Error Status Register */
-#define SDHOST_ADMAERRORSTATUS                ((volatile uint32_t *)0x10654)
-/** @brief ADMA System Address Register */
-#define SDHOST_ADMASYSADDR                    ((volatile uint32_t *)0x10658)
-/** @brief Preset Value Register 0 */
-#define SDHOST_PRESETVALUE0                   ((volatile uint32_t *)0x10660)
-/** @brief Preset Value Register 1 */
-#define SDHOST_PRESETVALUE1                   ((volatile uint32_t *)0x10664)
-/** @brief Preset Value Register 2 */
-#define SDHOST_PRESETVALUE2                   ((volatile uint32_t *)0x10668)
-/** @brief Preset Value Register 3 */
-#define SDHOST_PRESETVALUE3                   ((volatile uint32_t *)0x1066c)
-/** @brief Vendor-defined Register 0 */
-#define SDHOST_VENDOR0                        ((volatile uint32_t *)0x10700)
-/** @brief Vendor-defined Register 1 */
-#define SDHOST_VENDOR1                        ((volatile uint32_t *)0x10704)
-/** @brief Vendor-defined Register 5 */
-#define SDHOST_VENDOR5                        ((volatile uint32_t *)0x10714)
-
-#else
-
-#error -- processor type not defined
-
-#endif /* __FT900__ */
 
 /** @brief
  *  SDIO special operations, to be used only when CMD52 is sent
@@ -507,7 +260,7 @@
 #define COMM_TIMEOUT_U32		(uint32_t)(10000000)
 
 #ifdef SD_HOST_DEBUG
-#define DBG_TIMEOUT()			if(timeout == 0) {tfp_printf("Timeout ERROR @"); tfp_printf(__FILE__); tfp_printf("%d", __LINE__); sdhost_registerdump();}
+#define DBG_TIMEOUT()			if(timeout == 0) {printf("Timeout ERROR @"); printf(__FILE__); printf("%d", __LINE__); sdhost_registerdump();}
 #else /* SD_HOST_DEBUG */
 #define DBG_TIMEOUT()
 #endif /* SD_HOST_DEBUG */
@@ -877,24 +630,24 @@ void sdhost_sys_init(void)
 {
 #if defined(__FT930__)
 	/* Enable pad for SD Host (bit [7:6]). Must pull up (bit [3]) as stated in specs... */
-	*SYS_REGPAD00 = 0x80; /* CLK, none */
-	*SYS_REGPAD01 = 0x80; /* CMD, none */
-	*SYS_REGPAD02 = 0x80; /* CD, none */
-	*SYS_REGPAD03 = 0x80; /* DATA0, none */
-	*SYS_REGPAD04 = 0x80; /* DATA1, none */
-	*SYS_REGPAD05 = 0x80; /* DATA2, none */
-	*SYS_REGPAD06 = 0x80; /* DATA3, none */
-	*SYS_REGPAD07 = 0x80; /* WP, none */
+	GPIO->PAD00_CFG = 0x80; /* CLK, none */
+	GPIO->PAD01_CFG = 0x80; /* CMD, none */
+	GPIO->PAD02_CFG = 0x80; /* CD, none */
+	GPIO->PAD03_CFG = 0x80; /* DATA0, none */
+	GPIO->PAD04_CFG = 0x80; /* DATA1, none */
+	GPIO->PAD05_CFG = 0x80; /* DATA2, none */
+	GPIO->PAD06_CFG = 0x80; /* DATA3, none */
+	GPIO->PAD07_CFG = 0x80; /* WP, none */
 #else
 	/* Enable pad for SD Host (bit [7:6]). Must pull up (bit [3]) as stated in specs... */
-	*SYS_REGPAD19 = 0x40; /* CLK */
-	*SYS_REGPAD20 = 0x40; /* CMD, pulled up */
-	*SYS_REGPAD21 = 0x40; /* DATA3, pulled up */
-	*SYS_REGPAD22 = 0x40; /* DATA2, pulled up */
-	*SYS_REGPAD23 = 0x40; /* DATA1, pulled up */
-	*SYS_REGPAD24 = 0x40; /* DATA0, pulled up */
-	*SYS_REGPAD25 = 0x40; /* CD, pulled up */
-	*SYS_REGPAD26 = 0x40; /* WP, pulled up */
+	GPIO->PAD19_CFG = 0x40; /* CLK */
+	GPIO->PAD20_CFG = 0x40; /* CMD, pulled up */
+	GPIO->PAD21_CFG = 0x40; /* DATA3, pulled up */
+	GPIO->PAD22_CFG = 0x40; /* DATA2, pulled up */
+	GPIO->PAD23_CFG = 0x40; /* DATA1, pulled up */
+	GPIO->PAD24_CFG = 0x40; /* DATA0, pulled up */
+	GPIO->PAD25_CFG = 0x40; /* CD, pulled up */
+	GPIO->PAD26_CFG = 0x40; /* WP, pulled up */
 #endif
 
 	/* Enable SD Host function (bit 12) */
@@ -918,82 +671,82 @@ static uint32_t read_sdhost_reg(uint32_t addr)
 	switch (addr)
 	{
 	case SDH_BLK_SIZE:
-		return *SDHOST_BS_BC & 0x0000fff;
+		return SDHOST->BS_BC & 0x0000fff;
 
 	case SDH_BLK_COUNT:
-		return *SDHOST_BS_BC >> 16;
+		return SDHOST->BS_BC >> 16;
 
 	case SDH_TNSFER_MODE:
-		return *SDHOST_TM_CMD & 0x0000ffff;
+		return SDHOST->TM_CMD & 0x0000ffff;
 
 	case SDH_CMD:
-		return *SDHOST_TM_CMD >> 16;
+		return SDHOST->TM_CMD >> 16;
 
 	case SDH_RESPONSE0:
-		return *SDHOST_RESPONSE0;
+		return SDHOST->RESPONSE0;
 
 	case SDH_RESPONSE1:
-		return *SDHOST_RESPONSE1;
+		return SDHOST->RESPONSE1;
 
 	case SDH_RESPONSE2:
-		return *SDHOST_RESPONSE2;
+		return SDHOST->RESPONSE2;
 
 	case SDH_RESPONSE3:
-		return *SDHOST_RESPONSE3;
+		return SDHOST->RESPONSE3;
 
 	case SDH_BUF_DATA:
-		return *SDHOST_BUFDATAPORT;
+		return SDHOST->BUFDATAPORT;
 
 	case SDH_PRESENT_STATE:
-		return *SDHOST_PRESENTSTATE;
+		return SDHOST->PRESENTSTATE;
 
 	case SDH_HST_CNTL_1:
-		return *SDHOST_HOSTCTRL1_PWR_BLKGAP & 0xff;
+		return SDHOST->HOSTCTRL1_PWR_BLKGAP & 0xff;
 
 	case SDH_PWR_CNTL:
-		return (*SDHOST_HOSTCTRL1_PWR_BLKGAP >> 8) & 0xff;
+		return (SDHOST->HOSTCTRL1_PWR_BLKGAP >> 8) & 0xff;
 
 	case SDH_CLK_CNTL:
-		return *SDHOST_CLK_TIMEOUT_SWRESET & 0xffff;
+		return SDHOST->CLK_TIMEOUT_SWRESET & 0xffff;
 
 	case SDH_SW_RST:
-		return (*SDHOST_CLK_TIMEOUT_SWRESET >> 24) & 0xff;
+		return (SDHOST->CLK_TIMEOUT_SWRESET >> 24) & 0xff;
 
 	case SDH_NRML_INT_STATUS:
-		return *SDHOST_NORMINTSTATUS_ERRINTSTATUS & 0xffff;
+		return SDHOST->NORMINTSTATUS_ERRINTSTATUS & 0xffff;
 
 	case SDH_ERR_INT_STATUS:
-		return *SDHOST_NORMINTSTATUS_ERRINTSTATUS >> 16;
+		return SDHOST->NORMINTSTATUS_ERRINTSTATUS >> 16;
 
 	case SDH_NRML_INT_STATUS_ENABLE:
-		return *SDHOST_NORMINTSTATUSEN_ERRINTSTATUSEN & 0xffff;
+		return SDHOST->NORMINTSTATUSEN_ERRINTSTATUSEN & 0xffff;
 
 	case SDH_ERR_INT_STATUS_ENABLE:
-		return *SDHOST_NORMINTSTATUSEN_ERRINTSTATUSEN >> 16;
+		return SDHOST->NORMINTSTATUSEN_ERRINTSTATUSEN >> 16;
 
 	case SDH_NRML_INT_SGNL_ENABLE:
-		return *SDHOST_NORMINTSIGEN_ERRINTSIGEN & 0xffff;
+		return SDHOST->NORMINTSIGEN_ERRINTSIGEN & 0xffff;
 
 	case SDH_ERR_INT_SGNL_ENABLE:
-		return *SDHOST_NORMINTSIGEN_ERRINTSIGEN >> 16;
+		return SDHOST->NORMINTSIGEN_ERRINTSIGEN >> 16;
 
 	case SDH_HST_CNTL_2:
-		return *SDHOST_AUTOCMD12_HOSTCTRL2 >> 16;
+		return SDHOST->AUTOCMD12_HOSTCTRL2 >> 16;
 
 	case SDH_CAP_1:
-		return *SDHOST_CAP0;
+		return SDHOST->CAP0;
 
 	case SDH_CAP_2:
-		return *SDHOST_CAP1;
+		return SDHOST->CAP1;
 
 	case SDH_VNDR_0:
-		return *SDHOST_VENDOR0;
+		return SDHOSTVENDOR->VENDOR0;
 
 	case SDH_VNDR_1:
-		return *SDHOST_VENDOR1;
+		return SDHOSTVENDOR->VENDOR1;
 
 	case SDH_VNDR_5:
-		return *SDHOST_VENDOR5;
+		return SDHOSTVENDOR->VENDOR5;
 
 	default:
 		return 0;
@@ -1016,90 +769,90 @@ static void write_sdhost_reg(uint32_t val, uint32_t addr)
 	switch (addr)
 	{
 	case SDH_BLK_SIZE:
-		*SDHOST_BS_BC = val | (*SDHOST_BS_BC & 0xffff0000);
+		SDHOST->BS_BC = val | (SDHOST->BS_BC & 0xffff0000);
 		break;
 
 	case SDH_BLK_COUNT:
-		*SDHOST_BS_BC = (val << 16) | (*SDHOST_TM_CMD & 0xffff);
+		SDHOST->BS_BC = (val << 16) | (SDHOST->TM_CMD & 0xffff);
 		break;
 
 	case SDH_TNSFER_MODE:
-		*SDHOST_TM_CMD = val | (*SDHOST_TM_CMD & 0xffff0000);
+		SDHOST->TM_CMD = val | (SDHOST->TM_CMD & 0xffff0000);
 		break;
 
 	case SDH_CMD:
-		*SDHOST_TM_CMD = (val << 16) | (*SDHOST_TM_CMD & 0xffff);
+		SDHOST->TM_CMD = (val << 16) | (SDHOST->TM_CMD & 0xffff);
 		break;
 
 	case SDH_BUF_DATA:
-		*SDHOST_BUFDATAPORT = val;
+		SDHOST->BUFDATAPORT = val;
 		break;
 
 	case SDH_HST_CNTL_1:
-		*SDHOST_HOSTCTRL1_PWR_BLKGAP = val
-				| (*SDHOST_HOSTCTRL1_PWR_BLKGAP & 0xffffff00);
+		SDHOST->HOSTCTRL1_PWR_BLKGAP = val
+				| (SDHOST->HOSTCTRL1_PWR_BLKGAP & 0xffffff00);
 		break;
 
 	case SDH_PWR_CNTL:
-		*SDHOST_HOSTCTRL1_PWR_BLKGAP = (val << 8)
-				| (*SDHOST_HOSTCTRL1_PWR_BLKGAP & 0xffff00ff);
+		SDHOST->HOSTCTRL1_PWR_BLKGAP = (val << 8)
+				| (SDHOST->HOSTCTRL1_PWR_BLKGAP & 0xffff00ff);
 		break;
 
 	case SDH_CLK_CNTL:
-		*SDHOST_CLK_TIMEOUT_SWRESET = val
-				| (*SDHOST_CLK_TIMEOUT_SWRESET & 0xffff0000);
+		SDHOST->CLK_TIMEOUT_SWRESET = val
+				| (SDHOST->CLK_TIMEOUT_SWRESET & 0xffff0000);
 		break;
 
 	case SDH_SW_RST:
-		*SDHOST_CLK_TIMEOUT_SWRESET = (val << 24)
-				| (*SDHOST_CLK_TIMEOUT_SWRESET & 0xffffff);
+		SDHOST->CLK_TIMEOUT_SWRESET = (val << 24)
+				| (SDHOST->CLK_TIMEOUT_SWRESET & 0xffffff);
 		break;
 
 	case SDH_NRML_INT_STATUS:
-		*SDHOST_NORMINTSTATUS_ERRINTSTATUS = val
-				| (*SDHOST_NORMINTSTATUS_ERRINTSTATUS & 0xffff0000);
+		SDHOST->NORMINTSTATUS_ERRINTSTATUS = val
+				| (SDHOST->NORMINTSTATUS_ERRINTSTATUS & 0xffff0000);
 		break;
 
 	case SDH_ERR_INT_STATUS:
-		*SDHOST_NORMINTSTATUS_ERRINTSTATUS = (val << 16)
-				| (*SDHOST_NORMINTSTATUS_ERRINTSTATUS & 0xffff);
+		SDHOST->NORMINTSTATUS_ERRINTSTATUS = (val << 16)
+				| (SDHOST->NORMINTSTATUS_ERRINTSTATUS & 0xffff);
 		break;
 
 	case SDH_NRML_INT_STATUS_ENABLE:
-		*SDHOST_NORMINTSTATUSEN_ERRINTSTATUSEN = val
-				| (*SDHOST_NORMINTSTATUSEN_ERRINTSTATUSEN & 0xffff0000);
+		SDHOST->NORMINTSTATUSEN_ERRINTSTATUSEN = val
+				| (SDHOST->NORMINTSTATUSEN_ERRINTSTATUSEN & 0xffff0000);
 		break;
 
 	case SDH_ERR_INT_STATUS_ENABLE:
-		*SDHOST_NORMINTSTATUSEN_ERRINTSTATUSEN = (val << 16)
-				| (*SDHOST_NORMINTSTATUSEN_ERRINTSTATUSEN & 0xffff);
+		SDHOST->NORMINTSTATUSEN_ERRINTSTATUSEN = (val << 16)
+				| (SDHOST->NORMINTSTATUSEN_ERRINTSTATUSEN & 0xffff);
 		break;
 
 	case SDH_NRML_INT_SGNL_ENABLE:
-		*SDHOST_NORMINTSIGEN_ERRINTSIGEN = val
-				| (*SDHOST_NORMINTSIGEN_ERRINTSIGEN & 0xffff0000);
+		SDHOST->NORMINTSIGEN_ERRINTSIGEN = val
+				| (SDHOST->NORMINTSIGEN_ERRINTSIGEN & 0xffff0000);
 		break;
 
 	case SDH_ERR_INT_SGNL_ENABLE:
-		*SDHOST_NORMINTSIGEN_ERRINTSIGEN = (val << 16)
-				| (*SDHOST_NORMINTSIGEN_ERRINTSIGEN & 0xffff);
+		SDHOST->NORMINTSIGEN_ERRINTSIGEN = (val << 16)
+				| (SDHOST->NORMINTSIGEN_ERRINTSIGEN & 0xffff);
 		break;
 
 	case SDH_HST_CNTL_2:
-		*SDHOST_AUTOCMD12_HOSTCTRL2 = (val << 16)
-				| (*SDHOST_AUTOCMD12_HOSTCTRL2 & 0xffff);
+		SDHOST->AUTOCMD12_HOSTCTRL2 = (val << 16)
+				| (SDHOST->AUTOCMD12_HOSTCTRL2 & 0xffff);
 		break;
 
 	case SDH_VNDR_0:
-		*SDHOST_VENDOR0 = val;
+		SDHOSTVENDOR->VENDOR0 = val;
 		break;
 
 	case SDH_VNDR_1:
-		*SDHOST_VENDOR1 = val;
+		SDHOSTVENDOR->VENDOR1 = val;
 		break;
 
 	case SDH_VNDR_5:
-		*SDHOST_VENDOR5 = val;
+		SDHOSTVENDOR->VENDOR5 = val;
 		break;
 
 	default:
@@ -1287,9 +1040,9 @@ static SDHOST_STATUS sdhost_get_response(uint32_t *response,
 #ifdef SD_HOST_DEBUG
 		for (int i = 0; i < 1; i++)
 		{
-			tfp_printf("%08X", *((unsigned char*) response + i));
+			printf("%08X", *((unsigned char*) response + i));
 		}
-		tfp_printf("\r\n--------------------------------\r\n");
+		printf("\r\n--------------------------------\r\n");
 #endif /* SD_HOST_DEBUG */
 	}
 	else
@@ -1313,9 +1066,9 @@ static SDHOST_STATUS sdhost_get_response(uint32_t *response,
 #ifdef SD_HOST_DEBUG
 			for (int i = 0; i < 4*4; i++)
 			{
-				tfp_printf("0x%02X,", *((unsigned char*) response + i));
+				printf("0x%02X,", *((unsigned char*) response + i));
 			}
-			tfp_printf("\r\n--------------------------------\r\n");
+			printf("\r\n--------------------------------\r\n");
 #endif /* SD_HOST_DEBUG */
 		}
 		else
@@ -1325,9 +1078,9 @@ static SDHOST_STATUS sdhost_get_response(uint32_t *response,
 
 			for (int i = 0; i < 1; i++)
 			{
-				tfp_printf("%08X", *((unsigned char*) response + i));
+				printf("%08X", *((unsigned char*) response + i));
 			}
-			tfp_printf("\r\n--------------------------------\r\n");
+			printf("\r\n--------------------------------\r\n");
 #endif /* SD_HOST_DEBUG */
 		}
 	}
@@ -1506,8 +1259,8 @@ static SDHOST_STATUS sdhost_send_command(uint8_t cmd_index, sdhost_cmd_t cmd_typ
 		uint8_t sdio_special_op, uint32_t cmd_arg, uint32_t *response)
 {
 #ifdef SD_HOST_DEBUG
-	tfp_printf("--------------------------------\r\n");
-	tfp_printf("CMD:%d\r\n",cmd_index );
+	printf("--------------------------------\r\n");
+	printf("CMD:%d\r\n",cmd_index );
 #endif /* SD_HOST_DEBUG */
 	uint32_t timeout;
 	SDHOST_STATUS sdhost_status;
@@ -1564,7 +1317,7 @@ static SDHOST_STATUS sdhost_send_command(uint8_t cmd_index, sdhost_cmd_t cmd_typ
 	}
 
 	/* Set the argument to the argument register */
-	*SDHOST_ARG1 = cmd_arg;
+	SDHOST->ARG1 = cmd_arg;
 
 	/* Set the command register */
 	write_sdhost_reg((uint32_t) cmd_reg_value, SDH_CMD);
@@ -1605,7 +1358,7 @@ static SDHOST_STATUS sdhost_send_command(uint8_t cmd_index, sdhost_cmd_t cmd_typ
 			/* perform error recovery */
 			sdhost_error_recovery();
 			#ifdef SD_HOST_DEBUG
-				tfp_printf("SDHOST_CMD_TIMEOUT");
+				printf("SDHOST_CMD_TIMEOUT");
 			#endif
 			sdhost_status = SDHOST_CMD_TIMEOUT;
 			goto __exit;
@@ -1700,7 +1453,7 @@ static SDHOST_STATUS sdhost_send_command(uint8_t cmd_index, sdhost_cmd_t cmd_typ
 	{
 		/* Clear error flag */
 #ifdef SD_HOST_DEBUG
-		tfp_printf("\r\nerrStatus = "); printNum((uint32_t) errStatus, 'h', 1);
+		printf("\r\nerrStatus = "); printNum((uint32_t) errStatus, 'h', 1);
 #endif /* SD_HOST_DEBUG */
 		errStatus = 0;
 		sdhost_status = SDHOST_ERROR;
@@ -1712,7 +1465,7 @@ static SDHOST_STATUS sdhost_send_command(uint8_t cmd_index, sdhost_cmd_t cmd_typ
 	{
 		/* Recover SD Host from error */
 #ifdef SD_HOST_DEBUG
-		tfp_printf("SDH_ERR_INT_STATUS");
+		printf("SDH_ERR_INT_STATUS");
 #endif /* SD_HOST_DEBUG */
 		sdhost_error_recovery();
 		sdhost_status = SDHOST_ERROR;
@@ -1803,7 +1556,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 	if (sdhost_status != SDHOST_OK)
 	{
 #ifdef SD_HOST_DEBUG
-		tfp_printf("ERROR %d\r\n", sdhost_status);
+		printf("ERROR %d\r\n", sdhost_status);
 #endif /* SD_HOST_DEBUG */
 		goto __exit;
 	}
@@ -1817,14 +1570,14 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 	if (num_blocks == 1)
 	{
 		/* (1) Set Block Size register */
-		*SDHOST_BS_BC = (*SDHOST_BS_BC & 0xFFFF0000) | SDHOST_BLK_SIZE;
+		SDHOST->BS_BC = (SDHOST->BS_BC & 0xFFFF0000) | SDHOST_BLK_SIZE;
 
 		/* (2) Single-block transfer, SDH_BLK_COUNT register will be ignored */
 
 		if (direction == SDHOST_WRITE)
 		{
 			/* (3) Set Argument 1 Register */
-			*SDHOST_ARG1 = addr;
+			SDHOST->ARG1 = addr;
 
 			/* (4) Set Transfer Mode Register and Command Register at the same time */
 			cmd = (24 << 8) | CMD_TYPE_NORMAL | CMD_RESPONSE_R1
@@ -1832,7 +1585,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 			transfer_mode = SDHOST_DMA_DISABLED | SDHOST_AUTO_CMD12_DISABLED
 					| SDHOST_SINGLE_BLK | SDHOST_WRITE;
 
-			*SDHOST_TM_CMD = (cmd << 16) | transfer_mode;
+			SDHOST->TM_CMD = (cmd << 16) | transfer_mode;
 
 #ifdef __USE_SDHOST_INTERRUPT_
 			/*  (6) Wait for Command Complete interrupt */
@@ -1895,14 +1648,14 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 
 			__asm__ ( "streamout.l    %0, %1, %2    \n\t"
 					: /* output registers */
-					: "r" (&(*SDHOST_BUFDATAPORT)), "r" (buf32), "r" (SDHOST_BLK_SIZE) /* input registers */
+					: "r" (&(SDHOST->BUFDATAPORT)), "r" (buf32), "r" (SDHOST_BLK_SIZE) /* input registers */
 					  : "memory");
 
 		}
 		else if (direction == SDHOST_READ)
 		{
 			/* (3) Set Argument 1 Register */
-			*SDHOST_ARG1 = addr;
+			SDHOST->ARG1 = addr;
 
 			/* (4) Set Transfer Mode Register and Command Register at the same time */
 			cmd = (17 << 8) | CMD_TYPE_NORMAL | CMD_RESPONSE_R1
@@ -1911,7 +1664,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 					| SDHOST_SINGLE_BLK | SDHOST_READ;
 
 			/* (5) Set the command register */
-			*SDHOST_TM_CMD = (cmd << 16) | transfer_mode;
+			SDHOST->TM_CMD = (cmd << 16) | transfer_mode;
 
 #ifdef __USE_SDHOST_INTERRUPT_
 			/* (6) Wait for Command Complete interrupt */
@@ -1973,7 +1726,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 
 			__asm__ ( "streamin.l        %0, %1, %2    \n\t"
 					: /* output registers */
-					: "r" (buf32), "r" (&(*SDHOST_BUFDATAPORT)), "r" (SDHOST_BLK_SIZE) /* input registers */
+					: "r" (buf32), "r" (&(SDHOST->BUFDATAPORT)), "r" (SDHOST_BLK_SIZE) /* input registers */
 					  : "memory");
 		}
 
@@ -2026,12 +1779,12 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 		 * (2) Multiple-block transfer
 		 */
 
-		*SDHOST_BS_BC = (num_blocks << 16) | SDHOST_BLK_SIZE;
+		SDHOST->BS_BC = (num_blocks << 16) | SDHOST_BLK_SIZE;
 
 		if (direction == SDHOST_WRITE)
 		{
 			/* (3) Set Argument 1 Register */
-			*SDHOST_ARG1 = addr;
+			SDHOST->ARG1 = addr;
 
 			/* (4) Set Transfer Mode Register and (5) Command Register at the same time */
 			cmd = (25 << 8) | CMD_TYPE_NORMAL | CMD_RESPONSE_R1
@@ -2039,7 +1792,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 			transfer_mode = SDHOST_DMA_DISABLED | SDHOST_BLK_COUNT_ENABLED
 					| SDHOST_AUTO_CMD12_ENABLED | SDHOST_MULTI_BLK
 					| SDHOST_WRITE;
-			*SDHOST_TM_CMD = (cmd << 16) | transfer_mode;
+			SDHOST->TM_CMD = (cmd << 16) | transfer_mode;
 
 #ifdef __USE_SDHOST_INTERRUPT_
 			/* (6) Wait for Command Complete interrupt */
@@ -2102,7 +1855,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 
 				__asm__ ( "streamout.l    %0, %1, %2    \n\t"
 						: /* output registers */
-						: "r" (&(*SDHOST_BUFDATAPORT)), "r" (&buf32[nextIdx]), "r" (SDHOST_BLK_SIZE) /* input registers */
+						: "r" (&(SDHOST->BUFDATAPORT)), "r" (&buf32[nextIdx]), "r" (SDHOST_BLK_SIZE) /* input registers */
 						  : "memory");
 
 				nextIdx += SDHOST_BLK_SIZE / 4;
@@ -2111,7 +1864,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 		else if (direction == SDHOST_READ)
 		{
 			/* (3) Set Argument 1 Register */
-			*SDHOST_ARG1 = addr;
+			SDHOST->ARG1 = addr;
 
 			/* (4) Set Transfer Mode Register and (5) Command Register at the same time */
 			cmd = (18 << 8) | CMD_TYPE_NORMAL | CMD_RESPONSE_R1
@@ -2120,7 +1873,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 					SDHOST_DMA_DISABLED | SDHOST_BLK_COUNT_ENABLED
 							| SDHOST_AUTO_CMD12_ENABLED | SDHOST_MULTI_BLK
 							| SDHOST_READ;
-			*SDHOST_TM_CMD = (cmd << 16) | transfer_mode;
+			SDHOST->TM_CMD = (cmd << 16) | transfer_mode;
 
 #ifdef __USE_SDHOST_INTERRUPT_
 			/* (6) Wait for Command Complete interrupt */
@@ -2183,7 +1936,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 
 				__asm__ ( "streamin.l        %0, %1, %2    \n\t"
 						: /* output registers */
-						: "r" (&buf32[nextIdx]), "r" (&(*SDHOST_BUFDATAPORT)), "r" (SDHOST_BLK_SIZE) /* input registers */
+						: "r" (&buf32[nextIdx]), "r" (&(SDHOST->BUFDATAPORT)), "r" (SDHOST_BLK_SIZE) /* input registers */
 						  : "memory");
 
 				nextIdx += SDHOST_BLK_SIZE / 4;
@@ -2232,7 +1985,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 	if (num_bytes_left > 0)
 	{
 		/* (1) Set Block Size register to SDHOST_BLK_SIZE */
-		*SDHOST_BS_BC = (*SDHOST_BS_BC & 0xFFFF0000) | SDHOST_BLK_SIZE;
+		SDHOST->BS_BC = (SDHOST->BS_BC & 0xFFFF0000) | SDHOST_BLK_SIZE;
 
 		/* (2) Send CMD16 to set the card's block length */
 		sdhost_send_command(SD_MMC_CMD_SET_BLOCKLEN, SDHOST_BUS_CMD, NOT_IN_USE,
@@ -2242,7 +1995,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 		if (direction == SDHOST_WRITE)
 		{
 			/* (3) Set Argument 1 Register */
-			*SDHOST_ARG1 = addr;
+			SDHOST->ARG1 = addr;
 
 			/* (4) Set Transfer Mode Register and Command Register at the same time */
 			cmd = (24 << 8) | CMD_TYPE_NORMAL | CMD_RESPONSE_R1
@@ -2251,7 +2004,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 					| SDHOST_SINGLE_BLK | SDHOST_WRITE;
 
 			/* (5) */
-			*SDHOST_TM_CMD = (cmd << 16) | transfer_mode;
+			SDHOST->TM_CMD = (cmd << 16) | transfer_mode;
 
 #ifdef __USE_SDHOST_INTERRUPT_
 			/* (6) Wait for Command Complete interrupt */
@@ -2314,14 +2067,14 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 			__asm__ (
 					"streamout.l    %0, %1, %2    \n\t"
 					: /* output registers */
-					: "r" (&(*SDHOST_BUFDATAPORT)), "r" (&buf32[nextIdx]), "r" (num_bytes_left) /* input registers */
+					: "r" (&(SDHOST->BUFDATAPORT)), "r" (&buf32[nextIdx]), "r" (num_bytes_left) /* input registers */
 					  : "memory");
 
 		}
 		else if (direction == SDHOST_READ)
 		{
 			/* (3) Set Argument 1 Register */
-			*SDHOST_ARG1 = addr;
+			SDHOST->ARG1 = addr;
 
 			/* (4) Set Transfer Mode Register and (5) Command Register at the same time */
 			cmd = (17 << 8) | CMD_TYPE_NORMAL | CMD_RESPONSE_R1
@@ -2330,7 +2083,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 					| SDHOST_SINGLE_BLK | SDHOST_READ;
 
 			/* (5) */
-			*SDHOST_TM_CMD = (cmd << 16) | transfer_mode;
+			SDHOST->TM_CMD = (cmd << 16) | transfer_mode;
 
 #ifdef __USE_SDHOST_INTERRUPT_
 			/* (6) Wait for Command Complete interrupt */
@@ -2392,7 +2145,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 			__asm__ (
 					"streamin.l        %0, %1, %2    \n\t"
 					: /* output registers */
-					: "r" (&buf32[nextIdx]), "r" (&(*SDHOST_BUFDATAPORT)), "r" (num_bytes_left) /* input registers */
+					: "r" (&buf32[nextIdx]), "r" (&(SDHOST->BUFDATAPORT)), "r" (num_bytes_left) /* input registers */
 					  : "memory");
 		}
 
@@ -2439,7 +2192,7 @@ SDHOST_STATUS sdhost_transfer_data(uint8_t direction, void *buf,
 SDHOST_STATUS sdhost_abort(void)
 {
 #ifdef SD_HOST_DEBUG
-	tfp_printf("sdhost_abort\r\n");
+	printf("sdhost_abort\r\n");
 #endif /* SD_HOST_DEBUG */
 	SDHOST_STATUS sdhost_status = SDHOST_OK;
 	uint32_t response;
@@ -2450,7 +2203,7 @@ SDHOST_STATUS sdhost_abort(void)
 	if (sdhost_status != SDHOST_OK)
 	{
 #ifdef SD_HOST_DEBUG
-		tfp_printf("ERROR %d\r\n", sdhost_status);
+		printf("ERROR %d\r\n", sdhost_status);
 #endif /* SD_HOST_DEBUG */
 		goto __exit;
 	}
@@ -2490,8 +2243,8 @@ static SDHOST_STATUS sdhost_send_wide_data_cmd(uint8_t cmd_id, uint32_t arg, uin
     SDHOST_STATUS ret = SDHOST_OK;
 
 #ifdef SD_HOST_DEBUG
-	tfp_printf("\r\n--------------------------------\r\n");
-	tfp_printf("\r\nCMD:%d\r\n",cmd_id );
+	printf("\r\n--------------------------------\r\n");
+	printf("\r\nCMD:%d\r\n",cmd_id );
 #endif /* SD_HOST_DEBUG */
 
     /*
@@ -2501,19 +2254,19 @@ static SDHOST_STATUS sdhost_send_wide_data_cmd(uint8_t cmd_id, uint32_t arg, uin
      */
 
     /* (1) Set Block Size register */
-    *SDHOST_BS_BC = (*SDHOST_BS_BC & 0xFFFF0000) | blk_size;
+    SDHOST->BS_BC = (SDHOST->BS_BC & 0xFFFF0000) | blk_size;
 
     /* (2) Single-block transfer, SDH_BLK_COUNT register will be ignored */
 
     /* (3) Set Argument 1 Register */
-    *SDHOST_ARG1 = arg;
+    SDHOST->ARG1 = arg;
 
     /* (4) Set Transfer Mode Register and Command Register at the same time */
     cmd = (cmd_id << 8) | CMD_TYPE_NORMAL | CMD_RESPONSE_R1 | CMD_DATA_PRESENT;
     transfer_mode = SDHOST_DMA_DISABLED | SDHOST_AUTO_CMD12_DISABLED | SDHOST_SINGLE_BLK | SDHOST_READ;
 
     /* (5) Set the command register */
-    *SDHOST_TM_CMD = (cmd << 16) | transfer_mode;
+    SDHOST->TM_CMD = (cmd << 16) | transfer_mode;
 
 #ifdef __USE_SDHOST_INTERRUPT_
     /* (6) Wait for Command Complete interrupt */
@@ -2581,7 +2334,7 @@ static SDHOST_STATUS sdhost_send_wide_data_cmd(uint8_t cmd_id, uint32_t arg, uin
 
     __asm__ ( "streamin.l        %0, %1, %2    \n\t"
             : /* output registers */
-            : "r" (pData), "r" (&(*SDHOST_BUFDATAPORT)), "r" (blk_size) /* input registers */
+            : "r" (pData), "r" (&(SDHOST->BUFDATAPORT)), "r" (blk_size) /* input registers */
 			  : "memory");
 
 #ifdef __USE_SDHOST_INTERRUPT_
@@ -2633,7 +2386,7 @@ static SDHOST_STATUS sdhost_chk_mmc_ext_csd(uint8_t* mmc_highspeed_support, uint
 	if (sdhost_status != SDHOST_OK)
 	{
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("ERROR %X \r\n", sdhost_status);
+			printf("ERROR %X \r\n", sdhost_status);
 		#endif /* SD_HOST_DEBUG */
 	}
 	else
@@ -2678,12 +2431,12 @@ bool sdhost_cmd6(void)
     /* Device command class bits [95:84] in 128 bit wide CSD register.*/
     ccc = UNSTUFF_BITS(sdhost_context.CSD,84,12);
 #ifdef SD_HOST_DEBUG
-    tfp_printf("CCC = %04X\n", ccc);
+    printf("CCC = %04X\n", ccc);
 #endif
     if((ccc & (1 << 10)) != (1 << 10))
     {
 #ifdef SD_HOST_DEBUG
-        tfp_printf("CMD6 not supported\n");
+        printf("CMD6 not supported\n");
 #endif
         return false;
     }
@@ -2693,7 +2446,7 @@ bool sdhost_cmd6(void)
     if (sdhost_status != SDHOST_OK)
 	{
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("ERROR %X \r\n", sdhost_status);
+			printf("ERROR %X \r\n", sdhost_status);
 		#endif /* SD_HOST_DEBUG */
 	}
 
@@ -2706,15 +2459,15 @@ bool sdhost_cmd6(void)
         if (sdhost_status != SDHOST_OK)
     	{
     		#ifdef SD_HOST_DEBUG
-    			tfp_printf("ERROR %X \r\n", sdhost_status);
+    			printf("ERROR %X \r\n", sdhost_status);
     		#endif /* SD_HOST_DEBUG */
     	}
         /* read out the bits:*/
 #ifdef SD_HOST_DEBUG
-        tfp_printf("SD FUNCTION STATUS = \n");
+        printf("SD FUNCTION STATUS = \n");
         for (int i = 0; i < 64; i++)
         {
-            tfp_printf("0x%02X,", *((uint8_t*) pBuff + i));
+            printf("0x%02X,", *((uint8_t*) pBuff + i));
         }
 #endif
 
@@ -2728,7 +2481,7 @@ bool sdhost_cmd6(void)
         else
         {
 #ifdef SD_HOST_DEBUG
-            tfp_printf("Error while switching to HS mode!");
+            printf("Error while switching to HS mode!");
 #endif
         }
 
@@ -2736,7 +2489,7 @@ bool sdhost_cmd6(void)
     else
     {
 #ifdef SD_HOST_DEBUG
-        tfp_printf("Couldn't switch to HS mode!");
+        printf("Couldn't switch to HS mode!");
 #endif
     }
     return false;
@@ -2776,11 +2529,11 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 			/*Bits [113:112] decodes card type*/
 			if(UNSTUFF_BITS(sdhost_context.CID, 112, 2) == 0x01)
 			{
-				tfp_printf("\r\nDevice type e•MMC detected..\r\n");
+				printf("\r\nDevice type e•MMC detected..\r\n");
 			}
 			else
 			{
-				tfp_printf("\r\nDevice type MMC detected..\r\n");
+				printf("\r\nDevice type MMC detected..\r\n");
 			}
 		#endif
 	}
@@ -2836,7 +2589,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 			/* Set SD host bus width to 4-bit mode */
 			write_sdhost_reg(SD_BUS_WIDTH_4, SDH_HST_CNTL_1);
 			#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\n4-bit mode set\r\n");
+				printf("\r\n4-bit mode set\r\n");
 			#endif
 		}
 		/* (8) Send CMD6 to switch the card to HIGH SPEED */
@@ -2851,7 +2604,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 		else
 		{
 			#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\nMMC HIGH SPEED mode set \r\n");
+				printf("\r\nMMC HIGH SPEED mode set \r\n");
 			#endif
 		}
 
@@ -2889,7 +2642,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 			mult = (1 << (c_size_mult + 2));
 			sdhost_context.capacity = (c_size + 1) * mult * (blen / SDHOST_BLK_SIZE);
 			#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\nCSD Info: C_SIZE = 0x%lX, C_SIZE_MULT = 0x%lX, READ_BL_LEN = 0x%lX\r\n",
+				printf("\r\nCSD Info: C_SIZE = 0x%lX, C_SIZE_MULT = 0x%lX, READ_BL_LEN = 0x%lX\r\n",
 								c_size, c_size_mult, read_blk_len);
 			#endif /* SD_HOST_DEBUG */
 		}
@@ -2902,7 +2655,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 			sdhost_context.capacity= mmc_sector_count*(512/SDHOST_BLK_SIZE);
 		}
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("\r\nMMC capacity: 0x%08lX blocks\r\n", sdhost_context.capacity);
+			printf("\r\nMMC capacity: 0x%08lX blocks\r\n", sdhost_context.capacity);
 		#endif /* SD_HOST_DEBUG */
 	}
 	else
@@ -2914,7 +2667,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 	if(mmc_highspeed_support)
 	{
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("\r\nTry 50MHz\r\n");
+			printf("\r\nTry 50MHz\r\n");
 		#endif
 
 		/*  Disable SD clock */
@@ -2930,7 +2683,7 @@ static SDHOST_STATUS sdhost_mmc_startup(void)
 	else
 	{
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("\r\nTry 25MHz\r\n");
+			printf("\r\nTry 25MHz\r\n");
 		#endif
 		 /*  Disable SD clock */
 		 write_sdhost_reg(read_sdhost_reg(SDH_CLK_CNTL) & 0xFFFB, SDH_CLK_CNTL);
@@ -3072,7 +2825,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 						SDHOST_APP_SPECIFIC_CMD, NOT_IN_USE,
 						sdhost_context.OCR | 0x50000000, &(sdhost_context.OCR));
 				#ifdef SD_HOST_DEBUG
-						tfp_printf("Inside ACMD loop:%08lX\r\n", sdhost_context.OCR);
+						printf("Inside ACMD loop:%08lX\r\n", sdhost_context.OCR);
 				#endif /* SD_HOST_DEBUG */
 
 				if (sdhost_status != SDHOST_OK) /* (24) */
@@ -3107,20 +2860,20 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 				{
 					sdhost_context.isSDSCCard = false;
 					#ifdef SD_HOST_DEBUG
-						tfp_printf("Detected SDHC\r\n");
+						printf("Detected SDHC\r\n");
 					#endif /* SD_HOST_DEBUG */
 				}
 				else
 				{
 					sdhost_context.isSDSCCard = true; /* (27) */
 					#ifdef SD_HOST_DEBUG
-						tfp_printf("Detected SDSC\r\n");
+						printf("Detected SDSC\r\n");
 					#endif /* SD_HOST_DEBUG */
 				}
 			}
 		}
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("ACMD loop exit, OCR:%08lX\r", sdhost_context.OCR);
+			printf("ACMD loop exit, OCR:%08lX\r", sdhost_context.OCR);
 		#endif // SD_HOST_DEBUG
 		/* (32) Issue CMD2 to get CID */
 		sdhost_status = sdhost_send_command(SD_MMC_CMD_ALL_SEND_CID, SDHOST_BUS_CMD,
@@ -3145,7 +2898,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 		/* RCA is stored in the upper 16 bits of CMD3 response */
 		sdhost_context.RCA = response >> 16;
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("\r\nRCA = %08X\r\n",sdhost_context.RCA);
+			printf("\r\nRCA = %08X\r\n",sdhost_context.RCA);
 		#endif /* SD_HOST_DEBUG */
 		/* Issue CMD9 to get CSD */
 		sdhost_status = sdhost_send_command(SD_MMC_CMD_SEND_CSD, SDHOST_BUS_CMD,
@@ -3170,7 +2923,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 			mult = (1 << (c_size_mult + 2));
 			sdhost_context.capacity = (c_size + 1) * mult * (blen / SDHOST_BLK_SIZE);
 			#ifdef SD_HOST_DEBUG
-						tfp_printf("\r\nSD CSD Info v1: C_SIZE = 0x%lX, C_SIZE_MULT = 0x%lX, READ_BL_LEN = 0x%lX\r\n",
+						printf("\r\nSD CSD Info v1: C_SIZE = 0x%lX, C_SIZE_MULT = 0x%lX, READ_BL_LEN = 0x%lX\r\n",
 								c_size, c_size_mult, read_blk_len);
 			#endif /* SD_HOST_DEBUG */
 		}
@@ -3182,12 +2935,12 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 			sdhost_context.capacity = (c_size + 1) * ((512 * 1024) / SDHOST_BLK_SIZE);
 
 			#ifdef SD_HOST_DEBUG
-						tfp_printf("\r\nSD CSD Info v2: C_SIZE = 0x%08lX\r\n", c_size);
+						printf("\r\nSD CSD Info v2: C_SIZE = 0x%08lX\r\n", c_size);
 			#endif /* SD_HOST_DEBUG */
 		}
 
 		#ifdef SD_HOST_DEBUG
-					tfp_printf("\r\nSD Capacity: 0x%08lX blocks\r\n", sdhost_context.capacity);
+					printf("\r\nSD Capacity: 0x%08lX blocks\r\n", sdhost_context.capacity);
 		#endif /* SD_HOST_DEBUG */
 
 		/* Send CMD7 to set the card in Data Transfer mode */
@@ -3236,7 +2989,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 		if(sdhost_cmd6())
 		{
 			#ifdef SD_HOST_DEBUG
-					tfp_printf("\r\nTry 50MHz\r\n");
+					printf("\r\nTry 50MHz\r\n");
 			#endif /* SD_HOST_DEBUG */
 
 			/*  Disable SD clock */
@@ -3253,7 +3006,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 		else
 		{
 			#ifdef SD_HOST_DEBUG
-					tfp_printf("\r\nTry 25MHz\r\n");
+					printf("\r\nTry 25MHz\r\n");
 			#endif /* SD_HOST_DEBUG */
 			 /*  Disable SD clock */
 			 write_sdhost_reg(read_sdhost_reg(SDH_CLK_CNTL) & 0xFFFB, SDH_CLK_CNTL);
@@ -3277,7 +3030,7 @@ static SDHOST_STATUS sdhost_sd_startup(void)
 	else
 	{
 		#ifdef SD_HOST_DEBUG
-			tfp_printf("\r\nUnusable Card.. \r\n");
+			printf("\r\nUnusable Card.. \r\n");
 		#endif /* SD_HOST_DEBUG */
 		sdhost_status = SDHOST_UNUSABLE_CARD;
 	}
@@ -3346,7 +3099,7 @@ SDHOST_STATUS sdhost_card_init(void)
 				/* Legacy card detected, clear F8 flag - SDv1 or MMCv3 */
 				flag8 = 0;
 		#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\nSDv1 detected.. \r\n");
+				printf("\r\nSDv1 detected.. \r\n");
 		#endif /* SD_HOST_DEBUG */
 				sdhost_context.cardType = SD_V1;
 			}
@@ -3368,7 +3121,7 @@ SDHOST_STATUS sdhost_card_init(void)
 					flag8 = 1;
 					sdhost_context.cardType = SD_V2;
 					#ifdef SD_HOST_DEBUG
-						tfp_printf("SDCv2 detected..\r\n");
+						printf("SDCv2 detected..\r\n");
 					#endif /* SD_HOST_DEBUG */
 				}
 			}
@@ -3382,7 +3135,7 @@ SDHOST_STATUS sdhost_card_init(void)
 				sdhost_status = sdhost_send_command(SD_MMC_CMD_SEND_OP_COND, SDHOST_BUS_CMD,
 										NOT_IN_USE, SDHOST_CMD1_ARG_OCR, &(sdhost_context.OCR));
 				#ifdef SD_HOST_DEBUG
-					tfp_printf("CMD1: response = %08lX \r\n", sdhost_context.OCR);
+					printf("CMD1: response = %08lX \r\n", sdhost_context.OCR);
 				#endif /* SD_HOST_DEBUG */
 				if (sdhost_status != SDHOST_OK)
 				{
@@ -3423,13 +3176,13 @@ SDHOST_STATUS sdhost_card_init(void)
 	if (sdhost_status != SDHOST_OK)
 	{
 		#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\n---------------- SD HOST CARD INIT ERROR -----------\r\n");
+				printf("\r\n---------------- SD HOST CARD INIT ERROR -----------\r\n");
 		#endif /* SD_HOST_DEBUG */
 	}
 	else
 	{
 		#ifdef SD_HOST_DEBUG
-				tfp_printf("\r\n************* SD HOST CARD INIT OK **********\r\n");
+				printf("\r\n************* SD HOST CARD INIT OK **********\r\n");
 		#endif /* SD_HOST_DEBUG */
 	}
 
@@ -3475,12 +3228,12 @@ void sdhost_get_card_status_reg(uint32_t* pBuff)
 	 */
 
 	/* (1) Set Block Size register */
-	*SDHOST_BS_BC = (*SDHOST_BS_BC & 0xFFFF0000) | SDCARD_SDSTATUS_BLK_SIZE;
+	SDHOST->BS_BC = (SDHOST->BS_BC & 0xFFFF0000) | SDCARD_SDSTATUS_BLK_SIZE;
 
 	/* (2) Single-block transfer, SDH_BLK_COUNT register will be ignored */
 
 	/* (3) Set Argument 1 Register */
-	*SDHOST_ARG1 = 0x00000000;
+	SDHOST->ARG1 = 0x00000000;
 
 	/* (4) Set Transfer Mode Register and Command Register at the same time */
 	cmd = (SD_MMC_CMD_SEND_STATUS << 8) | CMD_TYPE_NORMAL | CMD_RESPONSE_R1
@@ -3489,7 +3242,7 @@ void sdhost_get_card_status_reg(uint32_t* pBuff)
 			| SDHOST_SINGLE_BLK | SDHOST_READ;
 
 	/* (5) Set the command register */
-	*SDHOST_TM_CMD = (cmd << 16) | transfer_mode;
+	SDHOST->TM_CMD = (cmd << 16) | transfer_mode;
 
 #ifdef __USE_SDHOST_INTERRUPT_
 	/* (6) Wait for Command Complete interrupt */
@@ -3548,7 +3301,7 @@ void sdhost_get_card_status_reg(uint32_t* pBuff)
 
 	__asm__ ( "streamin.l        %0, %1, %2    \n\t"
 			: /* output registers */
-			: "r" (pBuff), "r" (&(*SDHOST_BUFDATAPORT)), "r" (SDCARD_SDSTATUS_BLK_SIZE) /* input registers */
+			: "r" (pBuff), "r" (&(SDHOST->BUFDATAPORT)), "r" (SDCARD_SDSTATUS_BLK_SIZE) /* input registers */
 			  : "memory");
 
 #ifdef __USE_SDHOST_INTERRUPT_
@@ -3576,10 +3329,10 @@ void sdhost_get_card_status_reg(uint32_t* pBuff)
 	SDH_NRML_INT_STATUS);
 #endif
 #ifdef SD_HOST_DEBUG
-	tfp_printf("SD STATUS = ");
+	printf("SD STATUS = ");
 	for (int i = 0; i < 64; i++)
 	{
-		tfp_printf("0x%02X,", *((uint8_t*) pBuff + i));
+		printf("0x%02X,", *((uint8_t*) pBuff + i));
 	}
 #endif /* SD_HOST_DEBUG */
 __exit:
@@ -3619,7 +3372,7 @@ uint32_t sdhost_get_erase_block_count(void)
 		sdhost_context.block_size = (erase_sector_size + 1);
 
 #ifdef SD_HOST_DEBUG
-		tfp_printf("V1 erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
+		printf("V1 erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
 #endif /* SD_HOST_DEBUG */
 	}
 	else if(sdhost_context.cardType == MMC)
@@ -3630,7 +3383,7 @@ uint32_t sdhost_get_erase_block_count(void)
 			/* Erase Unit Size in blocks = (512Kbyte × HC_ERASE_GRP_SIZE)/SDHOST_BLK_SIZE */
 			sdhost_context.block_size = 512*sdhost_erase_grp_size*(1024/SDHOST_BLK_SIZE);
 #ifdef SD_HOST_DEBUG
-		tfp_printf("MMC erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
+		printf("MMC erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
 #endif /* SD_HOST_DEBUG */
 		}
 	}
@@ -3666,8 +3419,8 @@ uint32_t sdhost_get_erase_block_count(void)
 		/*sdhost_context.block_size = 16 * 1024 / SDHOST_BLK_SIZE;*/
 
 #ifdef SD_HOST_DEBUG
-		tfp_printf("V2 erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
-		tfp_printf("V2 erase: AU SIZE = 0x%lx\r\n", au_size);
+		printf("V2 erase: erase blocks = 0x%lx\r\n", sdhost_context.block_size);
+		printf("V2 erase: AU SIZE = 0x%lx\r\n", au_size);
 #endif /* SD_HOST_DEBUG */
 	}
 
@@ -3692,10 +3445,10 @@ uint32_t sdhost_get_block_size(void)
 
 void sdhost_registerdump(void)
 {
-	tfp_printf("PRESENT STATE: %08lX\r\n", read_sdhost_reg(SDH_PRESENT_STATE));
-	tfp_printf("HOST CNTL 1: %08lX\r\n", read_sdhost_reg(SDH_HST_CNTL_1));
-	tfp_printf("NRM INT STATUS: %08lX\r\n", read_sdhost_reg(SDH_NRML_INT_STATUS));
-	tfp_printf("ERROR INT STATUS: %08lX\r\n", read_sdhost_reg(SDH_ERR_INT_STATUS));
+	printf("PRESENT STATE: %08lX\r\n", read_sdhost_reg(SDH_PRESENT_STATE));
+	printf("HOST CNTL 1: %08lX\r\n", read_sdhost_reg(SDH_HST_CNTL_1));
+	printf("NRM INT STATUS: %08lX\r\n", read_sdhost_reg(SDH_NRML_INT_STATUS));
+	printf("ERROR INT STATUS: %08lX\r\n", read_sdhost_reg(SDH_ERR_INT_STATUS));
 }
 
 void sdhost_analyze_r1_status(uint32_t response_r1)
@@ -3703,97 +3456,97 @@ void sdhost_analyze_r1_status(uint32_t response_r1)
 
 	if (response_r1 & SD_OCR_ADDR_OUT_OF_RANGE)
 	{
-		tfp_printf("SD_ADDR_OUT_OF_RANGE");
+		printf("SD_ADDR_OUT_OF_RANGE");
 	}
 
 	if (response_r1 & SD_OCR_ADDR_MISALIGNED)
 	{
-		tfp_printf("SD_ADDR_MISALIGNED");
+		printf("SD_ADDR_MISALIGNED");
 	}
 
 	if (response_r1 & SD_OCR_BLOCK_LEN_ERR)
 	{
-		tfp_printf("SD_BLOCK_LEN_ERR");
+		printf("SD_BLOCK_LEN_ERR");
 	}
 
 	if (response_r1 & SD_OCR_ERASE_SEQ_ERR)
 	{
-		tfp_printf("SD_ERASE_SEQ_ERR");
+		printf("SD_ERASE_SEQ_ERR");
 	}
 
 	if (response_r1 & SD_OCR_BAD_ERASE_PARAM)
 	{
-		tfp_printf("SD_BAD_ERASE_PARAM");
+		printf("SD_BAD_ERASE_PARAM");
 	}
 
 	if (response_r1 & SD_OCR_WRITE_PROT_VIOLATION)
 	{
-		tfp_printf("SD_WRITE_PROT_VIOLATION");
+		printf("SD_WRITE_PROT_VIOLATION");
 	}
 
 	if (response_r1 & SD_OCR_LOCK_UNLOCK_FAILED)
 	{
-		tfp_printf("SD_LOCK_UNLOCK_FAILED");
+		printf("SD_LOCK_UNLOCK_FAILED");
 	}
 
 	if (response_r1 & SD_OCR_COM_CRC_FAILED)
 	{
-		tfp_printf("SD_COM_CRC_FAILED");
+		printf("SD_COM_CRC_FAILED");
 	}
 
 	if (response_r1 & SD_OCR_ILLEGAL_CMD)
 	{
-		tfp_printf("SD_ILLEGAL_CMD");
+		printf("SD_ILLEGAL_CMD");
 	}
 
 	if (response_r1 & SD_OCR_CARD_ECC_FAILED)
 	{
-		tfp_printf("SD_CARD_ECC_FAILED");
+		printf("SD_CARD_ECC_FAILED");
 	}
 
 	if (response_r1 & SD_OCR_CC_ERROR)
 	{
-		tfp_printf("SD_CC_ERROR");
+		printf("SD_CC_ERROR");
 	}
 
 	if (response_r1 & SD_OCR_GENERAL_UNKNOWN_ERROR)
 	{
-		tfp_printf("SD_GENERAL_UNKNOWN_ERROR");
+		printf("SD_GENERAL_UNKNOWN_ERROR");
 	}
 
 	if (response_r1 & SD_OCR_STREAM_READ_UNDERRUN)
 	{
-		tfp_printf("SD_STREAM_READ_UNDERRUN");
+		printf("SD_STREAM_READ_UNDERRUN");
 	}
 
 	if (response_r1 & SD_OCR_STREAM_WRITE_OVERRUN)
 	{
-		tfp_printf("SD_STREAM_WRITE_OVERRUN");
+		printf("SD_STREAM_WRITE_OVERRUN");
 	}
 
 	if (response_r1 & SD_OCR_CID_CSD_OVERWRIETE)
 	{
-		tfp_printf("SD_CID_CSD_OVERWRITE");
+		printf("SD_CID_CSD_OVERWRITE");
 	}
 
 	if (response_r1 & SD_OCR_WP_ERASE_SKIP)
 	{
-		tfp_printf("SD_WP_ERASE_SKIP");
+		printf("SD_WP_ERASE_SKIP");
 	}
 
 	if (response_r1 & SD_OCR_CARD_ECC_DISABLED)
 	{
-		tfp_printf("SD_CARD_ECC_DISABLED");
+		printf("SD_CARD_ECC_DISABLED");
 	}
 
 	if (response_r1 & SD_OCR_ERASE_RESET)
 	{
-		tfp_printf("SD_ERASE_RESET");
+		printf("SD_ERASE_RESET");
 	}
 
 	if (response_r1 & SD_OCR_AKE_SEQ_ERROR)
 	{
-		tfp_printf("SD_AKE_SEQ_ERROR");
+		printf("SD_AKE_SEQ_ERROR");
 	}
 
 }

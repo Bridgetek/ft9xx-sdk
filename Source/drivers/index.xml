@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<libraries
+	name = "Layered Driver Libraries for FT9xx" desc = "v2.7.0">
+	<library>
+		<name>USB Header Files</name>
+		<desc>USB header files.</desc>
+		<include>usb/include</include>
+		<file dest="usb/include/ft900_usb_cdc.h" src="ft900_usb_cdc.h" />
+		<file dest="usb/include/ft900_usb_hid.h" src="ft900_usb_hid.h" />
+		<file dest="usb/include/ft900_usb_boms.h" src="ft900_usb_boms.h" />
+		<file dest="usb/include/ft900_usb_audio.h" src="ft900_usb_audio.h" />
+		<file dest="usb/include/ft900_usb_uvc.h" src="ft900_usb_uvc.h" />
+	</library>
+	<library>
+		<name>USB Host CDCACM</name>
+		<desc>USB Host driver for CDC ACM devices.</desc>
+		<include>usb/include</include>
+		<file dest="usb/include/ft900_usb_cdc.h" src="ft900_usb_cdc.h" />
+		<file dest="usb/include/ft900_usbh_cdcacm.h" src="ft900_usbh_cdcacm.h" />
+		<file dest="usb/src/usbh_cdcacm.c" src="usbh_cdcacm.c" />
+	</library>
+	<library>
+		<name>USB Host HID</name>
+		<desc>USB Host driver for HID devices.</desc>
+		<include>usb/include</include>
+		<file dest="usb/include/ft900_usb_hid.h" src="ft900_usb_hid.h" />
+		<file dest="usb/include/ft900_usbh_hid.h" src="ft900_usbh_hid.h" />
+		<file dest="usb/src/usbh_hid.c" src="usbh_hid.c" />
+	</library>
+	<library>
+		<name>USB Host BOMS</name>
+		<desc>USB Host driver for BOMS (Flash Disk) devices.</desc>
+		<include>usb/include</include>
+		<file dest="usb/include/ft900_usb_boms.h" src="ft900_usb_boms.h" />
+		<file dest="usb/include/ft900_usbh_boms.h" src="ft900_usbh_boms.h" />
+		<file dest="usb/src/usbh_boms.c" src="usbh_boms.c" />
+	</library>
+	<library>
+		<name>USB Host AOA</name>
+		<desc>USB Host driver for AOA devices.</desc>
+		<include>usb/include</include>
+		<file dest="usb/include/ft900_usb_aoa.h" src="ft900_usb_aoa.h" />
+		<file dest="usb/include/ft900_usbh_aoa.h" src="ft900_usbh_aoa.h" />
+		<file dest="usb/src/usbh_aoa.c" src="usbh_aoa.c" />
+	</library>
+	<library>
+		<name>USB Device RNDIS</name>
+		<desc>USB Device driver for RNDIS.</desc>
+		<include>usb/include</include>
+		<file dest="usb/include/ft900_usb_rndis.h" src="ft900_usb_rndis.h" />
+		<file dest="usb/include/ft900_usbh_rndis.h" src="ft900_usbh_rndis.h" />
+		<file dest="usb/src/usbd_rndis.c" src="usbd_rndis.c" />
+	</library>
+ </libraries>

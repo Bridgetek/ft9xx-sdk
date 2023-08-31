@@ -46,8 +46,8 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 
 void setup(void);
 void loop(void);
@@ -144,9 +144,6 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
-
     /* Enable CAN0 and CAN1... */
     sys_enable(sys_device_can0);
     sys_enable(sys_device_can1);
@@ -189,30 +186,30 @@ void loop(void)
         {
             /* Transmit an unwanted message on CAN0 to CAN1... */
             can_write(CAN0, unwanted_messages+i);
-            tfp_printf("Transmitting %5d unwanted messages\r", k++);
+            printf("Transmitting %5d unwanted messages\r", k++);
 
             /* Sanity check to see if we go anything on CAN1 */
             if (can_available(CAN1))
             {
-                tfp_printf("\r\n"
+                printf("\r\n"
                            "ERROR: Got a CAN message on CAN1 when I wasn't expecting it\r\n"
                            "HALTING.\r\n");
                 for(;;); /* HALT */
             }
         }
     }
-    tfp_printf("\r\n");
+    printf("\r\n");
 
     /* Transmit the wanted message to CAN1... */
     can_write(CAN0, wanted_messages);
-    tfp_printf("Transmitting     1 wanted messages\r\n");
+    printf("Transmitting     1 wanted messages\r\n");
 
     /* Check to see if only one message has appeared at CAN1... */
     available = can_available(CAN1);
     if (available == 1)
-        tfp_printf("There is 1 message available on CAN1\r\n");
+        printf("There is 1 message available on CAN1\r\n");
     else
-        tfp_printf("There are %d messages available on CAN1\r\n", available);
+        printf("There are %d messages available on CAN1\r\n", available);
 
 
     /* Read out every message we got (which should be just one)... */
@@ -220,12 +217,12 @@ void loop(void)
     {
         if (can_read(CAN1, &rx) == 0)
         {
-            tfp_printf("CAN1 RX-> ");
+            printf("CAN1 RX-> ");
             print_can_msg_t(&rx);
         }
     }
 
-    tfp_printf("\r\n");
+    printf("\r\n");
 
     /* Wait a bit... */
     delayms(2000);
@@ -250,27 +247,22 @@ void print_can_msg_t(can_msg_t *msg)
     uint8_t i = 0;
 
     if (msg->type == can_type_standard)
-        tfp_printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
+        printf("ID=_____0x%03lx ", msg->id); /* 11 bit ID */
     else
-        tfp_printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
+        printf("ID=0x%08lx ", msg->id); /* 29 bit ID */
 
     if (msg->rtr == can_rtr_remote_request)
-        tfp_printf("RTR ");
+        printf("RTR ");
     else
-        tfp_printf("    ");
+        printf("    ");
 
-    tfp_printf("{");
+    printf("{");
     for (i = 0; i < msg->dlc; ++i)
     {
-        tfp_printf("0x%02x", msg->data[i]);
+        printf("0x%02x", msg->data[i]);
         if (i < (msg->dlc - 1))
-            tfp_printf(",");
+            printf(",");
     }
-    tfp_printf("}"
+    printf("}"
            "\r\n");
-}
-
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
 }

@@ -46,6 +46,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
 
 #define GPIO_PIN 18

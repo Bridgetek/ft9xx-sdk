@@ -59,14 +59,14 @@
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 static inline void spi_wait_whilst_transmitting(ft900_spi_regs_t* dev)
 {
-    while (!(dev->SPI_STATUS & MASK_SPIM_SPIM_STATUS_TX_EMPTY))
+    while (!(dev->STATUS & MASK_SPIM_SPIM_STATUS_TX_EMPTY))
     {
     }
 }
 
 static inline uint8_t spi_fifos_enabled(ft900_spi_regs_t* dev)
 {
-    return (dev->SPI_FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN) > 0;
+    return (dev->FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN) > 0;
 }
 
 /* FUNCTIONS ***********************************************************************/
@@ -111,16 +111,16 @@ int8_t spi_init(ft900_spi_regs_t* dev, spi_dir_t dir, spi_clock_mode_t clock_mod
     if (iRet == 0)
     {
         /* Reset all registers */
-        dev->SPI_CNTL = 0x00;
-        dev->SPI_STATUS = 0x00;
-        dev->SPI_FIFO_CNTL = 0x00;
-        dev->SPI_TNSFR_FRMT_CNTL = 0x00;
+        dev->CNTL = 0x00;
+        dev->STATUS = 0x00;
+        dev->FIFO_CNTL = 0x00;
+        dev->TNSFR_FRMT_CNTL = 0x00;
 
 
         if (dir == spi_dir_master)
         {
             /* Master */
-            dev->SPI_CNTL |= MASK_SPIM_SPIM_CNTL_MSTR;
+            dev->CNTL |= MASK_SPIM_SPIM_CNTL_MSTR;
         }
         else
         {
@@ -136,15 +136,15 @@ int8_t spi_init(ft900_spi_regs_t* dev, spi_dir_t dir, spi_clock_mode_t clock_mod
         }
         else if (clock_mode == spi_mode_1)
         {
-            dev->SPI_CNTL |= MASK_SPIM_SPIM_CNTL_CLK_PHA;
+            dev->CNTL |= MASK_SPIM_SPIM_CNTL_CLK_PHA;
         }
         else if (clock_mode == spi_mode_2)
         {
-            dev->SPI_CNTL |= MASK_SPIM_SPIM_CNTL_CLK_POL;
+            dev->CNTL |= MASK_SPIM_SPIM_CNTL_CLK_POL;
         }
         else if (clock_mode == spi_mode_3)
         {
-            SPIM->SPI_CNTL |= (MASK_SPIM_SPIM_CNTL_CLK_PHA | MASK_SPIM_SPIM_CNTL_CLK_POL);
+            SPIM->CNTL |= (MASK_SPIM_SPIM_CNTL_CLK_PHA | MASK_SPIM_SPIM_CNTL_CLK_POL);
         }
         else
         {
@@ -155,18 +155,18 @@ int8_t spi_init(ft900_spi_regs_t* dev, spi_dir_t dir, spi_clock_mode_t clock_mod
         /* Set up the clock divider... */
         /*SPIM->SPCR &= ~(SPIM_SPCR_SPR2 | SPIM_SPCR_SPR1 | SPIM_SPCR_SPR0);*/ /* Mask */
         if (div == 4) { /* SPIM->SPCR |= 0x00; */ /* SPR = 0b000 */ }
-        else if (div == 8) { dev->SPI_CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R0); /* SPR = 0b001 */ }
-        else if (div == 16) { dev->SPI_CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R1); /* SPR = 0b010 */ }
-        else if (div == 32) { dev->SPI_CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R1 | MASK_SPIM_SPIM_CNTL_SP_R0); /* SPR = 0b011 */ }
-        else if (div == 64) { dev->SPI_CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R2); /* SPR = 0b100 */ }
-        else if (div == 128) { dev->SPI_CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R2 | MASK_SPIM_SPIM_CNTL_SP_R0); /* SPR = 0b101 */ }
-        else if (div == 256) { dev->SPI_CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R2 | MASK_SPIM_SPIM_CNTL_SP_R1); /* SPR = 0b110 */ }
-        else if (div == 512) { dev->SPI_CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R2 | MASK_SPIM_SPIM_CNTL_SP_R1 | MASK_SPIM_SPIM_CNTL_SP_R0); /* SPR = 0b111 */ }
+        else if (div == 8) { dev->CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R0); /* SPR = 0b001 */ }
+        else if (div == 16) { dev->CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R1); /* SPR = 0b010 */ }
+        else if (div == 32) { dev->CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R1 | MASK_SPIM_SPIM_CNTL_SP_R0); /* SPR = 0b011 */ }
+        else if (div == 64) { dev->CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R2); /* SPR = 0b100 */ }
+        else if (div == 128) { dev->CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R2 | MASK_SPIM_SPIM_CNTL_SP_R0); /* SPR = 0b101 */ }
+        else if (div == 256) { dev->CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R2 | MASK_SPIM_SPIM_CNTL_SP_R1); /* SPR = 0b110 */ }
+        else if (div == 512) { dev->CNTL |= (MASK_SPIM_SPIM_CNTL_SP_R2 | MASK_SPIM_SPIM_CNTL_SP_R1 | MASK_SPIM_SPIM_CNTL_SP_R0); /* SPR = 0b111 */ }
         else {}
 
-        dev->SPI_SLV_SEL_CNTL = 0xFF; /* Deassert all devices */
+        dev->SLV_SEL_CNTL = 0xFF; /* Deassert all devices */
         
-        dev->SPI_CNTL |= MASK_SPIM_SPIM_CNTL_SP_E; /* Enable the SPI device */
+        dev->CNTL |= MASK_SPIM_SPIM_CNTL_SP_E; /* Enable the SPI device */
 
     }
 
@@ -180,7 +180,7 @@ int8_t spi_init(ft900_spi_regs_t* dev, spi_dir_t dir, spi_clock_mode_t clock_mod
 int8_t spi_enable(ft900_spi_regs_t* dev)
 {
 
-	dev->SPI_CNTL |= MASK_SPIM_SPIM_CNTL_SP_E; /* Enable the SPI device */
+	dev->CNTL |= MASK_SPIM_SPIM_CNTL_SP_E; /* Enable the SPI device */
 
 	return 0;
 }
@@ -191,7 +191,7 @@ int8_t spi_enable(ft900_spi_regs_t* dev)
  */
 int8_t spi_uninit(ft900_spi_regs_t* dev)
 {
-    dev->SPI_CNTL &= ~MASK_SPIM_SPIM_CNTL_SP_E; /* Disable the SPI device */
+    dev->CNTL &= ~MASK_SPIM_SPIM_CNTL_SP_E; /* Disable the SPI device */
 
     return 0;
 }
@@ -214,20 +214,20 @@ int8_t spi_open(ft900_spi_regs_t* dev, uint8_t num)
 
     if (iRet == 0)
     {
-        if (((dev->SPI_CNTL & MASK_SPIM_SPIM_CNTL_MSTR)) && (dev->SPI_SLV_SEL_CNTL == 0xFF))
+        if (((dev->CNTL & MASK_SPIM_SPIM_CNTL_MSTR)) && (dev->SLV_SEL_CNTL == 0xFF))
         {
             /* No devices currently asserted */
             if (spi_fifos_enabled(dev))
             {
                 /* Reset the FIFOs - clear out any latent data from the last
                    transfer */
-                dev->SPI_FIFO_CNTL |= MASK_SPIM_SPIM_FIFO_CNTL_RCVR_RST | MASK_SPIM_SPIM_FIFO_CNTL_TX_RST;
-                while (dev->SPI_FIFO_CNTL & (MASK_SPIM_SPIM_FIFO_CNTL_RCVR_RST | MASK_SPIM_SPIM_FIFO_CNTL_TX_RST))
+                dev->FIFO_CNTL |= MASK_SPIM_SPIM_FIFO_CNTL_RCVR_RST | MASK_SPIM_SPIM_FIFO_CNTL_TX_RST;
+                while (dev->FIFO_CNTL & (MASK_SPIM_SPIM_FIFO_CNTL_RCVR_RST | MASK_SPIM_SPIM_FIFO_CNTL_TX_RST))
                 {
                     /* Wait for the FIFOs to reset */
                 }
             }
-            dev->SPI_SLV_SEL_CNTL &= ~(1 << num); /* Assert */
+            dev->SLV_SEL_CNTL &= ~(1 << num); /* Assert */
         }
         else
         {
@@ -258,12 +258,12 @@ int8_t spi_close(ft900_spi_regs_t* dev, uint8_t num)
     if (iRet == 0)
     {
         /* Need to cast to a byte because of 32 bit memory accesses */
-        if ( (uint8_t)(~(dev->SPI_SLV_SEL_CNTL | (1 << num))) )
+        if ( (uint8_t)(~(dev->SLV_SEL_CNTL | (1 << num))) )
         {
             /* Another device is currently opened */
             iRet = -1;
         }
-        else if ( (uint8_t)((~dev->SPI_SLV_SEL_CNTL) & (1 << num)) == 0 )
+        else if ( (uint8_t)((~dev->SLV_SEL_CNTL) & (1 << num)) == 0 )
         {
             /* The device is not open */
             iRet = -1;
@@ -276,7 +276,7 @@ int8_t spi_close(ft900_spi_regs_t* dev, uint8_t num)
                 spi_wait_whilst_transmitting(dev);
             /*}*/
 
-            dev->SPI_SLV_SEL_CNTL |= (1 << num); /* Deassert */
+            dev->SLV_SEL_CNTL |= (1 << num); /* Deassert */
         }
     }
 
@@ -298,10 +298,10 @@ int32_t spi_writen(ft900_spi_regs_t* dev, const uint8_t *b, size_t len)
     const uint8_t *p8 = b;
     uint8_t FifoScratch[64];
 
-    if (dev->SPI_TNSFR_FRMT_CNTL & (MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI))
+    if (dev->TNSFR_FRMT_CNTL & (MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI))
     {
         /* Set to write */
-        dev->SPI_TNSFR_FRMT_CNTL &= ~MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DIR;
+        dev->TNSFR_FRMT_CNTL &= ~MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DIR;
     }
 
     /* Check if FIFO mode is on */
@@ -309,9 +309,9 @@ int32_t spi_writen(ft900_spi_regs_t* dev, const uint8_t *b, size_t len)
     {
     	int32_t chunksz;
         /* FIFOs enabled */
-        //asm_streamout8(p8, &(dev->SPI_DATA), len);
+        //asm_streamout8(p8, &(dev->DATA), len);
 		/* FIFOs are enabled... */
-		if (dev->SPI_FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE)
+		if (dev->FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE)
 		{
 			iFifoSize = 64;
 		}
@@ -324,20 +324,20 @@ int32_t spi_writen(ft900_spi_regs_t* dev, const uint8_t *b, size_t len)
         {
         	chunksz = (len > iFifoSize)? iFifoSize : len;
 
-        	asm_streamout8(b,&(dev->SPI_DATA), chunksz);
+        	asm_streamout8(b,&(dev->DATA), chunksz);
 
         	spi_wait_whilst_transmitting(dev);
 
 			//TODO - scope for optimization by using RCVR_RST approach to clear the receive fifo instead of streamin
 
 			/* Do not perform read of data in case of quad or dual mode */
-			if( !(dev->SPI_TNSFR_FRMT_CNTL & (MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI)))
+			if( !(dev->TNSFR_FRMT_CNTL & (MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI)))
 			{
-				while(!(dev->SPI_STATUS & MASK_SPIM_SPIM_STATUS_SPI_FLAG))
+				while(!(dev->STATUS & MASK_SPIM_SPIM_STATUS_SPI_FLAG))
 				{
 
 				}
-				asm_streamin8(&(dev->SPI_DATA), FifoScratch, chunksz);
+				asm_streamin8(&(dev->DATA), FifoScratch, chunksz);
 			}
 
             len -= chunksz;
@@ -351,10 +351,10 @@ int32_t spi_writen(ft900_spi_regs_t* dev, const uint8_t *b, size_t len)
         while(len > 0)
         {
         	uint8_t __attribute__ ((unused)) DummyByte;
-            dev->SPI_DATA = *p8++;
+            dev->DATA = *p8++;
 
             spi_wait_whilst_transmitting(dev);
-            DummyByte = dev->SPI_DATA;
+            DummyByte = dev->DATA;
 
             len--;
             iRet++;
@@ -387,22 +387,22 @@ int32_t spi_readn(ft900_spi_regs_t* dev, uint8_t *b, size_t len)
     spi_wait_whilst_transmitting(dev);
 
 
-    if (dev->SPI_TNSFR_FRMT_CNTL & (MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI))
+    if (dev->TNSFR_FRMT_CNTL & (MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI))
     {
 
         /* Dual or Quad Mode... */
         /* FIFOs enabled - stream in dummy bytes */
 
         /* Set to read */
-        dev->SPI_TNSFR_FRMT_CNTL |= MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DIR;
+        dev->TNSFR_FRMT_CNTL |= MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DIR;
     }
 
-    if (dev->SPI_FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN)
+    if (dev->FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN)
     {
     	int32_t chunksz = 0;
 
         /* FIFOs are enabled... */
-        if (dev->SPI_FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE)
+        if (dev->FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE)
         {
             iFifoSize = 64;
         }
@@ -415,19 +415,19 @@ int32_t spi_readn(ft900_spi_regs_t* dev, uint8_t *b, size_t len)
 		{
 			chunksz = (len > iFifoSize) ? iFifoSize : len;
 
-			asm_streamout8(FifoScratch,&(dev->SPI_DATA), chunksz);
+			asm_streamout8(FifoScratch,&(dev->DATA), chunksz);
 
 			/* Check for tx empty flag */
 			spi_wait_whilst_transmitting(dev);
 
 			/* Check for the transmission emplty flag */
-			while(!(dev->SPI_STATUS & MASK_SPIM_SPIM_STATUS_SPI_FLAG))
+			while(!(dev->STATUS & MASK_SPIM_SPIM_STATUS_SPI_FLAG))
 			{
 
 			}
 
 
-			asm_streamin8(&(dev->SPI_DATA), b, chunksz);
+			asm_streamin8(&(dev->DATA), b, chunksz);
 
 			len -= chunksz;
 			b += chunksz;
@@ -439,14 +439,14 @@ int32_t spi_readn(ft900_spi_regs_t* dev, uint8_t *b, size_t len)
 		/* Synchronously read data from the SPI device */
 		for (i = 0; i < len; ++i)
 		{
-			dev->SPI_DATA = 0xDE; /* Poke the SPI device to read */
+			dev->DATA = 0xDE; /* Poke the SPI device to read */
 			spi_wait_whilst_transmitting(dev);
-			while(!(dev->SPI_STATUS & MASK_SPIM_SPIM_STATUS_SPI_FLAG))
+			while(!(dev->STATUS & MASK_SPIM_SPIM_STATUS_SPI_FLAG))
 			{
 
 			}
 
-			*b++ = dev->SPI_DATA; /* Read the byte into the buffer */
+			*b++ = dev->DATA; /* Read the byte into the buffer */
 			iRet++;
 		}
     }
@@ -471,7 +471,7 @@ int32_t spi_xchangen(ft900_spi_regs_t* dev, uint8_t *binp, uint8_t *bout, size_t
     int32_t iRet = 0;
     size_t i = 0, iFifoSize = 0;
 
-    if (dev->SPI_TNSFR_FRMT_CNTL & (MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI))
+    if (dev->TNSFR_FRMT_CNTL & (MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI))
     {
 
         /* Error case for Dual or Quad Mode... */
@@ -482,12 +482,12 @@ int32_t spi_xchangen(ft900_spi_regs_t* dev, uint8_t *binp, uint8_t *bout, size_t
     spi_wait_whilst_transmitting(dev);
 
     /* Check for fifo enabled or disabled */
-    if (dev->SPI_FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN)
+    if (dev->FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN)
     {
     	int32_t chunksz = 0;
 
         /* FIFOs are enabled... */
-        if (dev->SPI_FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE)
+        if (dev->FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE)
         {
             iFifoSize = 64;
         }
@@ -501,15 +501,15 @@ int32_t spi_xchangen(ft900_spi_regs_t* dev, uint8_t *binp, uint8_t *bout, size_t
 		{
 			chunksz = (len > iFifoSize) ? iFifoSize : len;
 
-			asm_streamout8(bout,&(dev->SPI_DATA), chunksz);
+			asm_streamout8(bout,&(dev->DATA), chunksz);
 
 			spi_wait_whilst_transmitting(dev);
-			while(!(dev->SPI_STATUS & MASK_SPIM_SPIM_STATUS_SPI_FLAG))
+			while(!(dev->STATUS & MASK_SPIM_SPIM_STATUS_SPI_FLAG))
 			{
 
 			}
 
-			asm_streamin8(&(dev->SPI_DATA), binp, chunksz);
+			asm_streamin8(&(dev->DATA), binp, chunksz);
 
 			len -= chunksz;
 			binp += chunksz;
@@ -522,14 +522,14 @@ int32_t spi_xchangen(ft900_spi_regs_t* dev, uint8_t *binp, uint8_t *bout, size_t
 		/* Only read out one byte (the one in the shift register) */
 		for (i = 0; i < len; i++)
 		{
-			dev->SPI_DATA = *bout++; /* transfer dummy data to read */
+			dev->DATA = *bout++; /* transfer dummy data to read */
 			spi_wait_whilst_transmitting(dev);
-			while(!(dev->SPI_STATUS & MASK_SPIM_SPIM_STATUS_SPI_FLAG))
+			while(!(dev->STATUS & MASK_SPIM_SPIM_STATUS_SPI_FLAG))
 			{
 
 			}
 
-			*binp++ = dev->SPI_DATA;
+			*binp++ = dev->DATA;
 			iRet++;
 		}
     }
@@ -543,7 +543,7 @@ int32_t spi_xchangen(ft900_spi_regs_t* dev, uint8_t *binp, uint8_t *bout, size_t
  */
 int8_t spi_enable_interrupts_globally(ft900_spi_regs_t* dev)
 {
-    dev->SPI_CNTL |= MASK_SPIM_SPIM_CNTL_SP_IE;
+    dev->CNTL |= MASK_SPIM_SPIM_CNTL_SP_IE;
     return 0;
 }
 
@@ -554,7 +554,7 @@ int8_t spi_enable_interrupts_globally(ft900_spi_regs_t* dev)
  */
 int8_t spi_disable_interrupts_globally(ft900_spi_regs_t* dev)
 {
-    dev->SPI_CNTL &= ~MASK_SPIM_SPIM_CNTL_SP_IE;
+    dev->CNTL &= ~MASK_SPIM_SPIM_CNTL_SP_IE;
     return 0;
 }
 
@@ -577,7 +577,7 @@ int8_t spi_enable_interrupt(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
     switch(interrupt)
     {
         case spi_interrupt_transmit_empty:
-            dev->SPI_TNSFR_FRMT_CNTL |= MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_TX_IEN;
+            dev->TNSFR_FRMT_CNTL |= MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_TX_IEN;
             break;
 #if 0
         case spi_interrupt_receiver_fifo_timeout:
@@ -585,17 +585,17 @@ int8_t spi_enable_interrupt(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
             break;
 #endif
         case spi_interrupt_transmit_1bit_complete:
-            dev->SPI_TNSFR_FRMT_CNTL |= MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_BISINT_EN;
+            dev->TNSFR_FRMT_CNTL |= MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_BISINT_EN;
             break;
         /* Now all the stuff that is set automatically */
         case spi_interrupt_data_ready:
         case spi_interrupt_fault:
             break;
         case spi_interrupt_ex_tx_trigger_en:
-        	device->SPI_FIFO_CNTL_2 |= MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_EN;
+        	device->FIFO_CNTL_2 |= MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_EN;
             break;
         case spi_interrupt_ex_rx_trigger_en:
-        	device->SPI_FIFO_CNTL_2 |= MASK_SPIM_SPIM_FIFO_CNTL_2_RX_TRIG_EN;
+        	device->FIFO_CNTL_2 |= MASK_SPIM_SPIM_FIFO_CNTL_2_RX_TRIG_EN;
             break;
         default:
             iRet = -1;
@@ -619,7 +619,7 @@ int8_t spi_disable_interrupt(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
     switch(interrupt)
     {
         case spi_interrupt_transmit_empty:
-            dev->SPI_TNSFR_FRMT_CNTL &= ~MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_TX_IEN;
+            dev->TNSFR_FRMT_CNTL &= ~MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_TX_IEN;
             break;
 #if 0
         case spi_interrupt_receiver_fifo_timeout:
@@ -627,7 +627,7 @@ int8_t spi_disable_interrupt(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
             break;
 #endif
         case spi_interrupt_transmit_1bit_complete:
-            dev->SPI_TNSFR_FRMT_CNTL &= ~MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_BISINT_EN;
+            dev->TNSFR_FRMT_CNTL &= ~MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_BISINT_EN;
             break;
         /* Now all the stuff that is set automatically */
         case spi_interrupt_data_ready:
@@ -670,7 +670,7 @@ int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
 #if defined(__FT900__)
             	if (sys_check_ft900_revB())//if 90x series is rev B
             	{
-					if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_TX_EMPTY))
+					if ((dev->STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_TX_EMPTY))
 							== (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_TX_EMPTY))
 					{
 						iRet = 1;
@@ -679,14 +679,14 @@ int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
             	else
             	{
             		//if 90x series is rev C
-                    if ((device->SPI_STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_TXFIFO_EMPTY))
+                    if ((device->STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_TXFIFO_EMPTY))
                             == (MASK_SPIM_SPIM_STATUS_2_TXFIFO_EMPTY))
                     {
                         iRet = 1;
                     }
             	}
 #elif defined(__FT930__)
-                if ((device->SPI_STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_TXFIFO_EMPTY))
+                if ((device->STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_TXFIFO_EMPTY))
                         == (MASK_SPIM_SPIM_STATUS_2_TXFIFO_EMPTY))
                 {
                     iRet = 1;
@@ -698,11 +698,11 @@ int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
                 break;
 #endif
             case spi_interrupt_transmit_1bit_complete:
-                if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS))
+                if ((dev->STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS))
                         == (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS))
                 {
                     iRet = 1;
-                    dev->SPI_CNTL |= 0x00; /* Do nothing but access SPIM_CNTL */
+                    dev->CNTL |= 0x00; /* Do nothing but access SPIM_CNTL */
                 }
                 break;
 
@@ -711,7 +711,7 @@ int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
 #if defined(__FT900__)
             	if (sys_check_ft900_revB())//if 90x series is rev B
             	{
-                    if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
+                    if ((dev->STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
                             == (MASK_SPIM_SPIM_STATUS_SPI_FLAG))
                     {
                         iRet = 1;
@@ -720,14 +720,14 @@ int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
             	else
             	{
             		//if 90x series is rev C
-                    if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
+                    if ((dev->STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
                             == (MASK_SPIM_SPIM_STATUS_SPI_FLAG))
                     {
                         iRet = 1;
                     }
             	}
 #elif defined(__FT930__)
-                if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
+                if ((dev->STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_SPI_BIS | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
                           == (MASK_SPIM_SPIM_STATUS_SPI_FLAG))
                 {
                     iRet = 1;
@@ -736,22 +736,22 @@ int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
                 break;
 
             case spi_interrupt_fault:
-                if ((dev->SPI_STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
+                if ((dev->STATUS & (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
                         == (MASK_SPIM_SPIM_STATUS_SPI_FLAG | MASK_SPIM_SPIM_STATUS_MOD_FAULT))
                 {
                     iRet = 1;
-                    dev->SPI_CNTL |= 0x00; /* Do nothing but access SPICTRL1 */
+                    dev->CNTL |= 0x00; /* Do nothing but access SPICTRL1 */
                 }
                 break;
             case spi_interrupt_ex_rx_fifo_full:
-                if ((device->SPI_STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_RXFIFO_FULL))
+                if ((device->STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_RXFIFO_FULL))
                         == (MASK_SPIM_SPIM_STATUS_2_RXFIFO_FULL))
                 {
                     iRet = 1;
                 }
                 break;
             case spi_interrupt_ex_rx_fifo_overridden:
-                if ((device->SPI_STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_RXFULL_OVERRIDE))
+                if ((device->STATUS_2 & (MASK_SPIM_SPIM_STATUS_2_RXFULL_OVERRIDE))
                         == (MASK_SPIM_SPIM_STATUS_2_RXFULL_OVERRIDE))
                 {
                     iRet = 1;
@@ -785,7 +785,7 @@ int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt)
  */
 uint8_t spi_status(ft900_spi_regs_t* dev)
 {
-    return dev->SPI_STATUS;
+    return dev->STATUS;
 }
 
 
@@ -820,13 +820,13 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
         {
             if (val == 1)
             {
-                if (!(dev->SPI_FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN))
+                if (!(dev->FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN))
                 {
-                    dev->SPI_FIFO_CNTL |= MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN; /* Enable the FIFOs */
+                    dev->FIFO_CNTL |= MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN; /* Enable the FIFOs */
 
                     /* Reset both FIFOs, self clearing */
-                    dev->SPI_FIFO_CNTL |= (MASK_SPIM_SPIM_FIFO_CNTL_RCVR_RST | MASK_SPIM_SPIM_FIFO_CNTL_TX_RST);
-                    while (dev->SPI_FIFO_CNTL & (MASK_SPIM_SPIM_FIFO_CNTL_RCVR_RST | MASK_SPIM_SPIM_FIFO_CNTL_TX_RST))
+                    dev->FIFO_CNTL |= (MASK_SPIM_SPIM_FIFO_CNTL_RCVR_RST | MASK_SPIM_SPIM_FIFO_CNTL_TX_RST);
+                    while (dev->FIFO_CNTL & (MASK_SPIM_SPIM_FIFO_CNTL_RCVR_RST | MASK_SPIM_SPIM_FIFO_CNTL_TX_RST))
                     {
                         /* Wait for these bits to clear */
                     }
@@ -834,9 +834,9 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
             }
             else if (val == 0)
             {
-                if ((dev->SPI_FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN))
+                if ((dev->FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN))
                 {
-                    dev->SPI_FIFO_CNTL &= ~MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN; /* Disable the FIFOs */
+                    dev->FIFO_CNTL &= ~MASK_SPIM_SPIM_FIFO_CNTL_FIFO_EN; /* Disable the FIFOs */
                 }
             }
             else
@@ -850,11 +850,11 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
         {
             if (val == spi_fifo_size_16)
             {
-                dev->SPI_FIFO_CNTL &= ~MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE;
+                dev->FIFO_CNTL &= ~MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE;
             }
             else if (val == spi_fifo_size_64)
             {
-                dev->SPI_FIFO_CNTL |= MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE;
+                dev->FIFO_CNTL |= MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE;
             }
             else
             {
@@ -867,28 +867,28 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
 
         case spi_option_fifo_receive_trigger:
         {
-            if (dev->SPI_FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE)
+            if (dev->FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE)
             {
                 /* 64 Byte FIFO in use... */
                 if (val == 1)
                 {
-                    dev->SPI_FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
-                    dev->SPI_FIFO_CNTL |= (0 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL |= (0 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
                 }
                 else if (val == 16)
                 {
-                    dev->SPI_FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
-                    dev->SPI_FIFO_CNTL |= (1 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL |= (1 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
                 }
                 else if (val == 32)
                 {
-                    dev->SPI_FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
-                    dev->SPI_FIFO_CNTL |= (2 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL |= (2 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
                 }
                 else if (val == 56)
                 {
-                    dev->SPI_FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
-                    dev->SPI_FIFO_CNTL |= (3 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL |= (3 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
                 }
                 else
                 {
@@ -900,23 +900,23 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
                 /* 16 Byte FIFO in use... */
                 if (val == 1)
                 {
-                    dev->SPI_FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
-                    dev->SPI_FIFO_CNTL |= (0 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL |= (0 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
                 }
                 else if (val == 4)
                 {
-                    dev->SPI_FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
-                    dev->SPI_FIFO_CNTL |= (1 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL |= (1 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
                 }
                 else if (val == 8)
                 {
-                    dev->SPI_FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
-                    dev->SPI_FIFO_CNTL |= (2 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL |= (2 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
                 }
                 else if (val == 14)
                 {
-                    dev->SPI_FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
-                    dev->SPI_FIFO_CNTL |= (3 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL &= ~(MASK_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
+                    dev->FIFO_CNTL |= (3 << BIT_SPIM_SPIM_FIFO_CNTL_RCVR_TRIG);
                 }
                 else
                 {
@@ -930,11 +930,11 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
         {
             if (val == 1)
             {
-                dev->SPI_STATUS &= ~MASK_SPIM_SPIM_STATUS_SSC_EN;
+                dev->STATUS &= ~MASK_SPIM_SPIM_STATUS_SSC_EN;
             }
             else if (val == 0)
             {
-                dev->SPI_STATUS |= MASK_SPIM_SPIM_STATUS_SSC_EN;
+                dev->STATUS |= MASK_SPIM_SPIM_STATUS_SSC_EN;
             }
             else
             {
@@ -947,17 +947,17 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
         {
             if (val == spi_width_1bit)
             {
-            	dev->SPI_TNSFR_FRMT_CNTL &= ~(MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI);
+            	dev->TNSFR_FRMT_CNTL &= ~(MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI);
             }
             else if (val == spi_width_2bit)
             {
-                dev->SPI_TNSFR_FRMT_CNTL &= ~(MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI);
-                dev->SPI_TNSFR_FRMT_CNTL |= (1 << BIT_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI);
+                dev->TNSFR_FRMT_CNTL &= ~(MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI);
+                dev->TNSFR_FRMT_CNTL |= (1 << BIT_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI);
             }
             else if (val == spi_width_4bit)
             {
-                dev->SPI_TNSFR_FRMT_CNTL &= ~(MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI);
-                dev->SPI_TNSFR_FRMT_CNTL |= (2 << BIT_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI);
+                dev->TNSFR_FRMT_CNTL &= ~(MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI | MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_QUAD_SPI);
+                dev->TNSFR_FRMT_CNTL |= (2 << BIT_SPIM_SPIM_TNSFR_FRMT_CNTL_DUAL_SPI);
             }
             else
             {
@@ -1013,27 +1013,27 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
         		ft900_spi_regs_t *device = dev;
 #endif
 
-				  if (device->SPI_FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE)
+				  if (device->FIFO_CNTL & MASK_SPIM_SPIM_FIFO_CNTL_64_BYTE)
 				  {
 					  /* 64 Byte FIFO in use... */
 					  if (val == 1)
 					  {
-						  device->SPI_FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
 					  }
 					  else if (val == 16)
 					  {
-						  device->SPI_FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
-						  device->SPI_FIFO_CNTL_2 |= (1 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 |= (1 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
 					  }
 					  else if (val == 32)
 					  {
-						  device->SPI_FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
-						  device->SPI_FIFO_CNTL_2 |= (2 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 |= (2 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
 					  }
 					  else if (val == 56)
 					  {
-						  device->SPI_FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
-						  device->SPI_FIFO_CNTL_2 |= (3 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 |= (3 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
 					  }
 					  else
 					  {
@@ -1045,22 +1045,22 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
 					  /* 16 Byte FIFO in use... */
 					  if (val == 1)
 					  {
-						  device->SPI_FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
 					  }
 					  else if (val == 4)
 					  {
-						  device->SPI_FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
-						  device->SPI_FIFO_CNTL_2 |= (1 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 |= (1 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
 					  }
 					  else if (val == 8)
 					  {
-						  device->SPI_FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
-						  device->SPI_FIFO_CNTL_2 |= (2 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 |= (2 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
 					  }
 					  else if (val == 14)
 					  {
-						  device->SPI_FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
-						  device->SPI_FIFO_CNTL_2 |= (3 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 &= ~(MASK_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
+						  device->FIFO_CNTL_2 |= (3 << BIT_SPIM_SPIM_FIFO_CNTL_2_TX_TRIG_LVL);
 					  }
 					  else
 					  {
@@ -1076,11 +1076,11 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
         {
             if (val == 1)
             {
-                dev->SPI_TNSFR_FRMT_CNTL |= MASK_SPIM_SPIM_TNSFR_FMRT_CNTL_MULTI_REC;
+                dev->TNSFR_FRMT_CNTL |= MASK_SPIM_SPIM_TNSFR_FMRT_CNTL_MULTI_REC;
             }
             else if (val == 0)
             {
-                dev->SPI_TNSFR_FRMT_CNTL &= ~MASK_SPIM_SPIM_TNSFR_FMRT_CNTL_MULTI_REC;
+                dev->TNSFR_FRMT_CNTL &= ~MASK_SPIM_SPIM_TNSFR_FMRT_CNTL_MULTI_REC;
             }
             else
             {
@@ -1109,16 +1109,16 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
         		/* Enable baud register */
         		if (val)
                 {
-                    device->SPI_BAUD |= MASK_SPIM_SPIM_CNTL_2_BAUD_REG_EN;
+                    device->BAUD |= MASK_SPIM_SPIM_CNTL_2_BAUD_REG_EN;
                 }
                 else
                 {
-                    device->SPI_BAUD &= ~MASK_SPIM_SPIM_CNTL_2_BAUD_REG_EN;
+                    device->BAUD &= ~MASK_SPIM_SPIM_CNTL_2_BAUD_REG_EN;
                     /*BAUD register is disabled, transmission speed is controlled by
                      * SPR[2:0] of SPCR, CHG_SPR and FAST_SPI.
                      */
                 }
-                device->SPI_BAUD = val;
+                device->BAUD = val;
         	}
         }
         break;  /* spi_option_baud_factor */
@@ -1135,11 +1135,11 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
         	{
 				if (val == 1)
 				{
-					dev->SPI_TNSFR_FRMT_CNTL |= MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_FAST_SPI;
+					dev->TNSFR_FRMT_CNTL |= MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_FAST_SPI;
 				}
 				else if (val == 0)
 				{
-					dev->SPI_TNSFR_FRMT_CNTL &= ~MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_FAST_SPI;
+					dev->TNSFR_FRMT_CNTL &= ~MASK_SPIM_SPIM_TNSFR_FRMT_CNTL_FAST_SPI;
 				}
 				else
 				{
@@ -1166,11 +1166,11 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
         		ft900_spi_regs_ex_t *device = (ft900_spi_regs_ex_t *)dev;
 				if (val == 1)
 				{
-					device->SPI_CNTL_2 |= MASK_SPIM_SPIM_CNTL_2_CHG_SPR;
+					device->CNTL_2 |= MASK_SPIM_SPIM_CNTL_2_CHG_SPR;
 				}
 				else if (val == 0)
 				{
-					device->SPI_CNTL_2 &= ~MASK_SPIM_SPIM_CNTL_2_CHG_SPR;
+					device->CNTL_2 &= ~MASK_SPIM_SPIM_CNTL_2_CHG_SPR;
 				}
 				else
 				{
@@ -1190,7 +1190,7 @@ int8_t spi_option(ft900_spi_regs_t* dev, spi_option_t opt, uint8_t val)
 #else
         	ft900_spi_regs_t *device = dev;
 #endif
-        	device->SPI_SLV_SEL_CNTL &= (~val);
+        	device->SLV_SEL_CNTL &= (~val);
         }
         break;
 

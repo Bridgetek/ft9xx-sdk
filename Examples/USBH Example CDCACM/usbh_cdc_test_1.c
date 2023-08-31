@@ -48,14 +48,13 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include <ft900.h>
 #include <ft900_usb.h>
 #include "ft900_usbhx.h"
 #include <ft900_usbh_cdcacm.h>
 #include <ft900_startup_dfu.h>
-
-#include "tinyprintf.h"
 
 /* CONSTANTS ***********************************************************************/
 
@@ -91,16 +90,6 @@ static volatile uint16_t uart0BufferOut_avail = RINGBUFFER_SIZE;
 size_t uart0Tx(uint8_t *data, size_t len);
 size_t uart0Rx(uint8_t *data, size_t len);
 void uart0ISR(void);
-
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}
 
 void ISR_timer(void)
 {
@@ -275,7 +264,7 @@ void cdc_uart_bridge(USBH_CDCACM_context *ctx)
     int8_t ns, ds;
     int i;
 
-	tfp_printf("Sending encapsulated reset...");
+	printf("Sending encapsulated reset...");
     status = USBH_CDCACM_send_encapsulated_command(ctx, "ATZ", 3);
     if (status == USBH_CDCACM_OK)
     {
@@ -283,14 +272,14 @@ void cdc_uart_bridge(USBH_CDCACM_context *ctx)
 		{
 			USBH_process();
 		}while (!USBH_CDCACM_get_response_available(ctx));
-		tfp_printf("\r\n");
+		printf("\r\n");
 		// Big enough buffer for "\r\nOK\r\n" or "\r\nERROR\r\n"
 		USBH_CDCACM_get_encapsulated_response(ctx, (char *) bufUsb2Uart, 10);
-		tfp_printf("Received %s\r\n", bufUsb2Uart);
+		printf("Received %s\r\n", bufUsb2Uart);
     }
     else
     {
-    	tfp_printf(" not supported %d\r\nSending reset to DATA interface...", status);
+    	printf(" not supported %d\r\nSending reset to DATA interface...", status);
     	USBH_CDCACM_write(ctx, (uint8_t *) "ATZ\r\n", 5);
 		do
 		{
@@ -303,7 +292,7 @@ void cdc_uart_bridge(USBH_CDCACM_context *ctx)
 					break;
 			}
 		}while (read_bytes == 0);
-		tfp_printf("Received OK\r\n");
+		printf("Received OK\r\n");
 
 		status = USBH_CDCACM_OK;
     }
@@ -335,7 +324,7 @@ void cdc_uart_bridge(USBH_CDCACM_context *ctx)
 		USBH_CDCACM_get_poll_status(ctx, &ns, &ds);
 		if (ns || ds)
 		{
-			tfp_printf("Status: %d %d\r\n", ns, ds);
+			printf("Status: %d %d\r\n", ns, ds);
 			if (ns != USBH_OK)
 				status = USBH_CDCACM_ERR_NOTIFICATION_ENDPOINT;
 			if (ds != USBH_OK)
@@ -367,7 +356,7 @@ int8_t scan_for_cdc_acm(USBH_device_handle hDev)
 		if (usbStatus == USBH_OK)
 		{
 			cdcStatus = USBH_CDCACM_init(hInterfaceControl, flags, &ctx);
-			tfp_printf("Beginning CDC ACM testing %d %d\r\n", cdcStatus, usbStatus);
+			printf("Beginning CDC ACM testing %d %d\r\n", cdcStatus, usbStatus);
 			if (cdcStatus == USBH_CDCACM_OK)
 			{
 				break;
@@ -377,12 +366,12 @@ int8_t scan_for_cdc_acm(USBH_device_handle hDev)
 
 	if (cdcStatus == USBH_OK)
 	{
-		tfp_printf("Beginning CDC ACM testing\r\n");
+		printf("Beginning CDC ACM testing\r\n");
 		cdc_uart_bridge(&ctx);
 	}
 	else
 	{
-		tfp_printf("No CDC ACM devices found\r\n");
+		printf("No CDC ACM devices found\r\n");
 	}
 
 	return usbStatus;
@@ -401,7 +390,7 @@ uint8_t usbh_testing(void)
     	USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
 		if (connect == USBH_STATE_NOTCONNECTED)
 		{
-			tfp_printf("\r\nPlease plug in a USB Device\r\n");
+			printf("\r\nPlease plug in a USB Device\r\n");
 
 			// Detect usb device connect
 			do
@@ -410,7 +399,7 @@ uint8_t usbh_testing(void)
 				USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
 			} while (connect == USBH_STATE_NOTCONNECTED);
 		}
-		tfp_printf("\r\nUSB Device Detected\r\n");
+		printf("\r\nUSB Device Detected\r\n");
 
 		do {
 			status = USBH_process();
@@ -419,11 +408,11 @@ uint8_t usbh_testing(void)
 
 		if (connect == USBH_STATE_ENUMERATED)
 		{
-			tfp_printf("USB Devices Enumerated\r\n");
+			printf("USB Devices Enumerated\r\n");
 		}
 		else
 		{
-			tfp_printf("USB Devices Partially Enumerated\r\n");
+			printf("USB Devices Partially Enumerated\r\n");
 		}
 
 		// Get the first device (device on root hub)
@@ -431,7 +420,7 @@ uint8_t usbh_testing(void)
 		if (status != USBH_OK)
 		{
 			// Report the error code.
-			tfp_printf("%d\r\n", status);
+			printf("%d\r\n", status);
 		}
 		else
 		{
@@ -439,7 +428,7 @@ uint8_t usbh_testing(void)
 			scan_for_cdc_acm(hRootDev);
 		}
 
-		tfp_printf("\r\nPlease remove the USB Device\r\n");
+		printf("\r\nPlease remove the USB Device\r\n");
 		// Detect usb device disconnect
 		do
 		{
@@ -480,9 +469,6 @@ int main(int argc, char *argv[])
         "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
     	);
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0, tfp_putc);
-
     /* Attach the interrupt so it can be called... */
     interrupt_attach(interrupt_uart0, (uint8_t) interrupt_uart0, uart0ISR);
     /* Enable the UART to fire interrupts when receiving data... */
@@ -500,7 +486,7 @@ int main(int argc, char *argv[])
 
     interrupt_enable_globally();
 
-    tfp_printf("Copyright (C) Bridgetek Pte Ltd \r\n"
+    printf("Copyright (C) Bridgetek Pte Ltd \r\n"
         "--------------------------------------------------------------------- \r\n"
         "Welcome to USBH CDC Tester Example 1... \r\n"
         "\r\n"

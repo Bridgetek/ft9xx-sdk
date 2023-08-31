@@ -93,7 +93,7 @@ task.h is included from an application file. */
 /* FreeRTOS default is USE_PROTECTION_SCHEME == 1, which does not allow malloc() and free() to be supported in ISR. */
 /* For iHome, we should use either USE_PROTECTION_SCHEME 2 or 3. */
 /* 0: None, 1: vTaskSuspendAll(), 2: taskENTER_CRITICAL(), 3: portIRQ_SET_MASK_ALL(). */
-#define USE_PROTECTION_SCHEME           1
+#define USE_PROTECTION_SCHEME           3
 
 #if USE_PROTECTION_SCHEME == 1
     #define CRITICAL_SECTION_START      vTaskSuspendAll
@@ -494,6 +494,16 @@ uint8_t *puc;
 	{
 		mtCOVERAGE_TEST_MARKER();
 	}
+}
+
+void* pvPortGetHeapStart()
+{
+	return &xStart;
+}
+
+void* pvPortGetHeapEnd()
+{
+	return pxEnd;
 }
 
 #endif  //FT32_PORT_HEAP

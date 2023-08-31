@@ -523,4 +523,14 @@ const HeapRegion_t *pxHeapRegion;
 	xBlockAllocatedBit = ( ( size_t ) 1 ) << ( ( sizeof( size_t ) * heapBITS_PER_BYTE ) - 1 );
 }
 
+void* pvPortGetHeapStart()
+{
+	return &xStart;
+}
+
+void* pvPortGetHeapEnd()
+{
+	return pxEnd;
+}
+
 #endif  //FT32_PORT_HEAP

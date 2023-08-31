@@ -50,6 +50,7 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -74,7 +75,6 @@
 #ifdef RNDIS_DEBUG
 /* UART support for printf output. */
 #include <ft900_uart_simple.h>
-#include "tinyprintf.h"
 #define RNDIS_STATE_DEBUG
 #define RNDIS_LINK_DEBUG
 #define RNDIS_ERROR_DEBUG
@@ -754,16 +754,6 @@ uint8_t eth_link = 0;
 static void eth_setup(void);
 static void eth_rx_enable_cb(uint8_t rx_enable, uint32_t rx_filter);
 
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-	uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}
-
 void ISR_timer(void)
 {
 	if (timer_is_interrupted(timer_select_a))
@@ -1315,7 +1305,7 @@ void reset_cb(uint8_t status)
 {
 	(void) status;
 
-	tfp_printf("Restarting\r\n");
+	printf("Restarting\r\n");
 	USBD_set_state(USBD_STATE_DEFAULT);
 
 	// If we are at DFUSTATE_MANIFEST_WAIT_RESET stage and do
@@ -1333,7 +1323,7 @@ void reset_cb(uint8_t status)
 /* For debugging endpoint transactions. */
 void ep_cb(USBD_ENDPOINT_NUMBER ep_number)
 {
-	tfp_printf("EP%d\r\n", ep_number);
+	printf("EP%d\r\n", ep_number);
 }
 
 
@@ -1348,7 +1338,7 @@ static void rndis_eth_bridge(void)
 
 
 #ifdef RNDIS_STATE_DEBUG
-	tfp_printf("Enumerated\r\n");
+	printf("Enumerated\r\n");
 #endif // RNDIS_STATE_DEBUG
 
 	// Create endpoints for
@@ -1367,7 +1357,7 @@ static void rndis_eth_bridge(void)
 #ifdef RNDIS_LINK_DEBUG
     if (!ethernet_is_link_up())
     {
-    	tfp_printf("Please plug in your Ethernet cable\r\n");
+    	printf("Please plug in your Ethernet cable\r\n");
     }
 #endif // RNDIS_LINK_DEBUG
 
@@ -1524,7 +1514,7 @@ static void rndis_eth_bridge(void)
 			else if (status == USBD_RNDIS_ERROR)
 			{
 #ifdef RNDIS_ERROR_DEBUG
-				tfp_printf("RNDIS ERROR\r\n");
+				printf("RNDIS ERROR\r\n");
 #endif // RNDIS_ERROR_DEBUG
 				USBD_RNDIS_stat(USBD_RNDIS_STAT_TX_DROPPED);
 			}
@@ -1552,7 +1542,7 @@ static void rndis_eth_bridge(void)
 						/* Get the current link speed. */
 						eth_link = ethernet_link_speed();
 #ifdef RNDIS_LINK_DEBUG
-						tfp_printf("Media connected %d Mb/sec\r\n", eth_link);
+						printf("Media connected %d Mb/sec\r\n", eth_link);
 #endif // RNDIS_LINK_DEBUG
 						/* Tell the RNDIS driver what speed we are connected at. */
 						USBD_RNDIS_link(eth_link);
@@ -1577,7 +1567,7 @@ static void rndis_eth_bridge(void)
 							/* Get the new link speed. */
 							eth_link = ethernet_link_speed();
 #ifdef RNDIS_LINK_DEBUG
-							tfp_printf("Media speed change to %d Mb/sec\r\n", eth_link);
+							printf("Media speed change to %d Mb/sec\r\n", eth_link);
 #endif // RNDIS_LINK_DEBUG
 							/* Tell the RNDIS driver what speed we are connected at now. */
 							USBD_RNDIS_link(eth_link);
@@ -1591,7 +1581,7 @@ static void rndis_eth_bridge(void)
 					if (eth_link != 0)
 					{
 #ifdef RNDIS_LINK_DEBUG
-						tfp_printf("Media disconnected\r\n");
+						printf("Media disconnected\r\n");
 #endif // RNDIS_LINK_DEBUG
 						USBD_RNDIS_link(0);
 						ethernet_rx_enable(0);
@@ -1603,7 +1593,7 @@ static void rndis_eth_bridge(void)
 
 			/* Heartbeat. */
 #ifdef RNDIS_STATE_DEBUG
-			tfp_printf(".");
+			printf(".");
 #endif // RNDIS_STATE_DEBUG
 			/* Restart timer. */
 			eth_link_check_timer = ETHERNET_LINK_CHECK_TIMER;
@@ -1612,7 +1602,7 @@ static void rndis_eth_bridge(void)
 		if (eth_stat_timer == 0)
 		{
 #ifdef RNDIS_LINK_DEBUG
-			tfp_printf("Rx %ld Err %ld Dr %ld Tx %ld Err %ld Dr %ld\r\n",
+			printf("Rx %ld Err %ld Dr %ld Tx %ld Err %ld Dr %ld\r\n",
 					USBD_RNDIS_get_stat(USBD_RNDIS_STAT_RX_PACKETS),
 					USBD_RNDIS_get_stat(USBD_RNDIS_STAT_RX_ERROR),
 					USBD_RNDIS_get_stat(USBD_RNDIS_STAT_RX_DROPPED),
@@ -1645,7 +1635,7 @@ static void eth_rx_enable_cb(uint8_t rx_enable, uint32_t rx_filter)
 		ethernet_set_promiscuous(rx_filter & NDIS_PACKET_TYPE_PROMISCUOUS);
 		ethernet_accept_multicast(rx_filter & (NDIS_PACKET_TYPE_MULTICAST | NDIS_PACKET_TYPE_ALL_MULTICAST));
 #ifdef RNDIS_LINK_DEBUG
-        tfp_printf("Packet filter ON P %c M %c\r\n",
+        printf("Packet filter ON P %c M %c\r\n",
         		rx_filter & NDIS_PACKET_TYPE_PROMISCUOUS?'Y':'N',
         				rx_filter & (NDIS_PACKET_TYPE_MULTICAST | NDIS_PACKET_TYPE_ALL_MULTICAST)?'Y':'N');
 #endif // RNDIS_LINK_DEBUG
@@ -1654,7 +1644,7 @@ static void eth_rx_enable_cb(uint8_t rx_enable, uint32_t rx_filter)
 	{
 		ethernet_rx_enable(0);
 #ifdef RNDIS_LINK_DEBUG
-        tfp_printf("Packet filter OFF\r\n");
+        printf("Packet filter OFF\r\n");
 #endif // RNDIS_LINK_DEBUG
 	}
 }
@@ -1665,10 +1655,10 @@ static void eth_setup(void)
 
 	if (i2cm_read(NET_EEPROM_ADDR, NET_EEPROM_OFFSET_MACADDRESS, my_mac, 6) != 0)
 	{
-		tfp_printf("Default ");
+		printf("Default ");
 	}
 
-	tfp_printf("MAC %02x:%02x:%02x:%02x:%02x:%02x\r\n",
+	printf("MAC %02x:%02x:%02x:%02x:%02x:%02x\r\n",
     	    my_mac[0],
 		    my_mac[1],
 			my_mac[2],
@@ -1747,7 +1737,7 @@ uint8_t usbd_testing(void)
 				}while (status == USBD_OK);
 			}
 			USBD_detach();
-			tfp_printf("Restarting\r\n");
+			printf("Restarting\r\n");
 		}
 	}
 
@@ -1783,9 +1773,6 @@ int main(void)
 			"\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
 	);
 
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, tfp_putc);
-
 	sys_enable(sys_device_timer_wdt);
 
 	/* Timer A = 1ms */
@@ -1794,12 +1781,12 @@ int main(void)
 	timer_enable_interrupt(timer_select_a);
 	timer_start(timer_select_a);
 
-	tfp_printf("(C) Copyright, Bridgetek Pte Ltd \r\n");
-	tfp_printf("--------------------------------------------------------------------- \r\n");
-	tfp_printf("Welcome to USBD RNDIS Tester Example 1... \r\n");
-	tfp_printf("\r\n");
-	tfp_printf("Emulate a RNDIS device connected to the USB Device Port.\r\n");
-	tfp_printf("--------------------------------------------------------------------- \r\n");
+	printf("(C) Copyright, Bridgetek Pte Ltd \r\n");
+	printf("--------------------------------------------------------------------- \r\n");
+	printf("Welcome to USBD RNDIS Tester Example 1... \r\n");
+	printf("\r\n");
+	printf("Emulate a RNDIS device connected to the USB Device Port.\r\n");
+	printf("--------------------------------------------------------------------- \r\n");
 
 	interrupt_attach(interrupt_timers, (int8_t)interrupt_timers, ISR_timer);
 	/* Enable power management interrupts. Primarily to detect resume signalling

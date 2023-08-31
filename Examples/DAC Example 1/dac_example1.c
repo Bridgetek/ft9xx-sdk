@@ -46,6 +46,7 @@
  * ============================================================================
  */
 
+#include <stdio.h>
 #include <ft900.h>
 
 #define N_VALUES (sizeof(values)/sizeof(uint16_t))

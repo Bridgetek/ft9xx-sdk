@@ -1,0 +1,327 @@
+<?xml version="1.0"?>
+<projects
+	name = "FT9xx Examples" desc = "v2.7.0">
+    <group name="USB Device Examples" desc="Examples for the USB Device Interface." ft900="yes" ft930="yes" >
+        <project>
+			<name>USBD Example BOMS to SDcard</name>
+			<desc>Implement a BOMS device (Flash disk) on the USB bridged to the file system on an SD card.</desc>
+			<driver>USB Header Files</driver>
+		</project>
+        <project>
+			<name>USBD Example CDCACM</name>
+			<desc>Enumerate as a CDC device on the USB which supports the ACM protocol.</desc>
+			<driver>USB Header Files</driver>
+		</project>
+        <project>
+			<name>USBD Example HID</name>
+			<desc>Make a USB keyboard device appear on the host and send a series of key presses.</desc>
+			<driver>USB Header Files</driver>
+		</project>
+        <project>
+			<name>USBD Example HID Bridge</name>
+			<desc>A USB keyboard device that will send a series of key presses translated from UART input characters.</desc>
+			<driver>USB Header Files</driver>
+		</project>
+        <project>
+			<name>USBD Example Composite</name>
+			<desc>Demonstrate how to make a composite USB device.</desc>
+			<driver>USB Header Files</driver>
+		</project>
+    </group>
+    <group name="USB Host Examples" desc="Examples for the USB Host Interface." ft900="yes" ft930="no" >
+        <project>
+			<name>USBH Example BOMS</name>
+			<desc>Read a BOMS device (Flash disk) plugged into the USB host.</desc>
+			<driver>USB Host BOMS</driver>
+		</project>
+        <project>
+			<name>USBH Example CDCACM</name>
+			<desc>Connect to and send data to and from a CDC device on the USB.</desc>
+			<driver>USB Host CDCACM</driver>
+		</project>
+        <project>
+			<name>USBH Example FT232</name>
+			<desc>Connect to and send data to and from an FT232 device on the USB.</desc>
+		</project>
+        <project>
+			<name>USBH Example HID</name>
+			<desc>Find USB HIDs on the USB and display report data from the device.</desc>
+			<driver>USB Host HID</driver>
+		</project>
+        <project>
+			<name>USBH Example HID to UART</name>
+			<desc>Find USB HID keyboard or barcode scanners on the USB and translate report data from the device.</desc>
+			<driver>USB Host HID</driver>
+		</project>
+        <project>
+			<name>USBH Example File System</name>
+			<desc>Reads a filesystem on an Flash disk. Writes, reads and deletes a file.</desc>
+			<thirdparty>FatFs</thirdparty>
+			<driver>USB Host BOMS</driver>
+		</project>
+        <project>
+			<name>USBH Example Hub</name>
+			<desc>Finds devices connected to the USB and shows information about them.</desc>
+			<driver>USB Header Files</driver>
+		</project>
+    </group>
+    <group name="ADC Examples" desc="Analog to Digital Converter Examples." ft900="yes" ft930="yes" >
+        <project>
+			<name>ADC Example 1</name>
+			<desc>Continuously poll one ADC channel for a new value and write the value to the UART interface.</desc>
+		</project>
+        <project>
+			<name>ADC Example 2</name>
+			<desc>Setup in an interrupt on the ADC and write the value to the UART interface when it changes.</desc>
+		</project>
+        <project>
+			<name>ADC Example 3</name>
+			<desc>Continuously poll multiple ADC channels and periodically write the values to the UART interface.</desc>
+		</project>
+        <project>
+			<name>ADC Example 4</name>
+			<desc>Obtain ADC channel reading in single shot more and write the values to the UART interface.</desc>
+		</project>
+        <project>
+			<name>ADC Example 5</name>
+			<desc>Obtain ADC channel reading with an interrupt in single shot more and write the values to the UART interface.</desc>
+		</project>
+    </group>
+    <group name="BCD Examples" desc="Battery Charge Detection Examples." ft900="yes" ft930="yes" >
+        <project>
+			<name>BCD Example 1</name>
+			<desc>Display the type of BCD charging port that the device is connected to.</desc>
+		</project>
+    </group>
+    <group name="Camera Example" desc="Camera Sensor Interface Examples." ft900="yes" ft930="no" >
+        <project>
+			<name>Camera Example 1</name>
+			<desc>Demonstrates how to interface with the camera sensor and I2C control lines.</desc>
+		</project>
+    </group>
+    <group name="CAN Examples" desc="Controller Area Network Examples." ft900="yes" ft930="no" >
+        <project>
+			<name>CAN Example 1</name>
+			<desc>Transmit CAN messages between CAN0 and CAN1 and poll for the response.</desc>
+		</project>
+        <project>
+			<name>CAN Example 2</name>
+			<desc>Transmit CAN messages from CAN0 and show they can be filtered on CAN1.</desc>
+		</project>
+        <project  ft900="yes" ft930="no" >
+			<name>CAN Example 3</name>
+			<desc>Transmit CAN messages and revieve and process using interrupts.</desc>
+		</project>
+    </group>
+    <group name="D2XX Examples" desc="Implement an FTDI D2XX Device on the USB Device." ft900="yes" ft930="yes" >
+        <project>
+			<name>D2XX Example 1</name>
+			<desc>Configure and enumerate as a D2XX device with data loopback.</desc>
+		</project>
+        <project>
+			<name>D2XX Example UART Bridge</name>
+			<desc>Enumerate as a D2XX device and bridge data to and from the UART interface.</desc>
+		</project>
+    </group>
+    <group name="DAC Examples" desc="Analog to Digital Converter Examples." ft900="yes" ft930="yes" >
+        <project>
+			<name>DAC Example 1</name>
+			<desc>Perform a series of single-shot DAC conversions.</desc>
+		</project>
+        <project>
+			<name>DAC Example 2</name>
+			<desc>Setup in a DAC in continuous mode and poll to send new data.</desc>
+		</project>
+        <project>
+			<name>DAC Example 3</name>
+			<desc>Setup in a DAC in continuous mode and use an interrupt to send new data.</desc>
+		</project>
+    </group>
+    <group name="DLOG Example" desc="Datalogger Example using Flash memory." ft900="yes" ft930="yes" >
+        <project>
+			<name>DLOG Example</name>
+			<desc>Demonstrate use of the datalogger API.</desc>
+		</project>
+    </group>
+    <group name="Ethernet Example 1" desc="Ethernet interface Examples." ft900="yes" ft930="no" >
+        <project>
+			<name>Ethernet Example 1</name>
+			<desc>Implementing ARP and ICMP Echo support to allow the device to respond to a "ping".</desc>
+		</project>
+    </group>
+    <group name="FreeRTOS Examples" desc="Demonstrate a Port of FreeRTOS." ft900="yes" ft930="yes" >
+        <project>
+			<name>FreeRTOS Example 1</name>
+			<desc>Run a series of tasks using queues, switching with the pre-emptive scheduler.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
+		</project>
+        <project>
+			<name>FreeRTOS Example 2</name>
+			<desc>Run a series of tasks using queues, semaphores, events and priority assignment.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
+		</project>
+        <project>
+			<name>FreeRTOS Example 3</name>
+			<desc>Run a series of tasks using time slicing, pre-emptive scheduling using a mutex.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
+		</project>
+        <project>
+			<name>FreeRTOS Example 4</name>
+			<desc>Run a series of tasks demonstrating FreeRTOS kernel aware debugging.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
+		</project>
+        <project>
+			<name>FreeRTOS D2XX Example</name>
+			<desc>Within FreeRTOS, configure and enumerate as a D2XX device with data loopback.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
+			<thirdparty>tinyprintf</thirdparty>
+		</project>
+        <project>
+			<name>FreeRTOS lwIP Example</name>
+			<desc>Use lwIP (lightweight IP stack) from FreeRTOS to perform Ethernet networking.</desc>
+			<thirdparty>FreeRTOS</thirdparty>
+			<thirdparty>lwIP</thirdparty>
+		</project>
+    </group>
+    <group name="GPIO Examples" desc="Show how the GPIO Interface can be used." ft900="yes" ft930="yes" >
+        <project>
+			<name>GPIO Example 1</name>
+			<desc>Set the state of a GPIO output through polling.</desc>
+		</project>
+        <project>
+			<name>GPIO Example 2</name>
+			<desc>Monitor the state of a GPIO input through polling.</desc>
+		</project>
+        <project>
+			<name>GPIO Example 3</name>
+			<desc>Monitor the state of a GPIO input by interrupts.</desc>
+		</project>
+        <project>
+			<name>GPIO DFU Example</name>
+			<desc>Enable the device to enter USB DFU mode when signalled by a GPIO.</desc>
+		</project>
+    </group>
+    <group name="I2C Examples" desc="Send and Receive Data on the I2C Interfaces." ft900="yes" ft930="yes" >
+        <project>
+			<name>I2C Master Example 1</name>
+			<desc>Send and receive data to an externally connected I2C slave device.</desc>
+		</project>
+        <project ft930="no">
+			<name>I2C Master Example 2</name>
+			<desc>Send and receive data to an 24AA02E48T device. MM900EVx boards with Ethernet will have this device.</desc>
+		</project>
+        <project>
+			<name>I2C Slave Example 1</name>
+			<desc>Reveive and reply to an I2C master device.</desc>
+		</project>
+    </group>
+    <group name="I2S Examples" desc="Send and Receive Data on the I2C Interfaces." ft900="yes" ft930="no" >
+        <project ft930="no">
+			<name>I2S Master Example 1</name>
+			<desc>Send a block of data to a codec. MM900EVx boards as fitted with a Wolfram WM8731 Codec.</desc>
+		</project>
+        <project ft930="no">
+			<name>I2S Master Example 2</name>
+			<desc>Send and receive data to and from a codec. MM900EVx boards as fitted with a Wolfram WM8731 Codec.</desc>
+		</project>
+    </group>
+    <group name="PWM Examples" desc="Genreate Waveforms on the PWM Interfaces." ft900="yes" ft930="yes" >
+        <project>
+			<name>PWM Example 1</name>
+			<desc>Output a fixed duty cycle waveform.</desc>
+		</project>
+        <project>
+			<name>PWM Example 2</name>
+			<desc>Output a variable duty cycle waveform.</desc>
+		</project>
+        <project>
+			<name>PWM Example 3</name>
+			<desc>Output audible frequencies on the PWM.</desc>
+		</project>
+    </group>
+    <group name="RTC Examples" desc="Real Time Clock Examples." ft900="yes" ft930="yes" >
+        <project>
+			<name>RTC Example 1</name>
+			<desc>Internal RTC. Display the elapsed time recorded by the RTC.</desc>
+		</project>
+        <project>
+			<name>RTC Example 2</name>
+			<desc>Internal RTC. Demonstrate time matching on the RTC.</desc>
+		</project>
+        <project ft930="no">
+			<name>RTC External Example 1</name>
+			<desc>Extenal RTC on MM900EVx boards. Display time and elapsed time recorded by the RTC.</desc>
+		</project>
+        <project ft930="no">
+			<name>RTC External Example 2</name>
+			<desc>Extenal RTC on MM900EVx boards. Demonstrate time matching on the RTC.</desc>
+		</project>
+    </group>
+    <group name="SD Host Example" desc="Examples for the SD Card reader." ft900="yes" ft930="yes" >
+        <project>
+			<name>SD Host Example 1</name>
+			<desc>Reads a filesystem on an SD card. Writes, reads and deletes a file.</desc>
+			<thirdparty>FatFs</thirdparty>
+		</project>
+    </group>
+    <group name="SPI Examples" desc="Send and Receive Data on the SPI Interfaces." ft900="yes" ft930="yes" >
+        <project>
+			<name>SPI Master Example 1</name>
+			<desc>Send and receive data from an SPI device.</desc>
+		</project>
+        <project ft930="no">
+			<name>SPI Master Example 2</name>
+			<desc>Send and receive data from an SPI device using a FIFO buffer.</desc>
+		</project>
+        <project>
+			<name>SPI Master Example 3</name>
+			<desc>Send and receive data from an SPI device using 4-bit mode.</desc>
+		</project>
+        <project>
+			<name>SPI Slave Example 1</name>
+			<desc>Reveive and reply to an SPI master device.</desc>
+		</project>
+    </group>
+    <group name="Timer Examples" desc="Internal Timer Examples." ft900="yes" ft930="yes" >
+        <project>
+			<name>Timer Example 1</name>
+			<desc>Demonstrate multiple times using single-shot mode.</desc>
+		</project>
+        <project>
+			<name>Timer Example 2</name>
+			<desc>Demonstrate multiple times using continuous mode.</desc>
+		</project>
+        <project>
+			<name>Timer Example 3</name>
+			<desc>Demonstrate multiple times using continuous mode and being serviced by an interrupt.</desc>
+		</project>
+    </group>
+    <group name="UART Examples" desc="Send and Recieve Data on the UART Interfaces." ft900="yes" ft930="yes" >
+        <project>
+			<name>UART Example 1</name>
+			<desc>Echo back characters received on the UART.</desc>
+		</project>
+        <project>
+			<name>UART Example 2</name>
+			<desc>Echo back characters received on the UART using interrupts.</desc>
+		</project>
+        <project>
+			<name>UART Example 3</name>
+			<desc>Echo back characters received on the UART using a FIFO.</desc>
+		</project>
+        <project>
+			<name>UART Example 4</name>
+			<desc>Echo back characters received on the UART using auto-flow control modes.</desc>
+		</project>
+        <project>
+			<name>UART 9Bit Mode Example</name>
+			<desc>Loop back characters between UARTs in 9-bit mode.</desc>
+		</project>
+    </group>
+    <group name="Watchdog Examples" desc="Internal Watchdog Examples." ft900="yes" ft930="no" >
+        <project>
+			<name>Watchdog Example 1</name>
+			<desc>Test the different modes of the internal watchdog timer.</desc>
+		</project>
+    </group>
+ </projects>

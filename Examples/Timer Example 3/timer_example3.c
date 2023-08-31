@@ -50,6 +50,7 @@
  * ============================================================================
  */
 
+#include <stdio.h>
 #include <ft900.h>
 
 /* The Timer Prescaler will divide the 100MHz Master clock down to 2kHz */

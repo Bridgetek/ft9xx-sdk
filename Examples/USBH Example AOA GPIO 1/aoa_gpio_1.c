@@ -48,6 +48,7 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include <ft900_timers.h>
 #include <ft900_sys.h>
@@ -64,7 +65,6 @@
 
 /* UART support for printf output. */
 #include <ft900_uart_simple.h>
-#include "../tinyprintf/tinyprintf.h"
 
 /* CONSTANTS ***********************************************************************/
 
@@ -102,19 +102,9 @@ uint8_t readBuf[64];
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}
-
 void ISR_timer(void)
 {
-	//tfp_printf("ISR_timer");;
+	//printf("ISR_timer");;
     if (timer_is_interrupted(timer_select_a))
     {
     	// Call USB timer handler to action transaction and hub timers.
@@ -137,7 +127,7 @@ int8_t aoa_read_cb(uint32_t id, int8_t status, size_t len, uint8_t *buffer)
 	if (status != USBH_ERR_TIMEOUT)
 	{
 #ifdef USBH_AOA_DEBUG_DATA
-		tfp_printf("Read: %d ", status);
+		printf("Read: %d ", status);
 		if (status == USBH_OK)
 		{
 			for (i = 0; i < len; i++)
@@ -151,37 +141,37 @@ int8_t aoa_read_cb(uint32_t id, int8_t status, size_t len, uint8_t *buffer)
 		// Decode commands from the Android app.
 		if (readBuf[0] == 0x14)
 		{
-			tfp_printf("Reset command\r\n");
+			printf("Reset command\r\n");
 		}
 		else if (readBuf[0] == 0x11)
 		{
-			tfp_printf("Configure command: Outmap ");
+			printf("Configure command: Outmap ");
 			for (i = 0; i < 7; i++)
 			{
-				tfp_printf("%c", ((readBuf[2] >> i) & 1)?'1':'0');
+				printf("%c", ((readBuf[2] >> i) & 1)?'1':'0');
 			}
-			tfp_printf(" Inmap ");
+			printf(" Inmap ");
 			for (i = 0; i < 7; i++)
 			{
-				tfp_printf("%c", ((readBuf[3] >> i) & 1)?'1':'0');
+				printf("%c", ((readBuf[3] >> i) & 1)?'1':'0');
 			}
-			tfp_printf("\r\n");
+			printf("\r\n");
 		}
 		else if (readBuf[0] == 0x13)
 		{
-			tfp_printf("Write Port: Bitmap ");
+			printf("Write Port: Bitmap ");
 			for (i = 0; i < 7; i++)
 			{
-				tfp_printf("%c", ((readBuf[1] >> i) & 1)?'1':'0');
+				printf("%c", ((readBuf[1] >> i) & 1)?'1':'0');
 			}
-			tfp_printf("\r\n");
+			printf("\r\n");
 		}
 		else
 		{
-			tfp_printf("Unknown command %02x.\r\n", readBuf[0]);
+			printf("Unknown command %02x.\r\n", readBuf[0]);
 		}
 	}
-	tfp_printf(".");
+	printf(".");
 
 	// Resubmit asyncronous read.
 	return USBH_AOA_accessory_read_async((USBH_AOA_context *)id, readBuf, 64, id, aoa_read_cb);
@@ -200,27 +190,27 @@ void aoa_testing(USBH_AOA_context *ctx, USBH_device_handle hAOAdev)
     // Display some information on the Android accessory device.
 	if (USBH_device_get_vid_pid(hAOAdev, &usbVid, &usbPid) == USBH_OK)
 	{
-		tfp_printf("VID: %04x PID: %04x\r\n", usbVid, usbPid);
+		printf("VID: %04x PID: %04x\r\n", usbVid, usbPid);
 	}
 	if (USBH_device_get_info(hAOAdev, &devInfo) == USBH_OK)
 	{
-		tfp_printf("Speed: %d %s \r\n", devInfo.speed, speed[devInfo.speed]);
-	    tfp_printf("Address: %d \r\n", devInfo.addr);
+		printf("Speed: %d %s \r\n", devInfo.speed, speed[devInfo.speed]);
+	    printf("Address: %d \r\n", devInfo.addr);
 	}
 
 	// Display accessory interfaces supported.
 	i = USBH_AOA_has_accessory(ctx);
-    tfp_printf("Accessory: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
+    printf("Accessory: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
 	i = USBH_AOA_has_audio(ctx);
-    tfp_printf("Audio: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
+    printf("Audio: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
 	i = USBH_AOA_has_adb(ctx);
-    tfp_printf("Adb: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
+    printf("Adb: %s \r\n", i==USBH_AOA_DETECTED?"yes":"no");
 
     // Start by writing 4 zeros to the Android app. This clears all the
     // LEDs.
     writeBuf[0] = 0;
 	result = USBH_AOA_accessory_write(ctx, writeBuf, 4);
-	tfp_printf("Write: %d\r\n", (int)result);
+	printf("Write: %d\r\n", (int)result);
 
 	// Asynchronously read data from the Android app.
 	USBH_AOA_accessory_read_async(ctx, readBuf, 64, (uint32_t)ctx, aoa_read_cb);
@@ -237,23 +227,23 @@ void aoa_testing(USBH_AOA_context *ctx, USBH_device_handle hAOAdev)
 	    	result = USBH_AOA_accessory_write(ctx, writeBuf, 4);
 
 #ifdef USBH_AOA_DEBUG_DATA
-			tfp_printf("Write: %d ", result);
+			printf("Write: %d ", result);
 			if (result >= 0)
 			{
 				for (i = 0; i < result; i++)
 				{
-					tfp_printf("%02x", writeBuf[i]);
+					printf("%02x", writeBuf[i]);
 				}
 			}
-			tfp_printf("\r\n");
+			printf("\r\n");
 #endif // USBH_AOA_DEBUG_DATA
 
-			tfp_printf("Read Port: Bitmap ");
+			printf("Read Port: Bitmap ");
 			for (i = 0; i < 7; i++)
 			{
-				tfp_printf("%c", ((writeBuf[1] >> i) & 1)?'1':'0');
+				printf("%c", ((writeBuf[1] >> i) & 1)?'1':'0');
 			}
-			tfp_printf("\r\n");
+			printf("\r\n");
 
 			// Shift 'on' LED. Wrap at bit 8 (it's not used).
 			map = map << 1;
@@ -289,7 +279,7 @@ int8_t hub_scan_for_aoa(USBH_device_handle hDev, int level)
     // Disable audio mode if protocol supports it.
     uint16_t audio = USB_AOA_SET_AUDIO_MODE_NONE;
 
-    tfp_printf("Init AOA\r\n");
+    printf("Init AOA\r\n");
 
     // Initialise the device. Try to change it into an accessory after
     // checking the protocol, setting the descriptors and starting the
@@ -306,11 +296,11 @@ int8_t hub_scan_for_aoa(USBH_device_handle hDev, int level)
 
         // A device in Android accessory mode is connected. We can now
     	// attach to the device before calling the testing function.
-        tfp_printf("Attaching AOA\r\n");
+        printf("Attaching AOA\r\n");
         if (USBH_AOA_attach(&ctx) == USBH_AOA_OK)
         {
         	// AOA testing function(s).
-            tfp_printf("Testing AOA\r\n");
+            printf("Testing AOA\r\n");
         	aoa_testing(&ctx, hDev);
         }
     }
@@ -334,7 +324,7 @@ uint8_t usbh_testing(void)
 		USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
 		if (connect == USBH_STATE_NOTCONNECTED)
 		{
-			tfp_printf("\r\nPlease plug in a USB Device\r\n");
+			printf("\r\nPlease plug in a USB Device\r\n");
 
 	    	// Wait for a device (any device) to connect to the USB Host.
 			do
@@ -345,7 +335,7 @@ uint8_t usbh_testing(void)
 			} while (connect == USBH_STATE_NOTCONNECTED);
 		}
 		// We now have a device connected - it may not be enumerated though.
-		tfp_printf("\r\nUSB Device Detected\r\n");
+		printf("\r\nUSB Device Detected\r\n");
 
 		do
 		{
@@ -355,18 +345,18 @@ uint8_t usbh_testing(void)
 			do{
 				status = USBH_process();
 				USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
-				tfp_printf(".");
+				printf(".");
 			} while (connect < USBH_STATE_ENUMERATED);
 
 			// Enumeration may not complete depending on available resources.
 			// Report this but the accessory device may still work.
 			if (connect == USBH_STATE_ENUMERATED)
 			{
-				tfp_printf("USB Devices Enumerated\r\n");
+				printf("USB Devices Enumerated\r\n");
 			}
 			else
 			{
-				tfp_printf("USB Devices Partially Enumerated\r\n");
+				printf("USB Devices Partially Enumerated\r\n");
 			}
 
 			// Get the first device (device on root hub)
@@ -374,7 +364,7 @@ uint8_t usbh_testing(void)
 			if (status != USBH_OK)
 			{
 				// Report the error code.
-				tfp_printf("%d\r\n", status);
+				printf("%d\r\n", status);
 			}
 			else
 			{
@@ -386,7 +376,7 @@ uint8_t usbh_testing(void)
 		// The testing has finished. The device may have been removed or the test
 		// exited normally. Ask the user to remove the device and wait for it to
 		// be removed.
-		tfp_printf("\r\nPlease remove the USB Device\r\n");
+		printf("\r\nPlease remove the USB Device\r\n");
 		// Detect usb device disconnect
 		do
 		{
@@ -430,10 +420,7 @@ int main(void)
         "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
     	);
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0, tfp_putc);
-
-	sys_enable(sys_device_timer_wdt);
+    sys_enable(sys_device_timer_wdt);
 
     interrupt_attach(interrupt_timers, (int8_t)interrupt_timers, ISR_timer);
     interrupt_enable_globally();
@@ -444,7 +431,7 @@ int main(void)
     timer_enable_interrupt(timer_select_a);
     timer_start(timer_select_a);
 
-    tfp_printf("Copyright (C) Bridgetek Pte Ltd \r\n"
+    printf("Copyright (C) Bridgetek Pte Ltd \r\n"
         "--------------------------------------------------------------------- \r\n"
         "Welcome to USBH GPIO AOA Tester Example 1... \r\n"
         "\r\n"

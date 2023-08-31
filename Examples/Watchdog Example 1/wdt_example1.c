@@ -46,9 +46,9 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
 #include <ft900_dlog.h>
-#include "tinyprintf.h"
 
 void setup(void);
 void loop(void);
@@ -169,8 +169,6 @@ void setup(void)
 	}
 #endif
     interrupt_disable_globally();
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
     
 	dlog_hdl = dlog_init (__dlog_partition, &pgsz, &pages);
     if (read_last_context)
@@ -182,11 +180,11 @@ void setup(void)
 		}
 		else
 		{
-			tfp_printf ("DLOG init failed!\n");
+			printf ("DLOG init failed!\n");
 		}
     }
 
-    tfp_printf("Wait for 10 Seconds before starting the test\r\n");
+    printf("Wait for 10 Seconds before starting the test\r\n");
     delayms(10000);
 
     /* attaching watchdog interrupt */
@@ -209,29 +207,23 @@ void loop(void)
         wdt_kick();
         n_kicks++;
 
-        tfp_printf("WDT Kick %d\r\n", n_kicks);
+        printf("WDT Kick %d\r\n", n_kicks);
     }
     delayms(1000);
 }
-
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
-}
-
 
 void dump (uint8_t *d, int len)
 {
 	int	i;
 
-	tfp_printf("last saved context on a watchdog reset: \n");
+	printf("last saved context on a watchdog reset: \n");
 	for (i = 0; i < len; i++)
 	{
 		if ((i & 0xF) == 0)
-			tfp_printf("\n0x%02x: ", i);
-		tfp_printf("%02x ", *d++);
+			printf("\n0x%02x: ", i);
+		printf("%02x ", *d++);
 	}
-	tfp_printf("\n");
+	printf("\n");
 }
 
 void watchdog_ISR(void)

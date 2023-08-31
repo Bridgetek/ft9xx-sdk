@@ -46,12 +46,12 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include "ft900.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
-#include "tinyprintf.h"
 
 /* Three Demo Tasks are implemented here to illustrate the usage of FreeRTOS.
  *
@@ -87,15 +87,6 @@ static void frt_demo2_setup(void);
 static void frt_demo3_setup(void);
 #endif
 
-/** tfp_printf putc
- *  @param p Parameters
- *  @param c The character to write */
-void myputc(void* p, char c) {
-	uart_write((ft900_uart_regs_t*) p, (uint8_t) c);
-}
-
-
-
 int main(void)
 {
 
@@ -118,10 +109,7 @@ int main(void)
 	uart_open(UART0, 1,
 			UART_DIVIDER_19200_BAUD, uart_data_bits_8, uart_parity_none,
 			uart_stop_bits_1);
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, myputc);
-
-
+	
 #if(FRT_DEMO == 1)
 	/* Print out a welcome message... */
 	uart_puts(UART0,
@@ -163,7 +151,7 @@ int main(void)
 	/* Start the scheduler so the created tasks start executing. */
 	vTaskStartScheduler();
 
-	tfp_printf("Should never reach here!\n");
+	printf("Should never reach here!\n");
 
 	for (;;)
 		;
@@ -186,8 +174,8 @@ void vTask1(void *pvParameters)
 	for(;;)
 	{
 		vTaskSuspendAll ();
-		/* tfp_printf out the name of this task. */
-		tfp_printf(pcTaskName);
+		/* printf out the name of this task. */
+		printf(pcTaskName);
 		xTaskResumeAll ();
 
 		/* Delay for a period. */
@@ -208,8 +196,8 @@ void vTask2(void *pvParameters)
 	for(;;)
 	{
 		vTaskSuspendAll ();
-		/* tfp_printf out the name of this task. */
-		tfp_printf(pcTaskName);
+		/* printf out the name of this task. */
+		printf(pcTaskName);
 		xTaskResumeAll ();
 
 		/* Delay for a period. */
@@ -230,8 +218,8 @@ void vTask3(void *pvParameters)
 	for(;;)
 	{
 		vTaskSuspendAll ();
-		/* tfp_printf out the name of this task. */
-		tfp_printf(pcTaskName);
+		/* printf out the name of this task. */
+		printf(pcTaskName);
 		xTaskResumeAll ();
 
 		/* Delay for a period. */
@@ -278,8 +266,8 @@ void vTask1(void *pvParameters)
 
 	for(;;)
 	{
-		/* tfp_printf out the name of this task. */
-		tfp_printf(pcTaskName);
+		/* printf out the name of this task. */
+		printf(pcTaskName);
 
 		vTaskDelay(500 * portTICK_PERIOD_MS);
 	}
@@ -295,8 +283,8 @@ void vTask2(void *pvParameters)
 
 	for(;;)
 	{
-		/* tfp_printf out the name of this task. */
-		tfp_printf(pcTaskName);
+		/* printf out the name of this task. */
+		printf(pcTaskName);
 
 		/* Delay for a period. */
 		for( ul = 0; ul < mainDELAY_LOOP_COUNT; ul++ )
@@ -315,14 +303,14 @@ void vTask3(void *pvParameters)
 
 	for(;;)
 	{
-		/* tfp_printf out the name of this task. */
-		tfp_printf(pcTaskName);
+		/* printf out the name of this task. */
+		printf(pcTaskName);
 	}
 }
 
 static void frt_demo2_setup(void)
 {
-	tfp_printf("Demo 2\n");
+	printf("Demo 2\n");
 
 
 	xTaskCreate(vTask1, /* Pointer to the function that implements the task. */
@@ -369,7 +357,7 @@ static void prvNewPrintString( portCHAR *pcString)
 		 * only one task can have the mutex at any one time.
 		 */
 
-		tfp_printf(pcString);
+		printf(pcString);
 
 		/* The mutex MUST be given back! */
 	}
@@ -390,7 +378,7 @@ static void prvPrintTask(void *pvParameters)
 	pcStringToPrint = (char *)pvParameters;
 	for(;;)
 	{
-		/* tfp_printf out the string using the newly defined function. */
+		/* printf out the string using the newly defined function. */
 		prvNewPrintString(pcStringToPrint);
 
 		/*
@@ -407,7 +395,7 @@ static void prvPrintTask(void *pvParameters)
 
 static void frt_demo3_setup(void)
 {
-	tfp_printf("Demo 3\r\n");
+	printf("Demo 3\r\n");
 
 	/* The tasks are going to use a pseudo random delay, seed the random number
 	 * generator.

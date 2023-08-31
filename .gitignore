@@ -3,7 +3,6 @@
 
 # Object files
 *.o
-*.ko
 *.obj
 *.elf
 
@@ -22,32 +21,42 @@
 *.la
 *.lo
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
 # Executables
 *.exe
 *.out
-*.app
-*.i*86
-*.x86_64
 *.hex
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# Editor backup files
 *.bak
+*.c.bak
+*.h.bak
+
+# Exclude non-FT9xx files from FreeRTOS
+Source/3rdparty/FreeRTOS/*
+!Source/3rdparty/FreeRTOS/Source
+Source/3rdparty/FreeRTOS/Source/*
+!Source/3rdparty/FreeRTOS/Source/portable
+Source/3rdparty/FreeRTOS/Source/portable/*
+!Source/3rdparty/FreeRTOS/Source/portable/GCC
+
+# Exclude non-FT9xx files from lwip
+Source/3rdparty/lwip/*
+!Source/3rdparty/lwip/src
+Source/3rdparty/lwip/src/*
+!Source/3rdparty/lwip/src/arch
+
+# Exclude non-FT9xx files from mbedtls
+Source/3rdparty/mbedtls/*
+!Source/3rdparty/mbedtls/arch
+
+# Test builds
+FT90x_Debug
+FT93x_Debug
+FT90x_Release
+FT93x_Release
+
+# Library Eclipse settings
+Source/.settings/*
+!Source/.settings/org.eclipse.cdt.core.prefs
+!Source/.project
+!Source/.cproject

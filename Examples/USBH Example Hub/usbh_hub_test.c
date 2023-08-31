@@ -51,14 +51,12 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include <ft900.h>
 #include <ft900_usb.h>
 #include <ft900_usb_hid.h>
 #include <ft900_startup_dfu.h>
-
-/* UART support for printf output. */
-#include "tinyprintf.h"
 
 /* CONSTANTS ***********************************************************************/
 
@@ -69,16 +67,6 @@
 /* MACROS **************************************************************************/
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
-
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}
 
 void getDeviceDescp(USBH_device_handle hDev, int level);
 void getConfigDescp(USBH_device_handle hDev);
@@ -136,16 +124,16 @@ void getDeviceDescp(USBH_device_handle hDev, int level)
 	if (result >= 0)
 	{
 		// device descriptors
-		tfp_printf("\r\nDevice found at level %d\r\n", level);
-		tfp_printf(start1Msg);
-		tfp_printf(bcdUSBMsg, hc_iocb_descriptor.bcdUSB);
-		tfp_printf(devClassMsg, hc_iocb_descriptor.bDeviceClass);
-		tfp_printf(subClassMsg, hc_iocb_descriptor.bDeviceSubClass);
-		tfp_printf(devProtMsg, hc_iocb_descriptor.bDeviceProtocol);
-		tfp_printf(packSizeMsg, hc_iocb_descriptor.bMaxPacketSize0);
-		tfp_printf(vidMsg, hc_iocb_descriptor.idVendor);
-		tfp_printf(pidMsg, hc_iocb_descriptor.idProduct);
-		tfp_printf(bcdMsg, hc_iocb_descriptor.bcdDevice);
+		printf("\r\nDevice found at level %d\r\n", level);
+		printf(start1Msg);
+		printf(bcdUSBMsg, hc_iocb_descriptor.bcdUSB);
+		printf(devClassMsg, hc_iocb_descriptor.bDeviceClass);
+		printf(subClassMsg, hc_iocb_descriptor.bDeviceSubClass);
+		printf(devProtMsg, hc_iocb_descriptor.bDeviceProtocol);
+		printf(packSizeMsg, hc_iocb_descriptor.bMaxPacketSize0);
+		printf(vidMsg, hc_iocb_descriptor.idVendor);
+		printf(pidMsg, hc_iocb_descriptor.idProduct);
+		printf(bcdMsg, hc_iocb_descriptor.bcdDevice);
 
 		// points to the contents (bString) of the structure usb_deviceStringDescriptor_t
 		string = (USB_string_descriptor *)buf;
@@ -169,11 +157,11 @@ void getDeviceDescp(USBH_device_handle hDev, int level)
 			}
 
 			bufString[i++] = '\0';
-			tfp_printf(manfMsg, bufString);
+			printf(manfMsg, bufString);
 		}
 		else
 		{
-			tfp_printf(manfMsg, "No manufacturer string");
+			printf(manfMsg, "No manufacturer string");
 		}
 
 		// product
@@ -194,11 +182,11 @@ void getDeviceDescp(USBH_device_handle hDev, int level)
 			}
 
 			bufString[i++] = '\0';
-			tfp_printf(productMsg, bufString);
+			printf(productMsg, bufString);
 		}
 		else
 		{
-			tfp_printf(productMsg, "No product string");
+			printf(productMsg, "No product string");
 		}
 
 		// serial
@@ -219,11 +207,11 @@ void getDeviceDescp(USBH_device_handle hDev, int level)
 			}
 
 			bufString[i++] = '\0';
-			tfp_printf(serialMsg, bufString);
+			printf(serialMsg, bufString);
 		}
 		else
 		{
-			tfp_printf(serialMsg, "No serial number string");
+			printf(serialMsg, "No serial number string");
 		}
 	}
 }
@@ -265,55 +253,55 @@ void getConfigDescp(USBH_device_handle hDev)
 			if (desctype == USB_DESCRIPTOR_TYPE_CONFIGURATION)
 			{
 				totallen = (pbuf[3] << 8) + pbuf[2];
-				tfp_printf("\r\nConfiguration Descriptors:\r\n");
-				tfp_printf(" wTotalLength:             %04x\r\n", totallen);
-				tfp_printf(" bNumInterfaces:           %02x\r\n", pbuf[4]);
-				tfp_printf(" bConfigurationValue:      %02x\r\n", pbuf[5]);
-				tfp_printf(" iConfiguration:           %02x\r\n", pbuf[6]);
-				tfp_printf(" bmAttributes:             %02x\r\n", pbuf[7]);
-				tfp_printf(" MaxPower:                 %02x\r\n", pbuf[8]);
+				printf("\r\nConfiguration Descriptors:\r\n");
+				printf(" wTotalLength:             %04x\r\n", totallen);
+				printf(" bNumInterfaces:           %02x\r\n", pbuf[4]);
+				printf(" bConfigurationValue:      %02x\r\n", pbuf[5]);
+				printf(" iConfiguration:           %02x\r\n", pbuf[6]);
+				printf(" bmAttributes:             %02x\r\n", pbuf[7]);
+				printf(" MaxPower:                 %02x\r\n", pbuf[8]);
 			}
 
 			if (desctype == USB_DESCRIPTOR_TYPE_INTERFACE)
 			{
-				tfp_printf("\r\nInterface Descriptors:\r\n");
-				tfp_printf(" bInterfaceNumber:         %02x\r\n", pbuf[2]);
-				tfp_printf(" bAlternateSetting:        %02x\r\n", pbuf[3]);
-				tfp_printf(" bNumEndpoints:            %02x\r\n", pbuf[4]);
-				tfp_printf(" bInterfaceClass:          %02x\r\n", pbuf[5]);
-				tfp_printf(" bInterfaceSubClass:       %02x\r\n", pbuf[6]);
-				tfp_printf(" bInterfaceProtocol:       %02x\r\n", pbuf[7]);
-				tfp_printf(" iInterface:               %02x\r\n", pbuf[8]);
+				printf("\r\nInterface Descriptors:\r\n");
+				printf(" bInterfaceNumber:         %02x\r\n", pbuf[2]);
+				printf(" bAlternateSetting:        %02x\r\n", pbuf[3]);
+				printf(" bNumEndpoints:            %02x\r\n", pbuf[4]);
+				printf(" bInterfaceClass:          %02x\r\n", pbuf[5]);
+				printf(" bInterfaceSubClass:       %02x\r\n", pbuf[6]);
+				printf(" bInterfaceProtocol:       %02x\r\n", pbuf[7]);
+				printf(" iInterface:               %02x\r\n", pbuf[8]);
 			}
 
 			if (desctype == USB_DESCRIPTOR_TYPE_ENDPOINT)
 			{
-				tfp_printf("\r\nEndpoint Descriptors:\r\n");
-				tfp_printf(" bEndpointAddress:         %02x\r\n", pbuf[2]);
-				tfp_printf(" Transfer Type:            ");
+				printf("\r\nEndpoint Descriptors:\r\n");
+				printf(" bEndpointAddress:         %02x\r\n", pbuf[2]);
+				printf(" Transfer Type:            ");
 
 				if ((pbuf[3] & 0x03) == USB_ENDPOINT_DESCRIPTOR_ATTR_CONTROL)
 				{
-					tfp_printf("Control\r\n");
+					printf("Control\r\n");
 				}
 
 				if ((pbuf[3] & 0x03) == USB_ENDPOINT_DESCRIPTOR_ATTR_ISOCHRONOUS)
 				{
-					tfp_printf("Isochronous\r\n");
+					printf("Isochronous\r\n");
 				}
 
 				if ((pbuf[3] & 0x03) == USB_ENDPOINT_DESCRIPTOR_ATTR_BULK)
 				{
-					tfp_printf("Bulk\r\n");
+					printf("Bulk\r\n");
 				}
 
 				if ((pbuf[3] & 0x03) == USB_ENDPOINT_DESCRIPTOR_ATTR_INTERRUPT)
 				{
-					tfp_printf("Interrupt\r\n");
+					printf("Interrupt\r\n");
 				}
 
-				tfp_printf(" wMaxPacketSize:           %04x\r\n", ((pbuf[5] << 8) | pbuf[4]));
-				tfp_printf(" bInterval:                %02x\r\n", pbuf[6]);
+				printf(" wMaxPacketSize:           %04x\r\n", ((pbuf[5] << 8) | pbuf[4]));
+				printf(" bInterval:                %02x\r\n", pbuf[6]);
 			}
 
 			offset += desclen;
@@ -397,11 +385,11 @@ void getHubDescp(USBH_device_handle hDev, uint8_t iface)
 			desctype = pbuf[1];
 			numports = pbuf[2];
 
-			tfp_printf("\r\nHub Descriptor (interface %d):\r\n", iface);
-			tfp_printf(" bNbrPorts:                %02x\r\n", pbuf[2]);
-			tfp_printf(" wHubCharacteristics:      %04x\r\n", ((pbuf[4] << 8) | pbuf[3]));
-			tfp_printf(" bPwrOn2PwrGood:           %02x\r\n", pbuf[5]);
-			tfp_printf(" bHubContrCurrent:         %02x\r\n", pbuf[6]);
+			printf("\r\nHub Descriptor (interface %d):\r\n", iface);
+			printf(" bNbrPorts:                %02x\r\n", pbuf[2]);
+			printf(" wHubCharacteristics:      %04x\r\n", ((pbuf[4] << 8) | pbuf[3]));
+			printf(" bPwrOn2PwrGood:           %02x\r\n", pbuf[5]);
+			printf(" bHubContrCurrent:         %02x\r\n", pbuf[6]);
 
 			// the remaining fields have 1 bit per port, so there are variable
 			// numbers of them depending on the bNbrPorts field
@@ -412,12 +400,12 @@ void getHubDescp(USBH_device_handle hDev, uint8_t iface)
 
 			for (i = 0; i < var; i++)
 			{
-				tfp_printf(" DeviceRemovable_%d:        %x\r\n", i, pbuf[i + 7]);
+				printf(" DeviceRemovable_%d:        %x\r\n", i, pbuf[i + 7]);
 			}
 
 			for (i = 0; i < var; i++)
 			{
-				tfp_printf(" PortPwrCtrlMask_%d:        %x\r\n", i, pbuf[i + 7 + var]);
+				printf(" PortPwrCtrlMask_%d:        %x\r\n", i, pbuf[i + 7 + var]);
 			}
 
 			offset += desclen;
@@ -459,14 +447,14 @@ void getReportDescp(USBH_device_handle hDev, unsigned char descIndex, unsigned s
 
 		while (offset < totallen)
 		{
-			tfp_printf("\r\n Report Descriptor %d:\r\n", descIndex);
+			printf("\r\n Report Descriptor %d:\r\n", descIndex);
 
 			// Report decriptors have a variable length
 			var = descLength;
 
 			for (i = 0; i < var; i += 2)
 			{
-				tfp_printf("  %02x %02x\r\n", pbuf[i], pbuf[i + 1]);
+				printf("  %02x %02x\r\n", pbuf[i], pbuf[i + 1]);
 			}
 
 			offset += descLength;
@@ -515,10 +503,10 @@ void getHIDDescp(USBH_device_handle hDev, uint8_t iface)
 			// remember the number of descriptors
 			numdesc = pbuf[5];
 
-			tfp_printf("\r\nHID Descriptor (interface %d):\r\n", iface);
-			tfp_printf(" bcdHID:                   %04x\r\n", ((pbuf[3] << 8) | pbuf[2]));
-			tfp_printf(" bCountryCode:             %02x\r\n", pbuf[4]);
-			tfp_printf(" bNumDescriptors:          %02x\r\n", pbuf[5]);
+			printf("\r\nHID Descriptor (interface %d):\r\n", iface);
+			printf(" bcdHID:                   %04x\r\n", ((pbuf[3] << 8) | pbuf[2]));
+			printf(" bCountryCode:             %02x\r\n", pbuf[4]);
+			printf(" bNumDescriptors:          %02x\r\n", pbuf[5]);
 
 			// HID devices have at least 1 report descriptor
 			// there are variable fields from here depending on the bNumDescriptors field
@@ -526,8 +514,8 @@ void getHIDDescp(USBH_device_handle hDev, uint8_t iface)
 
 			for (i = 0; i < var; i++)
 			{
-				tfp_printf(" bDescriptorType_%d:        %02x\r\n", i, pbuf[i + 6]);
-				tfp_printf(" wDescriptorLength_%d:      %02x%02x\r\n", i, pbuf[i + 7 + var], pbuf[i + 6 + var]);
+				printf(" bDescriptorType_%d:        %02x\r\n", i, pbuf[i + 6]);
+				printf(" wDescriptorLength_%d:      %02x%02x\r\n", i, pbuf[i + 7 + var], pbuf[i + 6 + var]);
 
 				if (pbuf[i + 6] == USB_DESCRIPTOR_TYPE_REPORT)
 				{
@@ -547,23 +535,23 @@ void hub_testing(USBH_device_handle hHub, int level)
     uint8_t status;
     USBH_device_handle hDev;
 
-	tfp_printf("\r\nUSB Device Enumerated\r\n");
+	printf("\r\nUSB Device Enumerated\r\n");
 	do {
-		tfp_printf("hub %08x level %d\r\n", (unsigned int)hHub, level);
+		printf("hub %08x level %d\r\n", (unsigned int)hHub, level);
 		getDeviceDescp(hHub, level);
 		//getConfigDescp(hHub);
 
 		status = USBH_get_device_list(hHub, &hDev);
 		if (status == USBH_OK)
 		{
-			tfp_printf("child of hub %08x\r\n", (unsigned int)hDev);
+			printf("child of hub %08x\r\n", (unsigned int)hDev);
 			hub_testing(hDev, level + 1);
 		}
 
 		status = USBH_get_next_device(hHub, &hDev);
 		if (status == USBH_OK)
 		{
-			tfp_printf("next hub %08x\r\n", (unsigned int)hDev);
+			printf("next hub %08x\r\n", (unsigned int)hDev);
             hHub = hDev;
         }
 
@@ -574,7 +562,7 @@ volatile int change = 0;
 
 int8_t enum_change(uint32_t id, int8_t status, size_t len, uint8_t *buffer)
 {
-	//tfp_printf("enumeration change (%s) unique %d\r\n", status == 0?"disconnect":"connect", (int)id);
+	//printf("enumeration change (%s) unique %d\r\n", status == 0?"disconnect":"connect", (int)id);
 	change = 1;
 	return USBH_OK;
 }
@@ -595,7 +583,7 @@ uint8_t usbh_testing(void)
 		USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
 		if (connect == USBH_STATE_NOTCONNECTED)
 		{
-			tfp_printf("\r\nPlease plug in a USB Device\r\n");
+			printf("\r\nPlease plug in a USB Device\r\n");
 
 			// Detect usb device connect
 			do
@@ -617,20 +605,20 @@ uint8_t usbh_testing(void)
 
 		if (change)
 		{
-			tfp_printf("\r\nUSB Device Detected\r\n");
+			printf("\r\nUSB Device Detected\r\n");
 			change = 0;
 			// Get the first device (device on root hub)
 			status = USBH_get_device_list(USBH_ROOT_HUB_HANDLE, &hRootDev);
 			if (status != USBH_OK)
 			{
 				// Report the error code.
-				tfp_printf("%d\r\n", status);
+				printf("%d\r\n", status);
 			}
 			else
 			{
 				// Perform the actual testing.
 				hub_testing(hRootDev, 1);
-				tfp_printf("\r\nPlease remove the USB Device\r\n");
+				printf("\r\nPlease remove the USB Device\r\n");
 			}
 		}
     }
@@ -667,9 +655,6 @@ int main(int argc, char *argv[])
         "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
     	);
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0, tfp_putc);
-
     sys_enable(sys_device_timer_wdt);
 
     interrupt_attach(interrupt_timers, (int8_t)interrupt_timers, ISR_timer);
@@ -681,7 +666,7 @@ int main(int argc, char *argv[])
     timer_enable_interrupt(timer_select_a);
     timer_start(timer_select_a);
 
-    tfp_printf("Copyright (C) Bridgetek Pte Ltd \r\n"
+    printf("Copyright (C) Bridgetek Pte Ltd \r\n"
         "--------------------------------------------------------------------- \r\n"
         "Welcome to USBH Hub Tester Example 1... \r\n"
         "\r\n"

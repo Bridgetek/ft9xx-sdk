@@ -49,6 +49,7 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -72,7 +73,6 @@
 
 /* UART support for printf output. */
 #include <ft900_uart_simple.h>
-#include "tinyprintf.h"
 
 /* For MikroC const qualifier will place variables in Flash
  * not just make them constant.
@@ -612,16 +612,6 @@ DESCRIPTOR_QUALIFIER USB_WCID_feature_descriptor wcid_feature_dfumode =
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-	uart_write((ft900_uart_regs_t*) p, (uint8_t) c);
-}
-
 void ISR_timer(void)
 {
 	static int prev_connected;
@@ -728,17 +718,17 @@ int32_t get_out_buf(struct USBDX_pipe *out, uint8_t *bomsdata, size_t len)
 			/* Can send out all URB buffer, queue URB back to USBD */
 			asm_memcpy8(urb->ptr, bomsdata, status);
 			USBDX_submit_urb(out, urb);
-			//tfp_printf("get_out_buf\r\n");
+			//printf("get_out_buf\r\n");
 		}
 		else
 		{
-			//tfp_printf("get_out_buf: partial URB available %d\r\n", urb_len);
+			//printf("get_out_buf: partial URB available %d\r\n", urb_len);
 			status = 0;
 		}
 	}
 	else
 	{
-		//tfp_printf("get_out_buf: No BOMS data arrived\r\n");
+		//printf("get_out_buf: No BOMS data arrived\r\n");
 		usbdx_set_app_paused(out);
 		status = 0;
 	}
@@ -836,7 +826,7 @@ int8_t class_req_cb(USB_device_request *req)
 				{
 				case BOMS_REQUEST_GET_MAX_LUN:
 	#ifdef BOMS_DEBUG_REQUESTS
-					tfp_printf("BOMS_REQUEST_GET_MAX_LUN\r\n");
+					printf("BOMS_REQUEST_GET_MAX_LUN\r\n");
 	#endif // BOMS_DEBUG_REQUESTS
 
 					USBD_transfer_ep0(USBD_DIR_IN, &maxLun,
@@ -849,7 +839,7 @@ int8_t class_req_cb(USB_device_request *req)
 					break;
 				case BOMS_REQUEST_RESET:
 	#ifdef BOMS_DEBUG_REQUESTS
-					tfp_printf("BOMS_REQUEST_RESET\r\n");
+					printf("BOMS_REQUEST_RESET\r\n");
 	#endif // BOMS_DEBUG_REQUESTS
 
 					USBD_set_state(USBD_STATE_DEFAULT);
@@ -860,7 +850,7 @@ int8_t class_req_cb(USB_device_request *req)
 					break;
 				default:
 	#ifdef BOMS_DEBUG_REQUESTS
-					tfp_printf("Don't supported request %02x\r\n", request);
+					printf("Don't supported request %02x\r\n", request);
 	#endif // BOMS_DEBUG_REQUESTS
 					break;
 				}
@@ -877,7 +867,7 @@ int8_t class_req_cb(USB_device_request *req)
 				switch (req->bRequest)
 				{
 				case USB_CLASS_REQUEST_DNLOAD:
-					//tfp_printf("USB_CLASS_REQUEST_DNLOAD:%d\r\n",interface);
+					//printf("USB_CLASS_REQUEST_DNLOAD:%d\r\n",interface);
 					/* Block number passed in wValue gives the start address of
 					 * to program based on the size of the transfer size.
 					 */
@@ -1179,7 +1169,7 @@ void boms_populate_status(uint8_t status,
 #endif // BOMS_DEBUG_MSC
 
 #ifdef BOMS_DEBUG_SCSI_COMMANDS
-	tfp_printf("status = %d\r\n", status);
+	printf("status = %d\r\n", status);
 #endif // BOMS_DEBUG_SCSI_COMMANDS
 
 	memset((void *)BOMSStatus, 0, sizeof(boms_commandStatusWrapper_t));
@@ -1191,10 +1181,10 @@ void boms_populate_status(uint8_t status,
 		BOMSStatus->dCSWDataResidue = BOMSCmd->dCBWDataTransferLength;
 	}
 #ifdef BOMS_DEBUG_MSC
-	tfp_printf("USBS: ");
+	printf("USBS: ");
 	for (i = 0; i < sizeof(boms_commandStatusWrapper_t); i++)
-		tfp_printf("%02x ", ((unsigned char *)BOMSStatus)[i]);
-	tfp_printf("\r\n");
+		printf("%02x ", ((unsigned char *)BOMSStatus)[i]);
+	printf("\r\n");
 #endif // BOMS_DEBUG_MSC
 }
 
@@ -1300,7 +1290,7 @@ int32_t scsi_inquiry(boms_commandBlockWrapper_t *BOMSCmd)
 	boms_scsi_CRB_inquiry_t inq;
 
 #ifdef BOMS_DEBUG_SCSI_COMMANDS
-	tfp_printf("SCSI INQUIRY\r\n");
+	printf("SCSI INQUIRY\r\n");
 #endif // BOMS_DEBUG_SCSI_COMMANDS
 
 	memset((void *)&inq, 0, sizeof(boms_scsi_CRB_inquiry_t));
@@ -1363,7 +1353,7 @@ int32_t scsi_request_sense(boms_commandBlockWrapper_t *BOMSCmd)
 	boms_scsi_CRB_request_sense_t sense;
 
 #ifdef BOMS_DEBUG_SCSI_COMMANDS
-	tfp_printf("SCSI REQUEST SENSE\r\n");
+	printf("SCSI REQUEST SENSE\r\n");
 #endif // BOMS_DEBUG_SCSI_COMMANDS
 
 	memset((void *)&sense, 0, sizeof(boms_scsi_CRB_request_sense_t));
@@ -1434,7 +1424,7 @@ int32_t scsi_mode_sense(boms_commandBlockWrapper_t *BOMSCmd)
 	} response;
 
 #ifdef BOMS_DEBUG_SCSI_COMMANDS
-	tfp_printf("SCSI MODE SENSE\r\n");
+	printf("SCSI MODE SENSE\r\n");
 #endif // BOMS_DEBUG_SCSI_COMMANDS
 
 	memset((void *)&response, 0, sizeof(response));
@@ -1491,7 +1481,7 @@ int32_t scsi_test_unit_ready(boms_commandBlockWrapper_t *BOMSCmd)
 	uint8_t boms_status;
 
 #ifdef BOMS_DEBUG_SCSI_COMMANDS
-	tfp_printf("SCSI TEST UNIT READY\r\n");
+	printf("SCSI TEST UNIT READY\r\n");
 #endif // BOMS_DEBUG_SCSI_COMMANDS
 
 	if (sd_card_initialised)
@@ -1510,7 +1500,7 @@ int32_t scsi_test_unit_ready(boms_commandBlockWrapper_t *BOMSCmd)
 int32_t scsi_prevent_allow_removal(boms_commandBlockWrapper_t *BOMSCmd)
 {
 #ifdef BOMS_DEBUG_SCSI_COMMANDS
-	tfp_printf("SCSI REVENT ALLOW REMOVAL\r\n");
+	printf("SCSI REVENT ALLOW REMOVAL\r\n");
 #endif // BOMS_DEBUG_SCSI_COMMANDS
 
 	if (BOMSCmd->CBWCB.removal.prevent)
@@ -1545,7 +1535,7 @@ int32_t scsi_read_capacity(boms_commandBlockWrapper_t *BOMSCmd)
 		if (BOMSCmd->CBWCB.read_capacity.op_code == 0x9e)
 		{
 #ifdef BOMS_DEBUG_SCSI_COMMANDS
-			tfp_printf("SCSI READ CAPACITY (16)\r\n");
+			printf("SCSI READ CAPACITY (16)\r\n");
 #endif // BOMS_DEBUG_SCSI_COMMANDS
 
 			cap = (uint8_t *)&cap_16;
@@ -1558,7 +1548,7 @@ int32_t scsi_read_capacity(boms_commandBlockWrapper_t *BOMSCmd)
 		else
 		{
 #ifdef BOMS_DEBUG_SCSI_COMMANDS
-			tfp_printf("SCSI READ CAPACITY (10)\r\n");
+			printf("SCSI READ CAPACITY (10)\r\n");
 #endif // BOMS_DEBUG_SCSI_COMMANDS
 
 			cap = (uint8_t *)&cap_10;
@@ -1607,7 +1597,7 @@ int32_t scsi_read_format_capacity(boms_commandBlockWrapper_t *BOMSCmd)
 	if (boms_status == BOMS_STATUS_OK)
 	{
 #ifdef BOMS_DEBUG_SCSI_COMMANDS
-		tfp_printf("SCSI READ FORMAT CAPACITY (10)\r\n");
+		printf("SCSI READ FORMAT CAPACITY (10)\r\n");
 #endif // BOMS_DEBUG_SCSI_COMMANDS
 
 		memset(&fcap, 0, sizeof(fcap));
@@ -1677,7 +1667,7 @@ int32_t scsi_read(boms_commandBlockWrapper_t *BOMSCmd)
 	SDHOST_STATUS sdret = SDHOST_OK;
 
 #ifdef BOMS_DEBUG_SCSI_COMMANDS
-	tfp_printf("SCSI READ (10)\r\n");
+	printf("SCSI READ (10)\r\n");
 #endif // BOMS_DEBUG_SCSI_COMMANDS
 
 	if (!sd_card_initialised)
@@ -1715,7 +1705,7 @@ int32_t scsi_read(boms_commandBlockWrapper_t *BOMSCmd)
 		else
 		{
 #ifdef BOMS_DEBUG_SCSI_READ_WRITE_COMMANDS
-			tfp_printf("Read %d blocks from sector %ld\r\n", count, sector);
+			printf("Read %d blocks from sector %ld\r\n", count, sector);
 #endif // BOMS_DEBUG_SCSI_READ_COMMANDS
 
 			while (count)
@@ -1773,7 +1763,7 @@ int32_t scsi_read(boms_commandBlockWrapper_t *BOMSCmd)
 #ifdef BOMS_DEBUG_ERRORS
 		if (boms_status != BOMS_STATUS_OK)
 		{
-			tfp_printf("sd status %d usbd status %ld\r\n", sdret, status);
+			printf("sd status %d usbd status %ld\r\n", sdret, status);
 		}
 #endif // BOMS_DEBUG_ERRORS
 	}
@@ -1791,7 +1781,7 @@ int32_t scsi_write(boms_commandBlockWrapper_t *BOMSCmd)
 	SDHOST_STATUS sdret = SDHOST_OK;
 
 #ifdef BOMS_DEBUG_SCSI_COMMANDS
-	tfp_printf("SCSI WRITE (10)\r\n");
+	printf("SCSI WRITE (10)\r\n");
 #endif // BOMS_DEBUG_SCSI_COMMANDS
 
 	if (!sd_card_initialised)
@@ -1829,7 +1819,7 @@ int32_t scsi_write(boms_commandBlockWrapper_t *BOMSCmd)
 		else
 		{
 #ifdef BOMS_DEBUG_SCSI_READ_WRITE_COMMANDS
-			tfp_printf("Write %d blocks to sector %ld\r\n", count, sector);
+			printf("Write %d blocks to sector %ld\r\n", count, sector);
 #endif // BOMS_DEBUG_SCSI_READ_COMMANDS
 
 			while (count)
@@ -1899,7 +1889,7 @@ int32_t scsi_write(boms_commandBlockWrapper_t *BOMSCmd)
 #ifdef BOMS_DEBUG_ERRORS
 		if (boms_status != BOMS_STATUS_OK)
 		{
-			tfp_printf("sd status %d usbd status %ld\r\n", sdret, status);
+			printf("sd status %d usbd status %ld\r\n", sdret, status);
 		}
 #endif // BOMS_DEBUG_ERRORS
 	}
@@ -1961,10 +1951,10 @@ void boms_sdcard_bridge(void)
 
 #ifdef BOMS_DEBUG_MSC
 			// Write it out to the UART.
-			tfp_printf("USBC: ");
+			printf("USBC: ");
 			for (int i = 0; i < read_bytes; i++)
-				tfp_printf("%02x ", ((unsigned char *)&BOMSCmd)[i]);
-			tfp_printf("\r\n");
+				printf("%02x ", ((unsigned char *)&BOMSCmd)[i]);
+			printf("\r\n");
 #endif // BOMS_DEBUG_MSC
 
 			if (read_bytes == sizeof(BOMSCmd))
@@ -2015,7 +2005,7 @@ void boms_sdcard_bridge(void)
 					{
 						// Unknown command.
 #ifdef BOMS_DEBUG_ERRORS
-						tfp_printf("Unknown SCSI command 0x%02x\r\n", BOMSCmd.CBWCB.request_sense.op_code);
+						printf("Unknown SCSI command 0x%02x\r\n", BOMSCmd.CBWCB.request_sense.op_code);
 #endif // BOMS_DEBUG_ERRORS
 						// Send IN a zero length packet.
 						if (BOMSCmd.dCBWDataTransferLength)
@@ -2030,7 +2020,7 @@ void boms_sdcard_bridge(void)
 				else
 				{
 #ifdef BOMS_DEBUG_ERRORS
-					tfp_printf("Unknown BOMS signature 0x%08x\r\n", BOMSCmd.dCBWSignature);
+					printf("Unknown BOMS signature 0x%08x\r\n", BOMSCmd.dCBWSignature);
 #endif // BOMS_DEBUG_ERRORS
 					// Was not a USBC signature.
 					boms_send_status(BOMS_STATUS_PHASE_ERROR, &BOMSCmd);
@@ -2040,7 +2030,7 @@ void boms_sdcard_bridge(void)
 			else
 			{
 #ifdef BOMS_DEBUG_ERRORS
-				tfp_printf("Incorrect BOMS command length of %ld\r\n", read_bytes);
+				printf("Incorrect BOMS command length of %ld\r\n", read_bytes);
 #endif // BOMS_DEBUG_ERRORS
 				// Wrong command size.
 				boms_send_status(BOMS_STATUS_COMMAND_FAILED, &BOMSCmd);
@@ -2057,19 +2047,19 @@ void boms_sdcard_bridge(void)
 		// If the SD card is removed update the status.
 		if (sd_card_connect_change)
 		{
-			tfp_printf("Change...");
+			printf("Change...");
 			// Changed to inserted from removed.
 			if (sd_card_connected == SDHOST_CARD_INSERTED)
 			{
 				sdret = SDHOST_CARD_INSERTED;
-				tfp_printf("connect card %d", sdret);
+				printf("connect card %d", sdret);
 			}
 			else
 			{
 				sdret = SDHOST_CARD_REMOVED;
-				tfp_printf("no card");
+				printf("no card");
 			}
-			tfp_printf("\r\n");
+			printf("\r\n");
 
 			sd_card_connect_change = 0;
 		}
@@ -2087,7 +2077,7 @@ void boms_sdcard_bridge(void)
 		if (sdret == SDHOST_CARD_INSERTED)
 		{
 			sdret = sdhost_card_init();
-			tfp_printf("Card initialise %d\r\n", sdret);
+			printf("Card initialise %d\r\n", sdret);
 			if (sdret == SDHOST_OK)
 			{
 				sd_card_initialised = 1;
@@ -2099,7 +2089,7 @@ void boms_sdcard_bridge(void)
 		{
 			sdhost_init();
 			sd_card_initialised = 0;
-			tfp_printf("Host initialise\r\n");
+			printf("Host initialise\r\n");
 		}
 
 		status = (USBD_get_state() < USBD_STATE_DEFAULT)?USBD_ERR_NOT_CONFIGURED:USBD_OK;
@@ -2158,7 +2148,7 @@ uint8_t usbd_mass_storage(void)
 					status = (USBD_get_state() < USBD_STATE_DEFAULT)?USBD_ERR_NOT_CONFIGURED:USBD_OK;
 				}while (status == USBD_OK);
 			}
-			tfp_printf("Restarting\r\n");
+			printf("Restarting\r\n");
 		}
 	}
 
@@ -2229,9 +2219,6 @@ int main(void)
 			"\x1B[H" /* ANSI/VT100 - Move Cursor to Home */
 	);
 
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, tfp_putc);
-
 	sys_enable(sys_device_timer_wdt);
 
 	/* Timer A = 1ms */
@@ -2266,10 +2253,10 @@ int main(void)
 	interrupt_attach(interrupt_0, (int8_t)interrupt_0, powermanagement_ISR);
 	interrupt_enable_globally();
 
-    tfp_printf("(C) Copyright, Bridgetek Pte Ltd \r\n");
-	tfp_printf("--------------------------------------------------------------------- \r\n");
-	tfp_printf("Welcome to USB Mass Storage to SD Card Test Application ... \r\n");
-	tfp_printf("--------------------------------------------------------------------- \r\n");
+    printf("(C) Copyright, Bridgetek Pte Ltd \r\n");
+	printf("--------------------------------------------------------------------- \r\n");
+	printf("Welcome to USB Mass Storage to SD Card Test Application ... \r\n");
+	printf("--------------------------------------------------------------------- \r\n");
 
 	usbd_mass_storage();
 

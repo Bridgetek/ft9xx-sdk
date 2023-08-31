@@ -46,9 +46,9 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h> /* For memset */
 #include <ft900.h>
-#include "tinyprintf.h"
 
 #define EEPROM_ADDR (0xA0)
 #define EEPROM_SIZE (1024/8)
@@ -104,10 +104,8 @@ void setup(void)
         "Read and write to an I2C EEPROM (24LC01)\r\n"
         "--------------------------------------------------------------------- \r\n"
         );
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0,myputc);
-
-    /* Enable the I2C Slave device... */
+    
+	/* Enable the I2C Slave device... */
     sys_enable(sys_device_i2c_master);
 
 #if defined(__FT900__)
@@ -161,13 +159,13 @@ void loop(void)
     uint8_t i;
 
     /* Read all of EEPROM and dump it out to the user... */
-    tfp_printf("\r\n" "Reading all %d bytes of EEPROM\r\n",EEPROM_SIZE);
+    printf("\r\n" "Reading all %d bytes of EEPROM\r\n",EEPROM_SIZE);
 
     ee_dump();
 
 
     /* Set all of EEPROM to 0xFF... */
-    tfp_printf("\r\n" "Setting the EEPROM to 0xFF\r\n");
+    printf("\r\n" "Setting the EEPROM to 0xFF\r\n");
 
     memset(eeprom_buffer,0xFF,EEPROM_SIZE);
     ee_write(0, eeprom_buffer, EEPROM_SIZE);
@@ -176,7 +174,7 @@ void loop(void)
 
 
     /* Set all even numbered locations to 1... */
-    tfp_printf("\r\n" "Set all even numbered locations to 0x01\r\n");
+    printf("\r\n" "Set all even numbered locations to 0x01\r\n");
 
     eeprom_buffer[0] = 1;
     for (i = 0; i < EEPROM_SIZE; i += 2)
@@ -188,7 +186,7 @@ void loop(void)
 
 
     /* Fill EEPROM with some example text */
-    tfp_printf("\r\n" "Filling the EEPROM with example text\r\n");
+    printf("\r\n" "Filling the EEPROM with example text\r\n");
 
     ee_write(0, (uint8_t*) LOREM_IPSUM, EEPROM_SIZE);
 
@@ -247,40 +245,34 @@ void hexdump(uint8_t *data, uint16_t len)
     j = 0;
     do
     {
-        tfp_printf("0x%04x: ", j);
+        printf("0x%04x: ", j);
         for (i = 0; i < col_width; i++)
         {
             if (i+j < len)
-                tfp_printf("%02X ", data[i+j]);
+                printf("%02X ", data[i+j]);
             else
-                tfp_printf("   ");
+                printf("   ");
         }
 
-        tfp_printf(" | ");
+        printf(" | ");
 
         for (i = 0; i < col_width; i++)
         {
             if (i+j < len)
             {
                 if (data[i+j] < ' ' || data[i+j] > '~' )
-                    tfp_printf(".");
+                    printf(".");
                 else
-                    tfp_printf("%c", data[i+j]);
+                    printf("%c", data[i+j]);
             }
             else
             {
-                tfp_printf(" ");
+                printf(" ");
             }
         }
-        tfp_printf("\r\n");
+        printf("\r\n");
 
         j += col_width;
     }
     while(j < len);
-}
-
-/** Printf putc */
-void myputc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
 }

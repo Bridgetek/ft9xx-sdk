@@ -45,6 +45,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <ft900.h>
 #include <ft900_dlog.h>
 
@@ -52,8 +53,7 @@
 #define DEBUG
 
 #ifdef DEBUG
-#include "tinyprintf.h"
-#define dbg(s,...)	tfp_printf ((s), ##__VA_ARGS__)
+#define dbg(s,...)	printf ((s), ##__VA_ARGS__)
 #else
 #define dbg(s,...)
 #endif
@@ -62,7 +62,7 @@
 /**< global variable indicating start of dlog partition in flash */
 extern __flash__ uint32_t __dlog_partition[];	
 
-void myputc(void* p, char c);			/* required for tfp_printf library */
+void myputc(void* p, char c);			/* required for printf library */
 void setup(void);				/* setup UART communication */
 int cmp (uint8_t *a, uint8_t *b, int len);	/* helper routine */
 void dump (uint8_t *d, int len);		/* helper routine */
@@ -142,13 +142,6 @@ void dump (uint8_t *d, int len)
 	dbg ("\n");
 }
 
-
-/** Function used to facilitate printf */
-void myputc(void* p, char c)
-{
-    uart_write(p, (uint8_t)c);
-}
-
 void setup(void)
 {
     /* Enable the UART Device... */
@@ -178,11 +171,6 @@ void setup(void)
         	"from 1 to 14 (14 pages) with repeated values of 0x00 to 0x0D and end. \r\n"
             "--------------------------------------------------------------------- \r\n"
         );
-
-#ifdef DEBUG
-    /* Enable dbg() functionality... */
-    init_printf(UART0,myputc);
-#endif
 
 }
 

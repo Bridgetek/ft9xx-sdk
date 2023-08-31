@@ -329,7 +329,7 @@ static void STARTUP_DFU_go(uint16_t timeout);
 static void STARTUP_DFU_end(void);
 
 /** @name STARTUP_DFU_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
+ *  @details Machine dependent putc function for printf (tinyprintf) library.
  *  @param p Parameters (machine dependent)
  *  @param c The character to write
  */
@@ -689,7 +689,7 @@ static void STARTUP_DFU_go(uint16_t timeout)
 	{
 		// Wait for a connection for a specific amount of time.
 #ifdef STARTUP_UART_OUTPUT
-		tfp_printf("Timeout: %dms, Device Attached: %d\r\n"
+		printf("Timeout: %dms, Device Attached: %d\r\n"
 					"Looking for connection...\r\n",timeout, USBD_is_connected());
 #endif // STARTUP_UART_OUTPUT
 
@@ -716,7 +716,7 @@ static void STARTUP_DFU_go(uint16_t timeout)
 		if (status == USBD_OK)
 		{
 #ifdef STARTUP_UART_OUTPUT
-			tfp_printf("Connected\r\n");
+			printf("Connected\r\n");
 #endif // STARTUP_UART_OUTPUT
 			// We have a connection within the specified timeout period.
 			do
@@ -725,7 +725,7 @@ static void STARTUP_DFU_go(uint16_t timeout)
 				if (status != USBD_OK)
 				{
 #ifdef STARTUP_UART_OUTPUT
-					tfp_printf("Error\r\n");
+					printf("Error\r\n");
 #endif // STARTUP_UART_OUTPUT
 					STARTUP_timer = 0;
 					break;
@@ -733,7 +733,7 @@ static void STARTUP_DFU_go(uint16_t timeout)
 			} while ((STARTUP_timer > 0) || (timeout == 0));
 		}
 #ifdef STARTUP_UART_OUTPUT
-		tfp_printf("Finished\r\n");
+		printf("Finished\r\n");
 #endif // STARTUP_UART_OUTPUT
 	} while (timeout == 0);
 
@@ -783,8 +783,6 @@ void startup_dfu(int timeout)
 			"\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
 	);
 
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, STARTUP_DFU_putc);
 #endif // STARTUP_UART_OUTPUT
 
 	sys_enable(sys_device_timer_wdt);
@@ -800,10 +798,10 @@ void startup_dfu(int timeout)
 	timer_start(timer_select_a);
 
 #ifdef STARTUP_UART_OUTPUT
-	tfp_printf("Copyright (C) Bridgetek Pte Ltd \r\n");
-	tfp_printf("--------------------------------------------------------------------- \r\n");
-	tfp_printf("DFU STARTUP Function enabled...\r\n");
-	tfp_printf("--------------------------------------------------------------------- \r\n");
+	printf("Copyright (C) Bridgetek Pte Ltd \r\n");
+	printf("--------------------------------------------------------------------- \r\n");
+	printf("DFU STARTUP Function enabled...\r\n");
+	printf("--------------------------------------------------------------------- \r\n");
 
 	uart_disable_interrupt(UART0, uart_interrupt_tx);
 	uart_disable_interrupt(UART0, uart_interrupt_rx);

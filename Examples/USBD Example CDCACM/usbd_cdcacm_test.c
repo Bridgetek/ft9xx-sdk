@@ -49,6 +49,7 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -58,9 +59,6 @@
 #include <ft900_usb_dfu.h>
 #include <ft900_usbd_dfu.h>
 #include <ft900_usbdx.h>
-
-/* UART support for printf output. */
-#include "tinyprintf.h"
 
 /* For MikroC const qualifier will place variables in Flash
  * not just make them constant.
@@ -837,16 +835,6 @@ static inline void uart_spr_write(ft900_uart_regs_t *uart,
 	__asm__("" ::: "memory");
 }
 
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-	uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}
-
 void ISR_timer(void)
 {
 	if (timer_is_interrupted(timer_select_a))
@@ -896,12 +884,12 @@ static void uart_tx(struct USBDX_pipe *pp, struct USBDX_urb *urb)
 			/* Part of the URB buffer */
 			uart_tx_direct(urb->ptr, to_write);
 			urb->ptr += to_write;
-			//tfp_printf("UART TX%d len:%d\r\n", urb->id, to_write);
+			//printf("UART TX%d len:%d\r\n", urb->id, to_write);
 			break;
 		} else {
 			/* Can send out all URB buffer, queue URB back to USBD */
 			uart_tx_direct(urb->ptr, urb_len);
-			//tfp_printf("UART TX%d len:%d\r\n", urb->id, urb_len);
+			//printf("UART TX%d len:%d\r\n", urb->id, urb_len);
 			USBDX_submit_urb(pp, urb);
 			to_write -= urb_len;
 			/* Try read next available URB buffer */
@@ -933,7 +921,7 @@ void uart0ISR(void)
 		if (likely(usbdx_urb_owned_by_app(urb)))
 			uart_tx(pp, urb);
 		else {
-			//tfp_printf("UART TX paused\r\n");
+			//printf("UART TX paused\r\n");
 			usbdx_set_app_paused(pp);
 			uart_disable_interrupt(UART0, uart_interrupt_tx);
 		}
@@ -957,7 +945,7 @@ void uart0ISR(void)
 				uart_rx_direct(urb->ptr, free);
 				urb->ptr += free;
 				to_read -= free;
-				//tfp_printf("UART RX%d submit total:%d\r\n",
+				//printf("UART RX%d submit total:%d\r\n",
 				//		urb->id, urb_get_app_consumed(urb));
 				USBDX_submit_urb(pp, urb);
 				continue;
@@ -980,7 +968,7 @@ void uart0ISR(void)
 
 			/* Buffer is not fully filled */
 			urb->ptr = uart_rx_try(urb->ptr, urb->end);
-			//tfp_printf("UART RX%d timeout, send total:%d\r\n",
+			//printf("UART RX%d timeout, send total:%d\r\n",
 			//		urb->id, urb_get_app_consumed(urb));
 			USBDX_submit_urb(pp, urb);
 
@@ -1115,7 +1103,7 @@ int8_t class_req_cb(USB_device_request *req)
 					USBD_transfer_ep0(USBD_DIR_OUT, command, USB_CONTROL_EP_MAX_PACKET_SIZE, req->wLength);
 					// ACK
 					USBD_transfer_ep0(USBD_DIR_IN, NULL, 0, 0);
-					tfp_printf("Received encapsulated command \"%s\"\r\n",command);
+					printf("Received encapsulated command \"%s\"\r\n",command);
 					cdc_send_response_notification();
 					break;
 				case USB_CDC_REQUEST_GET_ENCAPSULATED_RESPONSE:
@@ -1125,7 +1113,7 @@ int8_t class_req_cb(USB_device_request *req)
 						// ACK
 						USBD_transfer_ep0(USBD_DIR_OUT, NULL, 0, 0);
 						status = USBD_OK;
-						tfp_printf("Sent encapsulated response!\r\n");
+						printf("Sent encapsulated response!\r\n");
 					}
 					break;
 				case USB_CDC_REQUEST_SET_COMM_FEATURE:
@@ -1138,7 +1126,7 @@ int8_t class_req_cb(USB_device_request *req)
 					// ACK
 					USBD_transfer_ep0(USBD_DIR_IN, NULL, 0, 0);
 					// Update UART settings
-					tfp_printf("set baud %ld, par %d, stop %d, data %d\r\n",
+					printf("set baud %ld, par %d, stop %d, data %d\r\n",
 							cdc_line_coding.dwDTERate,
 							cdc_line_coding.bParityType,
 							cdc_line_coding.bCharFormat,
@@ -1153,7 +1141,7 @@ int8_t class_req_cb(USB_device_request *req)
 					// ACK
 					USBD_transfer_ep0(USBD_DIR_OUT, NULL, 0, 0);
 					status = USBD_OK;
-					tfp_printf("get baud %ld, par %d, stop %d, data %d\r\n",
+					printf("get baud %ld, par %d, stop %d, data %d\r\n",
 							cdc_line_coding.dwDTERate,
 							cdc_line_coding.bParityType,
 							cdc_line_coding.bCharFormat,
@@ -1545,7 +1533,7 @@ void reset_cb(uint8_t status)
 /* For debugging endpoint transactions. */
 void ep_cb(USBD_ENDPOINT_NUMBER ep_number)
 {
-	tfp_printf("EP%d\r\n", ep_number);
+	printf("EP%d\r\n", ep_number);
 }
 
 void cdc_send_serial_state_notification(void)
@@ -1616,7 +1604,7 @@ void cdc_send_response_notification(void)
 
 bool acm_out_on_data_ready(struct USBDX_pipe *pp)
 {
-	//tfp_printf("UART TX resumed\r\n");
+	//printf("UART TX resumed\r\n");
 	uart_tx(pp, usbdx_get_app_urb(pp));
 	/* Enable the UART to fire interrupts when transmitting data... */
 	uart_enable_interrupt(UART0, uart_interrupt_tx);
@@ -1734,7 +1722,7 @@ uint8_t usbd_testing(void)
 				}while (status == USBD_OK);
 			}
 		}
-		tfp_printf("Restarting\r\n");
+		printf("Restarting\r\n");
 	}
 
 	return 0;
@@ -1802,9 +1790,6 @@ int main(void)
 			"\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
 	);
 
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, tfp_putc);
-
 	sys_enable(sys_device_timer_wdt);
 
 	//interrupt_attach(interrupt_timers, (int8_t)interrupt_timers, ISR_timer);
@@ -1826,12 +1811,12 @@ int main(void)
 	interrupt_attach(interrupt_0, (int8_t)interrupt_0, powermanagement_ISR);
 	interrupt_enable_globally();
 
-	tfp_printf("(C) Copyright, Bridgetek Pte Ltd \r\n");
-	tfp_printf("--------------------------------------------------------------------- \r\n");
-	tfp_printf("Welcome to USBDCDC ACM Tester Example 1... \r\n");
-	tfp_printf("\r\n");
-	tfp_printf("Emulate a CDC ACM device connected to the USB Device Port.\r\n");
-	tfp_printf("--------------------------------------------------------------------- \r\n");
+	printf("(C) Copyright, Bridgetek Pte Ltd \r\n");
+	printf("--------------------------------------------------------------------- \r\n");
+	printf("Welcome to USBDCDC ACM Tester Example 1... \r\n");
+	printf("\r\n");
+	printf("Emulate a CDC ACM device connected to the USB Device Port.\r\n");
+	printf("--------------------------------------------------------------------- \r\n");
 
 	usbd_testing();
 

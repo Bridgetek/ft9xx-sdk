@@ -160,12 +160,12 @@ int32_t USBD_HBW_iso_transfer(USBD_ENDPOINT_NUMBER   ep_number,
 				if (loop_count > 500000)
 				{
 					loop_count = 0;
-					tfp_printf ("%d: sr=0x%x, exceeded loop_count\n", ep_number, USBD_HBW->ctrl3);
+					printf ("%d: sr=0x%x, exceeded loop_count\n", ep_number, USBD_HBW->ctrl3);
 				}
 #endif //USBD_DEBUG_TRANSFER
 			}
 #ifdef USBD_HBW_DEBUG_ISO_TRANSFER
-			tfp_printf ("ctrl3=0x%x,tlen:%d, plen: %d\n", USBD_HBW->ctrl3, totalLen, packetLen);
+			printf ("ctrl3=0x%x,tlen:%d, plen: %d\n", USBD_HBW->ctrl3, totalLen, packetLen);
 #endif
 			transferred += usbd_in_request(ep_number, pdata, packetLen);
 
@@ -177,7 +177,7 @@ int32_t USBD_HBW_iso_transfer(USBD_ENDPOINT_NUMBER   ep_number,
 					// Acknowledge end of packet if flag is set.
 					//USBD_EP_SR_REG(ep_number) = (MASK_USBD_EPxSR_INPRDY);
 #ifdef USBD_HBW_DEBUG_ISO_TRANSFER
-			tfp_printf ("INPRDY set\n");
+			printf ("INPRDY set\n");
 #endif
 #ifndef USBD_HBW_ISOCHRONOUS_AUTOHEADER
 					USBD_HBW->ctrl3 |= MASK_USBD_HBW_CTRL3_INPRDY;

@@ -497,7 +497,7 @@
 /** @brief Register mappings for System level registers */
 typedef struct
 {
-	volatile uint32_t HIPID;
+	volatile uint32_t CHIPID;
 	volatile uint32_t EFCFG;
 	volatile uint32_t CLKCFG;
 	volatile uint16_t PMCFG_L;

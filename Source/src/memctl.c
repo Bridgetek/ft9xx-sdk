@@ -153,21 +153,6 @@
 #define PMCONTROL_ADDR	((volatile uint32_t *)0x1fc84)
 #define PMCONTROL_DATA	((volatile uint32_t *)0x1fc88)
 
-#define DBG_RSADDR0     ((volatile uint8_t *)0x10800)
-#define DBG_RSADDR1     ((volatile uint8_t *)0x10801)
-#define DBG_RSADDR2     ((volatile uint8_t *)0x10802)
-#define DBG_FSADDR0     ((volatile uint8_t *)0x10803)
-#define DBG_FSADDR1     ((volatile uint8_t *)0x10804)
-#define DBG_FSADDR2     ((volatile uint8_t *)0x10805)
-#define DBG_BLENGTH0    ((volatile uint8_t *)0x10806)
-#define DBG_BLENGTH1    ((volatile uint8_t *)0x10807)
-#define DBG_BLENGTH2    ((volatile uint8_t *)0x10808)
-#define DBG_COMMAND     ((volatile uint8_t *)0x10809)
-#define DBG_SEMAPHORE   ((volatile uint8_t *)0x1080b)
-#define DBG_CONFIG      ((volatile uint8_t *)0x1080c)
-#define DBG_STATUS      ((volatile uint8_t *)0x1080d)
-#define DBG_DRWDATA     ((volatile uint8_t *)0x10880)
-
 /*Sector size (in bytes)*/
 #define SECTOR_SIZE	(4096)
 /*Sector block (in bytes)*/
@@ -194,7 +179,7 @@ static int get_debugger(void)
 	while(count--)
 	{
 		__asm__(""::: "memory");
-		if(*DBG_SEMAPHORE == 0)
+		if(FLASHCTRL->SEMAPHORE == 0)
 			return 1;
 	}
 
@@ -204,7 +189,7 @@ static int get_debugger(void)
 static void release_debugger(void)
 {
 	__asm__(""::: "memory");
-	*DBG_SEMAPHORE = 1;
+	FLASHCTRL->SEMAPHORE = 1;
 }
 
 /* FUNCTIONS ***********************************************************************/
@@ -239,39 +224,39 @@ void dbg_memory_copy (uint8_t command, uint32_t raddr, uint32_t faddr, uint32_t 
 	get_debugger();
 
 	/* Check if debugger is ready (Status register : control busy is 0 when ready) */
-	while ((st = *DBG_STATUS) & DBG_CONTROL_BUSY) {
+	while ((st = FLASHCTRL->STATUS) & DBG_CONTROL_BUSY) {
 	}
 
 	/* Setup ram start address */
 	reg.word = raddr;
-	*DBG_RSADDR0 = reg.bytes[0];
-	*DBG_RSADDR1 = reg.bytes[1];
-	*DBG_RSADDR2 = reg.bytes[2];
+	FLASHCTRL->RSADDR0 = reg.bytes[0];
+	FLASHCTRL->RSADDR1 = reg.bytes[1];
+	FLASHCTRL->RSADDR2 = reg.bytes[2];
 
 	/* Setup flash start address */
 	reg.word = faddr;
-	*DBG_FSADDR0 = reg.bytes[0];
-	*DBG_FSADDR1 = reg.bytes[1];
-	*DBG_FSADDR2 = reg.bytes[2];
+	FLASHCTRL->FSADDR0 = reg.bytes[0];
+	FLASHCTRL->FSADDR1 = reg.bytes[1];
+	FLASHCTRL->FSADDR2 = reg.bytes[2];
 
 	/* Setup length to be transferred */
 	reg.word = length;
-	*DBG_BLENGTH0 = reg.bytes[0];
-	*DBG_BLENGTH1 = reg.bytes[1];
-	*DBG_BLENGTH2 = reg.bytes[2];
+	FLASHCTRL->BLENGTH0 = reg.bytes[0];
+	FLASHCTRL->BLENGTH1 = reg.bytes[1];
+	FLASHCTRL->BLENGTH2 = reg.bytes[2];
 
 	/* Enable Flash to be written, command send to Flash memory, */
-	*DBG_COMMAND = DBG_CMDWREN;
+	FLASHCTRL->COMMAND = DBG_CMDWREN;
 
 	/* Check if debugger is done (Status register : control busy is 0 when ready) */
-	while ((st = *DBG_STATUS) & DBG_CONTROL_BUSY) {
+	while ((st = FLASHCTRL->STATUS) & DBG_CONTROL_BUSY) {
 	}
 
 	/* Initiate transfer */
-	*DBG_COMMAND = command;
+	FLASHCTRL->COMMAND = command;
 
 	/* Check if debugger is done (Status register : control busy is 0 when ready) */
-	while ((st = *DBG_STATUS) & DBG_CONTROL_BUSY) {
+	while ((st = FLASHCTRL->STATUS) & DBG_CONTROL_BUSY) {
 	}
 
 	release_debugger();
@@ -377,7 +362,7 @@ void __attribute__((optimize("O0"))) memcpy_pm2dat( void *dest, const __flash__ 
     uint32_t newLen;
     uint32_t endLen;
     uint32_t longLen;
-    __flash__ uint32_t *pLongSrc;
+    const __flash__ uint32_t *pLongSrc;
     uint32_t *pLongDest;
     uint32_t longWord1;
     uint32_t longWord2;
@@ -415,12 +400,12 @@ void __attribute__((optimize("O0"))) memcpy_pm2dat( void *dest, const __flash__ 
     if ( srcCnt <= destCnt )
     {
         // Advance to pSrc at the start of the next full word
-        pLongSrc = (__flash__ uint32_t*) ( pSrc + srcCnt );
+        pLongSrc = (const __flash__ uint32_t*) ( pSrc + srcCnt );
     }
     else // There are still source bytes remaining in the first word
     {
         // Set pSrc to the start of the first full word
-        pLongSrc = (__flash__ uint32_t*) ( pSrc + srcCnt - 4 );
+        pLongSrc = (const __flash__ uint32_t*) ( pSrc + srcCnt - 4 );
     }
 #pragma GCC diagnostic pop
 

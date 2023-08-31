@@ -151,7 +151,7 @@ xCharsForTx = xQueueCreate( uxQueueLength + 1, ( unsigned portBASE_TYPE ) sizeof
 			uart_enable_interrupt(UART1, uart_interrupt_tx);
 		    uart_enable_interrupts_globally(UART1);
 
-			tfp_printf("Setup of UART1 Complete !");
+			printf("Setup of UART1 Complete !");
 
 		}
 		portEXIT_CRITICAL();

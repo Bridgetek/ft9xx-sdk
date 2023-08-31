@@ -437,41 +437,44 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 	USBH_endpoint *epThis = xferThis->endpoint;
 	USBH_qtd *hc_prev_qtd;
 
+	// This is called when there is a timeout on the transfer,
+	// or the transfer needs to be finished and disposed of.
+
 	// Check transfer endpoint queues match.
 	if (hc_this_qh != epThis->hc_entry.qh)
 	{
 #ifdef USBH_DEBUG_XFER
-		tfp_printf("Unlink qTD Error: Endpoint pointer to qTD does not match Xfer\r\n");
+		printf("Unlink qTD Error: Endpoint pointer to qTD does not match Xfer\r\n");
 #endif // USBH_DEBUG_XFER
 		return;
 	}
 
 	// Deactivate target qTD.
-	//CRITICAL_SECTION_BEGIN
 	token = EHCI_MEM(hc_this_qtd->token);
 	token &= (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
 	// Deactivate it.
 	EHCI_MEM(hc_this_qtd->token) = token;
-	//CRITICAL_SECTION_END
 
 	// Check if the qh->current_qtd points to the qTD of the transfer.
 	// If it does then the overlay is from the qTD we need to unlink.
 	if (EHCI_HC_TO_CPU(EHCI_MEM(hc_this_qh->qtd_current)) == (uint32_t)hc_this_qtd)
 	{
+#ifdef USBH_DEBUG_XFER
+		printf("Stopping in overlay\r\n");
+#endif // USBH_DEBUG_XFER
+
 		// Stop the transfer in the overlay.
 		token &= (~MASK_EHCI_QUEUE_TD_TOKEN_TOGGLE);
 		token |= (EHCI_MEM(hc_this_qh->transfer_overlay.token) & MASK_EHCI_QUEUE_TD_TOKEN_TOGGLE);
 
-		//CRITICAL_SECTION_BEGIN
 		EHCI_MEM(hc_this_qh->transfer_overlay.token) = token;
-		//CRITICAL_SECTION_END
+
 		// Wait for a short time to ensure that the controller passes this
 		// qTD and writes back the overlay.
 		delayms(1);
 		// Re-write the overlay.
 		EHCI_MEM(hc_this_qh->transfer_overlay.token) = token;
 	};
-
 
 	// Go through queue headers list of qTDs to find the right qTD to remove.
 	hc_prev_qtd = epThis->hc_head_qtd;
@@ -480,7 +483,7 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 	{
 		// The qTD to unlink is the first one in the endpoint's list.
 #ifdef USBH_DEBUG_XFER
-		tfp_printf("Unlink qTD: first entry unlinked (overlay)\r\n");
+		printf("Unlink qTD: first entry unlinked (overlay)\r\n");
 #endif // USBH_DEBUG_XFER
 	}
 	else
@@ -502,7 +505,7 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 		if (hc_prev_qtd == hc_this_qtd)
 		{
 #ifdef USBH_DEBUG_XFER
-			tfp_printf("Unlink qTD Error: could not find xfer qtd\r\n");
+			printf("Unlink qTD Error: could not find xfer qtd\r\n");
 #endif // USBH_DEBUG_XFER
 			return;
 		}
@@ -512,7 +515,7 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 				EHCI_TERMINATE_TD(EHCI_MEM(hc_prev_qtd->next));
 
 #ifdef USBH_DEBUG_XFER
-		tfp_printf("Unlink qTD: unlinked mid-list entry\r\n");
+		printf("Unlink qTD: unlinked mid-list entry\r\n");
 #endif // USBH_DEBUG_XFER
 
 		// Deactivate QH current aTD overlay.
@@ -521,10 +524,28 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 			EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->next);
 
 #ifdef USBH_DEBUG_XFER
-			tfp_printf("Unlink qTD: unlinked mid-list overlay\r\n");
+			printf("Unlink qTD: unlinked mid-list overlay\r\n");
 #endif // USBH_DEBUG_XFER
 		}
 	}
+
+	do {
+		// If the next entry is the qTD to unlink then stop.
+		if (EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)) == EHCI_CPU_TO_HC(epThis->hc_dummy_qtd))
+		{
+			// Free the current dummy and make this qTD the new dummy.
+			// Under all circumstances this qTD is gone but still linked.
+			usbh_free_hc_1_block(epThis->hc_dummy_qtd);
+			epThis->hc_dummy_qtd = hc_this_qtd;
+			break;
+		}
+		if (EHCI_TERMINATE_TD(EHCI_MEM(hc_prev_qtd->next)))
+		{
+			break;
+		}
+		hc_prev_qtd = (USBH_qtd *)EHCI_HC_TO_CPU(EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)));
+		// Stop if we reach the right qTD.
+	} while (1);
 }
 
 static uint16_t usbh_xfer_iso_td_insert(USBH_xfer *xferNew, uint16_t advance)
@@ -630,7 +651,7 @@ static uint16_t usbh_xfer_iso_td_insert(USBH_xfer *xferNew, uint16_t advance)
 	xferNew->endpoint->last_microframe = this_frindex;
 
 #ifdef USBH_DEBUG_PERIODIC_LIST
-	tfp_printf("Insert iTD: added iso to periodic schedule\r\n");
+	printf("Insert iTD: added iso to periodic schedule\r\n");
 #endif // USBH_DEBUG_PERIODIC_LIST
 
 	return next_frame;
@@ -657,7 +678,7 @@ static uint8_t usbh_xfer_iso_td_remove(USBH_xfer *xferOld)
 		usbh_write_periodic_list(this_frame, link);
 
 #ifdef USBH_DEBUG_PERIODIC_LIST
-		tfp_printf("Remove iTD: removed first\r\n");
+		printf("Remove iTD: removed first\r\n");
 #endif // USBH_DEBUG_PERIODIC_LIST
 
 		status = USBH_OK;
@@ -676,7 +697,7 @@ static uint8_t usbh_xfer_iso_td_remove(USBH_xfer *xferOld)
 				status = USBH_OK;
 
 #ifdef USBH_DEBUG_PERIODIC_LIST
-				tfp_printf("Remove iTD: remove mid-list\r\n");
+				printf("Remove iTD: remove mid-list\r\n");
 #endif // USBH_DEBUG_PERIODIC_LIST
 				break;
 			}
@@ -686,7 +707,7 @@ static uint8_t usbh_xfer_iso_td_remove(USBH_xfer *xferOld)
 				&& (EHCI_TERMINATE_QH(link) == 0));
 	}
 #ifdef USBH_DEBUG_PERIODIC_LIST
-	tfp_printf("Remove iTD: remove done\r\n");
+	printf("Remove iTD: remove done\r\n");
 #endif // USBH_DEBUG_PERIODIC_LIST
 
 	return status;
@@ -725,7 +746,7 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 						// Expired transaction is removed by USBH_process
 
 #ifdef USBH_DEBUG_XFER
-						tfp_printf("Xfer: timeout qH %08x qTD %08x token %08x\r\n", xferThis->hc_entry.qh, xferThis->hc_qtd, token);
+						printf("Xfer: timeout qH %08x qTD %08x token %08x\r\n", xferThis->hc_entry.qh, xferThis->hc_qtd, token);
 #endif // USBH_DEBUG_XFER
 					}
 				}
@@ -741,7 +762,7 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 						// Expired transaction is removed by USBH_process
 
 #ifdef USBH_DEBUG_XFER
-						tfp_printf("Xfer: timeout siTD %08x token %08x\r\n", xferThis->hc_entry.siTD, token);
+						printf("Xfer: timeout siTD %08x token %08x\r\n", xferThis->hc_entry.siTD, token);
 #endif // USBH_DEBUG_XFER
 					}
 				}
@@ -766,7 +787,7 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 						xferThis->status = USBH_ERR_TIMEOUT;
 						// Expired transaction is removed by USBH_process
 #ifdef USBH_DEBUG_XFER
-						tfp_printf("Xfer: timeout iTD %08x token %08x\r\n", xferThis->hc_entry.iTD, token);
+						printf("Xfer: timeout iTD %08x token %08x\r\n", xferThis->hc_entry.iTD, token);
 #endif // USBH_DEBUG_XFER
 					}
 				}
@@ -808,12 +829,12 @@ static int8_t usbh_hub_change(uint32_t id, int8_t status, size_t len, uint8_t *c
 			{
 				// And update that port.
 #ifdef USBH_DEBUG_ENUM
-				tfp_printf("Enumeration: Hub notification enumeration change port %d\r\n", hubPort);
+				printf("Enumeration: Hub notification enumeration change port %d\r\n", hubPort);
 #endif
 				usbh_hub_port_update(hubDev, hubPort, 0, &devNew);
 
 #ifdef USBH_DEBUG_ENUM
-				tfp_printf("Enumeration: Hub notification enumeration done\r\n");
+				printf("Enumeration: Hub notification enumeration done\r\n");
 #endif
 			}
 		}
@@ -838,7 +859,7 @@ static int8_t usbh_hub_change(uint32_t id, int8_t status, size_t len, uint8_t *c
 							!= USBH_OK)
 					{
 #ifdef USBH_DEBUG_ERROR
-						tfp_printf("Hub: could not submit new read status change\r\n");
+						printf("Hub: could not submit new read status change\r\n");
 #endif // USBH_DEBUG_ERROR
 					}
 				}
@@ -932,7 +953,7 @@ static void usbh_update_transactions(USBH_xfer **list)
 					usbh_xfer_callback_active = 0;
 					//CRITICAL_SECTION_END
 #ifdef USBH_DEBUG_XFER
-					tfp_printf("Xfer: updated qH/siTD/iTD %08x\r\n", xferThis->hc_entry.qh);
+					printf("Xfer: updated qH/siTD/iTD %08x\r\n", xferThis->hc_entry.qh);
 #endif // USBH_DEBUG_XFER
 
 					usbh_xfer_remove(xferThis, list);
@@ -994,28 +1015,28 @@ static void usbh_periodic_init(void)
 			MASK_EHCI_QUEUE_HEAD_TYPE_QH | MASK_EHCI_QUEUE_HEAD_TERMINATE;
 
 #ifdef USBH_DEBUG_SETUP
-	tfp_printf("Setup: Initialising Periodic EP list at %08x\r\n", (uint32_t)usbh_periodic_ep_list);
-	tfp_printf("Setup: Initialising Periodic QH list at %08x\r\n", (uint32_t)usbh_periodic_header_qh);
+	printf("Setup: Initialising Periodic EP list at %08x\r\n", (uint32_t)usbh_periodic_ep_list);
+	printf("Setup: Initialising Periodic QH list at %08x\r\n", (uint32_t)usbh_periodic_header_qh);
 #endif // USBH_DEBUG_SETUP
 
 	if (usbh_get_periodic_size() == 0x400)
 	{
 #ifdef USBH_DEBUG_SETUP
-		tfp_printf("Setup: Periodic Table Size 4 kB, 1k entries\r\n");
+		printf("Setup: Periodic Table Size 4 kB, 1k entries\r\n");
 #endif // USBH_DEBUG_SETUP
 		reg = EHCI_USBCMD_FRL_SIZE_1024;
 	}
 	else if (usbh_get_periodic_size() == 0x200)
 	{
 #ifdef USBH_DEBUG_SETUP
-		tfp_printf("Setup: Periodic Table Size 2 kB, 512 entries\r\n");
+		printf("Setup: Periodic Table Size 2 kB, 512 entries\r\n");
 #endif // USBH_DEBUG_SETUP
 		reg = EHCI_USBCMD_FRL_SIZE_512;
 	}
 	else // usbh_get_periodic_size() == 0x100
 	{
 #ifdef USBH_DEBUG_SETUP
-		tfp_printf("Setup: Periodic Table Size 1 kB, 256 entries\r\n");
+		printf("Setup: Periodic Table Size 1 kB, 256 entries\r\n");
 #endif // USBH_DEBUG_SETUP
 		reg = EHCI_USBCMD_FRL_SIZE_256;
 	}
@@ -1034,14 +1055,14 @@ static void usbh_periodic_init(void)
 	if (EHCI_REG(usbsts) & MASK_EHCI_USBSTS_PSCH_STS)
 	{
 #ifdef USBH_DEBUG_SETUP
-		tfp_printf("Setup: Periodic Schedule Running\r\n");
+		printf("Setup: Periodic Schedule Running\r\n");
 #endif // USBH_DEBUG_SETUP
 	}
 	else
 	{
 		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) | MASK_EHCI_USBCMD_PSCH_EN;
 #ifdef USBH_DEBUG_SETUP
-		tfp_printf("Setup: Periodic Schedule Enabled\r\n");
+		printf("Setup: Periodic Schedule Enabled\r\n");
 #endif // USBH_DEBUG_SETUP
 	}
 }
@@ -1065,8 +1086,8 @@ static void usbh_asynch_init(void)
 	usbh_async_ep_list->hc_head_qtd = usbh_async_ep_list->hc_dummy_qtd;
 
 #ifdef USBH_DEBUG_SETUP
-	tfp_printf("Setup: Initialising Async EP list at 0x%08x\r\n", (uint32_t)usbh_async_ep_list);
-	tfp_printf("Setup: Initialising Async QH list at 0x%08x\r\n", (uint32_t)usbh_async_header_qh);
+	printf("Setup: Initialising Async EP list at 0x%08x\r\n", (uint32_t)usbh_async_ep_list);
+	printf("Setup: Initialising Async QH list at 0x%08x\r\n", (uint32_t)usbh_async_header_qh);
 #endif // USBH_DEBUG_SETUP
 
 	// Point to self
@@ -1084,14 +1105,14 @@ static void usbh_asynch_init(void)
 	if (EHCI_REG(usbsts) & MASK_EHCI_USBSTS_ASCH_STS)
 	{
 #ifdef USBH_DEBUG_SETUP
-		tfp_printf("Setup: Asynchronous Schedule Running\r\n");
+		printf("Setup: Asynchronous Schedule Running\r\n");
 #endif // USBH_DEBUG_SETUP
 	}
 	else
 	{
 		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) | MASK_EHCI_USBCMD_ASCH_EN;
 #ifdef USBH_DEBUG_SETUP
-		tfp_printf("Setup: Asynchronous Schedule Enabled\r\n");
+		printf("Setup: Asynchronous Schedule Enabled\r\n");
 #endif // USBH_DEBUG_SETUP
 	}
 }
@@ -1120,7 +1141,7 @@ static int8_t usbh_ep_list_add(USBH_endpoint *epThis, USBH_endpoint *epListHead,
 		{
 			// List consistency error
 #ifdef USBH_DEBUG_LISTS
-			tfp_printf("List add error: list inconsistent\r\n");
+			printf("List add error: list inconsistent\r\n");
 #endif // USBH_DEBUG_LISTS
 			return USBH_ERR_USBERR;
 		}
@@ -1130,7 +1151,7 @@ static int8_t usbh_ep_list_add(USBH_endpoint *epThis, USBH_endpoint *epListHead,
 			if (epEnd->interval < epThis->interval)
 			{
 #ifdef USBH_DEBUG_LISTS
-				tfp_printf("List add: Interrupt interval new %d previous %d\r\n", epThis->interval, epEnd->interval);
+				printf("List add: Interrupt interval new %d previous %d\r\n", epThis->interval, epEnd->interval);
 #endif // USBH_DEBUG_LISTS
 				// The new endpoint to add has an interval less than the point Insert before end_ep in the list.
 				// If this is the first pass then add to end of list (after dummy entry).
@@ -1185,7 +1206,7 @@ static int8_t usbh_ep_list_add(USBH_endpoint *epThis, USBH_endpoint *epListHead,
 
 	// Didn't find either the end of either list or the start of endpoint list.
 #ifdef USBH_DEBUG_LISTS
-	tfp_printf("List add error: list not found\r\n");
+	printf("List add error: list not found\r\n");
 #endif // USBH_DEBUG_LISTS
 	return USBH_ERR_NOT_FOUND;
 }
@@ -1211,7 +1232,7 @@ static int8_t usbh_ep_list_remove(USBH_endpoint *epThis, USBH_endpoint *epListHe
 		if (epEnd->hc_entry.qh != hc_end_qh)
 		{
 #ifdef USBH_DEBUG_LISTS
-			tfp_printf("List Remove error: list inconsistent\r\n");
+			printf("List Remove error: list inconsistent\r\n");
 #endif // USBH_DEBUG_LISTS
 			// List consistency error
 			return USBH_ERR_USBERR;
@@ -1267,13 +1288,13 @@ static int8_t usbh_ep_list_remove(USBH_endpoint *epThis, USBH_endpoint *epListHe
 					{
 						usbh_write_periodic_list(i, link);
 #ifdef USBH_DEBUG_PERIODIC_LIST
-						tfp_printf("List remove: Changed periodic entry %d to %08x\r\n", i, link);
+						printf("List remove: Changed periodic entry %d to %08x\r\n", i, link);
 #endif // USBH_DEBUG_PERIODIC_LIST
 					}
 				}
 			}
 #ifdef USBH_DEBUG_LISTS
-			tfp_printf("List remove: done\r\n");
+			printf("List remove: done\r\n");
 #endif // USBH_DEBUG_LISTS
 
 #if 0
@@ -1284,7 +1305,7 @@ static int8_t usbh_ep_list_remove(USBH_endpoint *epThis, USBH_endpoint *epListHe
 			{
 				if (epEnd->hc_entry.qh != hc_end_qh)
 				{
-					tfp_printf("List remove error: list inconsistent\r\n");
+					printf("List remove error: list inconsistent\r\n");
 					// List consistency error
 					return USBH_ERR_USBERR;
 				}
@@ -1303,7 +1324,7 @@ static int8_t usbh_ep_list_remove(USBH_endpoint *epThis, USBH_endpoint *epListHe
 
 	// Didn't find either the end of either list or the start of endpoint list.
 #ifdef USBH_DEBUG_LISTS
-	tfp_printf("List remove error: list not found\r\n");
+	printf("List remove error: list not found\r\n");
 #endif // USBH_DEBUG_LISTS
 	return USBH_ERR_NOT_FOUND;
 }
@@ -1516,13 +1537,13 @@ static void usbh_xfer_add(USBH_xfer *xferAdd, USBH_xfer **list)
 		};
 		xferThis->next = xferAdd;
 #ifdef USBH_DEBUG_XFER
-		tfp_printf("Xfer add: add to end of list\r\n");
+		printf("Xfer add: add to end of list\r\n");
 #endif // USBH_DEBUG_XFER
 	}
 	else
 	{
 #ifdef USBH_DEBUG_XFER
-		tfp_printf("Xfer add: add to empty list\r\n");
+		printf("Xfer add: add to empty list\r\n");
 #endif // USBH_DEBUG_XFER
 		// Add to empty list
 		*list = xferAdd;
@@ -1549,7 +1570,7 @@ static void usbh_xfer_remove(USBH_xfer *xferRemove, USBH_xfer **list)
 				// Removing non-first member of list
 				xferPrev->next = xferThis->next;
 #ifdef USBH_DEBUG_XFER
-				tfp_printf("Xfer remove: removing mid-list entry\r\n");
+				printf("Xfer remove: removing mid-list entry\r\n");
 #endif // USBH_DEBUG_XFER
 			}
 			else
@@ -1557,7 +1578,7 @@ static void usbh_xfer_remove(USBH_xfer *xferRemove, USBH_xfer **list)
 				// Removing first member of list
 				*list = xferThis->next;
 #ifdef USBH_DEBUG_XFER
-				tfp_printf("Xfer remove: removing first entry\r\n");
+				printf("Xfer remove: removing first entry\r\n");
 #endif // USBH_DEBUG_XFER
 			}
 			break;
@@ -1814,7 +1835,7 @@ static int32_t usbh_setup_transfer(USBH_endpoint *ep0, USB_device_request *devRe
 	USBH_xfer xferAck;
 
 #ifdef USBH_DEBUG_SETUP
-	tfp_printf("Setup: request %d of length %d\r\n", devReq->bRequest, len);
+	printf("Setup: request %d of length %d\r\n", devReq->bRequest, len);
 #endif // USBH_DEBUG_SETUP
 
 	do {
@@ -2001,7 +2022,7 @@ static int32_t usbh_setup_transfer(USBH_endpoint *ep0, USB_device_request *devRe
 		{
 			// Handle or report error
 #ifdef USBH_DEBUG_ERROR
-			tfp_printf("Setup error: SETUP error occurred %d!!!\r\n", status);
+			printf("Setup error: SETUP error occurred %d!!!\r\n", status);
 #endif // USBH_DEBUG_ERROR
 		}
 		else
@@ -2028,7 +2049,7 @@ static int32_t usbh_setup_transfer(USBH_endpoint *ep0, USB_device_request *devRe
 			{
 				// Handle or report error
 #ifdef USBH_DEBUG_ERROR
-				tfp_printf("Setup: DATA Error occurred %d!!!\r\n", status);
+				printf("Setup: DATA Error occurred %d!!!\r\n", status);
 #endif // USBH_DEBUG_ERROR
 			}
 			else
@@ -2039,7 +2060,7 @@ static int32_t usbh_setup_transfer(USBH_endpoint *ep0, USB_device_request *devRe
 				{
 					// Handle or report error
 #ifdef USBH_DEBUG_ERROR
-					tfp_printf("Setup: ACK Error occurred %d!!!\r\n", status);
+					printf("Setup: ACK Error occurred %d!!!\r\n", status);
 #endif // USBH_DEBUG_ERROR
 				}
 			}
@@ -2474,22 +2495,22 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 			EHCI_MEM(hc_itd->pointer_list[6]) = 0;
 
 #ifdef USBH_DEBUG_XFER
-			tfp_printf("iTD next %08x\r\n", hc_itd->next);
-			tfp_printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[0]);
-			tfp_printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[1]);
-			tfp_printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[2]);
-			tfp_printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[3]);
-			tfp_printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[4]);
-			tfp_printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[5]);
-			tfp_printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[6]);
-			tfp_printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[7]);
-			tfp_printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[0]);
-			tfp_printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[1]);
-			tfp_printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[2]);
-			tfp_printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[3]);
-			tfp_printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[4]);
-			tfp_printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[5]);
-			tfp_printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[6]);
+			printf("iTD next %08x\r\n", hc_itd->next);
+			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[0]);
+			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[1]);
+			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[2]);
+			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[3]);
+			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[4]);
+			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[5]);
+			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[6]);
+			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[7]);
+			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[0]);
+			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[1]);
+			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[2]);
+			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[3]);
+			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[4]);
+			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[5]);
+			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[6]);
 #endif // USBH_DEBUG_XFER
 		}
 		// Full-speed endpoint.
@@ -2567,13 +2588,13 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 													| EHCI_SPLIT_ISO_TD_STATUS_ACTIVE;
 
 #ifdef USBH_DEBUG_XFER
-			tfp_printf("siTD next %08x\r\n", hc_sitd->next);
-			tfp_printf("siTD ep_char_1 %08x\r\n", hc_sitd->ep_char_1);
-			tfp_printf("siTD ep_capab_2 %08x\r\n", hc_sitd->ep_capab_2);
-			tfp_printf("siTD transfer_state %08x\r\n", hc_sitd->transfer_state);
-			tfp_printf("siTD pointer_list %08x\r\n", hc_sitd->pointer_list[0]);
-			tfp_printf("siTD pointer_list %08x\r\n", hc_sitd->pointer_list[1]);
-			tfp_printf("siTD back %08x\r\n", hc_sitd->back);
+			printf("siTD next %08x\r\n", hc_sitd->next);
+			printf("siTD ep_char_1 %08x\r\n", hc_sitd->ep_char_1);
+			printf("siTD ep_capab_2 %08x\r\n", hc_sitd->ep_capab_2);
+			printf("siTD transfer_state %08x\r\n", hc_sitd->transfer_state);
+			printf("siTD pointer_list %08x\r\n", hc_sitd->pointer_list[0]);
+			printf("siTD pointer_list %08x\r\n", hc_sitd->pointer_list[1]);
+			printf("siTD back %08x\r\n", hc_sitd->back);
 #endif // USBH_DEBUG_XFER
 
 		}
@@ -3004,7 +3025,7 @@ static int8_t usbh_hub_enumerate(USBH_device *hubDev, uint8_t configurationNum)
 	int8_t twopass = 0;
 
 #ifdef USBH_DEBUG_ENUM
-	tfp_printf("Enumeration: starting...\r\n");
+	printf("Enumeration: starting...\r\n");
 #endif
 	// Special case of enumeration of the root hub
 	if (hubDev == NULL)
@@ -3095,7 +3116,7 @@ static int8_t usbh_hub_port_update(USBH_device *hubDev, uint8_t hubPort, uint8_t
 		if (!portStatus.portPower)
 		{
 #ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Turn on Downstream Hub power for port %d\r\n", hubPort);
+			printf("Enumeration: Turn on Downstream Hub power for port %d\r\n", hubPort);
 #endif
 			status = usbh_set_hub_port_feature(hubDev, hubPort, USB_HUB_CLASS_FEATURE_PORT_POWER);
 
@@ -3154,13 +3175,13 @@ static int8_t usbh_hub_port_update(USBH_device *hubDev, uint8_t hubPort, uint8_t
 	if (connectChange)
 	{
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Hub port connection change\r\n");
+		printf("Enumeration: Hub port connection change\r\n");
 #endif
 
 		if (!portStatus.currentConnectStatus)
 		{
 #ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Removing hub port %d\r\n", hubPort);
+			printf("Enumeration: Removing hub port %d\r\n", hubPort);
 #endif
 			status = usbh_hub_port_remove(hubDev, hubPort);
 			*devNew = NULL;
@@ -3168,7 +3189,7 @@ static int8_t usbh_hub_port_update(USBH_device *hubDev, uint8_t hubPort, uint8_t
 		else
 		{
 #ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Connected hub port %d\r\n", hubPort);
+			printf("Enumeration: Connected hub port %d\r\n", hubPort);
 #endif
 			status = usbh_hub_port_enumerate(hubDev, hubPort, configurationNum, devNew);
 		}
@@ -3193,7 +3214,7 @@ static int8_t usbh_hub_port_remove(USBH_device *hubDev, uint8_t hubPort)
 		// If the root device is enumerated then disconnect everything.
 
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Root device removed\r\n");
+		printf("Enumeration: Root device removed\r\n");
 #endif // USBH_DEBUG_ENUM
 
 		if (usbh_firstDev)
@@ -3203,7 +3224,7 @@ static int8_t usbh_hub_port_remove(USBH_device *hubDev, uint8_t hubPort)
 			usbh_firstDev = NULL;
 
 #ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Removing devices on root hub\r\n");
+			printf("Enumeration: Removing devices on root hub\r\n");
 #endif // USBH_DEBUG_ENUM
 
 			usbh_dev_disconnect(hubDev);
@@ -3227,7 +3248,7 @@ static int8_t usbh_hub_port_remove(USBH_device *hubDev, uint8_t hubPort)
 		devChild = hubDev->children;
 
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Removing device on downstream hub\r\n");
+		printf("Enumeration: Removing device on downstream hub\r\n");
 #endif // USBH_DEBUG_ENUM
 
 		devPrev = NULL;
@@ -3313,7 +3334,7 @@ static void usbh_update_periodic_tree(void)
 				{
 					usbh_write_periodic_list(i, link);
 #ifdef USBH_DEBUG_PERIODIC_LIST
-					tfp_printf("List: Changed periodic entry %d to %08x\r\n", i, link);
+					printf("List: Changed periodic entry %d to %08x\r\n", i, link);
 #endif // USBH_DEBUG_PERIODIC_LIST
 				}
 			}
@@ -3350,7 +3371,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 	confDesc = (USB_configuration_descriptor *)&buf0[0];
 
 #ifdef USBH_DEBUG_ENUM
-	tfp_printf("Enumeration: Get Config Descriptor FULL %d bytes\r\n", confDescLen);
+	printf("Enumeration: Get Config Descriptor FULL %d bytes\r\n", confDescLen);
 #endif
 	status = usbh_req_get_descriptor(epZero, USB_DESCRIPTOR_TYPE_CONFIGURATION,
 			configurationNum, confDescLen, (uint8_t *)buf0);
@@ -3360,26 +3381,26 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 		confDescOffset = 0;
 
 #ifdef USBH_DEBUG_CONFIG_DESC
-		tfp_printf("Descriptor: Total length: %d\r\n", confDescLen);
+		printf("Descriptor: Total length: %d\r\n", confDescLen);
 #endif
 		while (confDescOffset < confDescLen)
 		{
 #ifdef USBH_DEBUG_CONFIG_DESC
-			tfp_printf("Descriptor: Offset: %d\r\n", confDescOffset);
+			printf("Descriptor: Offset: %d\r\n", confDescOffset);
 #endif
 			confDesc = (USB_configuration_descriptor *)&buf0[confDescOffset];
 
 			if (confDesc->bDescriptorType == USB_DESCRIPTOR_TYPE_CONFIGURATION)
 			{
 #ifdef USBH_DEBUG_CONFIG_DESC
-				tfp_printf("Descriptor: Parsing Configuration Descriptor\r\n");
+				printf("Descriptor: Parsing Configuration Descriptor\r\n");
 #endif
 				// There is no EHCI Structure associated with this type of descriptor.
 			}
 			else if (confDesc->bDescriptorType == USB_DESCRIPTOR_TYPE_INTERFACE_ASSOCIATION)
 			{
 #ifdef USBH_DEBUG_CONFIG_DESC
-				tfp_printf("Descriptor: Parsing Interface Association Descriptor\r\n");
+				printf("Descriptor: Parsing Interface Association Descriptor\r\n");
 #endif
 			}
 			else if (confDesc->bDescriptorType == USB_DESCRIPTOR_TYPE_INTERFACE)
@@ -3388,13 +3409,13 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 
 				// Make a new interface for the device.
 #ifdef USBH_DEBUG_CONFIG_DESC
-				tfp_printf("Descriptor: Parsing Interface Descriptor\r\n");
+				printf("Descriptor: Parsing Interface Descriptor\r\n");
 #endif
 				ifaceNew = usbh_alloc_interface();
 				if (ifaceNew == NULL)
 				{
 #ifdef USBH_DEBUG_CONFIG_DESC
-					tfp_printf("Descriptor: Exhaused Interface Resources\r\n");
+					printf("Descriptor: Exhaused Interface Resources\r\n");
 #endif
 					status = USBH_ENUM_PARTIAL;
 					break;
@@ -3443,7 +3464,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 
 				// Make a new endpoint on the interface.
 #ifdef USBH_DEBUG_CONFIG_DESC
-				tfp_printf("Descriptor: Parsing Endpoint Descriptor\r\n");
+				printf("Descriptor: Parsing Endpoint Descriptor\r\n");
 #endif
 				if (ifaceNew != 0)
 				{
@@ -3453,7 +3474,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 					if (epNew == NULL)
 					{
 #ifdef USBH_DEBUG_CONFIG_DESC
-						tfp_printf("Descriptor: Exhaused Endpoint Resources\r\n");
+						printf("Descriptor: Exhaused Endpoint Resources\r\n");
 #endif
 						status = USBH_ENUM_PARTIAL;
 						break;
@@ -3476,7 +3497,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 
 						epNew->index = (confEndpointDesc->bEndpointAddress & (~USB_ENDPOINT_DESCRIPTOR_EPADDR_MASK));
 #ifdef USBH_DEBUG_CONFIG_DESC
-						tfp_printf("Descriptor: Endpoint index: %d %s ", epNew->index, epNew->direction == USBH_DIR_IN?"in":"out");
+						printf("Descriptor: Endpoint index: %d %s ", epNew->index, epNew->direction == USBH_DIR_IN?"in":"out");
 #endif // USBH_DEBUG_CONFIG_DESC
 
 						epNew->interval = confEndpointDesc->bInterval;
@@ -3484,7 +3505,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 								USB_ENDPOINT_DESCRIPTOR_ATTR_BULK)
 						{
 #ifdef USBH_DEBUG_CONFIG_DESC
-							tfp_printf("bulk ");
+							printf("bulk ");
 #endif // USBH_DEBUG_CONFIG_DESC
 							epNew->type = USBH_EP_BULK;
 						}
@@ -3492,7 +3513,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 								USB_ENDPOINT_DESCRIPTOR_ATTR_INTERRUPT)
 						{
 #ifdef USBH_DEBUG_CONFIG_DESC
-							tfp_printf("int ");
+							printf("int ");
 #endif // USBH_DEBUG_CONFIG_DESC
 							epNew->type = USBH_EP_INT;
 							if (devNew->speed == USBH_SPEED_HIGH)
@@ -3521,7 +3542,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 								USB_ENDPOINT_DESCRIPTOR_ATTR_ISOCHRONOUS)
 						{
 #ifdef USBH_DEBUG_CONFIG_DESC
-							tfp_printf("iso ");
+							printf("iso ");
 #endif // USBH_DEBUG_CONFIG_DESC
 							epNew->type = USBH_EP_ISOC;
 							count = epNew->interval;
@@ -3539,7 +3560,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 
 						epNew->max_packet_size = (confEndpointDesc->wMaxPacketSize & 0x3ff);
 #ifdef USBH_DEBUG_CONFIG_DESC
-						tfp_printf("max %d ", epNew->max_packet_size);
+						printf("max %d ", epNew->max_packet_size);
 #endif // USBH_DEBUG_CONFIG_DESC
 
 						epNew->additional = (confEndpointDesc->wMaxPacketSize >> 11);
@@ -3598,7 +3619,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 							ifaceNew->endpoints = epNew;
 						}
 #ifdef USBH_DEBUG_CONFIG_DESC
-						tfp_printf("\r\n");
+						printf("\r\n");
 #endif // USBH_DEBUG_CONFIG_DESC
 					}
 				}
@@ -3606,7 +3627,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 			else
 			{
 #ifdef USBH_DEBUG_CONFIG_DESC
-				tfp_printf("Descriptor: Unknown Descriptor type %d length %d\r\n",
+				printf("Descriptor: Unknown Descriptor type %d length %d\r\n",
 						confDesc->bDescriptorType, confDesc->bLength);
 #endif
 			}
@@ -3691,7 +3712,7 @@ static int8_t usbh_hub_port_enumerate_device(USBH_device *devNew, USBH_device *h
 
 	// Transaction 4: Get Configuration Descriptor Part
 #ifdef USBH_DEBUG_ENUM
-	tfp_printf("Enumeration: Get Config Descriptor first\r\n");
+	printf("Enumeration: Get Config Descriptor first\r\n");
 #endif
 
 	for (configurationIndex = 0; configurationIndex < devNew->descriptor.bNumConfigurations; configurationIndex++)
@@ -3732,7 +3753,7 @@ static int8_t usbh_hub_port_enumerate_device(USBH_device *devNew, USBH_device *h
 			// Only need to continue with enumeration if the config descriptor claims more interfaces.
 			// Otherwise there is nothing else to do.
 #ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Parsing Configuration Descriptor for %d interfaces\r\n", confDesc->bNumInterfaces);
+			printf("Enumeration: Parsing Configuration Descriptor for %d interfaces\r\n", confDesc->bNumInterfaces);
 #endif
 
 			if (confDesc->bNumInterfaces)
@@ -3780,7 +3801,7 @@ static int8_t usbh_hub_port_enumerate_device(USBH_device *devNew, USBH_device *h
 				uniqueEnumValue++;
 			}
 #ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Get Config Descriptor status %d\r\n", status);
+			printf("Enumeration: Get Config Descriptor status %d\r\n", status);
 #endif
 		}
 	}
@@ -3822,8 +3843,8 @@ static int8_t usbh_hub_port_enumerate_device(USBH_device *devNew, USBH_device *h
 			}
 
 #ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Downstream hub with %d ports\r\n", devNew->portCount);
-			tfp_printf("Enumeration: polling interval approx %d ms\r\n", devNew->hubPollTimeout);
+			printf("Enumeration: Downstream hub with %d ports\r\n", devNew->portCount);
+			printf("Enumeration: polling interval approx %d ms\r\n", devNew->hubPollTimeout);
 #endif
 		}
 
@@ -3859,7 +3880,7 @@ static int8_t usbh_hub_port_enumerate_device(USBH_device *devNew, USBH_device *h
 	if (status < USBH_OK)
 	{
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: failed %d\r\n", status);
+		printf("Enumeration: failed %d\r\n", status);
 #endif // USBH_DEBUG_ENUM
 
 	}
@@ -3898,7 +3919,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 	if (hubDev)
 	{
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Port %d on Downstream Hub - Get Descriptor\r\n", hubPort);
+		printf("Enumeration: Port %d on Downstream Hub - Get Descriptor\r\n", hubPort);
 #endif
 		// Get downstream hub descriptor
 		status = usbh_get_hub_descriptor(hubDev, &hubDesc);
@@ -3917,7 +3938,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 	if (portStatus.currentConnectStatus == 0)
 	{
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Device attach error\r\n");
+		printf("Enumeration: Device attach error\r\n");
 #endif
 		portStatus.currentConnectStatusChange = 1;
 		enumInProgress = 0;
@@ -3936,7 +3957,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 			(portStatus.currentConnectStatus == 0))
 	{
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Device debounce error\r\n");
+		printf("Enumeration: Device debounce error\r\n");
 #endif
 		enumInProgress = 0;
 
@@ -3947,7 +3968,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 	{
 		// Enumerate Root hub
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Root Hub %d - Start Hardware\r\n", hubPort);
+		printf("Enumeration: Root Hub %d - Start Hardware\r\n", hubPort);
 #endif
 		// Disable the top level device to stop its use.
 		usbh_firstDev = NULL;
@@ -3981,7 +4002,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 	if (portStatus.currentConnectStatus == 0)
 	{
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Device disconnect TDRSTR %lx\r\n", *(uint32_t *)&portStatus);
+		printf("Enumeration: Device disconnect TDRSTR %lx\r\n", *(uint32_t *)&portStatus);
 #endif
 		portStatus.currentConnectStatusChange = 1;
 		enumInProgress = 0;
@@ -4000,7 +4021,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 	if (portStatus.currentConnectStatus == 0)
 	{
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Device disconnect TRSTRCY %lx\r\n", *(uint32_t *)&portStatus);
+		printf("Enumeration: Device disconnect TRSTRCY %lx\r\n", *(uint32_t *)&portStatus);
 #endif
 		portStatus.currentConnectStatusChange = 1;
 		enumInProgress = 0;
@@ -4029,7 +4050,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 	}
 
 #ifdef USBH_DEBUG_ENUM
-	tfp_printf("Enumeration: Speed %d Hub\r\n", speed);
+	printf("Enumeration: Speed %d Hub\r\n", speed);
 #endif
 
 	// Create a new device to be connected to the parent hub (and port)
@@ -4098,7 +4119,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 	{
 		// Transaction 1: Get Device Descriptor at Addr 0
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Get Device Descriptor first\r\n");
+		printf("Enumeration: Get Device Descriptor first\r\n");
 #endif
 
 		status = usbh_req_get_descriptor(epZero, USB_DESCRIPTOR_TYPE_DEVICE, 0,
@@ -4110,7 +4131,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 			// Fill in information from the device descriptor
 			epZero->max_packet_size = devDesc->bMaxPacketSize0;
 #ifdef USBH_DEBUG_ENUM
-			tfp_printf("Enumeration: Get Device Descriptor status %d\r\n", status);
+			printf("Enumeration: Get Device Descriptor status %d\r\n", status);
 #endif
 		}
 	}
@@ -4121,7 +4142,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 
 		// Transaction 2: Set Address
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Set Address %d\r\n", addr);
+		printf("Enumeration: Set Address %d\r\n", addr);
 #endif
 		status = usbh_req_set_address(epZero, addr);
 
@@ -4167,7 +4188,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 
 		// Transaction 3: Get Device Descriptor with Address
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: Get Device Descriptor FULL\r\n");
+		printf("Enumeration: Get Device Descriptor FULL\r\n");
 #endif
 
 		status = usbh_req_get_descriptor(epZero, USB_DESCRIPTOR_TYPE_DEVICE, 0,
@@ -4232,7 +4253,7 @@ static void usbh_dev_disconnect_config(USBH_device *devRemove, uint8_t keepDev)
 			{
 				epRemoveNext = epRemove->next;
 #ifdef USBH_DEBUG_LISTS
-				tfp_printf("List disconnect: Remove EP %08x\r\n", epRemove);
+				printf("List disconnect: Remove EP %08x\r\n", epRemove);
 #endif // USBH_DEBUG_LISTS
 				usbh_free_endpoint(epRemove);
 				epRemove = epRemoveNext;
@@ -4246,7 +4267,7 @@ static void usbh_dev_disconnect_config(USBH_device *devRemove, uint8_t keepDev)
 		devRemove->interfaces = NULL;
 
 #ifdef USBH_DEBUG_LISTS
-		tfp_printf("List disconnect: Remove EP0 %08x\r\n", devRemove->endpoint0);
+		printf("List disconnect: Remove EP0 %08x\r\n", devRemove->endpoint0);
 #endif // USBH_DEBUG_LISTS
 
 		if (keepDev == 0)
@@ -4493,7 +4514,7 @@ static void *usbh_alloc_hc_2_blocks(void)
 			hc_alloc = (void *)&EHCI_RAM[EHCI_RAM_OFFSET(i * EHCI_RAM_ALIGN)];
 
 #ifdef USBH_DEBUG_ALLOC
-			tfp_printf("Alloc: resv 2 blocks %08x\r\n", hc_alloc);
+			printf("Alloc: resv 2 blocks %08x\r\n", hc_alloc);
 #endif // USBH_DEBUG_ALLOC
 
 			// Zero out queue header
@@ -4511,7 +4532,7 @@ static void usbh_free_hc_2_blocks(void *hc_free)
 	uint32_t i;
 
 #ifdef USBH_DEBUG_ALLOC
-	tfp_printf("Alloc: free 2 blocks %08x\r\n", hc_free);
+	printf("Alloc: free 2 blocks %08x\r\n", hc_free);
 #endif // USBH_DEBUG_ALLOC
 
 	// LOCK
@@ -4537,7 +4558,7 @@ static void *usbh_alloc_hc_1_block(void)
 			hc_alloc = (USBH_qtd *)&EHCI_RAM[EHCI_RAM_OFFSET(i * EHCI_RAM_ALIGN)];
 
 #ifdef USBH_DEBUG_ALLOC
-			tfp_printf("Alloc: resv 1 block %08x\r\n", hc_alloc);
+			printf("Alloc: resv 1 block %08x\r\n", hc_alloc);
 #endif // USBH_DEBUG_ALLOC
 
 			// Zero out allocated memory
@@ -4554,7 +4575,7 @@ static void usbh_free_hc_1_block(void *hc_free)
 	uint32_t i;
 
 #ifdef USBH_DEBUG_ALLOC
-	tfp_printf("Alloc: free 1 block %04x\r\n", hc_free);
+	printf("Alloc: free 1 block %04x\r\n", hc_free);
 #endif // USBH_DEBUG_ALLOC
 
 	// LOCK
@@ -4604,7 +4625,7 @@ static void *usbh_alloc_hc_buffer(uint32_t size)
 				}
 
 #ifdef USBH_DEBUG_ALLOC
-				tfp_printf("Alloc: resv buffer %d blocks %08x\r\n", blocks, hc_buf);
+				printf("Alloc: resv buffer %d blocks %08x\r\n", blocks, hc_buf);
 #endif // USBH_DEBUG_ALLOC
 
 				break;
@@ -4634,7 +4655,7 @@ static void usbh_free_hc_buffer(void *hc_buf, uint32_t size)
 	}
 
 #ifdef USBH_DEBUG_ALLOC
-	tfp_printf("Alloc: free buffer %d blocks %08x\r\n", blocks, hc_buf);
+	printf("Alloc: free buffer %d blocks %08x\r\n", blocks, hc_buf);
 #endif // USBH_DEBUG_ALLOC
 
 	// LOCK
@@ -4968,7 +4989,7 @@ void usbh_hw_wait_for_doorbell(void)
 	if ((doorbell & MASK_EHCI_USBCMD_RS))
 	{
 #ifdef USBH_DEBUG_LISTS
-		tfp_printf("List: Doorbell rung.\r\n");
+		printf("List: Doorbell rung.\r\n");
 #endif // USBH_DEBUG_LISTS
 
 		// Turn off actual interrupt for doorbell (we will poll for it).
@@ -4988,7 +5009,7 @@ void usbh_hw_wait_for_doorbell(void)
 		} while ((EHCI_REG(usbsts) & MASK_EHCI_USBSTS_INT_OAA) == 0);
 
 #ifdef USBH_DEBUG_LISTS
-		tfp_printf("List: Doorbell answered.\r\n");
+		printf("List: Doorbell answered.\r\n");
 #endif // USBH_DEBUG_LISTS
 
 		// Clear response
@@ -5029,7 +5050,7 @@ static void usbh_hub_poll_start(USBH_device *hubDev)
 							!= USBH_OK)
 					{
 #ifdef USBH_DEBUG_ERROR
-						tfp_printf("Hub: could not submit read status change\r\n");
+						printf("Hub: could not submit read status change\r\n");
 #endif // USBH_DEBUG_ERROR
 					}
 				}
@@ -5838,7 +5859,7 @@ int8_t USBH_enumerate(USBH_device_handle hub, uint8_t hubPort)
 	if (hubPort > 0)
 	{
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: start from downstream hub port %d\r\n", hubPort);
+		printf("Enumeration: start from downstream hub port %d\r\n", hubPort);
 #endif // USBH_DEBUG_ENUM
 
 		status = usbh_hub_port_enumerate(hubDev, hubPort, 0, &devNew);
@@ -5859,13 +5880,13 @@ int8_t USBH_enumerate(USBH_device_handle hub, uint8_t hubPort)
 	else
 	{
 #ifdef USBH_DEBUG_ENUM
-		tfp_printf("Enumeration: start from hub\r\n");
+		printf("Enumeration: start from hub\r\n");
 #endif // USBH_DEBUG_ENUM
 		status = usbh_hub_enumerate(hubDev, 0);
 	}
 
 #ifdef USBH_DEBUG_ENUM
-	tfp_printf("Enumeration: complete %d\r\n", status);
+	printf("Enumeration: complete %d\r\n", status);
 #endif // USBH_DEBUG_ENUM
 
 	return status;

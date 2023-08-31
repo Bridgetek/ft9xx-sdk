@@ -146,7 +146,7 @@ void i2cm_init(I2CM_speed_mode mode, uint32_t i2c_clk_speed)
 
 		/* Then write timer value to the Normal register with the MSB set to 0 for standard/fast speed */
 	    I2CM->I2CM_TIME_PERIOD = (uint8_t)lTPVal;
-	    //tfp_printf("l:%02x\n",lTPVal);
+	    //printf("l:%02x\n",lTPVal);
 		//Programming High speed for data transmission
 		/* To write to the High-speed register, the MSB must be 1. FAST bit is cleared. Timer value is written*/
 		TPVal &= MASK_I2CM_TIME_PERIOD_HIGHSPEED;
@@ -154,7 +154,7 @@ void i2cm_init(I2CM_speed_mode mode, uint32_t i2c_clk_speed)
 		TPVal |= MASK_I2CM_TIME_PERIOD_HS_SELECT | MASK_I2CM_TIME_PERIOD_FS_SELECT;
 
 		I2CM->I2CM_TIME_PERIOD = TPVal;
-		//tfp_printf("h:%02x\n",TPVal);
+		//printf("h:%02x\n",TPVal);
 	}
 	else
 	{
@@ -167,7 +167,7 @@ void i2cm_init(I2CM_speed_mode mode, uint32_t i2c_clk_speed)
 		}
 		/* Then write timer value to the Normal register with the MSB set to 1 or 0 depending on high speed or not */
 	    I2CM->I2CM_TIME_PERIOD = (uint8_t)TPVal;
-	    //tfp_printf("l:%02x\n",TPVal);
+	    //printf("l:%02x\n",TPVal);
 	}
 
 	return;

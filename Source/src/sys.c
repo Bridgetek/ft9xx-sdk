@@ -51,12 +51,21 @@
 #include <ft900_timers.h>
 #include <ft900_delay.h>
 #include <registers/ft900_registers.h>
+#include <registers/ft900_register_debug.h>
 #include <ft900_interrupt.h>
 
 /* CONSTANTS ***********************************************************************/
 #define CLK_100MHZ (100*1000*1000)
 
 /* GLOBAL VARIABLES ****************************************************************/
+
+/* Add symbols for debugging registers. */
+#ifdef DEBUG
+ENABLE_PERIPHERALS_DEBUG;
+#if !defined(__FT930__)
+ENABLE_EHCI_RAM_DEBUG;
+#endif // !__FT930__
+#endif // DEBUG
 
 /* LOCAL VARIABLES *****************************************************************/
 

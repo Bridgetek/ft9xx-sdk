@@ -26,7 +26,7 @@ MathJax.Hub.Config({
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="brtlogo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">libft900<span id="projectnumber">&#160;2.6.0</span>
+   <div id="projectname">libft900<span id="projectnumber">&#160;2.7.0</span>
    </div>
    <div id="projectbrief">A hardware abstraction library for the FT9xx</div>
   </td>
@@ -142,7 +142,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Endpoint size for control endpoints. Section 3.3.1 FT900 USB Program Manual. Sets DC_EP0_CONTROL register in Table 3.6.<br  />
+<p >Endpoint size for control endpoints. This may only be in the range of 8, 16, 32 or 64 bytes. For high speed operation it must be 64 bytes.<br  />
  0: 8 bytes. 1: 16 bytes. 2: 32 bytes. 3: 64 bytes. </p>
 
 </div>
@@ -328,7 +328,7 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Device configuration section. High speed/full speed select. Section 3.2.2 FT900 USB Program Manual.<br  />
+<p >Device configuration section. High speed/full speed select. The device will only operate in high speed mode if selected by this option.<br  />
  0: Full speed only. 1: High speed if available. </p>
 
 </div>
@@ -385,7 +385,7 @@ Data Fields</h2></td></tr>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Jun 7 2022 14:07:41 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
+Generated on Thu Apr 6 2023 14:42:04 for libft900 by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
 </small></address>
 </body>
 </html>

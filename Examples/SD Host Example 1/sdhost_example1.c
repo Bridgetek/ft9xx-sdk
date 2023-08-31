@@ -46,12 +46,12 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <ft900.h>
 #include "ff.h"
 #include "diskio.h"
 #include "assert.h"
-#include "tinyprintf.h"
 
 #if defined(__FT900__)
 #define GPIO_SD_CLK  (19)
@@ -171,9 +171,6 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0,myputc);
-
 #if defined(__FT900__)
     /* All SD Host pins except CLK need a pull-up to work. The MM900EV*A module does not have external pull-up, so enable internal one */
     gpio_function(GPIO_SD_CLK, pad_sd_clk); gpio_pull(GPIO_SD_CLK, pad_pull_none);
@@ -208,24 +205,27 @@ void setup(void)
     sdhost_init();  
     
     /* Check to see if a card is inserted */
-    tfp_printf("Please Insert SD Card\r\n");
+    printf("Please Insert SD Card\r\n");
     while (sdhost_card_detect() != SDHOST_CARD_INSERTED);
-    tfp_printf("SD Card Inserted\r\n");
+    printf("SD Card Inserted\r\n");
 
     /* Initialise FatFS */
-    ASSERT_P(FR_OK, f_mount(&fs, "", 0), "Unable to mount File System");
+    if (FR_OK != f_mount(&fs, "", 0))
+    {
+    	printf("Unable to mount File System\r\n");
+    }
 
 #   if _USE_LABEL == 1
     {
         char label[64];
 
         if (FR_OK == f_getlabel("", label, NULL))
-            tfp_printf("Mounted \"%s\"\r\n",label);
+            printf("Mounted \"%s\"\r\n",label);
         else
-            tfp_printf("Mounted");
+            printf("Mounted");
     }
 #   else
-    tfp_printf("Mounted\r\n");
+    printf("Mounted\r\n");
 #   endif  /* _USE_LABEL == 1 */
 
 }
@@ -243,20 +243,30 @@ void loop(void)
     /* List the root directory */
     res = dir("");
 
-    tfp_printf("\r\n\r\n"); delayms(1000);
+    printf("\r\n\r\n"); delayms(1000);
 
     /* Check to see if the example file is there */
     res = f_stat(EXAMPLE_FILE, NULL);
     if (FR_OK == res)
     {
-    	tfp_printf(EXAMPLE_FILE " already exists. Deleting\r\n");
-        ASSERT_P(FR_OK, f_unlink(EXAMPLE_FILE), "Problem deleting " EXAMPLE_FILE);
+    	printf(EXAMPLE_FILE " already exists. Deleting\r\n");
+        if (FR_OK != f_unlink(EXAMPLE_FILE))
+        {
+        	printf("Problem deleting " EXAMPLE_FILE "\r\n");
+        	delayms(1000);
+        	return;
+        }
     }
 
     /* Write some data to the SD Card */
-    tfp_printf("Opening " EXAMPLE_FILE " for writing\r\n");
+    printf("Opening " EXAMPLE_FILE " for writing\r\n");
     res = f_open(&f, EXAMPLE_FILE, FA_WRITE | FA_CREATE_NEW);
-    ASSERT_P(FR_OK, res, "Problem creating " EXAMPLE_FILE);
+    if (FR_OK != res)
+    {
+    	printf("Problem creating " EXAMPLE_FILE "\r\n");
+    	delayms(1000);
+    	return;
+    }
 
     testdata = (char *) LOREM_IPSUM;
     towrite = strlen(testdata);
@@ -269,18 +279,27 @@ void loop(void)
         towrite -= written;
         testdata += written;
 
-        tfp_printf("Wrote %d bytes\r\n", written);
+        printf("Wrote %d bytes\r\n", written);
     }
 
-    tfp_printf("Closing " EXAMPLE_FILE "\r\n");
-    ASSERT_P(FR_OK, f_close(&f), "Error closing " EXAMPLE_FILE);
+    printf("Closing " EXAMPLE_FILE "\r\n");
+    if (FR_OK != f_close(&f))
+    {
+    	printf("Error closing " EXAMPLE_FILE "\r\n");
+    	delayms(1000);
+    	return;
+    }
 
-
-    tfp_printf("\r\n\r\n"); delayms(1000);
+    printf("\r\n\r\n"); delayms(1000);
 
     /* Open the file and dump out the contents */
-    tfp_printf("Opening " EXAMPLE_FILE " for reading\r\n\r\n");
-    ASSERT(FR_OK, f_open(&f, EXAMPLE_FILE, FA_READ));
+    printf("Opening " EXAMPLE_FILE " for reading\r\n\r\n");
+    if (FR_OK != f_open(&f, EXAMPLE_FILE, FA_READ))
+    {
+        printf("\r\n" "Could not open " EXAMPLE_FILE " for reading\r\n");
+        delayms(1000);
+        return;
+    }
 
     do
     {
@@ -290,11 +309,10 @@ void loop(void)
     while(read == 128);
 
 
-    tfp_printf("\r\n" "Closing " EXAMPLE_FILE "\r\n");
+    printf("\r\n" "Closing " EXAMPLE_FILE "\r\n");
     f_close(&f);
 
-
-    tfp_printf("\r\n\r\n");
+    printf("\r\n\r\n");
 
     for(;;);
 }
@@ -324,8 +342,8 @@ FRESULT dir(char* path)
     if (FR_OK == res)
     {
         /* Display a header */
-        tfp_printf("ls(path = \"%s\"):\r\n",path);
-        tfp_printf("DD/MM/YYYY HH:MM               Size Filename\r\n");
+        printf("ls(path = \"%s\"):\r\n",path);
+        printf("DD/MM/YYYY HH:MM               Size Filename\r\n");
 
         for(;;)
         {
@@ -364,7 +382,7 @@ FRESULT dir(char* path)
             totalsize += info.fsize;
 
             /* Display the item */
-            tfp_printf("%02d/%02d/%04d %02d:%02d   %s %10ld %s\r\n",
+            printf("%02d/%02d/%04d %02d:%02d   %s %10ld %s\r\n",
                        day, month, year, hour, min,
                        (info.fattrib & AM_DIR) ? "<DIR>" : "     ",
                        info.fsize,
@@ -374,7 +392,7 @@ FRESULT dir(char* path)
         if (FR_OK == res)
         {
             /* Display the summary if things were ok */
-            tfp_printf("  %10ld File(s)     %10ld bytes\r\n",
+            printf("  %10ld File(s)     %10ld bytes\r\n",
                        totalfiles, totalsize);
         }
 
@@ -495,13 +513,3 @@ DWORD get_fattime(void)
     return 0; /* Invalid timestamp */
 }
 #endif
-
-
-
-/** Printf putc
- *  @param p Parameters
- *  @param c The character to write */
-void myputc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}

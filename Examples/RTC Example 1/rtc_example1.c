@@ -46,9 +46,9 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <time.h>
 #include <ft900.h>
-#include "tinyprintf.h"
 
 void setup(void);
 void loop(void);
@@ -92,9 +92,6 @@ void setup(void)
         "--------------------------------------------------------------------- \r\n"
         );
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(NULL,myputc);
-
     /* Enable the RTC... */
     sys_enable(sys_device_timer_wdt);
 
@@ -132,18 +129,13 @@ void loop(void)
 	    minutes_elapsed = (total_seconds_elapsed / 60) % 60;
 	    hours_elapsed = (total_seconds_elapsed / (60*60));
 
-	    tfp_printf("Uptime %5d h %2d m %2d s\r",
+	    printf("Uptime %5d h %2d m %2d s\r",
 	        hours_elapsed, minutes_elapsed, seconds_elapsed);
     }
 	else
 	{
-		tfp_printf("Uptime %2d h %2d m %2d s\r",
+		printf("Uptime %2d h %2d m %2d s\r",
 			time.tm_hour, time.tm_min, time.tm_sec);
 	}
     delayms(500);
-}
-
-void myputc(void* p, char c)
-{
-    uart_write(UART0, (uint8_t)c);
 }

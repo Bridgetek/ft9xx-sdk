@@ -67,7 +67,7 @@
 #define MEM_LIBC_MALLOC                 1
 #define mem_clib_free vPortFree
 #define mem_clib_malloc pvPortMalloc
-#define mem_clib_calloc my_mem_calloc
+#define mem_clib_calloc sys_mem_calloc
 #else
 #define MEM_LIBC_MALLOC                 1
 #endif

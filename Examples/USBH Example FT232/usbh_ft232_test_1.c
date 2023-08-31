@@ -48,6 +48,7 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include <ft900.h>
 #include <ft900_timers.h>
@@ -62,7 +63,6 @@
 
 /* UART support for printf output. */
 #include <ft900_uart_simple.h>
-#include "../tinyprintf/tinyprintf.h"
 
 /* CONSTANTS ***********************************************************************/
 
@@ -103,16 +103,6 @@ static volatile uint16_t uart0BufferOut_avail = RINGBUFFER_SIZE;
 /* MACROS **************************************************************************/
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
-
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-    uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}
 
 void ISR_timer(void)
 {
@@ -314,7 +304,7 @@ void ft232_uart_bridge(USBH_FT232_context *ctx)
 		USBH_FT232_get_poll_status(ctx, &ds);
 		if (ds)
 		{
-			tfp_printf("Status: %d\r\n", ds);
+			printf("Status: %d\r\n", ds);
 			if (ds != USBH_OK)
 				status = USBH_FT232_ERR_DATA_ENDPOINT;
 
@@ -325,7 +315,7 @@ void ft232_uart_bridge(USBH_FT232_context *ctx)
 			if (lastModemStatus != ctx->lastModemStatus)
 			{
 				lastModemStatus = ctx->lastModemStatus;
-				tfp_printf("Modem Status: %04x\r\n", lastModemStatus); //Event notification
+				printf("Modem Status: %04x\r\n", lastModemStatus); //Event notification
 			}
 		}
 
@@ -351,7 +341,7 @@ uint8_t hub_scan_for_ft(USBH_device_handle hDev)
 		{
 			if (USBH_device_get_vid_pid(hDev, &usbVid, &usbPid) == USBH_OK)
 			{
-				tfp_printf("%04x\\%04x device found\r\n", usbVid, usbPid);
+				printf("%04x\\%04x device found\r\n", usbVid, usbPid);
 				type = NULL;
 				// If it is an Bridgetek device then use that...
 				if (usbPid == USB_PID_FTDI_FT232)
@@ -376,7 +366,7 @@ uint8_t hub_scan_for_ft(USBH_device_handle hDev)
 				}
 				if (type)
 				{
-					tfp_printf("%s device found\r\n", type);
+					printf("%s device found\r\n", type);
 					// Get the first interface
 					usbStatus = USBH_get_interface_list(hDev, &hInterface);
 					if (usbStatus == USBH_OK)
@@ -387,11 +377,11 @@ uint8_t hub_scan_for_ft(USBH_device_handle hDev)
 							uint16_t e2data = 0;
 
 							USBH_FT232_eeprom_read(&ctx, 0x12, &e2data);
-							tfp_printf("E2Addr:0x12; E2Data:%04X\r\n", e2data);
+							printf("E2Addr:0x12; E2Data:%04X\r\n", e2data);
 							USBH_FT232_eeprom_read(&ctx, 0x13, &e2data);
-							tfp_printf("E2Addr:0x13; E2Data:%04X\r\n", e2data);
+							printf("E2Addr:0x13; E2Data:%04X\r\n", e2data);
 							USBH_FT232_eeprom_read(&ctx, 0x14, &e2data);
-							tfp_printf("E2Addr:0x14; E2Data:%04X\r\n", e2data);
+							printf("E2Addr:0x14; E2Data:%04X\r\n", e2data);
 
 							USBH_FT232_set_baud_rate(&ctx, FT232_BAUD_RATE);
 							USBH_FT232_set_flow_control(&ctx, FT232_FLOW_CONTROL);
@@ -412,12 +402,12 @@ uint8_t hub_scan_for_ft(USBH_device_handle hDev)
 
 		USBH_FT232_get_latency(&ctx, &latency);
 		USBH_FT232_get_modemstat(&ctx, &modemstat);
-		tfp_printf("Beginning FT testing... latency: %d, modemstat: %04x\r\n", latency, modemstat);
+		printf("Beginning FT testing... latency: %d, modemstat: %04x\r\n", latency, modemstat);
 		ft232_uart_bridge(&ctx);
 	}
 	else
 	{
-		tfp_printf("No Bridgetek devices found\r\n");
+		printf("No Bridgetek devices found\r\n");
 	}
 
 	return usbStatus;
@@ -433,18 +423,18 @@ uint8_t usbh_testing(void)
 
     if (!USBHX_root_connected())
     {
-        tfp_printf("\r\nPlease plug in a USB Device\r\n");
+        printf("\r\nPlease plug in a USB Device\r\n");
 
         // Detect usb device connect
         while (!USBHX_root_connected());
     }
-    tfp_printf("\r\nUSB Device Detected\r\n");
+    printf("\r\nUSB Device Detected\r\n");
 
     // Start at root hub (dummy for now)
     status = USBH_enumerate(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT);
     if (status != USBH_OK)
     {
-    	tfp_printf("status: %d\r\n", status);
+    	printf("status: %d\r\n", status);
     }
 
     while (!USBHX_root_enumerated());
@@ -452,11 +442,11 @@ uint8_t usbh_testing(void)
     USBH_get_connect_state(USBH_ROOT_HUB_HANDLE, USBH_ROOT_HUB_PORT, &connect);
     if (connect == USBH_STATE_ENUMERATED_PARTIAL)
     {
-    	tfp_printf("USB Device Partially Enumerated (no resources)\r\n");
+    	printf("USB Device Partially Enumerated (no resources)\r\n");
     }
     else
     {
-    	tfp_printf("USB Device Enumerated\r\n");
+    	printf("USB Device Enumerated\r\n");
     }
 
     // Get the first device (device on root hub)
@@ -464,7 +454,7 @@ uint8_t usbh_testing(void)
 	if (status != USBH_OK)
 	{
 		// Report the error code.
-		tfp_printf("%d\r\n", status);
+		printf("%d\r\n", status);
 	}
 	else
 	{
@@ -504,11 +494,6 @@ int main(int argc, char *argv[])
         "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
     	);
 
-    /* Enable tfp_printf() functionality... */
-    init_printf(UART0, tfp_putc);
-
-    //sys_enable(sys_device_timer_wdt);
-
     //interrupt_attach(interrupt_timers, (int8_t)interrupt_timers, ISR_timer);
     /* Attach the interrupt so it can be called... */
     interrupt_attach(interrupt_uart0, (uint8_t) interrupt_uart0, uart0ISR);
@@ -527,7 +512,7 @@ int main(int argc, char *argv[])
 
     interrupt_enable_globally();
 
-    tfp_printf("Copyright (C) Bridgetek Pte Ltd \r\n"
+    printf("Copyright (C) Bridgetek Pte Ltd \r\n"
         "--------------------------------------------------------------------- \r\n"
         "Welcome to USBH FT232 Tester Example 1... \r\n"
         "\r\n"

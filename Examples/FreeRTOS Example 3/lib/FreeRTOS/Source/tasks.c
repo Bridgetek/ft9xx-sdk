@@ -417,7 +417,11 @@ PRIVILEGED_DATA static volatile UBaseType_t uxSchedulerSuspended	= ( UBaseType_t
 #if ( configGENERATE_RUN_TIME_STATS == 1 )
 
 	PRIVILEGED_DATA static uint32_t ulTaskSwitchedInTime = 0UL;	/*< Holds the value of a timer/counter the last time a task was switched in. */
+#if defined(FT32_PORT_HEAP)
+	PRIVILEGED_DATA uint32_t ulTotalRunTime = 0UL;		/*< Holds the total amount of execution time as defined by the run time counter clock. */
+#else // defined(FT32_PORT_HEAP)
 	PRIVILEGED_DATA static uint32_t ulTotalRunTime = 0UL;		/*< Holds the total amount of execution time as defined by the run time counter clock. */
+#endif // defined(FT32_PORT_HEAP)
 
 #endif
 

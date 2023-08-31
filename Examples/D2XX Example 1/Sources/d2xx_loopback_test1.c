@@ -48,6 +48,7 @@
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -60,8 +61,7 @@
 #define DEBUG
 
 #ifdef DEBUG
-#include "tinyprintf.h"
-#define dbg(s,...)	tfp_printf ((s), ##__VA_ARGS__)
+#define dbg(s,...)	printf ((s), ##__VA_ARGS__)
 #else
 #define dbg(s,...)
 #endif
@@ -156,7 +156,6 @@ volatile uint8_t check_device_status = 0;
 void setup(void);
 void loop (void);
 void debug_uart_init(void);
-void tfp_putc(void* p, char c);
 void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* param2);
 void power_management_ISR(void);
 #ifdef GPIO_REMOTE_WAKEUP
@@ -221,7 +220,7 @@ int main(void)
 #ifndef BDFU
 			STARTUP_DFU(0);
 #else
-			tfp_printf("Switching to DFU");
+			printf("Switching to DFU");
 			if (USBD_DFU_is_runtime()) /* to ward off linkage issue */
 			{
 				GO_BDFU(0x0403, 0x0FDE, 0x2300); // use default VID, PID and REL
@@ -377,21 +376,19 @@ void setup(void)
 			"--------------------------------------------------------------------- \r\n"
 	);
 
+	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
+	retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
+
+	if (retVal != 0)
+	{
+		dbg("Error with configuration file\r\n");
+		while(1) {};
+	}
 #if defined(__FT930__)
-	retVal =
-			D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
-
-
     /*slave sub-system control register setup*/
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
     *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_D2XX_MODE);    // turn-on D2XX_mode
     *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_SLV_RESET); // de-assert bit to allow slave CPU to start
-#else
-
-	retVal =
-
-			D2XX_Init(__pD2XXDefaultConfiguration, d2xx_callback, NULL);
-	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig.ConfigDesc, (__flash__ void *)((uint32_t)&__pD2XXDefaultConfiguration->ConfigDesc), sizeof(TConfigDescriptors));
 #endif
 
 	sys_enable(sys_device_timer_wdt);
@@ -415,16 +412,6 @@ void setup(void)
 #endif
 }
 
-/** @name tfp_putc
- *  @details Machine dependent putc function for tfp_printf (tinyprintf) library.
- *  @param p Parameters (machine dependent)
- *  @param c The character to write
- */
-void tfp_putc(void* p, char c)
-{
-	uart_write((ft900_uart_regs_t*)p, (uint8_t)c);
-}
-
 /** @name d2xx_callback
  *  @details Callback function to the D2XX library.
  *  @param
@@ -442,8 +429,12 @@ void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* para
 		param = (*(uint8_t *)param1);
 	}
 #ifdef DEBUG_EVENT
-	dbg("~%d",eventID);
-	dbg("%s\n", D2XXTest_EventStrings[eventID]);
+	dbg("~%d ",eventID);
+	if (eventID <= D2XX_EVT_INTF_RESET)
+	{
+		dbg("%s", D2XXTest_EventStrings[eventID]);
+	}
+	dbg("\n");
 #endif // DEBUG_EVENT
 	switch(eventID)
 	{
@@ -547,13 +538,8 @@ void debug_uart_init(void)
 			"\x1B[2J" /* ANSI/VT100 - Clear the Screen */
 			"\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
 	);
-
-#ifdef DEBUG
-	/* Enable tfp_printf() functionality... */
-	init_printf(UART0, tfp_putc);
-#endif
-
 }
+
 #if 0
 /* function to calculate the expected XOR checksum for the d2xx configuration */
 uint16_t xorChecksum(const char str[], uint16_t length) {

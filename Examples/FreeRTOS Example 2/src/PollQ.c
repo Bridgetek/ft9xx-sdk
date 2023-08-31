@@ -164,7 +164,7 @@ short sError = pdFALSE;
 				/* We should never find the queue full - this is an error. */
 				vPrintDisplayMessage( &pcTaskErrorMsg );
 				sError = pdTRUE;
-				tfp_printf("messages:%d\n", uxQueueMessagesWaiting( *pxQueue ));
+				printf("messages:%ld\n", uxQueueMessagesWaiting( *pxQueue ));
 			}
 			else
 			{
