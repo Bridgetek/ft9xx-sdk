@@ -8,7 +8,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 # Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(ADC_Example_1)
+project(UART_Example_4)
 set(EXECUTABLE ${PROJECT_NAME}.elf)
 set(OUTPUT_FOLDER_PRE "")
 set(OUTPUT_FOLDER_POST "")
@@ -19,7 +19,7 @@ enable_language(C ASM)
 
 # List of source files
 set(SRC_FILES
-    adc_example1.c
+    uart_example_4.c
 )
 
 # Build the executable based on the source files
@@ -28,7 +28,6 @@ add_executable(${EXECUTABLE} ${SRC_FILES})
 # Setup library for linker step
 if (${CMAKE_BUILD_TYPE} MATCHES Debug)
     target_link_libraries(${EXECUTABLE} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_DEBUG}")
-    target_compile_options(${EXECUTABLE} PRIVATE -Og)
     string(APPEND OUTPUT_FOLDER_POST "Debug")
 elseif (${CMAKE_BUILD_TYPE} MATCHES Release)
     target_link_libraries(${EXECUTABLE} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_RELEASE}")
@@ -41,6 +40,7 @@ endif ()
 if (${CHIPSET} MATCHES FT90X)
     target_compile_definitions(${EXECUTABLE} PRIVATE -D__FT900__)
     target_link_libraries(${EXECUTABLE} PRIVATE -lft900)
+    target_compile_options(${EXECUTABLE} PRIVATE -Og)
     string(APPEND OUTPUT_FOLDER_PRE "FT90X")
 elseif (${CHIPSET} MATCHES FT93X)
     target_compile_definitions(${EXECUTABLE} PRIVATE -D__FT930__)

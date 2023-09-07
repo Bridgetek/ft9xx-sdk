@@ -8,8 +8,9 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 # Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(ADC_Example_1)
+project(ADC_Example_5)
 set(EXECUTABLE ${PROJECT_NAME}.elf)
+set(LINKER_FILE ${CMAKE_SOURCE_DIR}/Scripts/ldscript.ld)
 set(OUTPUT_FOLDER_PRE "")
 set(OUTPUT_FOLDER_POST "")
 set(OUTPUT_FOLDER_NAME "")
@@ -19,7 +20,7 @@ enable_language(C ASM)
 
 # List of source files
 set(SRC_FILES
-    adc_example1.c
+    adc_example5.c
 )
 
 # Build the executable based on the source files

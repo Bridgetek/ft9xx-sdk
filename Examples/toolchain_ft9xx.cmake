@@ -45,11 +45,8 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 # Default configure
 
 # Default toolchain path
+set(TOOLCHAIN_DRIVER_INCLUDE       "$ENV{FT9XX_TOOLCHAIN}/drivers")
 set(TOOLCHAIN_HARDWARE_INCLUDE     "$ENV{FT9XX_TOOLCHAIN}/hardware/include")
 set(TOOLCHAIN_HARDWARE_LIB         "$ENV{FT9XX_TOOLCHAIN}/hardware/lib")
 set(TOOLCHAIN_HARDWARE_LIB_DEBUG   "$ENV{FT9XX_TOOLCHAIN}/hardware/lib/Debug")
 set(TOOLCHAIN_HARDWARE_LIB_RELEASE "$ENV{FT9XX_TOOLCHAIN}/hardware/lib/Release")
-
-# Setup the default compile flag for debug/release build type
-set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Og -g -fvar-tracking -fvar-tracking-assignments -Wall -c -fmessage-length=0 -ffunction-sections")
-set(CMAKE_CXX_FLAGS_RELEASE_INIT "-fvar-tracking -fvar-tracking-assignments -Wall -c -fmessage-length=0 -ffunction-sections")

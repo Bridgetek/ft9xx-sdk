@@ -54,12 +54,6 @@ FT90x_Debug
 FT93x_Debug
 FT90x_Release
 FT93x_Release
-
-# CMake tests build
-debug_ft90x
-debug_ft93x
-release_ft90x
-release_ft93x
 build
 
 # Library Eclipse settings

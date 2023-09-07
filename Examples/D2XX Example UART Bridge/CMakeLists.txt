@@ -8,8 +8,9 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 # Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(ADC_Example_1)
+project(D2XX_Example_UART_Bridge)
 set(EXECUTABLE ${PROJECT_NAME}.elf)
+set(LINKER_FILE ${CMAKE_SOURCE_DIR}/Scripts/ldscript.ld)
 set(OUTPUT_FOLDER_PRE "")
 set(OUTPUT_FOLDER_POST "")
 set(OUTPUT_FOLDER_NAME "")
@@ -19,7 +20,7 @@ enable_language(C ASM)
 
 # List of source files
 set(SRC_FILES
-    adc_example1.c
+    Sources/d2xx_uart_bridge.c
 )
 
 # Build the executable based on the source files
@@ -40,12 +41,12 @@ endif ()
 # Add specific libs and linker option
 if (${CHIPSET} MATCHES FT90X)
     target_compile_definitions(${EXECUTABLE} PRIVATE -D__FT900__)
-    target_link_libraries(${EXECUTABLE} PRIVATE -lft900)
+    target_link_libraries(${EXECUTABLE} PRIVATE -lft900_d2xx_dev -lft900)
     string(APPEND OUTPUT_FOLDER_PRE "FT90X")
 elseif (${CHIPSET} MATCHES FT93X)
     target_compile_definitions(${EXECUTABLE} PRIVATE -D__FT930__)
     target_link_options(${EXECUTABLE} PRIVATE -mft32b -mcompress)
-    target_link_libraries(${EXECUTABLE} PRIVATE -lft930)
+    target_link_libraries(${EXECUTABLE} PRIVATE -lft930_d2xx_dev -lft930)
     string(APPEND OUTPUT_FOLDER_PRE "FT93X")
 else ()
     message(FATAL_ERROR "The CHIPSET must me FT90X or FT93X.")
@@ -79,9 +80,23 @@ target_link_libraries(${EXECUTABLE} PRIVATE
 
 # Linker options
 target_link_options(${EXECUTABLE} PRIVATE
+    -nostartfiles
+    -Xlinker -dT ${LINKER_FILE}
+
     -Wl,--gc-sections
     -Wl,--entry=_start
     -Wl,-Map=${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.map,--cref
+
+    ${EXECUTABLE_OUTPUT_PATH}/crt0_d2xx_dlog.o
+)
+
+# Build the custom crt0 for d2xx
+add_custom_command(TARGET ${EXECUTABLE}
+    PRE_BUILD
+    COMMAND ${CMAKE_ASM_COMPILER}
+        -I"${CMAKE_SOURCE_DIR}/Includes"
+        ${CMAKE_SOURCE_DIR}/Sources/crt0_d2xx_dlog.S
+        -o ${EXECUTABLE_OUTPUT_PATH}/crt0_d2xx_dlog.o
 )
 
 # Print the size of excutable file after build *.elf successfully

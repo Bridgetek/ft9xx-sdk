@@ -8,7 +8,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 # Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(ADC_Example_1)
+project(RTC_External_Example_1)
 set(EXECUTABLE ${PROJECT_NAME}.elf)
 set(OUTPUT_FOLDER_PRE "")
 set(OUTPUT_FOLDER_POST "")
@@ -19,7 +19,8 @@ enable_language(C ASM)
 
 # List of source files
 set(SRC_FILES
-    adc_example1.c
+    Sources/external_rtc_example1.c
+    Sources/rtc.c
 )
 
 # Build the executable based on the source files
@@ -42,13 +43,8 @@ if (${CHIPSET} MATCHES FT90X)
     target_compile_definitions(${EXECUTABLE} PRIVATE -D__FT900__)
     target_link_libraries(${EXECUTABLE} PRIVATE -lft900)
     string(APPEND OUTPUT_FOLDER_PRE "FT90X")
-elseif (${CHIPSET} MATCHES FT93X)
-    target_compile_definitions(${EXECUTABLE} PRIVATE -D__FT930__)
-    target_link_options(${EXECUTABLE} PRIVATE -mft32b -mcompress)
-    target_link_libraries(${EXECUTABLE} PRIVATE -lft930)
-    string(APPEND OUTPUT_FOLDER_PRE "FT93X")
 else ()
-    message(FATAL_ERROR "The CHIPSET must me FT90X or FT93X.")
+    message(FATAL_ERROR "The CHIPSET must me FT90X.")
 endif()
 
 set(OUTPUT_FOLDER_NAME ${OUTPUT_FOLDER_PRE}_${OUTPUT_FOLDER_POST})

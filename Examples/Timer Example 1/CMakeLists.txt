@@ -8,7 +8,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 # Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(ADC_Example_1)
+project(Timer_Example_1)
 set(EXECUTABLE ${PROJECT_NAME}.elf)
 set(OUTPUT_FOLDER_PRE "")
 set(OUTPUT_FOLDER_POST "")
@@ -19,7 +19,7 @@ enable_language(C ASM)
 
 # List of source files
 set(SRC_FILES
-    adc_example1.c
+    timer_example1.c
 )
 
 # Build the executable based on the source files
