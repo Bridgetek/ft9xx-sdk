@@ -4,31 +4,31 @@ set(CMAKE_SYSTEM_PROCESSOR FT9XX)
 
 # Search command for Linux/Windows
 if(MINGW OR CYGWIN OR WIN32)
-    set(UTIL_SEARCH_CMD where)
+    # Get the path form the binutils search
+    execute_process(
+        COMMAND where ft32-elf-gcc
+            OUTPUT_VARIABLE
+            BINUTILS_PATH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    message(STATUS "Test BINUTILS_PATH: ${BINUTILS_PATH}")
+    cmake_path(SET TOOLCHAIN_DIR NORMALIZE "$ENV{FT9XX_TOOLCHAIN}")
+    set(TOOLCHAIN_PREFIX ft32-elf-)
+    set(EXTENTION ".exe")
 elseif(UNIX OR APPLE)
-    set(UTIL_SEARCH_CMD which)
+    set(COMPILER_PATH    /opt/ft32/bin)
+    set(TOOLCHAIN_DIR    /opt/ft9xxtoolchain/)
+    set(BINUTILS_PATH    ${COMPILER_PATH}/ft32-elf-gcc)
+    set(TOOLCHAIN_PREFIX ${COMPILER_PATH}/ft32-elf-)
+    set(EXTENTION "")
 endif()
 
-# Set the toolchain prefix
-set(TOOLCHAIN_PREFIX ft32-elf-)
-
-# Get the path form the binutils search
-execute_process(
-    COMMAND ${UTIL_SEARCH_CMD} ${TOOLCHAIN_PREFIX}gcc
-        OUTPUT_VARIABLE
-        BINUTILS_PATH
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-# Get the folder that contain toolchain
-get_filename_component(FT9XX_TOOLCHAIN_DIR ${BINUTILS_PATH} DIRECTORY)
-
 # which compilers to use for C and C++
-set(CMAKE_C_COMPILER   ${TOOLCHAIN_PREFIX}gcc.exe)
-set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PREFIX}as.exe)
-set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}g++.exe)
-set(CMAKE_OBJCOPY      ${TOOLCHAIN_PREFIX}objcopy CACHE INTERNAL "Objcopy tool")
-set(CMAKE_SIZE_UTIL    ${TOOLCHAIN_PREFIX}size    CACHE INTERNAL "Size tool")
+set(CMAKE_C_COMPILER   ${TOOLCHAIN_PREFIX}gcc${EXTENTION})
+set(CMAKE_ASM_COMPILER ${TOOLCHAIN_PREFIX}as${EXTENTION})
+set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}g++${EXTENTION})
+set(CMAKE_OBJCOPY      ${TOOLCHAIN_PREFIX}objcopy${EXTENTION} CACHE INTERNAL "Objcopy tool")
+set(CMAKE_SIZE_UTIL    ${TOOLCHAIN_PREFIX}size${EXTENTION}    CACHE INTERNAL "Size tool")
 
 # where is the target environment located
 set(CMAKE_FIND_ROOT_PATH ${BINUTILS_PATH})
@@ -42,11 +42,9 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 # --------------------------------------------------------------------------- #
-# Default configure
-
-# Default toolchain path
-set(TOOLCHAIN_DRIVER_INCLUDE       "$ENV{FT9XX_TOOLCHAIN}/drivers")
-set(TOOLCHAIN_HARDWARE_INCLUDE     "$ENV{FT9XX_TOOLCHAIN}/hardware/include")
-set(TOOLCHAIN_HARDWARE_LIB         "$ENV{FT9XX_TOOLCHAIN}/hardware/lib")
-set(TOOLCHAIN_HARDWARE_LIB_DEBUG   "$ENV{FT9XX_TOOLCHAIN}/hardware/lib/Debug")
-set(TOOLCHAIN_HARDWARE_LIB_RELEASE "$ENV{FT9XX_TOOLCHAIN}/hardware/lib/Release")
+# Define the list of toolchain suport
+set(TOOLCHAIN_DRIVER_INCLUDE       "${TOOLCHAIN_DIR}/drivers")
+set(TOOLCHAIN_HARDWARE_INCLUDE     "${TOOLCHAIN_DIR}/hardware/include")
+set(TOOLCHAIN_HARDWARE_LIB         "${TOOLCHAIN_DIR}/hardware/lib")
+set(TOOLCHAIN_HARDWARE_LIB_DEBUG   "${TOOLCHAIN_DIR}/hardware/lib/Debug")
+set(TOOLCHAIN_HARDWARE_LIB_RELEASE "${TOOLCHAIN_DIR}/hardware/lib/Release")
