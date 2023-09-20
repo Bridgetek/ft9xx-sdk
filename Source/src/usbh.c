@@ -1332,22 +1332,24 @@ static int8_t usbh_ep_list_remove(USBH_endpoint *epThis, USBH_endpoint *epListHe
 static USBH_endpoint *usbh_ep_list_find_periodic(uint16_t interval)
 {
 	USBH_endpoint *end_ep = usbh_periodic_ep_list;
+	USBH_endpoint *found_ep = NULL;
 
 	// Move through the endpoint list and find where the first endpoint with the
 	// required interval (or less) is found.
 	while (end_ep)
 	{
-		if (end_ep->interval <= ((interval * 2) - 1))
+		if ((end_ep->interval != 65535) && (end_ep->interval <= ((interval * 2) - 1)))
 		{
 			// Insert before end_ep in the list
 			// If this is the first pass then add to end of list (after dummy entry).
+			found_ep = end_ep;
 			break;
 		}
 
 		end_ep = end_ep->list_next;
 	}
 
-	return end_ep;
+	return found_ep;
 }
 
 static int8_t usbh_init_ep_qh(USBH_list_entry *hc_this_entry, USBH_qh *hc_ctrl_qh, USBH_endpoint *this_ep)
@@ -1392,7 +1394,16 @@ static int8_t usbh_init_ep_qh(USBH_list_entry *hc_this_entry, USBH_qh *hc_ctrl_q
 			}
 			else
 			{
-				epcapab = epcapab | (1 << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_SMASK);
+				if ((EHCI_MEM(hc_ctrl_qh->ep_char_1) & MASK_EHCI_QUEUE_HEAD_EP_CHAR_EPS) == EHCI_QUEUE_HEAD_EP_CHAR_EPS_FS)
+				{
+					epcapab = epcapab | (1 << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_SMASK) |
+							(0x2 << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_CMASK);
+				}
+				else
+				{
+					epcapab = epcapab | (0x10 << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_SMASK) |
+							(0xc0 << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_CMASK);
+				}
 				// Turn off the NAK counter reload for interrupt endpoints
 				epchar &= (~MASK_EHCI_QUEUE_HEAD_EP_CHAR_RL);
 			}
