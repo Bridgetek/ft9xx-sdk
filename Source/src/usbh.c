@@ -1332,24 +1332,22 @@ static int8_t usbh_ep_list_remove(USBH_endpoint *epThis, USBH_endpoint *epListHe
 static USBH_endpoint *usbh_ep_list_find_periodic(uint16_t interval)
 {
 	USBH_endpoint *end_ep = usbh_periodic_ep_list;
-	USBH_endpoint *found_ep = NULL;
 
 	// Move through the endpoint list and find where the first endpoint with the
 	// required interval (or less) is found.
 	while (end_ep)
 	{
-		if ((end_ep->interval != 65535) && (end_ep->interval <= ((interval * 2) - 1)))
+		if (end_ep->interval <= ((interval * 2) - 1))
 		{
 			// Insert before end_ep in the list
 			// If this is the first pass then add to end of list (after dummy entry).
-			found_ep = end_ep;
 			break;
 		}
 
 		end_ep = end_ep->list_next;
 	}
 
-	return found_ep;
+	return end_ep;
 }
 
 static int8_t usbh_init_ep_qh(USBH_list_entry *hc_this_entry, USBH_qh *hc_ctrl_qh, USBH_endpoint *this_ep)
