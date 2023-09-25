@@ -51,6 +51,7 @@ set(TOOLCHAIN_HARDWARE_INCLUDE     "${TOOLCHAIN_DIR}/hardware/include")
 set(TOOLCHAIN_HARDWARE_LIB         "${TOOLCHAIN_DIR}/hardware/lib")
 set(TOOLCHAIN_HARDWARE_LIB_DEBUG   "${TOOLCHAIN_DIR}/hardware/lib/Debug")
 set(TOOLCHAIN_HARDWARE_LIB_RELEASE "${TOOLCHAIN_DIR}/hardware/lib/Release")
+set(TOOLCHAIN_3RDPARTY_LIB         "${TOOLCHAIN_DIR}/3rdparty")
 
 macro(ft9xx_setup_project projectName)
     set(EXECUTABLE ${projectName}.elf)
@@ -103,6 +104,8 @@ macro(ft9xx_set_project_chipset excutable chipset)
 endmacro()
 
 macro(ft9xx_set_project_build_type excutable mode)
+    set(CMAKE_BUILD_MODE ${mode})
+
     # Setup library for linker step
     if (${mode} MATCHES Debug)
         target_link_libraries(${excutable} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_DEBUG}")
@@ -115,8 +118,6 @@ macro(ft9xx_set_project_build_type excutable mode)
     else ()
         message(FATAL_ERROR "The build type should be Debug or Release.")
     endif()
-
-    message(STATUS "ENV{FT9XX_OUTPUT_FOLDER_PRE}: $ENV{FT9XX_OUTPUT_FOLDER_PRE}")
 
     # Set the ouput folder for the elf, bin, map,...
     set(ENV{FT9XX_OUTPUT_FOLDER_NAME} $ENV{FT9XX_OUTPUT_FOLDER_PRE}_$ENV{FT9XX_OUTPUT_FOLDER_POST})
@@ -153,3 +154,135 @@ macro(ft9xx_show_image_size target excutable_path)
         COMMAND ${CMAKE_SIZE_UTIL} --format=berkeley -x ${excutable_path}
     )
 endmacro()
+
+function(ft9xx_target_add_supported_library target lib_name)
+    set(supported_lib_list fatfs FreeRTOS lwip mbedtls tinyprintf)
+    if (${lib_name} IN_LIST supported_lib_list)
+        message(STATUS "Found the lib ${lib_name} in the '3rdparty libraries'")
+    else()
+        message(FATAL_ERROR "The lib '${lib_name}' is not supported by FT9XX toolchain")
+    endif()
+
+    # Get the current value of the SOURCES property.
+    get_target_property(current_source_list ${target} SOURCES)
+
+    if (${lib_name} MATCHES lwip)
+        list(APPEND current_source_list
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/polarssl/arc4.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/polarssl/des.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/polarssl/md4.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/polarssl/md5.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/polarssl/sha1.c
+
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/auth.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/ccp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/chap-md5.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/chap-new.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/chap_ms.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/demand.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/eap.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/ecp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/eui64.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/fsm.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/ipcp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/ipv6cp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/lcp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/magic.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/mppe.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/multilink.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/ppp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/pppapi.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/pppcrypt.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/pppoe.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/pppol2tp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/pppos.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/upap.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/utils.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/vj.c
+
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/bridgeif.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/bridgeif_fdb.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ethernet.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/lowpan6.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/lowpan6_ble.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/lowpan6_common.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/slipif.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/zepif.c
+
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/autoip.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/dhcp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/etharp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/icmp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/igmp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/ip4.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/ip4_addr.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/ip4_frag.c
+
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/altcp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/altcp_alloc.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/altcp_tcp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/def.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/dns.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/inet_chksum.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/init.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ip.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/mem.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/memp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/netif.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/pbuf.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/raw.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/stats.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/sys.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/tcp.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/tcp_in.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/tcp_out.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/timeouts.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/udp.c
+
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/arch/net.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/arch/netif_ft900.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/arch/sys_arch.c
+
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/api_lib.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/api_msg.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/err.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/if_api.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/netbuf.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/netdb.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/netifapi.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/sockets.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/tcpip.c
+        )
+        target_include_directories(${EXECUTABLE} PRIVATE
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/include
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/GCC/FT32
+        )
+    elseif (${lib_name} MATCHES FreeRTOS)
+        list(APPEND current_source_list
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/MemMang/heap_1.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/MemMang/heap_2.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/MemMang/heap_3.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/MemMang/heap_4.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/MemMang/heap_5.c
+
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/GCC/FT32/port.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/GCC/FT32/port_extra.c
+
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/croutine.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/event_groups.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/list.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/queue.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/tasks.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/timers.c
+        )
+        target_include_directories(${EXECUTABLE} PRIVATE
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/arch
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/include
+        )
+    else()
+        message(FATAL_ERROR "The lib '${lib_name}' is not supported by FT9XX toolchain")
+    endif()
+
+    # Set the SOURCES property to the new list of source files.
+    set_property(TARGET ${target} PROPERTY SOURCES ${current_source_list})
+endfunction()
