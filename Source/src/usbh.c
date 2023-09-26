@@ -528,24 +528,6 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 #endif // USBH_DEBUG_XFER
 		}
 	}
-
-	do {
-		// If the next entry is the qTD to unlink then stop.
-		if (EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)) == EHCI_CPU_TO_HC(epThis->hc_dummy_qtd))
-		{
-			// Free the current dummy and make this qTD the new dummy.
-			// Under all circumstances this qTD is gone but still linked.
-			usbh_free_hc_1_block(epThis->hc_dummy_qtd);
-			epThis->hc_dummy_qtd = hc_this_qtd;
-			break;
-		}
-		if (EHCI_TERMINATE_TD(EHCI_MEM(hc_prev_qtd->next)))
-		{
-			break;
-		}
-		hc_prev_qtd = (USBH_qtd *)EHCI_HC_TO_CPU(EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)));
-		// Stop if we reach the right qTD.
-	} while (1);
 }
 
 static uint16_t usbh_xfer_iso_td_insert(USBH_xfer *xferNew, uint16_t advance)
@@ -1395,12 +1377,12 @@ static int8_t usbh_init_ep_qh(USBH_list_entry *hc_this_entry, USBH_qh *hc_ctrl_q
 				if ((EHCI_MEM(hc_ctrl_qh->ep_char_1) & MASK_EHCI_QUEUE_HEAD_EP_CHAR_EPS) == EHCI_QUEUE_HEAD_EP_CHAR_EPS_FS)
 				{
 					epcapab = epcapab | (1 << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_SMASK) |
-							(0x2 << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_CMASK);
+							(0xfc << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_CMASK);
 				}
 				else
 				{
 					epcapab = epcapab | (0x10 << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_SMASK) |
-							(0xc0 << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_CMASK);
+							(0xcf << BIT_EHCI_QUEUE_HEAD_EP_CAPAB_UFRAME_CMASK);
 				}
 				// Turn off the NAK counter reload for interrupt endpoints
 				epchar &= (~MASK_EHCI_QUEUE_HEAD_EP_CHAR_RL);
@@ -2186,14 +2168,13 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 	if (status == USBH_OK)
 	{
 		hc_dummy_qtd = (USBH_qtd *)usbh_alloc_hc_1_block();
-		usbh_init_qtd(hc_dummy_qtd);
 		if (hc_dummy_qtd == NULL)
 		{
 			status = USBH_ERR_RESOURCES;
 		}
 		else
 		{
-			usbh_memset32_hc(hc_dummy_qtd, 0, sizeof(USBH_qtd));
+			usbh_init_qtd(hc_dummy_qtd);
 			xferNew = usbh_alloc_transfer();
 			if (xferNew == NULL)
 			{
