@@ -9,6 +9,7 @@ elseif (EXISTS $ENV{FT9XX_TOOLCHAIN}/hardware/toolchain_ft9xx.cmake)
 else()
     message(FATAL_ERROR "Make sure that the FT9XX is installed correctly. Can't found the 'toolchain_ft9xx.cmake' file")
 endif()
+
 # Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 

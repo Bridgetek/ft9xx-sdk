@@ -66,7 +66,7 @@ target_link_options(${EXECUTABLE} PRIVATE
     -nostartfiles
     -Xlinker -dT ${LINKER_FILE}
 
-    ${EXECUTABLE_OUTPUT_PATH}/crt0_d2xx_dlog.o
+    $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/crt0_d2xx_dlog.o
 )
 
 # Build the custom crt0 for d2xx

@@ -30,9 +30,6 @@ set(SRC_FILES
 # Build the executable based on the source files
 add_executable(${EXECUTABLE} ${SRC_FILES})
 
-# Build the executable based on the source files
-add_executable(${EXECUTABLE} ${SRC_FILES})
-
 # Add specific libs and linker option base on the target input
 ft9xx_set_project_chipset(${EXECUTABLE} ${TARGET})
 

@@ -30,9 +30,6 @@ set(SRC_FILES
 # Build the executable based on the source files
 add_executable(${EXECUTABLE} ${SRC_FILES})
 
-# Build the executable based on the source files
-add_executable(${EXECUTABLE} ${SRC_FILES})
-
 # Add specific libs and linker option base on the target input
 # WARNING: This project does not suppot FT93X
 if (${TARGET} MATCHES FT93X)

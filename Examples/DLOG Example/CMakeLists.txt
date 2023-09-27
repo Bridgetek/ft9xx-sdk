@@ -59,7 +59,7 @@ target_link_options(${EXECUTABLE} PRIVATE
     -nostartfiles
     -Xlinker -dT ${LINKER_FILE}
 
-    ${EXECUTABLE_OUTPUT_PATH}/crt0.o
+    $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/crt0.o
     # Add your here
 )
 

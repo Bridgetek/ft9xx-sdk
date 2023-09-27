@@ -54,6 +54,7 @@ ft9xx_target_add_supported_library(${EXECUTABLE} fatfs)
 
 # List of include directories
 target_include_directories(${EXECUTABLE} PRIVATE
+    ${TOOLCHAIN_DRIVER_INCLUDE}
     # Add your here
 )
 

@@ -97,7 +97,7 @@ add_custom_command(TARGET ${EXECUTABLE}
     COMMAND ${CMAKE_ASM_COMPILER}
         ${ASM_BUILD_FLAG}
         -I"${CMAKE_SOURCE_DIR}/Includes"
-        ${CMAKE_SOURCE_DIR}/lib/FreeRTOS/Source/portable/GCC/FT32/portasm.S
+        ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/GCC/FT32/portasm.S
         -o $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/portasm.o
 )
 

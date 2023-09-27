@@ -13,11 +13,11 @@ endif()
 # Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
-# Make sure the target we setup is supported
-ft9xx_verify_target_name(${TARGET})
-
 # Set the project name
 project(CAN_Example_1)
+
+# Make sure the target we setup is supported
+ft9xx_verify_target_name(${TARGET})
 
 # Set some default configure to project
 ft9xx_setup_project(${PROJECT_NAME})

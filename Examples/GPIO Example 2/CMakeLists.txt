@@ -24,7 +24,7 @@ ft9xx_setup_project(${PROJECT_NAME})
 
 # List of source files
 set(SRC_FILES
-    Sources/gpio_examples2.c
+    Sources/gpio_example2.c
 )
 
 # Build the executable based on the source files

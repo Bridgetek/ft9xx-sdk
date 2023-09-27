@@ -66,7 +66,7 @@ target_link_options(${EXECUTABLE} PRIVATE
     -nostartfiles
     -Xlinker -dT ${LINKER_FILE}
 
-    ${EXECUTABLE_OUTPUT_PATH}/crt0_d2xx_dlog.o
+    $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/crt0_d2xx_dlog.o
     # Add your here
 )
 
@@ -76,7 +76,7 @@ add_custom_command(TARGET ${EXECUTABLE}
     COMMAND ${CMAKE_ASM_COMPILER}
         -I"${CMAKE_SOURCE_DIR}/Includes"
         ${CMAKE_SOURCE_DIR}/Sources/crt0_d2xx_dlog.S
-        -o ${EXECUTABLE_OUTPUT_PATH}/crt0_d2xx_dlog.o
+        -o $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/crt0_d2xx_dlog.o
 )
 
 # Setup the file path for the mapfile if needed

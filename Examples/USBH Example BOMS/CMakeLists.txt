@@ -46,6 +46,7 @@ ft9xx_set_project_build_type(${EXECUTABLE} ${BUILD})
 
 # List of include directories
 target_include_directories(${EXECUTABLE} PRIVATE
+    ${TOOLCHAIN_DRIVER_INCLUDE}
     # Add your here
 )
 
