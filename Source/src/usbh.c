@@ -435,7 +435,6 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 	USBH_qh *hc_this_qh = xferThis->hc_entry.qh;
 	USBH_qtd *hc_this_qtd = xferThis->hc_qtd;
 	USBH_endpoint *epThis = xferThis->endpoint;
-	USBH_qtd *hc_prev_qtd;
 
 	// This is called when there is a timeout on the transfer,
 	// or the transfer needs to be finished and disposed of.
@@ -449,85 +448,40 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 		return;
 	}
 
-	// Deactivate target qTD.
-	token = EHCI_MEM(hc_this_qtd->token);
-	token &= (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
-	// Deactivate it.
-	EHCI_MEM(hc_this_qtd->token) = token;
-
-	// Check if the qh->current_qtd points to the qTD of the transfer.
-	// If it does then the overlay is from the qTD we need to unlink.
-	if (EHCI_HC_TO_CPU(EHCI_MEM(hc_this_qh->qtd_current)) == (uint32_t)hc_this_qtd)
+	// Stop the periodic or async schedule
+	if (xferThis->endpoint->type == USBH_EP_BULK)
 	{
-#ifdef USBH_DEBUG_XFER
-		printf("Stopping in overlay\r\n");
-#endif // USBH_DEBUG_XFER
-
-		// Stop the transfer in the overlay.
-		token &= (~MASK_EHCI_QUEUE_TD_TOKEN_TOGGLE);
-		token |= (EHCI_MEM(hc_this_qh->transfer_overlay.token) & MASK_EHCI_QUEUE_TD_TOKEN_TOGGLE);
-
-		EHCI_MEM(hc_this_qh->transfer_overlay.token) = token;
-
-		// Wait for a short time to ensure that the controller passes this
-		// qTD and writes back the overlay.
-		delayms(1);
-		// Re-write the overlay.
-		EHCI_MEM(hc_this_qh->transfer_overlay.token) = token;
-	};
-
-	// Go through queue headers list of qTDs to find the right qTD to remove.
-	hc_prev_qtd = epThis->hc_head_qtd;
-
-	if (hc_prev_qtd == hc_this_qtd)
-	{
-		// The qTD to unlink is the first one in the endpoint's list.
-#ifdef USBH_DEBUG_XFER
-		printf("Unlink qTD: first entry unlinked (overlay)\r\n");
-#endif // USBH_DEBUG_XFER
+		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) & (~MASK_EHCI_USBCMD_ASCH_EN);
+		while (EHCI_REG(usbsts) & MASK_EHCI_USBSTS_ASCH_STS) {};
 	}
 	else
 	{
-		do {
-			// If the next entry is the qTD to unlink then stop.
-			if (EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)) == EHCI_CPU_TO_HC(hc_this_qtd))
-			{
-				break;
+		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) & (~MASK_EHCI_USBCMD_PSCH_EN);
+		while (EHCI_REG(usbsts) & MASK_EHCI_USBSTS_PSCH_STS) {};
 			}
-			if (EHCI_TERMINATE_TD(EHCI_MEM(hc_prev_qtd->next)))
+
+	// Check the transfer is still active.
+	token = EHCI_MEM(hc_this_qtd->token);
+	if (token & EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE)
 			{
-				break;
+		USBH_qtd *hc_next_qtd = EHCI_MEM(hc_this_qh->transfer_overlay.next);
+		EHCI_MEM(hc_this_qtd->token) = token & (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
+		EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->qtd_current);
+		EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_MEM(hc_this_qh->qtd_current);
+		EHCI_MEM(hc_this_qh->qtd_current) = hc_next_qtd;
 			}
-			hc_prev_qtd = (USBH_qtd *)EHCI_HC_TO_CPU(EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)));
-			// Stop if we reach the right qTD.
-		} while (hc_prev_qtd != hc_this_qtd);
 
-		if (hc_prev_qtd == hc_this_qtd)
+	// Restart the schedule.
+	if (xferThis->endpoint->type == USBH_EP_BULK)
 		{
-#ifdef USBH_DEBUG_XFER
-			printf("Unlink qTD Error: could not find xfer qtd\r\n");
-#endif // USBH_DEBUG_XFER
-			return;
+		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) | MASK_EHCI_USBCMD_ASCH_EN;
 		}
-
-		// Bypass this qTD in the list.
-		EHCI_MEM(hc_prev_qtd->next) = EHCI_NEXT_TD(EHCI_MEM(hc_this_qtd->next)) |
-				EHCI_TERMINATE_TD(EHCI_MEM(hc_prev_qtd->next));
-
-#ifdef USBH_DEBUG_XFER
-		printf("Unlink qTD: unlinked mid-list entry\r\n");
-#endif // USBH_DEBUG_XFER
-
-		// Deactivate QH current aTD overlay.
-		if (EHCI_MEM(hc_this_qh->qtd_current) == EHCI_HC_TO_CPU(hc_this_qtd))
+	else
 		{
-			EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->next);
-
-#ifdef USBH_DEBUG_XFER
-			printf("Unlink qTD: unlinked mid-list overlay\r\n");
-#endif // USBH_DEBUG_XFER
-		}
+		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) | MASK_EHCI_USBCMD_PSCH_EN;
 	}
+
+	return;
 }
 
 static uint16_t usbh_xfer_iso_td_insert(USBH_xfer *xferNew, uint16_t advance)
@@ -719,8 +673,6 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 					token = EHCI_MEM(xferThis->hc_qtd->token);
 					if (token & EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE)
 					{
-						EHCI_MEM(xferThis->hc_qtd->token) = token & ~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE;
-
 						// Timeout expired.
 						usbh_unlink_qtd(xferThis);
 
@@ -2185,7 +2137,7 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 
 	if (status == USBH_OK)
 	{
-		data_qtd.next = EHCI_CPU_TO_HC(hc_dummy_qtd);;
+		data_qtd.next = EHCI_CPU_TO_HC(hc_dummy_qtd);
 		data_qtd.alt_next = EHCI_CPU_TO_HC(hc_dummy_qtd);;
 		//data toggle + 64Bytes + 3 error retire + in/out token + active
 		token = EHCI_QUEUE_TD_TOKEN_TOTAL_TO_TRANSFER(length) |
