@@ -53,6 +53,9 @@ set(TOOLCHAIN_HARDWARE_LIB_DEBUG   "${TOOLCHAIN_DIR}/hardware/lib/Debug")
 set(TOOLCHAIN_HARDWARE_LIB_RELEASE "${TOOLCHAIN_DIR}/hardware/lib/Release")
 set(TOOLCHAIN_3RDPARTY_LIB         "${TOOLCHAIN_DIR}/3rdparty")
 
+# --------------------------------------------------------------------------- #
+# Define the macro which support build process
+
 macro(ft9xx_setup_project projectName)
     set(EXECUTABLE ${projectName}.elf)
 
@@ -80,8 +83,6 @@ macro(ft9xx_setup_project projectName)
         -Wl,--gc-sections
         -Wl,--entry=_start
     )
-
-    link_libraries(-lc -lstub)
 endmacro()
 
 macro(ft9xx_target_add_libraries target libraries)
@@ -101,9 +102,25 @@ macro(ft9xx_set_project_chipset excutable chipset)
     else ()
         message(FATAL_ERROR "The TARGET must me FT90X or FT93X.")
     endif()
+
+    target_link_libraries(${excutable} PRIVATE -lc -lstub)
+endmacro()
+
+function(ft9xx_verify_target_name target)
+    set(target_list FT90X FT93X)
+    if (${target} IN_LIST target_list)
+        message(STATUS "Target chipset is ${target}")
+    else ()
+        message(FATAL_ERROR "The TARGET must be FT90X or FT93X.")
+    endif()
+endfunction()
+
+macro(ft9xx_target_add_library excutable lib_name)
+    target_link_libraries(${EXECUTABLE} PRIVATE ${lib_name})
 endmacro()
 
 macro(ft9xx_set_project_build_type excutable mode)
+    # This is the CMAKE value should be set also
     set(CMAKE_BUILD_MODE ${mode})
 
     # Setup library for linker step
@@ -123,6 +140,7 @@ macro(ft9xx_set_project_build_type excutable mode)
     set(ENV{FT9XX_OUTPUT_FOLDER_NAME} $ENV{FT9XX_OUTPUT_FOLDER_PRE}_$ENV{FT9XX_OUTPUT_FOLDER_POST})
     set(ENV{FT9XX_EXECUTABLE_OUTPUT_PATH} ${CMAKE_SOURCE_DIR}/$ENV{FT9XX_OUTPUT_FOLDER_NAME})
 
+    # Setup the output folder for the build
     set_target_properties(${excutable}
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "$ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}"
@@ -254,8 +272,8 @@ function(ft9xx_target_add_supported_library target lib_name)
             ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/tcpip.c
         )
         target_include_directories(${EXECUTABLE} PRIVATE
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/include
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/GCC/FT32
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/arch
+            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/include
         )
     elseif (${lib_name} MATCHES FreeRTOS)
         list(APPEND current_source_list
@@ -276,9 +294,29 @@ function(ft9xx_target_add_supported_library target lib_name)
             ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/timers.c
         )
         target_include_directories(${EXECUTABLE} PRIVATE
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/arch
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/include
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/include
+            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/GCC/FT32
         )
+    elseif (${lib_name} MATCHES tinyprintf)
+        list(APPEND current_source_list
+            ${TOOLCHAIN_3RDPARTY_LIB}/tinyprintf/tinyprintf.c
+        )
+        target_include_directories(${EXECUTABLE} PRIVATE
+            ${TOOLCHAIN_3RDPARTY_LIB}/tinyprintf
+        )
+    elseif (${lib_name} MATCHES fatfs)
+        list(APPEND current_source_list
+            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/option/syscall.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/option/unicode.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/ff.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/ffsystem.c
+            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/ffunicode.c
+        )
+        target_include_directories(${EXECUTABLE} PRIVATE
+            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs
+            ${TOOLCHAIN_DRIVER_INCLUDE}
+        )
+    # elseif (${lib_name} MATCHES tiniprintf)
     else()
         message(FATAL_ERROR "The lib '${lib_name}' is not supported by FT9XX toolchain")
     endif()

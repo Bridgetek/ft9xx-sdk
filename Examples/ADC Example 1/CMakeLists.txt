@@ -1,12 +1,23 @@
 
 # Load the toolchain cmake file
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
+if (EXISTS ${CMAKE_SOURCE_DIR}/toolchain_ft9xx.cmake)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
+elseif (EXISTS ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
+elseif (EXISTS $ENV{FT9XX_TOOLCHAIN}/hardware/toolchain_ft9xx.cmake)
+    set(CMAKE_TOOLCHAIN_FILE $ENV{FT9XX_TOOLCHAIN}/hardware/toolchain_ft9xx.cmake)
+else()
+    message(FATAL_ERROR "Make sure that the FT9XX is installed correctly. Can't found the 'toolchain_ft9xx.cmake' file")
+endif()
 
 # Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 # Set the project name
 project(ADC_Example_1)
+
+# Make sure the target we setup is supported
+ft9xx_verify_target_name(${TARGET})
 
 # Set some default configure to project
 ft9xx_setup_project(${PROJECT_NAME})

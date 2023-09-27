@@ -1,46 +1,35 @@
-set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
 # Load the toolchain cmake file
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
-
-# This one use to by pass the test build for compiler
-set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+if (EXISTS ${CMAKE_SOURCE_DIR}/toolchain_ft9xx.cmake)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
+elseif (EXISTS ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
+elseif (EXISTS $ENV{FT9XX_TOOLCHAIN}/hardware/toolchain_ft9xx.cmake)
+    set(CMAKE_TOOLCHAIN_FILE $ENV{FT9XX_TOOLCHAIN}/hardware/toolchain_ft9xx.cmake)
+else()
+    message(FATAL_ERROR "Make sure that the FT9XX is installed correctly. Can't found the 'toolchain_ft9xx.cmake' file")
+endif()
 
 # Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
-project(FreeRTOS_D2XX_Example)
-set(EXECUTABLE ${PROJECT_NAME}.elf)
-set(LINKER_FILE ${CMAKE_SOURCE_DIR}/Scripts/freertos.ld)
-set(OUTPUT_FOLDER_PRE "")
-set(OUTPUT_FOLDER_POST "")
-set(OUTPUT_FOLDER_NAME "")
 
-# Language setup
-enable_language(C ASM)
+# Set the project name
+project(D2XX_Example_1)
+
+# Make sure the target we setup is supported
+ft9xx_verify_target_name(${TARGET})
+
+# Set some default configure to project
+ft9xx_setup_project(${PROJECT_NAME})
+
+# Project setup
+project(FreeRTOS_D2XX_Example)
+
+# Indicate the linker script for project
+set(LINKER_FILE ${CMAKE_SOURCE_DIR}/Scripts/freertos.ld)
 
 # List of source files
 set(SRC_FILES
-    # Free RTOS source
-    lib/FreeRTOS/Source/portable/MemMang/heap_1.c
-    lib/FreeRTOS/Source/portable/MemMang/heap_2.c
-    lib/FreeRTOS/Source/portable/MemMang/heap_3.c
-    lib/FreeRTOS/Source/portable/MemMang/heap_4.c
-    lib/FreeRTOS/Source/portable/MemMang/heap_5.c
-
-    lib/FreeRTOS/Source/portable/GCC/FT32/port.c
-    lib/FreeRTOS/Source/portable/GCC/FT32/port_extra.c
-
-    lib/FreeRTOS/Source/croutine.c
-    lib/FreeRTOS/Source/event_groups.c
-    lib/FreeRTOS/Source/list.c
-    lib/FreeRTOS/Source/queue.c
-    lib/FreeRTOS/Source/tasks.c
-    lib/FreeRTOS/Source/timers.c
-
-    # Tinyprintf
-    lib/tinyprintf/tinyprintf.c
-
-    # Main source
     Sources/main.c
     Sources/user.c
 )
@@ -48,63 +37,43 @@ set(SRC_FILES
 # Build the executable based on the source files
 add_executable(${EXECUTABLE} ${SRC_FILES})
 
-# Setup library for linker step
-if (${CMAKE_BUILD_TYPE} MATCHES Debug)
-    target_link_libraries(${EXECUTABLE} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_DEBUG}")
-    target_compile_options(${EXECUTABLE} PRIVATE -Og)
-    string(APPEND OUTPUT_FOLDER_POST "Debug")
-elseif (${CMAKE_BUILD_TYPE} MATCHES Release)
-    target_link_libraries(${EXECUTABLE} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_RELEASE}")
-    string(APPEND OUTPUT_FOLDER_POST "Release")
-else ()
-    message(FATAL_ERROR "The build type should be Debug or Release.")
-endif ()
-
-# Add specific libs and linker option
-if (${CHIPSET} MATCHES FT90X)
-    target_compile_definitions(${EXECUTABLE} PRIVATE -D__FT900__)
-    target_link_libraries(${EXECUTABLE} PRIVATE -lft900_d2xx_dev_rtos -lft900)
-    string(APPEND OUTPUT_FOLDER_PRE "FT90X")
-    set(ASM_BUILD_FLAG --defsym __FT900__=1)
-elseif (${CHIPSET} MATCHES FT93X)
-    target_compile_definitions(${EXECUTABLE} PRIVATE -D__FT930__)
-    target_link_options(${EXECUTABLE} PRIVATE -mft32b -mcompress)
-    target_link_libraries(${EXECUTABLE} PRIVATE -lft930_d2xx_dev -lft930)
-    string(APPEND OUTPUT_FOLDER_PRE "FT93X")
-    set(ASM_BUILD_FLAG --defsym __FT930__=1)
-else ()
-    message(FATAL_ERROR "The CHIPSET must me FT90X or FT93X.")
+# Add the specific D2XX library for target
+if (${TARGET} MATCHES FT90X)
+    ft9xx_target_add_library(${EXECUTABLE} -lft900_d2xx_dev_rtos)
+else (${TARGET} MATCHES FT93X)
+    ft9xx_target_add_library(${EXECUTABLE} -lft930_d2xx_dev_rtos)
 endif()
 
-set(OUTPUT_FOLDER_NAME ${OUTPUT_FOLDER_PRE}_${OUTPUT_FOLDER_POST})
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/${OUTPUT_FOLDER_NAME})
+# Add specific libs and linker option base on the target input
+ft9xx_set_project_chipset(${EXECUTABLE} ${TARGET})
+
+# Set the build type (Must be Debug or Release)
+ft9xx_set_project_build_type(${EXECUTABLE} ${BUILD})
+
+# Add the supported library
+ft9xx_target_add_supported_library(${EXECUTABLE} FreeRTOS)
+ft9xx_target_add_supported_library(${EXECUTABLE} tinyprintf)
 
 # List of include directories
 target_include_directories(${EXECUTABLE} PRIVATE
-    lib/FreeRTOS/Source/include
-    lib/FreeRTOS/Source/portable/GCC/FT32
-    lib/tinyprintf
-    Sources
-    Includes
-    ${TOOLCHAIN_HARDWARE_INCLUDE}
+    # Add your here
+)
+
+# List of include directories
+target_include_directories(${EXECUTABLE} PRIVATE
+    # Add your here
 )
 
 # Compiler options
 target_compile_options(${EXECUTABLE} PRIVATE
     -DFT32_PORT
     -DFT32_PORT_HEAP=4
-    -fvar-tracking-assignments
-    -Wall
-    -c
-    -fmessage-length=0
-    -ffunction-sections
     # Add your here
 )
 
 # Linker library options
 target_link_libraries(${EXECUTABLE} PRIVATE
-    -lc
-    -lstub
+    # Add your here
 )
 
 # Linker options
@@ -112,12 +81,8 @@ target_link_options(${EXECUTABLE} PRIVATE
     -nostartfiles
     -Xlinker -dT ${LINKER_FILE}
 
-    -Wl,--gc-sections
-    -Wl,--entry=_start
-    -Wl,-Map=${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.map,--cref
-
-    ${EXECUTABLE_OUTPUT_PATH}/freertos_d2xx_dlog_crt0.o
-    ${EXECUTABLE_OUTPUT_PATH}/portasm.o
+    $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/freertos_d2xx_dlog_crt0.o
+    $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/portasm.o
 )
 
 # Build the custom crt0 for d2xx
@@ -127,25 +92,19 @@ add_custom_command(TARGET ${EXECUTABLE}
         ${ASM_BUILD_FLAG}
         -I"${CMAKE_SOURCE_DIR}/Includes"
         ${CMAKE_SOURCE_DIR}/Sources/freertos_d2xx_dlog_crt0.S
-        -o ${EXECUTABLE_OUTPUT_PATH}/freertos_d2xx_dlog_crt0.o
+        -o $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/freertos_d2xx_dlog_crt0.o
 
     COMMAND ${CMAKE_ASM_COMPILER}
         ${ASM_BUILD_FLAG}
         -I"${CMAKE_SOURCE_DIR}/Includes"
         ${CMAKE_SOURCE_DIR}/lib/FreeRTOS/Source/portable/GCC/FT32/portasm.S
-        -o ${EXECUTABLE_OUTPUT_PATH}/portasm.o
+        -o $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/portasm.o
 )
 
-# Print the size of excutable file after build *.elf successfully
-add_custom_command(TARGET ${EXECUTABLE}
-    POST_BUILD
-    # Create bin file
-    COMMAND ${CMAKE_OBJCOPY}
-        --output-target binary
-        ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.elf
-        ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.bin
-    # Print out size of image
-    COMMAND ${CMAKE_SIZE_UTIL}
-        --format=berkeley
-        -x ${EXECUTABLE_OUTPUT_PATH}/${EXECUTABLE}
-)
+# Setup the file path for the mapfile if needed
+set(OUTPUT_MAP_FILE_PATH $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.map)
+ft9xx_enable_map_file(${EXECUTABLE} ${OUTPUT_MAP_FILE_PATH})
+
+# Print bin file size after build
+set(BIN_FILE_PATH $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${EXECUTABLE})
+ft9xx_show_image_size(${EXECUTABLE} ${BIN_FILE_PATH})

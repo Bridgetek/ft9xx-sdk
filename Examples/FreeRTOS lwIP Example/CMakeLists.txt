@@ -1,6 +1,14 @@
 
 # Load the toolchain cmake file
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
+if (EXISTS ${CMAKE_SOURCE_DIR}/toolchain_ft9xx.cmake)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
+elseif (EXISTS ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
+    set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
+elseif (EXISTS $ENV{FT9XX_TOOLCHAIN}/hardware/toolchain_ft9xx.cmake)
+    set(CMAKE_TOOLCHAIN_FILE $ENV{FT9XX_TOOLCHAIN}/hardware/toolchain_ft9xx.cmake)
+else()
+    message(FATAL_ERROR "Make sure that the FT9XX is installed correctly. Can't found the 'toolchain_ft9xx.cmake' file")
+endif()
 
 # Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
@@ -8,15 +16,17 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 # Set the project name
 project(FreeRTOS_lwip_Example)
 
-# Mention the linker script for project
-set(LINKER_FILE ${CMAKE_SOURCE_DIR}/Scripts/freertos.ld)
-
 # Set some default configure to project
 ft9xx_setup_project(${PROJECT_NAME})
 
+# Make sure the target we setup is supported
+ft9xx_verify_target_name(${TARGET})
+
+# Mention the linker script for project
+set(LINKER_FILE ${CMAKE_SOURCE_DIR}/Scripts/freertos.ld)
+
 # List of source files
 set(SRC_FILES
-    # Main source
     Sources/main.c
 )
 
@@ -69,14 +79,12 @@ add_custom_command(TARGET ${EXECUTABLE}
     PRE_BUILD
     COMMAND ${CMAKE_ASM_COMPILER}
         ${ASM_BUILD_FLAG}
-        -I"${CMAKE_SOURCE_DIR}/Includes"
         ${CMAKE_SOURCE_DIR}/Sources/crt0.S
         -o $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/crt0.o
 
     COMMAND ${CMAKE_ASM_COMPILER}
         ${ASM_BUILD_FLAG}
-        -I"${CMAKE_SOURCE_DIR}/Includes"
-        ${CMAKE_SOURCE_DIR}/lib/FreeRTOS/Source/portable/GCC/FT32/portasm.S
+        ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/GCC/FT32/portasm.S
         -o $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/portasm.o
 )
 
