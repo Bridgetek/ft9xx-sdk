@@ -464,11 +464,11 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 	token = EHCI_MEM(hc_this_qtd->token);
 	if (token & EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE)
 			{
-		USBH_qtd *hc_next_qtd = EHCI_MEM(hc_this_qh->transfer_overlay.next);
+		USBH_qtd *hc_next_qtd = (USBH_qtd *)EHCI_MEM(hc_this_qh->transfer_overlay.next);
 		EHCI_MEM(hc_this_qtd->token) = token & (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
 		EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->qtd_current);
 		EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_MEM(hc_this_qh->qtd_current);
-		EHCI_MEM(hc_this_qh->qtd_current) = hc_next_qtd;
+		EHCI_MEM(hc_this_qh->qtd_current) = (uint32_t)hc_next_qtd;
 			}
 
 	// Restart the schedule.
@@ -4360,7 +4360,7 @@ static void usbh_force_close_xfer(USBH_endpoint *ep, USBH_xfer *list)
 			{
 				// Deactivate qTD
 				usbh_unlink_qtd(xferThis);
-				//xferThis->token = token & MASK_EHCI_QUEUE_TD_TOKEN_STATUS;
+
 				xferThis->status = USBH_ERR_REMOVED;
 			}
 		}
