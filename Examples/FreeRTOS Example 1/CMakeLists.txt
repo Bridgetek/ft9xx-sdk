@@ -46,13 +46,6 @@ set(SRC_FILES
 # Build the executable based on the source files
 add_executable(${EXECUTABLE} ${SRC_FILES})
 
-# Add the specific D2XX library for target
-if (${TARGET} MATCHES FT90X)
-    ft9xx_target_add_library(${EXECUTABLE} -lft900_d2xx_dev_rtos)
-else (${TARGET} MATCHES FT93X)
-    ft9xx_target_add_library(${EXECUTABLE} -lft930_d2xx_dev_rtos)
-endif()
-
 # Add specific libs and linker option base on the target input
 ft9xx_set_project_chipset(${EXECUTABLE} ${TARGET})
 

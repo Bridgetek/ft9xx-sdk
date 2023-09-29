@@ -41,7 +41,7 @@ add_executable(${EXECUTABLE} ${SRC_FILES})
 if (${TARGET} MATCHES FT90X)
     ft9xx_target_add_library(${EXECUTABLE} -lft900_d2xx_dev_rtos)
 else (${TARGET} MATCHES FT93X)
-    ft9xx_target_add_library(${EXECUTABLE} -lft930_d2xx_dev_rtos)
+    ft9xx_target_add_library(${EXECUTABLE} -lft930_d2xx_dev)
 endif()
 
 # Add specific libs and linker option base on the target input
