@@ -39,9 +39,9 @@ INCDIRS+=drivers
 # All directory names with spaces must be escaped.
 # Do not use source filenames with spaces.
 # If directories are not found they will be ignored.
-SRCDIRS+=src
-# Template source directories for Examples.
 SRCDIRS+=Sources
+# Template source directories for Examples.
+SRCDIRS+=src
 SRCDIRS+=hw/src
 SRCDIRS+=usb/src
 SRCDIRS+=drivers
