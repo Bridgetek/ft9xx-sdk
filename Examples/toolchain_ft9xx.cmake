@@ -54,6 +54,23 @@ set(TOOLCHAIN_HARDWARE_LIB_RELEASE "${TOOLCHAIN_DIR}/hardware/lib/Release")
 set(TOOLCHAIN_3RDPARTY_LIB         "${TOOLCHAIN_DIR}/3rdparty")
 
 # --------------------------------------------------------------------------- #
+# Set defaults.
+if (NOT DEFINED ${BUILD})
+	set (BUILD "Debug")
+endif()
+if (NOT DEFINED ${TARGET})
+	set (TARGET "ft90x")
+endif()
+
+# --------------------------------------------------------------------------- #
+# Get the default name of the project from the directory name.
+#if (NOT DEFINED ${PROJECT})
+#	cmake_path(GET CMAKE_CURRENT_SOURCE_DIR FILENAME DEFAULT_PROJECT_NAME)  
+#	string(REPLACE " " "_" DEFAULT_PROJECT_NAME ${DEFAULT_PROJECT_NAME})
+#	message(STATUS "Project name set to ${DEFAULT_PROJECT_NAME}")
+#endif()
+
+# --------------------------------------------------------------------------- #
 # Define the macro which support build process
 
 macro(ft9xx_setup_project projectName)
@@ -90,28 +107,28 @@ macro(ft9xx_target_add_libraries target libraries)
 endmacro()
 
 macro(ft9xx_set_project_chipset excutable chipset)
-    if (${chipset} MATCHES FT90X)
+    if (${chipset} MATCHES ft90x)
         target_compile_definitions(${excutable} PRIVATE -D__FT900__)
         target_link_libraries(${excutable} PRIVATE -lft900)
-        set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT90X)
-    elseif (${chipset} MATCHES FT93X)
+        set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT90x)
+    elseif (${chipset} MATCHES ft93x)
         target_compile_definitions(${excutable} PRIVATE -D__FT930__)
         target_link_options(${excutable} PRIVATE -mft32b -mcompress)
         target_link_libraries(${excutable} PRIVATE -lft930)
-        set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT93X)
+        set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT93x)
     else ()
-        message(FATAL_ERROR "The TARGET must me FT90X or FT93X.")
+        message(FATAL_ERROR "The TARGET must me ft90x or ft93x.")
     endif()
 
     target_link_libraries(${excutable} PRIVATE -lc -lstub)
 endmacro()
 
 function(ft9xx_verify_target_name target)
-    set(target_list FT90X FT93X)
+    set(target_list ft90x ft93x)
     if (${target} IN_LIST target_list)
         message(STATUS "Target chipset is ${target}")
     else ()
-        message(FATAL_ERROR "The TARGET must be FT90X or FT93X.")
+        message(FATAL_ERROR "The TARGET must be ft90x or ft93x.")
     endif()
 endfunction()
 
