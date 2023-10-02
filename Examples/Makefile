@@ -5,9 +5,9 @@
 # Spaces must be escaped. e.g. PROJECT=my\ project
 #PROJECT?=firmware
 
-# Build type (case sensitive), can be debug (default) or release.
-# On command line call "make BUILD=release" "make BUILD=debug" to override.
-#BUILD?=debug
+# Build type (case sensitive), can be Debug (default) or Release.
+# On command line call "make BUILD=Release" "make BUILD=Debug" to override.
+#BUILD?=Debug
 
 # Target device type (case sensitive), can be ft90x (default) or ft93x.
 # On command line call "make TARGET=ft93x" or "make TARGET=ft90x" to override.
@@ -70,9 +70,9 @@ SRCDIRS+=drivers
 # Do not include the "lib" prefix or ".a" suffix in the name.
 # Template for including D2XX device libraries.
 ifeq ($(TARGET),ft93x)
-	LIBS+=ft930_d2xx_dev
+	#LIBS+=ft930_d2xx_dev
 else
-	LIBS+=ft900_d2xx_dev
+	#LIBS+=ft900_d2xx_dev
 endif
 
 # Include the toolchain makefile which contains the recipie and

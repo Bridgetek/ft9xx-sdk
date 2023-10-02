@@ -2,12 +2,12 @@
 
 # Apply sensible default values.
 
-# Build type (case sensitive), can be debug (default) or release.
-BUILD?=debug
+# Build type (case sensitive), can be Debug (default) or Release.
+BUILD?=Debug
 # Target device type (case sensitive), can be ft90x (default) or ft93x.
 TARGET?=ft90x
 # Output directories depend on build type and target device.
-ifeq ($(BUILD),release)
+ifeq ($(BUILD),Release)
 ifeq ($(TARGET),ft93x)
 OUTDIR?=FT93x_Release
 else
@@ -18,7 +18,7 @@ $(error use TARGET=ft90x or TARGET=ft93x)
 endif
 endif
 else
-ifeq ($(BUILD),debug)
+ifeq ($(BUILD),Debug)
 ifeq ($(TARGET),ft93x)
 OUTDIR?=FT93x_Debug
 else
@@ -29,7 +29,7 @@ $(error use TARGET=ft90x or TARGET=ft93x)
 endif
 endif
 else
-$(error use BUILD=debug or BUILD=release)
+$(error use BUILD=Debug or BUILD=Release)
 endif
 endif
 
@@ -76,8 +76,8 @@ else
 endif
 # Paths to include files that are needed. The search order is important.
 CFLAGS+=-I"." $(patsubst %, -I "%", $(INCDIRS))
-# Compilation output options for debug and release builds.
-ifeq ($(BUILD),release)
+# Compilation output options for Debug and Release builds.
+ifeq ($(BUILD),Release)
 	CFLAGS+=-Os
 else
 	CFLAGS+=-Og -g -fvar-tracking -fvar-tracking-assignments 
@@ -98,6 +98,12 @@ LDFLAGS+=-Wl,--gc-sections -Wl,--entry=_start
 # Paths to any additional library search directories that are needed. The 
 # search order is important.
 LDFLAGS+=$(patsubst %, -L"%", $(LIBDIRS))
+# Add D2XX libraries.
+ifeq ($(TARGET),ft93x)
+	LIBS+=ft930_d2xx_dev
+else
+	LIBS+=ft900_d2xx_dev
+endif
 # Add the optional libraries onto the linker command line.
 LDLIBS:=$(patsubst %, -l%, $(LIBS))
 # Add the device specific libraries and options onto the linker command line.
@@ -116,7 +122,7 @@ ifneq ($(findstring crt0,$(ASMSRCS)),)
 	LDFLAGS+=-nostartfiles
 endif
 # Toolchain default library directory incase it does not find anything in the other areas.
-ifeq ($(BUILD),release)
+ifeq ($(BUILD),Release)
 	TOOLCHAINLIB= -L"$(FT9XX_TOOLCHAIN)/hardware/lib/Release"
 else
 	TOOLCHAINLIB= -L"$(FT9XX_TOOLCHAIN)/hardware/lib/Debug"
