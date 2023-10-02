@@ -8,29 +8,29 @@ BUILD?=debug
 TARGET?=ft90x
 # Output directories depend on build type and target device.
 ifeq ($(BUILD),release)
-	ifeq ($(TARGET),ft93x)
-		OUTDIR?=FT93x_Release
-	else
-		ifeq ($(TARGET),ft90x)
-			OUTDIR?=FT90x_Release
-		else
-			$(error use TARGET=ft90x or TARGET=ft93x)
-		endif
-	endif
+ifeq ($(TARGET),ft93x)
+OUTDIR?=FT93x_Release
 else
-	ifeq ($(BUILD),debug)
-		ifeq ($(TARGET),ft93x)
-			OUTDIR?=FT93x_Debug
-		else
-			ifeq ($(TARGET),ft90x)
-				OUTDIR?=FT90x_Debug
-			else
-				$(error use TARGET=ft90x or TARGET=ft93x)
-			endif
-		endif
-	else
-		$(error use BUILD=debug or BUILD=release)
-	endif
+ifeq ($(TARGET),ft90x)
+OUTDIR?=FT90x_Release
+else
+$(error use TARGET=ft90x or TARGET=ft93x)
+endif
+endif
+else
+ifeq ($(BUILD),debug)
+ifeq ($(TARGET),ft93x)
+OUTDIR?=FT93x_Debug
+else
+ifeq ($(TARGET),ft90x)
+OUTDIR?=FT90x_Debug
+else
+$(error use TARGET=ft90x or TARGET=ft93x)
+endif
+endif
+else
+$(error use BUILD=debug or BUILD=release)
+endif
 endif
 
 # Project name (this forms part of the filename for the output files).

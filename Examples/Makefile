@@ -80,8 +80,16 @@ endif
 # The toolchain makefile is found in the root directory of the toolchain
 # installation.
 # If there is a local copy then that will be used instead.
-ifeq (,$(wildcard ft9xx_toolchain.mak))
-	include $(subst $(empty) ,\ ,$(FT9XX_TOOLCHAIN))\ft9xx_toolchain.mak
+ifneq (,$(wildcard toolchain_ft9xx.mak))
+include toolchain_ft9xx.mak
 else
-	include ft9xx_toolchain.mak
+ifneq (,$(wildcard ../toolchain_ft9xx.mak))
+include ../toolchain_ft9xx.mak
+else
+ifneq (,$(wildcard $(subst $(empty) ,\ ,$(FT9XX_TOOLCHAIN))\toolchain_ft9xx.mak))
+include $(subst $(empty) ,\ ,$(FT9XX_TOOLCHAIN))\toolchain_ft9xx.mak
+else
+$(error Make sure that the FT9XX is installed correctly. Can't find the 'toolchain_ft9xx.mak' file)
+endif
+endif
 endif
