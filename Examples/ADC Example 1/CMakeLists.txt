@@ -1,5 +1,22 @@
+# Standard CMakeLists.txt Template for FT9xx project compilation.
 
-# Load the toolchain cmake file
+# Project name. Default name is the name of the current directory.
+# On command line call cmake with the parameter "-DPROJECT=firmware" to override.
+
+# Build type (case sensitive), can be Debug (default) or Release.
+# On command line call cmake with the parameter "-DBUILD=Release" or "-DBUILD=Debug" to override.
+
+# Target device type (case sensitive), can be ft90x (default) or ft93x.
+# On command line call cmake with the parameter "-DTARGET=ft93x" or "-DTARGET=ft90x" to override.
+
+# Output directories (you may override this). 
+# Default is one of "FT90x_Release", "FT90x_Debug", "FT93x_Release" or 
+#  "FT93x_Debug" depending on build type and target device.
+# On command line call cmake with the parameter "-DOUTDIR=test" to override.
+
+# Load the toolchain cmake file.
+# This will look in the local directory, followed by the '..' directory,
+# finally it will look in the toolchain installation.
 if (EXISTS ${CMAKE_SOURCE_DIR}/toolchain_ft9xx.cmake)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
 elseif (EXISTS ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
@@ -7,10 +24,9 @@ elseif (EXISTS ${CMAKE_SOURCE_DIR}/../toolchain_ft9xx.cmake)
 elseif (EXISTS $ENV{FT9XX_TOOLCHAIN}/hardware/toolchain_ft9xx.cmake)
     set(CMAKE_TOOLCHAIN_FILE $ENV{FT9XX_TOOLCHAIN}/hardware/toolchain_ft9xx.cmake)
 else()
-    message(FATAL_ERROR "Make sure that the FT9XX is installed correctly. Can't found the 'toolchain_ft9xx.cmake' file")
+    message(FATAL_ERROR "Make sure that the FT9XX is installed correctly. Can't find the 'toolchain_ft9xx.cmake' file")
 endif()
 
-# Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 # Set the project name to the current directory if it is not defined in the command line.
@@ -20,13 +36,16 @@ if (NOT DEFINED ${PROJECT})
 	message(STATUS "Project name set to ${PROJECT}")
 endif()
 
+# Setup the cmake project name.
 project(${PROJECT})
+
+# Make a variable for the executable output. This is normally based on the project name.
 set(EXECUTABLE ${PROJECT}.elf)
 
-# Setup project default configure to project
+# Setup project defaults to configure to project for FT9xx.
 ft9xx_setup_project()
 
-# List of source files
+# Compile a list of source files.
 file(GLOB SRC_FILES CONFIGURE_DEPENDS 
 	Sources/*.c
 	src/*.c
@@ -35,10 +54,10 @@ file(GLOB SRC_FILES CONFIGURE_DEPENDS
 	drivers/*.c
 )
 
-# Replace perform add_executable and make default settings for BUILD and TARGET.
+# Macro to perform cmake add_executable and configure the default settings for BUILD and TARGET.
 ft9xx_set_executable(${EXECUTABLE} ${SRC_FILES})
 
-# List of include directories
+# Compile a list of include directories.
 target_include_directories(${EXECUTABLE} PRIVATE
 	Includes
 	hardware/include
@@ -47,12 +66,12 @@ target_include_directories(${EXECUTABLE} PRIVATE
 	drivers
 )
 
-# Compiler options
+# Setup any extra compiler options required.
 target_compile_options(${EXECUTABLE} PRIVATE
 	# Add your compiler options here
 )
 
-# Linker library options
+# Add any additional linker libraries required.
 target_link_libraries(${EXECUTABLE} PRIVATE
     # Add your libraries here:
 	# ft900_d2xx_dev
@@ -60,8 +79,5 @@ target_link_libraries(${EXECUTABLE} PRIVATE
 	# ftd2xx_host
 )
 
-# Setup the file path for the mapfile if needed
+# Enable generation of a map file for the project if needed.
 ft9xx_enable_map_file(${EXECUTABLE})
-
-# Print bin file size after build
-ft9xx_show_image_size(${EXECUTABLE})

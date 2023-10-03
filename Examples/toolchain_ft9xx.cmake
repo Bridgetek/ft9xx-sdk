@@ -144,9 +144,14 @@ macro(ft9xx_set_executable executable srcfiles)
     # This is the CMAKE value should be set also
     set(CMAKE_BUILD_MODE ${BUILD})
 
-    # Set the ouput folder for the elf, bin, map,...
-    set(ENV{FT9XX_OUTPUT_FOLDER_NAME} $ENV{FT9XX_OUTPUT_FOLDER_PRE}_$ENV{FT9XX_OUTPUT_FOLDER_POST})
-    set(ENV{FT9XX_EXECUTABLE_OUTPUT_PATH} ${CMAKE_SOURCE_DIR}/$ENV{FT9XX_OUTPUT_FOLDER_NAME})
+	if("${OUTDIR}" STREQUAL "")
+		# Set the ouput folder for the elf, bin, map,...
+		set(ENV{FT9XX_OUTPUT_FOLDER_NAME} $ENV{FT9XX_OUTPUT_FOLDER_PRE}_$ENV{FT9XX_OUTPUT_FOLDER_POST})
+		set(ENV{FT9XX_EXECUTABLE_OUTPUT_PATH} ${CMAKE_SOURCE_DIR}/$ENV{FT9XX_OUTPUT_FOLDER_NAME})
+	else()
+		set(ENV{FT9XX_EXECUTABLE_OUTPUT_PATH} ${CMAKE_SOURCE_DIR}/${OUTDIR})
+	endif()
+	message(STATUS "Output directory has been set to $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}.")
 
     # Setup the output folder for the build
     set_target_properties(${executable}
@@ -165,6 +170,13 @@ macro(ft9xx_set_executable executable srcfiles)
 
     # Setup library for linker step
     target_link_libraries(${executable} PRIVATE -lc -lstub)
+
+	# Enable printing of the executable program size after compilation.
+    add_custom_command(TARGET ${executable}
+        POST_BUILD
+        # Print out size of image
+        COMMAND ${CMAKE_SIZE_UTIL} --format=berkeley -x $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.elf
+    )
 endmacro()
 
 macro(ft9xx_target_add_libraries target libraries)
@@ -182,15 +194,6 @@ macro(ft9xx_enable_map_file excutable)
         -Wl,-Map=${OUTPUT_MAP_FILE_PATH}
         # Add cross-reference table to the map file
         -Wl,--cref
-    )
-endmacro()
-
-macro(ft9xx_show_image_size excutable)
-	set(BIN_FILE_PATH $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${excutable})
-    add_custom_command(TARGET ${excutable}
-        POST_BUILD
-        # Print out size of image
-        COMMAND ${CMAKE_SIZE_UTIL} --format=berkeley -x ${BIN_FILE_PATH}
     )
 endmacro()
 
