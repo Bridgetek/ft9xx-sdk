@@ -54,28 +54,35 @@ set(TOOLCHAIN_HARDWARE_LIB_RELEASE "${TOOLCHAIN_DIR}/hardware/lib/Release")
 set(TOOLCHAIN_3RDPARTY_LIB         "${TOOLCHAIN_DIR}/3rdparty")
 
 # --------------------------------------------------------------------------- #
-# Set defaults.
-if (NOT DEFINED ${BUILD})
+# Set and test defaults.
+if("${BUILD}" STREQUAL "")
 	set (BUILD "Debug")
-endif()
-if (NOT DEFINED ${TARGET})
-	set (TARGET "ft90x")
+	message(STATUS "Build type has been set to ${BUILD}.")
+else()
+	set(build_list Debug Release)
+	if(${BUILD} IN_LIST build_list)
+		message(STATUS "Build type is ${BUILD}")
+	else()
+		message(FATAL_ERROR "The BUILD parameter must be Debug or Release. \"${BUILD}\" not allowed.")
+	endif()
 endif()
 
-# --------------------------------------------------------------------------- #
-# Get the default name of the project from the directory name.
-#if (NOT DEFINED ${PROJECT})
-#	cmake_path(GET CMAKE_CURRENT_SOURCE_DIR FILENAME DEFAULT_PROJECT_NAME)  
-#	string(REPLACE " " "_" DEFAULT_PROJECT_NAME ${DEFAULT_PROJECT_NAME})
-#	message(STATUS "Project name set to ${DEFAULT_PROJECT_NAME}")
-#endif()
+if("${TARGET}" STREQUAL "")
+	set (TARGET "ft90x")
+	message(STATUS "Target has been set to ${TARGET}.")
+else()
+	set(target_list ft90x ft93x)
+	if(${TARGET} IN_LIST target_list)
+		message(STATUS "Target chipset is ${TARGET}")
+	else()
+		message(FATAL_ERROR "The TARGET must be ft90x or ft93x. \"${TARGET}\" not allowed.")
+	endif()
+endif()
 
 # --------------------------------------------------------------------------- #
 # Define the macro which support build process
 
-macro(ft9xx_setup_project projectName)
-    set(EXECUTABLE ${projectName}.elf)
-
+macro(ft9xx_setup_project)
     # Language setup
     enable_language(C ASM)
 
@@ -98,97 +105,96 @@ macro(ft9xx_setup_project projectName)
         -Wl,--gc-sections
         -Wl,--entry=_start
     )
+
 endmacro()
 
-macro(ft9xx_target_add_libraries target libraries)
-    target_link_libraries(${target} PRIVATE ${libraries})
-endmacro()
+macro(ft9xx_set_executable executable srcfiles)
+	# Build the executable based on the source files
+	add_executable(${executable} ${srcfiles})
 
-macro(ft9xx_set_project_chipset excutable chipset)
-    if (${chipset} MATCHES ft90x)
-        target_compile_definitions(${excutable} PRIVATE -D__FT900__)
-        target_link_libraries(${excutable} PRIVATE -lft900)
+	# Set target-specific settings.
+    if (${TARGET} MATCHES ft90x)
+        target_compile_definitions(${executable} PRIVATE -D__FT900__)
+        target_link_libraries(${executable} PRIVATE -lft900)
         set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT90x)
-    elseif (${chipset} MATCHES ft93x)
-        target_compile_definitions(${excutable} PRIVATE -D__FT930__)
-        target_link_options(${excutable} PRIVATE -mft32b -mcompress)
-        target_link_libraries(${excutable} PRIVATE -lft930)
+    elseif (${TARGET} MATCHES ft93x)
+        target_compile_definitions(${executable} PRIVATE -D__FT930__)
+        target_link_options(${executable} PRIVATE -mft32b -mcompress)
+        target_link_libraries(${executable} PRIVATE -lft930)
         set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT93x)
     else ()
+		# Double check TARGET
         message(FATAL_ERROR "The TARGET must me ft90x or ft93x.")
     endif()
 
-    target_link_libraries(${excutable} PRIVATE -lc -lstub)
-endmacro()
-
-function(ft9xx_verify_target_name target)
-    set(target_list ft90x ft93x)
-    if (${target} IN_LIST target_list)
-        message(STATUS "Target chipset is ${target}")
-    else ()
-        message(FATAL_ERROR "The TARGET must be ft90x or ft93x.")
-    endif()
-endfunction()
-
-macro(ft9xx_target_add_library excutable lib_name)
-    target_link_libraries(${EXECUTABLE} PRIVATE ${lib_name})
-endmacro()
-
-macro(ft9xx_set_project_build_type excutable mode)
-    # This is the CMAKE value should be set also
-    set(CMAKE_BUILD_MODE ${mode})
-
-    # Setup library for linker step
-    if (${mode} MATCHES Debug)
-        target_link_libraries(${excutable} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_DEBUG}")
-        target_compile_options(${excutable} PRIVATE -g -Og)
+	# Set build-specific settings.
+    if (${BUILD} MATCHES Debug)
+        target_compile_options(${executable} PRIVATE -g -Og)
+        target_link_libraries(${executable} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_DEBUG}")
         set(ENV{FT9XX_OUTPUT_FOLDER_POST} Debug)
-    elseif (${mode} MATCHES Release)
-        target_link_libraries(${excutable} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_RELEASE}")
-        target_compile_options(${excutable} PRIVATE -O3)
+    elseif (${BUILD} MATCHES Release)
+        target_compile_options(${executable} PRIVATE -O3)
+        target_link_libraries(${executable} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_RELEASE}")
         set(ENV{FT9XX_OUTPUT_FOLDER_POST} Release)
     else ()
-        message(FATAL_ERROR "The build type should be Debug or Release.")
+		# Double check BUILD
+        message(FATAL_ERROR "The BUILD type should be Debug or Release.")
     endif()
+
+    # This is the CMAKE value should be set also
+    set(CMAKE_BUILD_MODE ${BUILD})
 
     # Set the ouput folder for the elf, bin, map,...
     set(ENV{FT9XX_OUTPUT_FOLDER_NAME} $ENV{FT9XX_OUTPUT_FOLDER_PRE}_$ENV{FT9XX_OUTPUT_FOLDER_POST})
     set(ENV{FT9XX_EXECUTABLE_OUTPUT_PATH} ${CMAKE_SOURCE_DIR}/$ENV{FT9XX_OUTPUT_FOLDER_NAME})
 
     # Setup the output folder for the build
-    set_target_properties(${excutable}
+    set_target_properties(${executable}
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "$ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}"
     )
 
     # Print the size of excutable file after build *.elf successfully
-    add_custom_command(TARGET ${excutable}
+    add_custom_command(TARGET ${executable}
         POST_BUILD
         # Create bin file
         COMMAND ${CMAKE_OBJCOPY} --output-target binary
             $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.elf
             $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.bin
     )
+
+    # Setup library for linker step
+    target_link_libraries(${executable} PRIVATE -lc -lstub)
 endmacro()
 
-macro(ft9xx_enable_map_file excutable output_path)
+macro(ft9xx_target_add_libraries target libraries)
+    target_link_libraries(${target} PRIVATE ${libraries})
+endmacro()
+
+macro(ft9xx_target_add_library excutable lib_name)
+    target_link_libraries(${excutable} PRIVATE ${lib_name})
+endmacro()
+
+macro(ft9xx_enable_map_file excutable)
+	set(OUTPUT_MAP_FILE_PATH $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.map)
     target_link_options(${excutable} PRIVATE
         # Enable the map file
-        -Wl,-Map=${output_path}
+        -Wl,-Map=${OUTPUT_MAP_FILE_PATH}
         # Add cross-reference table to the map file
         -Wl,--cref
     )
 endmacro()
 
-macro(ft9xx_show_image_size target excutable_path)
-    add_custom_command(TARGET ${target}
+macro(ft9xx_show_image_size excutable)
+	set(BIN_FILE_PATH $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${excutable})
+    add_custom_command(TARGET ${excutable}
         POST_BUILD
         # Print out size of image
-        COMMAND ${CMAKE_SIZE_UTIL} --format=berkeley -x ${excutable_path}
+        COMMAND ${CMAKE_SIZE_UTIL} --format=berkeley -x ${BIN_FILE_PATH}
     )
 endmacro()
 
-function(ft9xx_target_add_supported_library target lib_name)
+function(ft9xx_target_add_supported_library excutable lib_name)
     set(supported_lib_list fatfs FreeRTOS lwip mbedtls tinyprintf)
     if (${lib_name} IN_LIST supported_lib_list)
         message(STATUS "Found the lib ${lib_name} in the '3rdparty libraries'")
@@ -197,7 +203,7 @@ function(ft9xx_target_add_supported_library target lib_name)
     endif()
 
     # Get the current value of the SOURCES property.
-    get_target_property(current_source_list ${target} SOURCES)
+    get_target_property(current_source_list ${excutable} SOURCES)
 
     if (${lib_name} MATCHES lwip)
         list(APPEND current_source_list
@@ -286,7 +292,7 @@ function(ft9xx_target_add_supported_library target lib_name)
             ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/sockets.c
             ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/tcpip.c
         )
-        target_include_directories(${EXECUTABLE} PRIVATE
+        target_include_directories(${excutable} PRIVATE
             ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/arch
             ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/include
         )
@@ -308,7 +314,7 @@ function(ft9xx_target_add_supported_library target lib_name)
             ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/tasks.c
             ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/timers.c
         )
-        target_include_directories(${EXECUTABLE} PRIVATE
+        target_include_directories(${excutable} PRIVATE
             ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/include
             ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/GCC/FT32
         )
@@ -316,7 +322,7 @@ function(ft9xx_target_add_supported_library target lib_name)
         list(APPEND current_source_list
             ${TOOLCHAIN_3RDPARTY_LIB}/tinyprintf/tinyprintf.c
         )
-        target_include_directories(${EXECUTABLE} PRIVATE
+        target_include_directories(${excutable} PRIVATE
             ${TOOLCHAIN_3RDPARTY_LIB}/tinyprintf
         )
     elseif (${lib_name} MATCHES fatfs)
@@ -327,7 +333,7 @@ function(ft9xx_target_add_supported_library target lib_name)
             ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/ffsystem.c
             ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/ffunicode.c
         )
-        target_include_directories(${EXECUTABLE} PRIVATE
+        target_include_directories(${excutable} PRIVATE
             ${TOOLCHAIN_3RDPARTY_LIB}/fatfs
             ${TOOLCHAIN_DRIVER_INCLUDE}
         )
@@ -337,5 +343,5 @@ function(ft9xx_target_add_supported_library target lib_name)
     endif()
 
     # Set the SOURCES property to the new list of source files.
-    set_property(TARGET ${target} PROPERTY SOURCES ${current_source_list})
+    set_property(TARGET ${excutable} PROPERTY SOURCES ${current_source_list})
 endfunction()

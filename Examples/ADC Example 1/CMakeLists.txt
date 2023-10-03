@@ -19,13 +19,12 @@ if (NOT DEFINED ${PROJECT})
 	string(REPLACE " " "_" PROJECT ${PROJECT_DIR})
 	message(STATUS "Project name set to ${PROJECT}")
 endif()
+
 project(${PROJECT})
+set(EXECUTABLE ${PROJECT}.elf)
 
-# Make sure the target we setup is supported
-ft9xx_verify_target_name(${TARGET})
-
-# Set some default configure to project
-ft9xx_setup_project(${PROJECT})
+# Setup project default configure to project
+ft9xx_setup_project()
 
 # List of source files
 file(GLOB SRC_FILES CONFIGURE_DEPENDS 
@@ -36,14 +35,8 @@ file(GLOB SRC_FILES CONFIGURE_DEPENDS
 	drivers/*.c
 )
 
-# Build the executable based on the source files
-add_executable(${EXECUTABLE} ${SRC_FILES})
-
-# Add specific libs and linker option base on the target input (Must be ft90x or ft93x)
-ft9xx_set_project_chipset(${EXECUTABLE} ${TARGET})
-
-# Set the build type (Must be Debug or Release)
-ft9xx_set_project_build_type(${EXECUTABLE} ${BUILD})
+# Replace perform add_executable and make default settings for BUILD and TARGET.
+ft9xx_set_executable(${EXECUTABLE} ${SRC_FILES})
 
 # List of include directories
 target_include_directories(${EXECUTABLE} PRIVATE
@@ -68,9 +61,7 @@ target_link_libraries(${EXECUTABLE} PRIVATE
 )
 
 # Setup the file path for the mapfile if needed
-set(OUTPUT_MAP_FILE_PATH $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.map)
-ft9xx_enable_map_file(${EXECUTABLE} ${OUTPUT_MAP_FILE_PATH})
+ft9xx_enable_map_file(${EXECUTABLE})
 
 # Print bin file size after build
-set(BIN_FILE_PATH $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${EXECUTABLE})
-ft9xx_show_image_size(${EXECUTABLE} ${BIN_FILE_PATH})
+ft9xx_show_image_size(${EXECUTABLE})
