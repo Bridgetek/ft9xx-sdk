@@ -1,4 +1,6 @@
-# the name of the target operating system
+# Standard Makefile Actions for FT9xx project compilation.
+
+# Setup for FT9xx
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR FT9XX)
 
