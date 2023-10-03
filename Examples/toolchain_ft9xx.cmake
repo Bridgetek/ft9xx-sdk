@@ -81,8 +81,6 @@ macro(ft9xx_setup_project projectName)
 
     # Add default include directory for project
     include_directories(
-        Sources
-        Includes
         ${TOOLCHAIN_HARDWARE_INCLUDE}
     )
 

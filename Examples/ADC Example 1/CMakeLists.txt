@@ -13,10 +13,10 @@ endif()
 # Project setup
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
-# Set the project name if it is not defined in the command line. (Move to toolchain_ft9xx.cmake).
+# Set the project name to the current directory if it is not defined in the command line.
 if (NOT DEFINED ${PROJECT})
-	cmake_path(GET CMAKE_CURRENT_SOURCE_DIR FILENAME DEFAULT_PROJECT_NAME)  
-	string(REPLACE " " "_" PROJECT ${DEFAULT_PROJECT_NAME})
+	get_filename_component(PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+	string(REPLACE " " "_" PROJECT ${PROJECT_DIR})
 	message(STATUS "Project name set to ${PROJECT}")
 endif()
 project(${PROJECT})
@@ -47,7 +47,6 @@ ft9xx_set_project_build_type(${EXECUTABLE} ${BUILD})
 
 # List of include directories
 target_include_directories(${EXECUTABLE} PRIVATE
-	${FT9XX_TOOLCHAIN}
 	Includes
 	hardware/include
 	hw/include
