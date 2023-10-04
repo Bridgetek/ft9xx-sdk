@@ -48,12 +48,10 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 # --------------------------------------------------------------------------- #
 # Define the list of toolchain suport
-set(TOOLCHAIN_DRIVER_INCLUDE       "${TOOLCHAIN_DIR}/drivers")
 set(TOOLCHAIN_HARDWARE_INCLUDE     "${TOOLCHAIN_DIR}/hardware/include")
 set(TOOLCHAIN_HARDWARE_LIB         "${TOOLCHAIN_DIR}/hardware/lib")
-set(TOOLCHAIN_HARDWARE_LIB_DEBUG   "${TOOLCHAIN_DIR}/hardware/lib/Debug")
-set(TOOLCHAIN_HARDWARE_LIB_RELEASE "${TOOLCHAIN_DIR}/hardware/lib/Release")
-set(TOOLCHAIN_3RDPARTY_LIB         "${TOOLCHAIN_DIR}/3rdparty")
+set(TOOLCHAIN_HARDWARE_LIB_DEBUG   "${TOOLCHAIN_HARDWARE_LIB}/Debug")
+set(TOOLCHAIN_HARDWARE_LIB_RELEASE "${TOOLCHAIN_HARDWARE_LIB}/Release")
 
 # --------------------------------------------------------------------------- #
 # Set and test defaults.
@@ -84,7 +82,7 @@ endif()
 # --------------------------------------------------------------------------- #
 # Define the macro which support build process
 
-macro(ft9xx_setup_project)
+macro(ft9xx_set_executable executable srcfiles libfiles ldscript)
     # Language setup
     enable_language(C ASM)
 
@@ -93,9 +91,6 @@ macro(ft9xx_setup_project)
         ${TOOLCHAIN_HARDWARE_INCLUDE}
     )
 
-endmacro()
-
-macro(ft9xx_set_executable executable srcfiles)
 	# Build the executable based on the source files.
 	add_executable(${executable} ${srcfiles})
 
@@ -118,30 +113,17 @@ macro(ft9xx_set_executable executable srcfiles)
 	set(_srcfiles ${srcfiles} ${ARGN})
 	# Do not load startup files if crt0 source file exists.
 	foreach (srcfile IN LISTS _srcfiles)
-		if (${srcfile} MATCHES ".*\.S$")
-			#set_source_files_properties(${srcfile} PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
-		else()
-			#set_source_files_properties(${srcfile} PROPERTIES COMPILE_FLAGS ${myoptionsfortargetX} )
+		if (${srcfile} MATCHES ".*crt0\.S$")
+			message(STATUS "crt0 file detected: ${srcfile}")
+			target_link_libraries(${EXECUTABLE} PRIVATE -nostartfiles)
+			break()
 		endif()
 	endforeach()
-
-	# Set target-specific settings.
-    if (${TARGET} MATCHES ft90x)
-        #SET(CMAKE_ASM_FLAGS "${CFLAGS} -x assembler-with-cpp")
-		target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:__FT900__>)
-        target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:ASM>:__FT900__=1>)
-        target_link_libraries(${executable} PRIVATE -lft900)
-        set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT90x)
-    elseif (${TARGET} MATCHES ft93x)
-        target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:__FT930__>)
-        target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:ASM>:__FT930__=1>)
-        target_link_options(${executable} PRIVATE -mft32b -mcompress)
-        target_link_libraries(${executable} PRIVATE -lft930)
-        set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT93x)
-    else ()
-		# Double check TARGET
-        message(FATAL_ERROR "The TARGET must me ft90x or ft93x.")
-    endif()
+	
+	if (${ldscript} MATCHES ".*\.ld$")
+		message(STATUS "Linker script file: ${ldscript}")
+		target_link_libraries(${EXECUTABLE} PRIVATE -Xlinker -dT "${ldscript}" )
+	endif()
 
 	# Set build-specific settings.
     if (${BUILD} MATCHES Debug)
@@ -157,22 +139,29 @@ macro(ft9xx_set_executable executable srcfiles)
         message(FATAL_ERROR "The BUILD type should be Debug or Release.")
     endif()
 
-	# Do not load startup files if crt0 source file exists.
-	file(GLOB crt0list CONFIGURE_DEPENDS "Sources/*crt0.S")
-	list(LENGTH crt0list crt0len)
-	if(crt0len GREATER 0)
-		target_link_libraries(${EXECUTABLE} PRIVATE -nostartfiles)
-	endif()
+	# Add optional libraries before toolchain libraries.
+	target_link_libraries(${EXECUTABLE} PRIVATE ${libfiles})
+	
+	# Set target-specific settings.
+    if (${TARGET} MATCHES ft90x)
+		target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:__FT900__>)
+        target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:ASM>:__FT900__=1>)
+        target_link_options(${executable} PRIVATE -D__FT900__)
+        target_link_libraries(${executable} PRIVATE -lft900)
+        set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT90x)
+    elseif (${TARGET} MATCHES ft93x)
+        target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:__FT930__>)
+        target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:ASM>:__FT930__=1>)
+        target_link_options(${executable} PRIVATE -D__FT930__)
+        target_link_options(${executable} PRIVATE -mft32b -mcompress)
+        target_link_libraries(${executable} PRIVATE -lft930)
+        set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT93x)
+    else ()
+		# Double check TARGET
+        message(FATAL_ERROR "The TARGET must me ft90x or ft93x.")
+    endif()
 
-	# Add linker script if it exists.
-	file(GLOB ldscriptlist CONFIGURE_DEPENDS "Scripts/*.ld")
-	list(LENGTH ldscriptlist ldscriptlen)
-	if(ldscriptlen GREATER 0)
-		list(GET ldscriptlist 0 ldscript)
-		target_link_libraries(${EXECUTABLE} PRIVATE -Xlinker -dT "${ldscript}" )
-	endif()
-
-    # This is the CMAKE value should be set also
+    # Set the build mode to Debug or Release.
     set(CMAKE_BUILD_MODE ${BUILD})
 
 	if("${OUTDIR}" STREQUAL "")
@@ -227,155 +216,3 @@ macro(ft9xx_enable_map_file excutable)
         -Wl,--cref
     )
 endmacro()
-
-function(ft9xx_target_add_supported_library excutable lib_name)
-    set(supported_lib_list fatfs FreeRTOS lwip mbedtls tinyprintf)
-    if (${lib_name} IN_LIST supported_lib_list)
-        message(STATUS "Found the lib ${lib_name} in the '3rdparty libraries'")
-    else()
-        message(FATAL_ERROR "The lib '${lib_name}' is not supported by FT9XX toolchain")
-    endif()
-
-    # Get the current value of the SOURCES property.
-    get_target_property(current_source_list ${excutable} SOURCES)
-
-    if (${lib_name} MATCHES lwip)
-        list(APPEND current_source_list
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/polarssl/arc4.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/polarssl/des.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/polarssl/md4.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/polarssl/md5.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/polarssl/sha1.c
-
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/auth.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/ccp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/chap-md5.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/chap-new.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/chap_ms.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/demand.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/eap.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/ecp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/eui64.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/fsm.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/ipcp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/ipv6cp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/lcp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/magic.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/mppe.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/multilink.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/ppp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/pppapi.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/pppcrypt.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/pppoe.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/pppol2tp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/pppos.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/upap.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/utils.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ppp/vj.c
-
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/bridgeif.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/bridgeif_fdb.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/ethernet.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/lowpan6.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/lowpan6_ble.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/lowpan6_common.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/slipif.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/netif/zepif.c
-
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/autoip.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/dhcp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/etharp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/icmp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/igmp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/ip4.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/ip4_addr.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ipv4/ip4_frag.c
-
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/altcp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/altcp_alloc.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/altcp_tcp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/def.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/dns.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/inet_chksum.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/init.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/ip.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/mem.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/memp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/netif.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/pbuf.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/raw.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/stats.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/sys.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/tcp.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/tcp_in.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/tcp_out.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/timeouts.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/core/udp.c
-
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/arch/net.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/arch/netif_ft900.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/arch/sys_arch.c
-
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/api_lib.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/api_msg.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/err.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/if_api.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/netbuf.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/netdb.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/netifapi.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/sockets.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/api/tcpip.c
-        )
-        target_include_directories(${excutable} PRIVATE
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/arch
-            ${TOOLCHAIN_3RDPARTY_LIB}/lwip/src/include
-        )
-    elseif (${lib_name} MATCHES FreeRTOS)
-        list(APPEND current_source_list
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/MemMang/heap_1.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/MemMang/heap_2.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/MemMang/heap_3.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/MemMang/heap_4.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/MemMang/heap_5.c
-
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/GCC/FT32/port.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/GCC/FT32/port_extra.c
-
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/croutine.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/event_groups.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/list.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/queue.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/tasks.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/timers.c
-        )
-        target_include_directories(${excutable} PRIVATE
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/include
-            ${TOOLCHAIN_3RDPARTY_LIB}/FreeRTOS/Source/portable/GCC/FT32
-        )
-    elseif (${lib_name} MATCHES tinyprintf)
-        list(APPEND current_source_list
-            ${TOOLCHAIN_3RDPARTY_LIB}/tinyprintf/tinyprintf.c
-        )
-        target_include_directories(${excutable} PRIVATE
-            ${TOOLCHAIN_3RDPARTY_LIB}/tinyprintf
-        )
-    elseif (${lib_name} MATCHES fatfs)
-        list(APPEND current_source_list
-            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/option/syscall.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/option/unicode.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/ff.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/ffsystem.c
-            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs/ffunicode.c
-        )
-        target_include_directories(${excutable} PRIVATE
-            ${TOOLCHAIN_3RDPARTY_LIB}/fatfs
-            ${TOOLCHAIN_DRIVER_INCLUDE}
-        )
-    # elseif (${lib_name} MATCHES tiniprintf)
-    else()
-        message(FATAL_ERROR "The lib '${lib_name}' is not supported by FT9XX toolchain")
-    endif()
-
-    # Set the SOURCES property to the new list of source files.
-    set_property(TARGET ${excutable} PROPERTY SOURCES ${current_source_list})
-endfunction()
