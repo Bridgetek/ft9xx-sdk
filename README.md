@@ -1,5 +1,5 @@
-# ft90x-sdk
-The FT90X has a hardware library and examples which are offered to allow access to the built-in peripherals on the device. These are installed with the [FT9XX Toolchain](http://brtchip.com/ft9xx-toolchain/).
+# ft9xx-sdk
+The FT9xx has a hardware library and examples which are offered to allow access to the built-in peripherals on the device. These are installed with the [FT9XX Toolchain](http://brtchip.com/ft9xx-toolchain/).
 
 The source code and example code are provided in this repo.
 
