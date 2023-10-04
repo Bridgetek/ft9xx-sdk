@@ -42,7 +42,7 @@ project(${PROJECT})
 # Make a variable for the executable output. This is normally based on the project name.
 set(EXECUTABLE ${PROJECT}.elf)
 
-# Compile a list of source files. This uses glob to search for files.
+# Compile a list of source files.
 file(GLOB SRC_FILES CONFIGURE_DEPENDS 
 	Sources/*.c
 	Sources/*.S
@@ -50,13 +50,13 @@ file(GLOB SRC_FILES CONFIGURE_DEPENDS
 	usb/src/*.c
 	drivers/*.c
 	# Template source directories for FreeRTOS.
-	lib/FreeRTOS/Source/portable/GCC/FT32/*.c lib/FreeRTOS/Source/portable/GCC/FT32/*.S lib/FreeRTOS/Source/portable/MemMang/*.c lib/FreeRTOS/Source/*.c
+	# lib/FreeRTOS/Source/portable/GCC/FT32/*.c lib/FreeRTOS/Source/portable/GCC/FT32/*.S lib/FreeRTOS/Source/portable/MemMang/*.c lib/FreeRTOS/Source/*.c
 	# Template source directories for lwIP.
-	lib/lwIP/src/api/*.c lib/lwIP/src/arch/*.c lib/lwIP/src/core/*.c lib/lwIP/src/core/ipv4/*.c lib/lwIP/src/netif/*.c lib/lwIP/src/netif/ppp/*.c lib/lwIP/src/netif/ppp/polarssl/*.c
+	# lib/lwIP/src/api/*.c lib/lwIP/src/arch/*.c lib/lwIP/src/core/*.c lib/lwIP/src/core/ipv4/*.c lib/lwIP/src/netif/*.c lib/lwIP/src/netif/ppp/*.c lib/lwIP/src/netif/ppp/polarssl/*.c
 	# Template source directories for FatFS.
-	lib/FatFS/*.c lib/FatFS/option/*.c
+	# lib/FatFS/*.c lib/FatFS/option/*.c
 	# Template source directories for tinyprintf.
-	lib/tinyprintf/*.c
+	# lib/tinyprintf/*.c
 )
 
 # Find any linker scripts. Uses glob to find files.
@@ -65,17 +65,17 @@ file(GLOB LDSCRIPT_FILES CONFIGURE_DEPENDS Scripts/*.ld)
 # Add any additional linker libraries or options required.
 if (${TARGET} MATCHES ft90x)
 	set(LIB_FILES
-		# Template for including D2XX device libraries.
-		#ft900_d2xx_dev
-		# Template for including D2XX device FreeRTOS libraries.
-		#ft900_d2xx_dev_rtos
-		# Template for including D2XX host libraries.
-		#ft900_d2xx_host
+		# Template for including d2xx_dev (USB device) libraries.
+		# ft900_d2xx_dev
+		# Template for including d2xx_dev_rtos (USB device) libraries.
+		# ft900_d2xx_dev_rtos
+		# Template for including d2xx_host (USB host) libraries.
+		# ft900_d2xx_host
 	)
 else (${TARGET} MATCHES ft93x)
 	set(LIB_FILES
-		# Template for including D2XX device libraries.
-		#ft930_d2xx_dev
+		# Template for including d2xx_dev (USB device) libraries.
+		# ft930_d2xx_dev
 	)
 endif()
 
@@ -89,19 +89,19 @@ target_include_directories(${EXECUTABLE} PRIVATE
 	usb/include
 	drivers
 	# Template include directories for FreeRTOS.
-	lib/FreeRTOS/Source/include lib/FreeRTOS/Source/portable/GCC/FT32
+	# lib/FreeRTOS/Source/include lib/FreeRTOS/Source/portable/GCC/FT32
 	# Template include directories for lwIP
-	lib/lwIP/src/arch lib/lwIP/src/include
+	# lib/lwIP/src/arch lib/lwIP/src/include
 	# Template include directories for FatFS.
-	lib/FatFS lib/FatFS/option
+	# lib/FatFS lib/FatFS/option
 	# Template include directories for tinyprintf.
-	lib/tinyprintf
+	# lib/tinyprintf
 )
 
 # Setup any extra compiler options required.
 target_compile_options(${EXECUTABLE} PRIVATE
 	# Template for additional macros defined for FreeRTOS.
-	$<$<COMPILE_LANGUAGE:C>:-DFT32_FREERTOS -DFT32_PORT -DFT32_PORT_HEAP=4>
+	# $<$<COMPILE_LANGUAGE:C>:-DFT32_FREERTOS -DFT32_PORT -DFT32_PORT_HEAP=4>
 )
 
 # Enable generation of a map file for the project if needed.

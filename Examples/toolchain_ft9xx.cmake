@@ -113,7 +113,7 @@ macro(ft9xx_set_executable executable srcfiles libfiles ldscript)
 	set(_srcfiles ${srcfiles} ${ARGN})
 	# Do not load startup files if crt0 source file exists.
 	foreach (srcfile IN LISTS _srcfiles)
-		if (${srcfile} MATCHES ".*crt0\.S$")
+		if (${srcfile} MATCHES ".*crt0.*\.S$")
 			message(STATUS "crt0 file detected: ${srcfile}")
 			target_link_libraries(${EXECUTABLE} PRIVATE -nostartfiles)
 			break()
