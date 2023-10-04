@@ -74,6 +74,8 @@ SRCDIRS+=drivers
 # Optional additional link libraries (you may override these) for a target.
 # Do not use source filenames with spaces.
 # Do not include the "lib" prefix or ".a" suffix in the name.
+# LIBS_FT900+=myft900lib
+# LIBS_FT930+=myft930lib
 # Template for including d2xx_dev (USB device) libraries.
 # LIBS_FT900+=ft900_d2xx_dev
 # Template for including d2xx_dev_rtos (USB device) libraries.

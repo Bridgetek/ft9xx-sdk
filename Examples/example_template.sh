@@ -34,10 +34,10 @@ echo D2XX device: $cm_d2xxdev
 echo D2XX Host: $cm_d2xxhost
 
 cat $1 | awk "/\s*# Template/{getline;next;}1" > $cm_basic
-cat $1 | awk "/^\s*# Template .+(FatFS )/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_fatfs
-cat $1 | awk "/^\s*# Template .+(FreeRTOS )/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_freertos
-cat $1 | awk "/^\s*# Template .+(FreeRTOS |lwIP )/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_freertos_lwip
-cat $1 | awk "/^\s*# Template .+(FreeRTOS |d2xx_dev_rtos |tinyprintf )/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_freertos_d2xx
+cat $1 | awk "/^\s*# Template .+(FatFS)/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_fatfs
+cat $1 | awk "/^\s*# Template .+(FreeRTOS)/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_freertos
+cat $1 | awk "/^\s*# Template .+(FreeRTOS|lwIP)/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_freertos_lwip
+cat $1 | awk "/^\s*# Template .+(FreeRTOS|d2xx_dev_rtos |tinyprintf)/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_freertos_d2xx
 cat $1 | awk "/^\s*# Template .+(d2xx_dev )/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_d2xxdev
 cat $1 | awk "/^\s*# Template .+(d2xx_host )/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_d2xxhost
 
