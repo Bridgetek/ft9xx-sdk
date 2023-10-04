@@ -48,7 +48,7 @@ CSRCS:=$(wildcard *.c) $(foreach SRCDIR,$(filter-out .,$(SRCDIRS)),$(wildcard $(
 ASMSRCS:=$(wildcard *.S) $(foreach SRCDIR,$(filter-out .,$(SRCDIRS)),$(wildcard $(SRCDIR)/*.S))
 
 # Find one linker script file in all the scripts directory.
-LDSRCS:=$(wildcard $(LDDIR)/*.ld)
+LDSRCS:=$(wildcard Scripts/*.ld)
 
 # Make a list of object files from the list of C source files.
 OBJS:=$(patsubst %.c, $(OUTDIR)/%.o, $(CSRCS))
@@ -90,6 +90,11 @@ CFLAGS+= -I"$(FT9XX_TOOLCHAIN)\hardware\include"
 # Assembler Flags
 
 ASFLAGS+=-I"." $(patsubst %, -I "%", $(INCDIRS))
+ifeq ($(TARGET),ft93x)
+	ASFLAGS+=--defsym __FT930__=1
+else
+	ASFLAGS+=--defsym __FT900__=1
+endif
 
 # Linker Flags 
 
@@ -98,20 +103,16 @@ LDFLAGS+=-Wl,--gc-sections -Wl,--entry=_start
 # Paths to any additional library search directories that are needed. The 
 # search order is important.
 LDFLAGS+=$(patsubst %, -L"%", $(LIBDIRS))
-# Add D2XX libraries.
-ifeq ($(TARGET),ft93x)
-	LIBS+=ft930_d2xx_dev
-else
-	LIBS+=ft900_d2xx_dev
-endif
 # Add the optional libraries onto the linker command line.
 LDLIBS:=$(patsubst %, -l%, $(LIBS))
 # Add the device specific libraries and options onto the linker command line.
 ifeq ($(TARGET),ft93x)
 	LDFLAGS+=-mft32b -mcompress 
+	LDLIBS+=$(patsubst %, -l%, $(LIBS_FT930))
 	LDLIBS+=-lft930
 	LDFLAGS+=-D__FT930__ 
 else
+	LDLIBS+=$(patsubst %, -l%, $(LIBS_FT900))
 	LDLIBS+=-lft900
 	LDFLAGS+=-D__FT900__ 
 endif
@@ -128,8 +129,8 @@ else
 	TOOLCHAINLIB= -L"$(FT9XX_TOOLCHAIN)/hardware/lib/Debug"
 endif
 # If the linker script path is valid then add it to the linker command line.
-ifneq (,$(wildcard $(LDSCRIPT)))
-	LDFLAGS+=-Xlinker -dT "$(LDSCRIPT)"
+ifneq (,$(firstword $(LDSRCS)))
+	LDFLAGS+=-Xlinker -dT "$(firstword $(LDSRCS))"
 endif
 
 # Recipie
