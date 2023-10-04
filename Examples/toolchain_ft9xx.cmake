@@ -93,34 +93,48 @@ macro(ft9xx_setup_project)
         ${TOOLCHAIN_HARDWARE_INCLUDE}
     )
 
+endmacro()
+
+macro(ft9xx_set_executable executable srcfiles)
+	# Build the executable based on the source files.
+	add_executable(${executable} ${srcfiles})
+
     # Add default compiler option for project
-    add_compile_options(
+    target_compile_options(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:
         -fvar-tracking-assignments
         -Wall
         -c
         -fmessage-length=0
         -ffunction-sections
+		>
     )
-
     # Add default linker option for project
-    add_link_options(
+    target_link_options(${executable} PRIVATE 
         -Wl,--gc-sections
         -Wl,--entry=_start
     )
 
-endmacro()
-
-macro(ft9xx_set_executable executable srcfiles)
-	# Build the executable based on the source files
-	add_executable(${executable} ${srcfiles})
+	# Reformulate srcfiles as a list.
+	set(_srcfiles ${srcfiles} ${ARGN})
+	# Do not load startup files if crt0 source file exists.
+	foreach (srcfile IN LISTS _srcfiles)
+		if (${srcfile} MATCHES ".*\.S$")
+			#set_source_files_properties(${srcfile} PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
+		else()
+			#set_source_files_properties(${srcfile} PROPERTIES COMPILE_FLAGS ${myoptionsfortargetX} )
+		endif()
+	endforeach()
 
 	# Set target-specific settings.
     if (${TARGET} MATCHES ft90x)
-        target_compile_definitions(${executable} PRIVATE -D__FT900__)
+        #SET(CMAKE_ASM_FLAGS "${CFLAGS} -x assembler-with-cpp")
+		target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:__FT900__>)
+        target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:ASM>:__FT900__=1>)
         target_link_libraries(${executable} PRIVATE -lft900)
         set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT90x)
     elseif (${TARGET} MATCHES ft93x)
-        target_compile_definitions(${executable} PRIVATE -D__FT930__)
+        target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:__FT930__>)
+        target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:ASM>:__FT930__=1>)
         target_link_options(${executable} PRIVATE -mft32b -mcompress)
         target_link_libraries(${executable} PRIVATE -lft930)
         set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT93x)
@@ -131,17 +145,32 @@ macro(ft9xx_set_executable executable srcfiles)
 
 	# Set build-specific settings.
     if (${BUILD} MATCHES Debug)
-        target_compile_options(${executable} PRIVATE -g -Og)
+        target_compile_options(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:-g -Og>)
         target_link_libraries(${executable} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_DEBUG}")
         set(ENV{FT9XX_OUTPUT_FOLDER_POST} Debug)
     elseif (${BUILD} MATCHES Release)
-        target_compile_options(${executable} PRIVATE -O3)
+        target_compile_options(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:-Os>)
         target_link_libraries(${executable} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_RELEASE}")
         set(ENV{FT9XX_OUTPUT_FOLDER_POST} Release)
     else ()
 		# Double check BUILD
         message(FATAL_ERROR "The BUILD type should be Debug or Release.")
     endif()
+
+	# Do not load startup files if crt0 source file exists.
+	file(GLOB crt0list CONFIGURE_DEPENDS "Sources/*crt0.S")
+	list(LENGTH crt0list crt0len)
+	if(crt0len GREATER 0)
+		target_link_libraries(${EXECUTABLE} PRIVATE -nostartfiles)
+	endif()
+
+	# Add linker script if it exists.
+	file(GLOB ldscriptlist CONFIGURE_DEPENDS "Scripts/*.ld")
+	list(LENGTH ldscriptlist ldscriptlen)
+	if(ldscriptlen GREATER 0)
+		list(GET ldscriptlist 0 ldscript)
+		target_link_libraries(${EXECUTABLE} PRIVATE -Xlinker -dT "${ldscript}" )
+	endif()
 
     # This is the CMAKE value should be set also
     set(CMAKE_BUILD_MODE ${BUILD})
@@ -191,9 +220,9 @@ endmacro()
 
 macro(ft9xx_enable_map_file excutable)
 	set(OUTPUT_MAP_FILE_PATH $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.map)
-    target_link_options(${excutable} PRIVATE
+    target_link_libraries(${excutable} PRIVATE
         # Enable the map file
-        -Wl,-Map=${OUTPUT_MAP_FILE_PATH}
+        -Wl,-Map="${OUTPUT_MAP_FILE_PATH}"
         # Add cross-reference table to the map file
         -Wl,--cref
     )

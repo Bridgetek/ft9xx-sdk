@@ -48,36 +48,61 @@ ft9xx_setup_project()
 # Compile a list of source files.
 file(GLOB SRC_FILES CONFIGURE_DEPENDS 
 	Sources/*.c
-	src/*.c
+	Sources/*.S
 	hw/src/*.c
 	usb/src/*.c
 	drivers/*.c
+	# Template source directories for FreeRTOS.
+	lib/FreeRTOS/Source/portable/GCC/FT32/*.c lib/FreeRTOS/Source/portable/MemMang/*.c lib/FreeRTOS/Source/*.c
+	# Template source directories for lwIP.
+	lib/lwIP/src/api/*.c lib/lwIP/src/arch/*.c lib/lwIP/src/core/*.c lib/lwIP/src/core/ipv4/*.c lib/lwIP/src/netif/*.c lib/lwIP/src/netif/ppp/*.c lib/lwIP/src/netif/ppp/polarssl/*.c
+	# Template source directories for FatFS.
+	lib/FatFS/*.c lib/FatFS/option/*.c
+	# Template source directories for tinyprintf.
+	lib/tinyprintf/*.c
 )
 
 # Macro to perform cmake add_executable and configure the default settings for BUILD and TARGET.
-ft9xx_set_executable(${EXECUTABLE} ${SRC_FILES})
+ft9xx_set_executable(${EXECUTABLE} "${SRC_FILES}")
 
 # Compile a list of include directories.
 target_include_directories(${EXECUTABLE} PRIVATE
 	Includes
-	hardware/include
 	hw/include
 	usb/include
 	drivers
+	# Template include directories for FreeRTOS.
+	lib/FreeRTOS/Source/include lib/FreeRTOS/Source/portable/GCC/FT32
+	# Template include directories for lwIP
+	lib/lwIP/src/arch lib/lwIP/src/include
+	# Template include directories for FatFS.
+	lib/FatFS lib/FatFS/option
+	# Template include directories for tinyprintf.
+	lib/tinyprintf
 )
 
 # Setup any extra compiler options required.
 target_compile_options(${EXECUTABLE} PRIVATE
-	# Add your compiler options here
+	# Template for additional macros defined for FreeRTOS.
+	$<$<COMPILE_LANGUAGE:C>:-DFT32_FREERTOS -DFT32_PORT -DFT32_PORT_HEAP=4>
 )
 
-# Add any additional linker libraries required.
-target_link_libraries(${EXECUTABLE} PRIVATE
-    # Add your libraries here:
-	# ft900_d2xx_dev
-	# ft930_d2xx_dev
-	# ftd2xx_host
-)
+# Add any additional linker libraries or options required.
+if (${TARGET} MATCHES ft90x)
+	target_link_libraries(${EXECUTABLE} PRIVATE 
+		# Template for including D2XX device libraries.
+		#ft900_d2xx_dev
+		# Template for including D2XX device FreeRTOS libraries.
+		#ft900_d2xx_dev_rtos
+		# Template for including D2XX host libraries.
+		#ft900_d2xx_host
+	)
+else (${TARGET} MATCHES ft93x)
+	target_link_libraries(${EXECUTABLE} PRIVATE 
+		# Template for including D2XX device libraries.
+		#ft930_d2xx_dev
+	)
+endif()
 
 # Enable generation of a map file for the project if needed.
 ft9xx_enable_map_file(${EXECUTABLE})
