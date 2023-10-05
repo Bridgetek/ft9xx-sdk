@@ -17,6 +17,7 @@ if [[ $# -ne 2 ]] ; then
     exit 1
 fi
 
+# Create temporary files to store processed files.
 cm_basic=$(mktemp)
 cm_fatfs=$(mktemp)
 cm_freertos=$(mktemp)
@@ -25,6 +26,7 @@ cm_freertos_d2xx=$(mktemp)
 cm_d2xxdev=$(mktemp)
 cm_d2xxhost=$(mktemp)
 
+# Show the temporary files used.
 echo No libraries: $cm_basic
 echo FatFS: $cm_fatfs
 echo FreeRTOS: $cm_freertos
@@ -33,6 +35,7 @@ echo FreeRTOS + D2XX device: $cm_freertos_d2xx
 echo D2XX device: $cm_d2xxdev
 echo D2XX Host: $cm_d2xxhost
 
+# Generate processed files.
 cat $1 | awk "/\s*# Template/{getline;next;}1" > $cm_basic
 cat $1 | awk "/^\s*# Template .+(FatFS)/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_fatfs
 cat $1 | awk "/^\s*# Template .+(FreeRTOS)/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_freertos
@@ -41,6 +44,7 @@ cat $1 | awk "/^\s*# Template .+(FreeRTOS|d2xx_dev_rtos |tinyprintf)/{getline;\$
 cat $1 | awk "/^\s*# Template .+(d2xx_dev )/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_d2xxdev
 cat $1 | awk "/^\s*# Template .+(d2xx_host )/{getline;\$1=\"\t\";print;getline;}1" | awk "/\s*# Template/{getline;next;}1" > $cm_d2xxhost
 
+# Copy processed files into Examples directories.
 cp -v $cm_basic "ADC Example 1/$2"
 cp -v $cm_basic "ADC Example 2/$2"
 cp -v $cm_basic "ADC Example 3/$2"
@@ -106,3 +110,12 @@ cp -v $cm_basic "USBH Example HID/$2"
 cp -v $cm_basic "USBH Example HID to UART/$2"
 cp -v $cm_basic "USBH Example Hub/$2"
 cp -v $cm_basic "Watchdog Example 1/$2"
+
+# Clean up temporary files.
+rm $cm_basic
+rm $cm_fatfs
+rm $cm_freertos
+rm $cm_freertos_lwip
+rm $cm_freertos_d2xx
+rm $cm_d2xxdev
+rm $cm_d2xxhost
