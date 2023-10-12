@@ -3927,7 +3927,7 @@ static int8_t usbh_hub_port_enumerate(USBH_device *hubDev, uint8_t hubPort, uint
 	else
 	{
 		// TDRST Min 10 ms, Max 20 ms delay
-		delayms(10);
+		delayms(20);
 	}
 
 	status += usbh_clear_hub_port_feature(hubDev, hubPort, USB_HUB_CLASS_FEATURE_PORT_RESET);
