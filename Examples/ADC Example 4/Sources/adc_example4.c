@@ -1,7 +1,6 @@
 /**
-  @file
-  @brief
-  ADC Example 4
+  @file  adc_example4.c
+  @brief ADC Example 4
 
   Poll ADC 1 in single-shot mode.
 */
@@ -14,7 +13,7 @@
  * Copyright (C) Bridgetek Pte Ltd
  * ============================================================================
  *
- * This source code ("the Software") is provided by Bridgetek Pte Ltd 
+ * This source code ("the Software") is provided by Bridgetek Pte Ltd
  * ("Bridgetek") subject to the licence terms set out
  * http://brtchip.com/BRTSourceCodeLicenseAgreement/ ("the Licence Terms").
  * You must read the Licence Terms before downloading or using the Software.
@@ -52,72 +51,71 @@
 
 void setup(void);
 void loop(void);
-void myputc(void* p, char c);
+void myputc(void *p, char c);
 
-static uint16_t adcsample = 0;
+static uint16_t adcSample = 0;
 
 int main(void)
 {
-    setup();
-    for(;;) loop();
-    return 0;
+  setup();
+  for (;;)
+    loop();
+  return 0;
 }
 
 void setup(void)
 {
-    /* Enable the UART Device... */
-    sys_enable(sys_device_uart0);
-    /* Set UART0 GPIO functions to UART0_TXD and UART0_RXD... */
+  /* Enable the UART Device... */
+  sys_enable(sys_device_uart0);
+  /* Set UART0 GPIO functions to UART0_TXD and UART0_RXD... */
 #if defined(__FT900__)
-    gpio_function(48, pad_uart0_txd); /* UART0 TXD */
-    gpio_function(49, pad_uart0_rxd); /* UART0 RXD */
+  gpio_function(48, pad_uart0_txd); /* UART0 TXD */
+  gpio_function(49, pad_uart0_rxd); /* UART0 RXD */
 #elif defined(__FT930__)
-    gpio_function(23, pad_uart0_txd); /* UART0 TXD */
-    gpio_function(22, pad_uart0_rxd); /* UART0 RXD */
+  gpio_function(23, pad_uart0_txd); /* UART0 TXD */
+  gpio_function(22, pad_uart0_rxd); /* UART0 RXD */
 #endif
-    uart_open(UART0,                    /* Device */
-              1,                        /* Prescaler = 1 */
-              UART_DIVIDER_19200_BAUD,  /* Divider = 1302 */
-              uart_data_bits_8,         /* No. Data Bits */
-              uart_parity_none,         /* Parity */
-              uart_stop_bits_1);        /* No. Stop Bits */
+  uart_open(UART0,                   /* Device */
+            1,                       /* Pre-scaler = 1 */
+            UART_DIVIDER_19200_BAUD, /* Divider = 1302 */
+            uart_data_bits_8,        /* No. Data Bits */
+            uart_parity_none,        /* Parity */
+            uart_stop_bits_1);       /* No. Stop Bits */
 
-    /* Print out a welcome message... */
-    uart_puts(UART0,
-        "\x1B[2J" /* ANSI/VT100 - Clear the Screen */
-        "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
-        "Copyright (C) Bridgetek Pte Ltd \r\n"
-        "--------------------------------------------------------------------- \r\n"
-        "Welcome to ADC Example 4... \r\n"
-        "\r\n"
-        "Read ADC 1 using single-shot polling mode.\r\n"
-        "--------------------------------------------------------------------- \r\n"
-        );
+  /* Print out a welcome message... */
+  uart_puts(UART0,
+            "\x1B[2J" /* ANSI/VT100 - Clear the Screen */
+            "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
+            "Copyright (C) Bridgetek Pte Ltd \r\n"
+            "--------------------------------------------------------------------- \r\n"
+            "Welcome to ADC Example 4... \r\n"
+            "\r\n"
+            "Read ADC 1 using single-shot polling mode.\r\n"
+            "--------------------------------------------------------------------- \r\n");
 
-    /* Enable the ADCs... */
-    sys_enable(sys_device_adc);
+  /* Enable the ADCs... */
+  sys_enable(sys_device_adc);
 
-    /* FT93x has dedicated ADC pins */
+  /* FT93x has dedicated ADC pins */
 #if defined(__FT900__)
-    /* Set GPIO6 to ADC1... */
-    gpio_function(6, pad_adc1);
+  /* Set GPIO6 to ADC1... */
+  gpio_function(6, pad_adc1);
 #endif
 
-    /* single-shot read data... */
-    adc_mode(adc_mode_single);
+  /* single-shot read data... */
+  adc_mode(adc_mode_single);
 
-    /* Enabling the rail-rail reference... */
-    ADCDAC->ADC_CONF |= MASK_ADC_CONF_ADC_EXT_VREF;
-
+  /* Enabling the rail-rail reference... */
+  ADCDAC->ADC_CONF |= MASK_ADC_CONF_ADC_EXT_VREF;
 }
 
 void loop(void)
 {
-	/* Start the ADC and use ADC1... */
-	adc_start(1);
-	delayms(1);
-    /* Check that a new sample is available... */
-	adc_read(&adcsample);
-	printf("ADC 1 = %04d\r", adcsample);
-    adc_stop();
+  /* Start the ADC and use ADC1... */
+  adc_start(1);
+  delayms(1);
+  /* Check that a new sample is available... */
+  adc_read(&adcSample);
+  printf("ADC 1 = %04d\r", adcSample);
+  adc_stop();
 }

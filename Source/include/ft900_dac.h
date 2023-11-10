@@ -1,10 +1,7 @@
 /**
     @file ft900_dac.h
 
-    @brief
-    Digital to Analogue Converter
-
-    
+    @brief Digital to Analogue Converter
 **/
 /*
  * ============================================================================
@@ -63,51 +60,54 @@ extern "C" {
 /** @brief DAC run mode */
 typedef enum
 {
-    dac_mode_single,        /*!< Run the DAC in Single Shot mode */
-    dac_mode_continuous     /*!< Run the DAC in Continuous mode */
+  dac_mode_single,        /*!< Run the DAC in Single Shot mode */
+  dac_mode_continuous     /*!< Run the DAC in Continuous mode */
 } dac_mode_t;
 
 /* GLOBAL VARIABLES ****************************************************************/
 
 /* MACROS **************************************************************************/
 
+#define DAC_DISABLE (0)
+#define DAC_ENABLE  (1)
+
 /* FUNCTION PROTOTYPES *************************************************************/
 
 /** @brief Select the mode of the DAC
- *  @param num The DAC to use
- *  @param mode The mode the DAC should be in (single or continuous)
+ *  @param [in] num  - The DAC to use
+ *  @param [in] mode - The mode the DAC should be in (single or continuous)
  *  @returns 0 on success, -1 otherwise
  */
 int8_t dac_mode(uint8_t num, dac_mode_t mode);
 
 /** @brief Select the divider for the DAC conversion rate
  *
- *  \f$ f_{DAC} = \frac{f_{peripheral}}{div + 1} \f$
+ *  \f$ f_DAC = \frac{f_peripheral}{DAC_DIVIDER + 1} \f$
  *
- *  @param div The divider
+ *  @param [in] div - The divider
  *  @warning The maximum conversion rate is 1 MHz
  *  @returns 0 on success, -1 otherwise
-*/
+ */
 int8_t dac_divider(uint8_t div);
 
 /** @brief See how many samples are still being converted
- *  @param num The DAC to use
+ *  @param [in] num - The DAC to use
  *	@warning This API returns 0xff in case FIFO is full or empty. User need to check
- *			 the interrupt pending bit to conclude 0 samples in FIFO or 128 samples in FIFO.
- *		     This function should be called in the I2S interrupt context in case of FT900 Revision B
- *		     for a reliable count value. For more info, please refer to "TN_159 FT90x Errata Technical Note".
+ *           the interrupt pending bit to conclude 0 samples in FIFO or 128 samples in FIFO.
+ *           This function should be called in the I2S interrupt context in case of FT900 Revision B
+ *           for a reliable count value. For more info, please refer to "TN_159 FT90x Errata Technical Note".
  *  @returns The number of samples still to be converted, or 0 otherwise
  */
 uint8_t dac_available(uint8_t num);
 
 /** @brief Start the DAC
- *  @param num The DAC to use
+ *  @param [in] num - The DAC to use
  *  @returns 0 on success, -1 otherwise
  */
 int8_t dac_start(uint8_t num);
 
 /** @brief Stop the DAC
- *  @param num The DAC to use
+ *  @param [in] num - The DAC to use
  *  @returns 0 on success, -1 otherwise
  */
 int8_t dac_stop(uint8_t num);
@@ -116,39 +116,41 @@ int8_t dac_stop(uint8_t num);
  *
  *  This function will automatically update the DAC when it is in single mode.
  *
- *  @param num The DAC to use
- *  @param data The sample to write
+ *  @param [in] num  - The DAC to use
+ *  @param [in] data - The sample to write
  *  @returns The number of bytes written, -1 otherwise
  */
 int8_t dac_write(uint8_t num, uint16_t data);
 
-/** @brief Write a series of values to the DAC
- *  @param num The DAC to use
- *  @param data The array of samples to write
- *  @param len The number of samples to write
+/**
+ *  @brief Disable the threshold interrupt
+ *  @param [in] num  - The DAC to use
+ *  @param [in] data - The array of samples to write
+ *  @param [in] len  - The number of samples to write
  *  @warning This function will only work when continuous mode is selected
- *  @returns The number of samples written, -1 otherwise
+ *  @returns number samples on success, -1 otherwise
  */
-int dac_writen(uint8_t num, uint16_t *data, size_t len);
+int dac_written(uint8_t num, uint16_t *data, size_t len);
 
 /** @brief Enable the interrupt on a DAC
  *
- *  Enable the DAC module to generate an interrupt.  The DAC module will generate an interrupt
+ *  Enable the DAC module to generate an interrupt.
+ *  The DAC module will generate an interrupt
  *  after 64 samples have been generated on the DAC.
  *
- *  @param num The DAC to use
+ *  @param [in] num - The DAC to use
  *  @returns 0 on success, -1 otherwise
  */
 int8_t dac_enable_interrupt(uint8_t num);
 
 /** @brief Disable the interrupt on a DAC
- *  @param num The DAC to use
+ *  @param [in] num - The DAC to use
  *  @returns 0 on success, -1 otherwise
  */
 int8_t dac_disable_interrupt(uint8_t num);
 
 /** @brief Check if the DAC has fired an interrupt
- *  @param num The DAC to use
+ *  @param [in] num - The DAC to use
  *  @warning This function clears the current interrupt status bit
  *  @returns 1 when interrupted, 0 when not interrupted, -1 otherwise
  */

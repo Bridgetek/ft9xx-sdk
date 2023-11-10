@@ -1,9 +1,8 @@
 /**
     @file ft900_registers.h
 
-    @brief
-    FT900 registers
-    
+    @brief FT900 registers map
+
 **/
 /*
  * ============================================================================
@@ -53,7 +52,6 @@
 #include <registers/ft930_epfifo_registers.h>
 #include <registers/ft930_ipc_registers.h>
 #include <registers/ft930_slave_cpu_registers.h>
-
 #include <registers/ft900_adc_dac_registers.h>
 #include <registers/ft900_gpio_registers.h>
 #include <registers/ft900_i2c_registers.h>
@@ -96,66 +94,75 @@
 /* TYPES ***************************************************************************/
 
 /* GLOBAL VARIABLES ****************************************************************/
+
+#define REGISTER_BASE_ADDR (0x10000U)
+
 #if defined(__FT930__)
 
-#define SYS         ((ft900_sys_regs_t *)           0x10000)
-#define GPIO        ((ft900_gpio_regs_t *)          0x1001C)
-#define SLAVECPU    ((ft930_slave_control_regs_t *) 0x100A8)
-#define ADCDAC      ((ft900_adc_dac_regs_t *)       0x100B0)
-#define SYS_RST     ((ft900_sys_reset_regs_t *)     0x100BC)
-#define INTERRUPT   ((ft900_interrupt_regs_t *)     0x10100)
-#define USBD        ((ft900_usbd_regs_t *)          0x10200)
-#define RTC         ((ft900_rtc_regs_t *)           0x10400)
-#define SPIM        ((ft900_spi_regs_t *)           0x10440)
-#define SPIS0       ((ft900_spi_regs_t *)           0x10480)
-#define SPIS1       ((ft900_spi_regs_t *)           0x104C0)
-#define I2CM        ((ft900_i2cm_regs_t *)          0x10500)
-#define I2CS        ((ft900_i2cs_regs_t *)          0x10510)
-#define UART0       ((ft900_uart_regs_t *)          0x10520)
-#define UART1       ((ft900_uart_regs_t *)          0x10530)
-#define UART2       ((ft900_uart_regs_t *)          0x10540)
-#define UART3       ((ft900_uart_regs_t *)          0x10550)
-#define TIMER       ((ft900_timer_wdt_regs_t *)     0x10560)
-#define PWM         ((ft900_pwm_regs_t *)           0x105B0)
-#define SDHOST      ((ft900_sdhost_regs_t *)        0x10600)
-#define SDHOSTVENDOR ((ft900_sdhost_vendor_regs_t *) 0x10700)
-#define FLASHCTRL   ((ft900_flash_regs_t *)         0x10800)
+#define SYS          ((ft900_sys_regs_t *)            (REGISTER_BASE_ADDR + 0x0000))
+#define GPIO         ((ft900_gpio_regs_t *)           (REGISTER_BASE_ADDR + 0x001C))
+#define SLAVECPU     ((ft930_slave_control_regs_t *)  (REGISTER_BASE_ADDR + 0x00A8))
+
+#define ADCDAC       ((ft900_adc_dac_regs_t *)        (REGISTER_BASE_ADDR + 0x00B0))
+#define ADCDAC_N     ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0))
+
+#define SYS_RST      ((ft900_sys_reset_regs_t *)      (REGISTER_BASE_ADDR + 0x00BC))
+#define INTERRUPT    ((ft900_interrupt_regs_t *)      (REGISTER_BASE_ADDR + 0x0100))
+#define USBD         ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0200))
+#define RTC          ((ft900_rtc_regs_t *)            (REGISTER_BASE_ADDR + 0x0400))
+#define SPIM         ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x0440))
+#define SPIS0        ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x0480))
+#define SPIS1        ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x04C0))
+#define I2CM         ((ft900_i2cm_regs_t *)           (REGISTER_BASE_ADDR + 0x0500))
+#define I2CS         ((ft900_i2cs_regs_t *)           (REGISTER_BASE_ADDR + 0x0510))
+#define UART0        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0520))
+#define UART1        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0530))
+#define UART2        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0540))
+#define UART3        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0550))
+#define TIMER        ((ft900_timer_wdt_regs_t *)      (REGISTER_BASE_ADDR + 0x0560))
+#define PWM          ((ft900_pwm_regs_t *)            (REGISTER_BASE_ADDR + 0x05B0))
+#define SDHOST       ((ft900_sdhost_regs_t *)         (REGISTER_BASE_ADDR + 0x0600))
+#define SDHOSTVENDOR ((ft900_sdhost_vendor_regs_t *)  (REGISTER_BASE_ADDR + 0x0700))
+#define FLASHCTRL    ((ft900_flash_regs_t *)          (REGISTER_BASE_ADDR + 0x0800))
 
 #else
 
-#define SYS         ((ft900_sys_regs_t *)           0x10000)
-#define GPIO        ((ft900_gpio_regs_t *)          0x1001C)
-#define ETHPHY      ((ft900_eth_phy_conf_reg_t *)   0x100A8)
-#define ADCDAC      ((ft900_adc_dac_regs_t *)       0x100B0)
-#define SYS_RST     ((ft900_sys_reset_regs_t *)     0x100BC) /* for FT900 Rev C onwards */
-#define INTERRUPT   ((ft900_interrupt_regs_t *)     0x100C0)
-#define EHCI        ((ft900_ehci_regs_t *)          0x10100)
-#define USBD        ((ft900_usbd_regs_t *)          0x10180)
-#define USBD_HBW    ((ft900_usbd_hbw_ctrl_regs_t *) 0x10A1C) /* for FT900 Rev C onwards */
-#define ETH         ((ft900_eth_regs_t *)           0x10220)
-#define CAN0        ((ft900_can_regs_t *)           0x10240)
-#define CAN1        ((ft900_can_regs_t *)           0x10260)
-#define RTCL        ((ft900_rtc_legacy_regs_t *)    0x10280) /* for FT900 Rev B */
-#define RTC         ((ft900_rtc_regs_t *)           0x10900) /* for FT900 Rev C onwards */
-#define SPIM        ((ft900_spi_regs_t *)           0x102A0) /* for FT900 Rev B */
-#define SPIM_EX     ((ft900_spi_regs_ex_t *)        0x102A0) /* for FT900 Rev C onwards */
-#define SPIS0       ((ft900_spi_regs_t *)           0x102C0) /* for FT900 Rev B */
-#define SPIS0_EX    ((ft900_spi_regs_ex_t *)        0x102C0) /* for FT900 Rev C onwards */
-#define SPIS1       ((ft900_spi_regs_t *)           0x102E0) /* for FT900 Rev B */
-#define SPIS1_EX    ((ft900_spi_regs_ex_t *)        0x102E0) /* for FT900 Rev C onwards */
-#define I2CM        ((ft900_i2cm_regs_t *)          0x10300)
-#define I2CS        ((ft900_i2cs_regs_t *)          0x10310)
-#define UART0       ((ft900_uart_regs_t *)          0x10320)
-#define UART1       ((ft900_uart_regs_t *)          0x10330)
-#define TIMER       ((ft900_timer_wdt_regs_t *)     0x10340)
-#define I2S         ((ft900_i2s_regs_t *)           0x10350)
-#define CAM         ((ft900_cam_regs_t *)           0x10360)
-#define PWM         ((ft900_pwm_regs_t *)           0x103C0)
-#define SDHOST      ((ft900_sdhost_regs_t *)        0x10400)
-#define SDHOSTVENDOR ((ft900_sdhost_vendor_regs_t *) 0x10500)
-#define FLASHCTRL   ((ft900_flash_regs_t *)         0x10800)
-#define EHCI_RAM    ((ft900_ehci_ram_t *)           0x11000)
-#define EHCI_RAM_SIZE                               0x2000
+#define SYS          ((ft900_sys_regs_t *)            (REGISTER_BASE_ADDR + 0x0000))
+#define GPIO         ((ft900_gpio_regs_t *)           (REGISTER_BASE_ADDR + 0x001C))
+#define ETHPHY       ((ft900_eth_phy_conf_reg_t *)    (REGISTER_BASE_ADDR + 0x00A8))
+
+#define ADCDAC       ((ft900_adc_dac_regs_t *)        (REGISTER_BASE_ADDR + 0x00B0))
+#define ADCDAC_N     ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0))
+
+#define SYS_RST      ((ft900_sys_reset_regs_t *)      (REGISTER_BASE_ADDR + 0x00BC)) /* for FT900 Rev C onwards */
+#define INTERRUPT    ((ft900_interrupt_regs_t *)      (REGISTER_BASE_ADDR + 0x00C0))
+#define EHCI         ((ft900_ehci_regs_t *)           (REGISTER_BASE_ADDR + 0x0100))
+#define USBD         ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0180))
+#define USBD_HBW     ((ft900_usbd_hbw_ctrl_regs_t *)  (REGISTER_BASE_ADDR + 0x0A1C)) /* for FT900 Rev C onwards */
+#define ETH          ((ft900_eth_regs_t *)            (REGISTER_BASE_ADDR + 0x0220))
+#define CAN0         ((ft900_can_regs_t *)            (REGISTER_BASE_ADDR + 0x0240))
+#define CAN1         ((ft900_can_regs_t *)            (REGISTER_BASE_ADDR + 0x0260))
+#define RTCL         ((ft900_rtc_legacy_regs_t *)     (REGISTER_BASE_ADDR + 0x0280)) /* for FT900 Rev B */
+#define RTC          ((ft900_rtc_regs_t *)            (REGISTER_BASE_ADDR + 0x0900)) /* for FT900 Rev C onwards */
+#define SPIM         ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev B */
+#define SPIM_EX      ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev C onwards */
+#define SPIS0        ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02C0)) /* for FT900 Rev B */
+#define SPIS0_EX     ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02C0)) /* for FT900 Rev C onwards */
+#define SPIS1        ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02E0)) /* for FT900 Rev B */
+#define SPIS1_EX     ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02E0)) /* for FT900 Rev C onwards */
+#define I2CM         ((ft900_i2cm_regs_t *)           (REGISTER_BASE_ADDR + 0x0300))
+#define I2CS         ((ft900_i2cs_regs_t *)           (REGISTER_BASE_ADDR + 0x0310))
+#define UART0        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0320))
+#define UART1        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0330))
+#define TIMER        ((ft900_timer_wdt_regs_t *)      (REGISTER_BASE_ADDR + 0x0340))
+#define I2S          ((ft900_i2s_regs_t *)            (REGISTER_BASE_ADDR + 0x0350))
+#define CAM          ((ft900_cam_regs_t *)            (REGISTER_BASE_ADDR + 0x0360))
+#define PWM          ((ft900_pwm_regs_t *)            (REGISTER_BASE_ADDR + 0x03C0))
+#define SDHOST       ((ft900_sdhost_regs_t *)         (REGISTER_BASE_ADDR + 0x0400))
+#define SDHOSTVENDOR ((ft900_sdhost_vendor_regs_t *)  (REGISTER_BASE_ADDR + 0x0500))
+#define FLASHCTRL    ((ft900_flash_regs_t *)          (REGISTER_BASE_ADDR + 0x0800))
+#define EHCI_RAM     ((ft900_ehci_ram_t *)            (REGISTER_BASE_ADDR + 0x1000))
+#define EHCI_RAM_SIZE                                 (0x2000)
 
 #endif
 
