@@ -156,7 +156,10 @@
 #define UART1        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0330))
 #define TIMER        ((ft900_timer_wdt_regs_t *)      (REGISTER_BASE_ADDR + 0x0340))
 #define I2S          ((ft900_i2s_regs_t *)            (REGISTER_BASE_ADDR + 0x0350))
+
 #define CAM          ((ft900_cam_regs_t *)            (REGISTER_BASE_ADDR + 0x0360))
+#define CAM_N        ((cam_regs_t *)                  (REGISTER_BASE_ADDR + 0x0360))
+
 #define PWM          ((ft900_pwm_regs_t *)            (REGISTER_BASE_ADDR + 0x03C0))
 #define SDHOST       ((ft900_sdhost_regs_t *)         (REGISTER_BASE_ADDR + 0x0400))
 #define SDHOSTVENDOR ((ft900_sdhost_vendor_regs_t *)  (REGISTER_BASE_ADDR + 0x0500))

@@ -1,10 +1,7 @@
 /**
-    @file
+    @file ft900_cam_registers.h
 
-    @brief
-    Camera/Parallel interface registers
-
-    
+    @brief Camera/Parallel interface registers
 **/
 /*
  * ============================================================================
@@ -50,7 +47,9 @@
 #define FT900_CAM_REGISTERS_H_
 
 /* INCLUDES ************************************************************************/
+
 #include <stdint.h>
+#include "ft900_regs_std.h"
 
 /* CONSTANTS ***********************************************************************/
 #define BIT_CAM_REG1_THRESHOLD      (0)
@@ -77,13 +76,85 @@
 #define MASK_CAM_REG4_HASDATA       (1 << BIT_CAM_REG4_HASDATA)
 
 /* TYPES ***************************************************************************/
+
+typedef struct
+{
+  uint32_t THRESHOLD : 12;  ///< Specifies the threshold value for the HAS_DATA signal.
+                            ///< It must be a multiple of 4 bytes.
+  uint32_t TRIG_PAT  : 4 ;  ///< This specifies the data capture trigger position.
+                            ///< Data capture starts on the cycle when trigger
+                            ///< transitions from 0 to 1
+                            ///<    En[1]/VD | En[0]/HD | Trigger
+                            ///<        0    |     0    | TRIG_PAT[0]
+                            ///<        0    |     1    | TRIG_PAT[1]
+                            ///<        1    |     0    | TRIG_PAT[2]
+                            ///<        1    |     1    | TRIG_PAT[3]
+  uint32_t COUNT     : 16;  ///< Number of bytes to capture after the last trigger event.
+                            ///< This must be in multiple of 4 bytes
+} dcap_reg_1_t;
+
+typedef union
+{
+  dcap_reg_1_t   B;
+  REG_ACCESS_U32 U;
+} dcap_reg_1_u;
+
+typedef struct
+{
+  uint32_t FULLNESS    : 12; ///< Specifies the number of bytes that can be safely
+                             ///< read from the FIFO. Its value is always a multiple of 4.
+  uint32_t Reserved_12 : 24;
+} dcap_reg_2_t;
+
+typedef union
+{
+  dcap_reg_2_t   B;
+  REG_ACCESS_U32 U;
+} dcap_reg_2_u;
+
+typedef struct
+{
+  uint32_t DATA; ///< Next four samples from the FIFO. Reading this will remove the
+                 ///< sample from the FIFO. When FULLNESS is 0, the effect is
+                 ///< non-deterministic
+} dcap_reg_3_t;
+
+typedef union
+{
+  dcap_reg_3_t   B;
+  REG_ACCESS_U32 U;
+} dcap_reg_3_u;
+
+typedef struct
+{
+  uint32_t INT_ENB    : 1 ;   ///< 1: enable interrupt; an interrupt will be generated
+                              ///< when HAS_DATA = 1
+  uint32_t CLK_SENSE  : 1 ;   ///< 1: capture data on clock rising edge
+  uint32_t HAS_DATA   : 1 ;   ///< Set when FIFO contains at least THRESHOLD bytes.
+  uint32_t Reserved_4 : 29;
+} dcap_reg_4_t;
+
+typedef union
+{
+  dcap_reg_4_t   B;
+  REG_ACCESS_U32 U;
+} dcap_reg_4_u;
+
+typedef struct
+{
+  __IO dcap_reg_1_u CAM_REG1;
+  __IO dcap_reg_2_u CAM_REG2;
+  __IO dcap_reg_3_u CAM_REG3;
+  __IO dcap_reg_4_u CAM_REG4;
+} cam_regs_t;
+
 /** @brief Register mappings for CAM registers */
 typedef struct
 {
-    volatile uint32_t CAM_REG1;
-    volatile uint32_t CAM_REG2;
-    volatile uint32_t CAM_REG3;
-    volatile uint32_t CAM_REG4;
+  __IO uint32_t CAM_REG1;
+  __IO uint32_t CAM_REG2;
+  __IO uint32_t CAM_REG3;
+  __IO uint32_t CAM_REG4;
 } ft900_cam_regs_t;
 
 /* GLOBAL VARIABLES ****************************************************************/
