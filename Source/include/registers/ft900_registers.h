@@ -140,8 +140,12 @@
 #define USBD         ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0180))
 #define USBD_HBW     ((ft900_usbd_hbw_ctrl_regs_t *)  (REGISTER_BASE_ADDR + 0x0A1C)) /* for FT900 Rev C onwards */
 #define ETH          ((ft900_eth_regs_t *)            (REGISTER_BASE_ADDR + 0x0220))
+
 #define CAN0         ((ft900_can_regs_t *)            (REGISTER_BASE_ADDR + 0x0240))
+#define CAN0_N       ((can_regs_t *)                  (REGISTER_BASE_ADDR + 0x0240))
 #define CAN1         ((ft900_can_regs_t *)            (REGISTER_BASE_ADDR + 0x0260))
+#define CAN1_N       ((can_regs_t *)                  (REGISTER_BASE_ADDR + 0x0260))
+
 #define RTCL         ((ft900_rtc_legacy_regs_t *)     (REGISTER_BASE_ADDR + 0x0280)) /* for FT900 Rev B */
 #define RTC          ((ft900_rtc_regs_t *)            (REGISTER_BASE_ADDR + 0x0900)) /* for FT900 Rev C onwards */
 #define SPIM         ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev B */
