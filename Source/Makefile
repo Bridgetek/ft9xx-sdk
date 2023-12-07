@@ -43,12 +43,12 @@
 # has no liability in relation to those amendments.
 # ============================================================================
 
-# The TARGET and CONFIG parameters are required (they are case-sensitive). 
+# The TARGET and BUILD parameters are required (they are case-sensitive). 
 # The INSTALL parameter allows the source code path to be set for object files to facilitate debugging.
 # Example Windows builds:
-# make -B TARGET=ft900 CONFIG=Debug INSTALL="C:\Program Files (x86)\Bridgetek\FT9xx Toolchain\Toolchain\hardware"
+# make -B TARGET=ft900 BUILD=Debug INSTALL="C:\Program Files (x86)\Bridgetek\FT9xx Toolchain\Toolchain\hardware"
 # Example Linux builds:
-# make -B TARGET=ft900 CONFIG=Debug INSTALL="/opt/ft9xx-toolchain/hardware"
+# make -B TARGET=ft900 BUILD=Debug INSTALL="/opt/ft9xx-toolchain/hardware"
 
 .PHONY := clean all 
 
@@ -92,13 +92,32 @@ endif
 CFLAGS += -ffile-prefix-map="${LOCALDIR}"="${INSTALL}"
 endif # ifdef INSTALL
 
-ifeq ($(CONFIG), Release)
+ifneq ($(CONFIG),)
+BUILD=$(CONFIG)
+endif
+
+ifeq ($(TARGET), ft90x)
+override TARGET:=ft900
+endif
+
+ifeq ($(TARGET), ft93x)
+override TARGET:=ft930
+endif
+
+ifeq ($(BUILD), release)
+override BUILD:=Release
+endif
+
+ifeq ($(BUILD), debug)
+override BUILD:=Debug
+endif
+
+ifeq ($(BUILD), Release)
 # Release settings
 CFLAGS += -Os
 LDFLAGS +=
-
 else
-ifeq ($(CONFIG), Debug)
+ifeq ($(BUILD), Debug)
 # Debug settings
 CFLAGS += -g3 
 CFLAGS += -DDEBUG
@@ -106,12 +125,12 @@ CFLAGS += -Og
 LDFLAGS +=
 
 else
-$(error Please choose CONFIG=Debug or CONFIG=Release)
+$(error Please choose BUILD=Debug or BUILD=Release)
 
-endif # ifeq ($(CONFIG), Debug)
-endif # ifeq ($(CONFIG), Release)
+endif # ifeq ($(BUILD), Debug)
+endif # ifeq ($(BUILD), Release)
 
-DESTDIR := $(LIBDIR)/$(CONFIG)/$(TARGET)
+DESTDIR := $(LIBDIR)/$(BUILD)/$(TARGET)
 
 ifeq ($(TARGET), ft900)
 CFLAGS += -D__FT900__ 
@@ -184,12 +203,12 @@ RELSRCFILES := $(addprefix $(SRC_DIR)/,$(SRCFILES))
 OBJFILES := $(addprefix $(DESTDIR)/,$(notdir $(RELSRCFILES:.c=.o)))
 
 all: $(DESTDIR)/lib$(TARGET).a
-ifeq ($(CONFIG), Debug)
+ifeq ($(BUILD), Debug)
 ifeq ($(TARGET), ft900)
 	cp  $^ $(LIBDIR)
 endif # ifeq ($(TARGET), ft900)
-endif # ifeq ($(CONFIG), Debug)
-	mv $^ $(LIBDIR)/$(CONFIG)
+endif # ifeq ($(BUILD), Debug)
+	mv $^ $(LIBDIR)/$(BUILD)
 
 clean:
 	-$(RM) $(OBJFILES)
