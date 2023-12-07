@@ -171,7 +171,10 @@
 #define PWM          ((ft900_pwm_regs_t *)            (REGISTER_BASE_ADDR + 0x03C0))
 #define SDHOST       ((ft900_sdhost_regs_t *)         (REGISTER_BASE_ADDR + 0x0400))
 #define SDHOSTVENDOR ((ft900_sdhost_vendor_regs_t *)  (REGISTER_BASE_ADDR + 0x0500))
+
 #define FLASHCTRL    ((ft900_flash_regs_t *)          (REGISTER_BASE_ADDR + 0x0800))
+#define FLASHCTRL_N  ((flash_regs_t *)                (REGISTER_BASE_ADDR + 0x0800))
+
 #define EHCI_RAM     ((ft900_ehci_ram_t *)            (REGISTER_BASE_ADDR + 0x1000))
 #define EHCI_RAM_SIZE                                 (0x2000)
 
