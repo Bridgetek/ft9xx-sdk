@@ -597,8 +597,8 @@ typedef union
 /** \brief Register mappings for Ethernet PHY registers */
 typedef struct
 {
-  eth_phy_cfg_reg_u ETH_PHY_CFG;
-  uint32_t          ETH_PHY_ID;
+  __IO eth_phy_cfg_reg_u ETH_PHY_CFG;
+  __IO uint32_t          ETH_PHY_ID;
 } eth_phy_conf_reg_t;
 
 /** @brief Register mappings for Ethernet PHY registers */
