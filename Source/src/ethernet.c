@@ -1,10 +1,7 @@
 /**
-    @file
+    @file ethernet.c
 
-    @brief
-    Driver for the FT900 ethernet peripheral
-
-    
+    @brief Driver for the FT900 ethernet peripheral
 **/
 /*
  * ============================================================================
@@ -45,7 +42,6 @@
  * ============================================================================
  */
 
-
 /* INCLUDES ************************************************************************/
 
 #include <stdint.h>
@@ -63,31 +59,30 @@
 
 /**
  *  @brief Allowed modes for auto-negotiate.
- *	@details This is sent in the advertise phase with the link partner.
- *		Set to zero if auto-negotiation is not to be used and instead a fixed
- *		mode is to be selected with ETHERNET_MODE below.
+ *  @details This is sent in the advertise phase with the link partner.
+ *           Set to zero if auto-negotiation is not to be used and instead a fixed
+ *           mode is to be selected with ETHERNET_MODE below.
  */
-#define ETHERNET_AUTO_NEG_ALLOW (MII_ACR_10HALF | MII_ACR_10FULL | MII_ACR_100HALF | MII_ACR_100FULL)
+#define ETHERNET_AUTO_NEG_ALLOW (MII_ACR_10HALF | MII_ACR_10FULL | MII_ACR_100HALF | \
+                                 MII_ACR_100FULL)
 
 /**
  *  @brief Preset modes operation.
- *	@details If auto-negotiation is not to be used then this is the mode which is
- *		to be used instead.
+ *  @details If auto-negotiation is not to be used then this is the mode which is
+ *           to be used instead.
  */
 #define ETHERNET_MODE (MII_BMCR_SPEED100 | MII_BMCR_FULLDUPLEX)
 
 /**
  *  @brief PHY address hardwired into device.
  */
-#define ETHERNET_PHY_ADDRESS    0x17
+#define ETHERNET_PHY_ADDRESS 0x17
 
 /**
  *  @brief Use a threshold to start a packet transmit.
  *  @details This offers a slight speed advantage as long as data is streamed to
- *  the transmit buffer sufficiently fast.
+ *           the transmit buffer sufficiently fast.
  */
-/* 1 = use threshold to start packet transmit */
-#define USE_THR      0        
 
 /* GLOBAL VARIABLES ****************************************************************/
 
@@ -95,554 +90,532 @@
 
 /* MACROS **************************************************************************/
 
+/* 1 = use threshold to start packet transmit */
+#define USE_THR 0
+
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
 /* FUNCTIONS ***********************************************************************/
 
-/** @brief ethernet_hook_interrupt install interrupt service routine for the ethernet.
- *             The default priority is 3
- *
- *  @param none
- *  @returns nothing
+/** @brief Ethernet_hook_interrupt install interrupt service routine for the ethernet.
+ *         The default priority is 3
  */
-
 void ethernet_enable_interrupt(uint8_t mask)
 {
-    ETH->ETH_INT_STATUS = mask;
-    ETH->ETH_INT_ENABLE = mask;
+  ETH->ETH_INT_STATUS = mask;
+  ETH->ETH_INT_ENABLE = mask;
 }
 
-
-/** @brief read the content of an MII register
- * 
- *  @param reg register to read
- *  @returnns the content of requested register 
+/** @brief Read the content of an MII register
+ *
+ *  @param [in] reg - Register to read
+ *  @returns The content of requested register
  */
-
 uint16_t ethernet_mii_read(uint8_t reg)
 {
-	uint16_t res;
+  uint16_t res;
 
-	CRITICAL_SECTION_BEGIN
-    /* wait for any previous transmit to complete */
-    while (ETH->ETH_TR_REQ) {};
+  CRITICAL_SECTION_BEGIN
+  /* Wait for any previous transmit to complete */
+  while (ETH->ETH_TR_REQ) {};
 
-    ETH->ETH_MNG_CNTL = (reg << BIT_ETH_MCR_RGAD) | MASK_ETH_MCR_START;
+  ETH->ETH_MNG_CNTL = (reg << BIT_ETH_MCR_RGAD) | MASK_ETH_MCR_START;
 
-    while((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) == 0) {};
+  while ((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) == 0) {};
 
-    ETH->ETH_INT_STATUS = MASK_ETH_IACK_MD_INT;
-    res = ETH->ETH_MNG_RX0;
-    ETH->ETH_MNG_CNTL = 0;
-    CRITICAL_SECTION_END
+  ETH->ETH_INT_STATUS = MASK_ETH_IACK_MD_INT;
+  res = ETH->ETH_MNG_RX0;
+  ETH->ETH_MNG_CNTL = 0;
+  CRITICAL_SECTION_END
 
-	return res;
+  return res;
 }
 
-/** @brief write a value to an MII register
- *  @param reg register to write to
- *  @param v value to write to requested register
- *  @returns 0 on success, -1 on error
+/** @brief Write a value to an MII register
+ *  @param [in] reg - Register to write to
+ *  @param [in] v   - Value to write to requested register
+ *  @returns 0 - On success, -1 - On error
  */
-
 int ethernet_mii_write(uint8_t reg, uint16_t v)
 {
-    if ((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) != 0)
-	{
-        return -1;
-	}
+  if ((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) != 0)
+  {
+    return -1;
+  }
 
-	CRITICAL_SECTION_BEGIN
+  CRITICAL_SECTION_BEGIN
 
-	ETH->ETH_MNG_TX0 = v;
-    ETH->ETH_MNG_CNTL = (reg << BIT_ETH_MCR_RGAD) | MASK_ETH_MCR_START | MASK_ETH_MCR_WRITE;
+  ETH->ETH_MNG_TX0 = v;
+  ETH->ETH_MNG_CNTL = (reg << BIT_ETH_MCR_RGAD) | MASK_ETH_MCR_START | MASK_ETH_MCR_WRITE;
 
-    while((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) == 0) {};
+  while ((ETH->ETH_INT_STATUS & MASK_ETH_IACK_MD_INT) == 0)
+  {
+  };
 
-    ETH->ETH_INT_STATUS = MASK_ETH_IACK_MD_INT;
-    ETH->ETH_MNG_CNTL = 0;
-    CRITICAL_SECTION_END
+  ETH->ETH_INT_STATUS = MASK_ETH_IACK_MD_INT;
+  ETH->ETH_MNG_CNTL = 0;
+  CRITICAL_SECTION_END
 
-    return 0;
+  return 0;
 }
 
-/** @brief set the ethernet peripheral in promiscuous mode 
- *  @param flag 0 - disable promiscuous mode,  1 - set promiscuous mode
- *  @returns nothing
+/** @brief Set the ethernet peripheral in promiscuous mode
+ *  @param [in] flag - 0: Disable promiscuous mode, 1: Set promiscuous mode
  */
-
 void ethernet_set_promiscuous(int flag)
 {
-	uint8_t mode;
+  uint8_t mode;
 
-	mode = (ETH->ETH_RX_CNTL) & (~MASK_ETH_RCR_RX_MEM_SIZE);
+  mode = (ETH->ETH_RX_CNTL) & (~MASK_ETH_RCR_RX_MEM_SIZE);
 
-	if (flag)
-	{
-		mode |= MASK_ETH_RCR_PRMS_MODE;
-	}
-    else
-    {
-        mode &= (~MASK_ETH_RCR_PRMS_MODE);
-    }
+  if (flag)
+  {
+    mode |= MASK_ETH_RCR_PRMS_MODE;
+  }
+  else
+  {
+    mode &= (~MASK_ETH_RCR_PRMS_MODE);
+  }
 
-	ETH->ETH_RX_CNTL = mode;
+  ETH->ETH_RX_CNTL = mode;
 }
 
-/** @brief set the ethernet peripheral to accept multicast
- *  @param flag 0 - disable accept multicast mode,  1 - set accept multicast mode
- *  @returns nothing
+/** @brief Set the ethernet peripheral to accept multicast
+ *  @param [in] flag - 0: Disable accept multicast mode, 1: Set accept multicast mode
  */
-
 void ethernet_accept_multicast(int flag)
 {
-	uint8_t mode;
+  uint8_t mode;
 
-	mode = (ETH->ETH_RX_CNTL) & (~MASK_ETH_RCR_RX_MEM_SIZE);
+  mode = (ETH->ETH_RX_CNTL) & (~MASK_ETH_RCR_RX_MEM_SIZE);
 
-	if (flag)
-	{
-		mode |= MASK_ETH_RCR_ACC_MULTI;
-	}
-    else
-    {
-        mode &= (~MASK_ETH_RCR_ACC_MULTI);
-    }
+  if (flag)
+  {
+    mode |= MASK_ETH_RCR_ACC_MULTI;
+  }
+  else
+  {
+    mode &= (~MASK_ETH_RCR_ACC_MULTI);
+  }
 
-	ETH->ETH_RX_CNTL = mode;
+  ETH->ETH_RX_CNTL = mode;
 }
 
-/** @brief set the ethernet peripheral to transmit in full duplex mode
- *  @param flag 0 - disable duplex mode,  1 - set enable duplex mode
- *  @returns nothing
+/** @brief Set the ethernet peripheral to transmit in full duplex mode
+ *  @param [in] flag - 0: Disable duplex mode, 1: Set enable duplex mode
  */
-
 void ethernet_enable_full_duplex(int flag)
 {
-	uint8_t mode;
+  uint8_t mode;
 
-	mode = (ETH->ETH_TX_CNTL) & (~MASK_ETH_TCR_TX_MEM_SIZE);
+  mode = (ETH->ETH_TX_CNTL) & (~MASK_ETH_TCR_TX_MEM_SIZE);
 
-	if (flag)
-	{
-		mode |= MASK_ETH_TCR_DUPLEX_MODE;
-	}
-    else
-    {
-        mode &= (~MASK_ETH_TCR_DUPLEX_MODE);
-    }
+  if (flag)
+  {
+    mode |= MASK_ETH_TCR_DUPLEX_MODE;
+  }
+  else
+  {
+    mode &= (~MASK_ETH_TCR_DUPLEX_MODE);
+  }
 
-	ETH->ETH_TX_CNTL = mode;
+  ETH->ETH_TX_CNTL = mode;
 }
 
 /** @brief set the ethernet peripheral to handle CRCs
- *  @param flag 0 - disable crc mode,  1 - set enable crc mode
- *  @returns nothing
+ *  @param [in] flag - 0: Disable crc mode, 1: Set enable crc mode
  */
-
 void ethernet_enable_crc(int flag)
 {
-	uint8_t mode;
+  uint8_t mode;
 
-	mode = (ETH->ETH_TX_CNTL) & (~MASK_ETH_TCR_TX_MEM_SIZE);
+  mode = (ETH->ETH_TX_CNTL) & (~MASK_ETH_TCR_TX_MEM_SIZE);
 
-	if (flag)
-	{
-		mode |= MASK_ETH_TCR_CRC_ENABLE;
-	}
-    else
-    {
-        mode &= (~MASK_ETH_TCR_CRC_ENABLE);
-    }
+  if (flag)
+  {
+    mode |= MASK_ETH_TCR_CRC_ENABLE;
+  }
+  else
+  {
+    mode &= (~MASK_ETH_TCR_CRC_ENABLE);
+  }
 
-	ETH->ETH_TX_CNTL = mode;
+  ETH->ETH_TX_CNTL = mode;
 }
 
 /** @brief set the ethernet peripheral to handle padding
- *  @param flag 0 - disable pad mode,  1 - set enable pad mode
- *  @returns nothing
+ *  @param [in] flag - 0: Disable pad mode, 1: Set enable pad mode
  */
-
 void ethernet_enable_pad(int flag)
 {
-	uint8_t mode;
+  uint8_t mode;
 
-	mode = (ETH->ETH_TX_CNTL) & (~MASK_ETH_TCR_TX_MEM_SIZE);
+  mode = (ETH->ETH_TX_CNTL) & (~MASK_ETH_TCR_TX_MEM_SIZE);
 
-	if (flag)
-	{
-		mode |= MASK_ETH_TCR_PAD_ENABLE;
-	}
-    else
-    {
-        mode &= (~MASK_ETH_TCR_PAD_ENABLE);
-    }
+  if (flag)
+  {
+    mode |= MASK_ETH_TCR_PAD_ENABLE;
+  }
+  else
+  {
+    mode &= (~MASK_ETH_TCR_PAD_ENABLE);
+  }
 
-	ETH->ETH_TX_CNTL = mode;
+  ETH->ETH_TX_CNTL = mode;
 }
 
 /** @brief enable or disable the ethernet transmitter
- *  @param flag 0 - disable transmitter, 1 - enable transmitter
- *  @returns nothing
+ *  @param [in] flag - 0: Disable transmitter, 1: Enable transmitter
  */
-
 void ethernet_tx_enable(int flag)
 {
-	uint8_t mode = 0;
+  uint8_t mode = 0;
 
-	CRITICAL_SECTION_BEGIN
+  CRITICAL_SECTION_BEGIN
 
-	mode = (ETH->ETH_TX_CNTL) & (~MASK_ETH_TCR_TX_MEM_SIZE);
+  mode = (ETH->ETH_TX_CNTL) & (~MASK_ETH_TCR_TX_MEM_SIZE);
 
-	if (flag)
-	{
-        mode |=	MASK_ETH_TCR_TX_ENABLE;
-	}
-	else
-	{
-		// Clear any outstanding transmit interrupts.
-		ETH->ETH_INT_STATUS = (MASK_ETH_IACK_TX_ERR | MASK_ETH_IACK_TX_EMPTY);
-       	mode &= (~MASK_ETH_TCR_TX_ENABLE);
-	}
+  if (flag)
+  {
+    mode |= MASK_ETH_TCR_TX_ENABLE;
+  }
+  else
+  {
+    // Clear any outstanding transmit interrupts.
+    ETH->ETH_INT_STATUS = (MASK_ETH_IACK_TX_ERR | MASK_ETH_IACK_TX_EMPTY);
+    mode &= (~MASK_ETH_TCR_TX_ENABLE);
+  }
 
-    ETH->ETH_TX_CNTL = mode;
+  ETH->ETH_TX_CNTL = mode;
 
-    CRITICAL_SECTION_END
+  CRITICAL_SECTION_END
 }
 
-/** @brief enable or disable the ethernet receiver
- *  @param flag 0 - disable receiver, 1 - enable receiver
- *  @returns nothing
+/** @brief Enable or disable the ethernet receiver
+ *  @param [in] flag - 0: Disable receiver, 1: Enable receiver
  */
-
 void ethernet_rx_enable(int flag)
 {
-	uint8_t mode;
+  uint8_t mode;
 
-	CRITICAL_SECTION_BEGIN
+  CRITICAL_SECTION_BEGIN
 
-	mode = (ETH->ETH_RX_CNTL) & (~MASK_ETH_RCR_RX_MEM_SIZE);
+  mode = (ETH->ETH_RX_CNTL) & (~MASK_ETH_RCR_RX_MEM_SIZE);
 
-	if (flag)
-	{
-		mode |= MASK_ETH_RCR_RX_ENABLE;
-	}
-    else
-    {
-        ETH->ETH_INT_STATUS = (MASK_ETH_IACK_RX_INT | MASK_ETH_IACK_FIFO_OV |
-        		MASK_ETH_IACK_RX_ERR);    /* reset rxer,fov and rxint */
-        mode &= (~MASK_ETH_RCR_RX_ENABLE);
-    }
+  if (flag)
+  {
+    mode |= MASK_ETH_RCR_RX_ENABLE;
+  }
+  else
+  {
+    ETH->ETH_INT_STATUS = (MASK_ETH_IACK_RX_INT | MASK_ETH_IACK_FIFO_OV |
+                           MASK_ETH_IACK_RX_ERR); /* reset rxer,fov and rxint */
+    mode &= (~MASK_ETH_RCR_RX_ENABLE);
+  }
 
-	ETH->ETH_RX_CNTL = mode;
+  ETH->ETH_RX_CNTL = mode;
 
-	CRITICAL_SECTION_END
+  CRITICAL_SECTION_END
 }
 
 /** @brief Set the ethernet MAC
- *  @param mac pointer to a six byte array containing MAC
- *  @returns nothing
+ *  @param [in] mac - Pointer to a six byte array containing MAC
  */
-
 void ethernet_set_mac(const uint8_t *mac)
 {
-    int    i;
+  int i;
 
-    for(i = 0; i < 6; i++)
-        ETH->ETH_ADDR[i] = mac[i];
+  for (i = 0; i < 6; i++)
+  {
+    ETH->ETH_ADDR[i] = mac[i];
+  }
 }
 
-/** @brief Return the ethernet link status 
- *  @params none
+/** @brief Return the ethernet link status
  *  @returns non-zero - link up, 0 - link is not up.
  */
 int ethernet_is_link_up(void)
 {
-	int link_stat = 0;
+  int link_stat = 0;
 
-	if (sys_check_ft900_revB()) //90x series rev B
-	{
-		uint16_t reg;
-		/* MII register 1. bit  0x04 = valid link established bit */
-		reg = ethernet_mii_read(MII_BMSR);
+  if (sys_check_ft900_revB()) // 90x series rev B
+  {
+    uint16_t reg;
+    /* MII register 1. bit  0x04 = valid link established bit */
+    reg = ethernet_mii_read(MII_BMSR);
 
-		// Return positive if link and auto-negotiate complete set.
-		link_stat = ((reg & MII_BMSR_LINK) == MII_BMSR_LINK)?1:0;
-	}
-	else
-	{
-		link_stat = (ETHPHY->MISC & MASK_ETHPHY_MISC_LINK_STATUS)?1:0;
-	}
-	return link_stat;
+    // Return positive if link and auto-negotiate complete set.
+    link_stat = ((reg & MII_BMSR_LINK) == MII_BMSR_LINK) ? 1 : 0;
+  }
+  else
+  {
+    link_stat = (ETHPHY->MISC & MASK_ETHPHY_MISC_LINK_STATUS) ? 1 : 0;
+  }
+  return link_stat;
 }
 
 /** @brief Return the ethernet link speed
- *  @params none
  *  @returns 10 - 10 Mb/sec, 100 - 100 Mb/sec.
  */
 int ethernet_link_speed(void)
 {
-	int speed = 10;
+  int speed = 10;
 
-	if (sys_check_ft900_revB()) //90x series rev B
-	{
-		/* MII register 1. bit  0x04 = valid link established bit */
-		if (ethernet_mii_read(MII_BMCR) & MII_BMCR_SPEED100)
-			speed = 100;
-	}
-	else
-	{
-		if (!(ETHPHY->MISC & MASK_ETHPHY_MISC_LINK_SPEED_LED))
-			speed = 100;
-	}
+  if (sys_check_ft900_revB()) // 90x series rev B
+  {
+    /* MII register 1. bit 0x04 = valid link established bit */
+    if (ethernet_mii_read(MII_BMCR) & MII_BMCR_SPEED100)
+    {
+      speed = 100;
+    }
+  }
+  else
+  {
+    if (!(ETHPHY->MISC & MASK_ETHPHY_MISC_LINK_SPEED_LED))
+    {
+      speed = 100;
+    }
+  }
 
-    return speed;
+  return speed;
 }
 
 /** @brief Return the ethernet duplex mode
- *  @params none
  *  @returns 0 - half duplex, 1 - full duplex.
  */
 int ethernet_link_duplex(void)
 {
-	int duplex = 0;
-	if (sys_check_ft900_revB()) //90x series rev B
-	{
-		/* MII register 1. bit  0x04 = valid link established bit */
-		if (ethernet_mii_read(MII_BMCR) & MII_BMCR_FULLDUPLEX)
-			duplex = 1;
-	}
-	else
-	{
-		if (!(ETHPHY->MISC & MASK_ETHPHY_MISC_FULL_DUPLEX_LED))
-			duplex = 1;
-	}
+  int duplex = 0;
+  if (sys_check_ft900_revB()) // 90x series rev B
+  {
+    /* MII register 1. bit  0x04 = valid link established bit */
+    if (ethernet_mii_read(MII_BMCR) & MII_BMCR_FULLDUPLEX)
+      duplex = 1;
+  }
+  else
+  {
+    if (!(ETHPHY->MISC & MASK_ETHPHY_MISC_FULL_DUPLEX_LED))
+      duplex = 1;
+  }
 
-
-    return duplex;
+  return duplex;
 }
 
-/** @brief initialise the ethernet hardware.
- *  @param mac pointer to a six byte array containing MAC
+/** @brief Initialise the ethernet hardware.
+ *  @param [in] mac - Pointer to a six byte array containing MAC
  */
 void ethernet_init(const uint8_t *mac)
 {
-	uint16_t bmcr;
-	/* Reset the PHY */
-    SYS->MSC0CFG |= MASK_SYS_MSC0CFG_MAC_RESET_PHY;
-    while(SYS->MSC0CFG & MASK_SYS_MSC0CFG_MAC_RESET_PHY) {};
+  uint16_t bmcr;
+  /* Reset the PHY */
+  SYS->MSC0CFG |= MASK_SYS_MSC0CFG_MAC_RESET_PHY;
+  while (SYS->MSC0CFG & MASK_SYS_MSC0CFG_MAC_RESET_PHY) {};
 
-    /* Setup the PHY address */
-	ETHPHY->MISC = (ETHPHY->MISC & ~MASK_ETHPHY_MISC_PHYAD) |
-                   (ETHERNET_PHY_ADDRESS << BIT_ETHPHY_MISC_PHYAD);
-                   
-    /* Point the MII to the PHY */
-    ETH->ETH_MNG_ADDR = ETHERNET_PHY_ADDRESS;
+  /* Setup the PHY address */
+  ETHPHY->MISC = (ETHPHY->MISC & ~MASK_ETHPHY_MISC_PHYAD) |
+                 (ETHERNET_PHY_ADDRESS << BIT_ETHPHY_MISC_PHYAD);
 
-    /* Set the MII clock divider */
-	/* The minimum value of this must ensure a 400 ns minimum period.
-	 *  Fmdc = Fclk/(2*(ETH_MNG_DIV + 1))
-	 * So, for an Fmdc of 2.5 MHz given a 100 MHz Fclk, the minimum
-	 * value to write to this register is 19dec.
-	 * There is no maximum value and the default is 128.
-	 */
-    ETH->ETH_MNG_DIV = 19;
+  /* Point the MII to the PHY */
+  ETH->ETH_MNG_ADDR = ETHERNET_PHY_ADDRESS;
 
-    /* Disable both receiver and transmitter */
-    ETH->ETH_RX_CNTL = MASK_ETH_RCR_RESET_FIFO |
-    		MASK_ETH_RCR_BAD_CRC;
-    ETH->ETH_TX_CNTL = 0;
+  /* Set the MII clock divider */
+  /* The minimum value of this must ensure a 400 ns minimum period.
+   *  Fmdc = Fclk/(2*(ETH_MNG_DIV + 1))
+   * So, for an Fmdc of 2.5 MHz given a 100 MHz Fclk, the minimum
+   * value to write to this register is 19dec.
+   * There is no maximum value and the default is 128.
+   */
+  ETH->ETH_MNG_DIV = 19;
 
-    /* Reset the PHY */
-    ethernet_mii_write(MII_BMCR, MII_BMCR_RESET);
-    while (ethernet_mii_read(MII_BMCR) & MII_BMCR_RESET)
-    {
-    	delayms(50);
-    };
+  /* Disable both receiver and transmitter */
+  ETH->ETH_RX_CNTL = MASK_ETH_RCR_RESET_FIFO |
+                     MASK_ETH_RCR_BAD_CRC;
+  ETH->ETH_TX_CNTL = 0;
 
-    /* Setup the PHY. */
+  /* Reset the PHY */
+  ethernet_mii_write(MII_BMCR, MII_BMCR_RESET);
+  while (ethernet_mii_read(MII_BMCR) & MII_BMCR_RESET)
+  {
+    delayms(50);
+  };
+
+  /* Setup the PHY. */
 #if ETHERNET_AUTO_NEG_ALLOW != 0
 
-	/* Setup auto-negotiation advertisement register. */
-	ethernet_mii_write(MII_ADVERTISE,
-			MII_ACR_CSMA
-			| ETHERNET_AUTO_NEG_ALLOW
-			| MII_ACR_LPACK);
+  /* Setup auto-negotiation advertisement register. */
+  ethernet_mii_write(MII_ADVERTISE, (MII_ACR_CSMA | ETHERNET_AUTO_NEG_ALLOW | MII_ACR_LPACK));
 
-    /* Restart the auto-negotiation. */
-	bmcr = ethernet_mii_read(MII_BMCR);
-	bmcr &= (~MII_BMCR_ISOLATE);
-	ethernet_mii_write(MII_BMCR, bmcr | MII_BMCR_RESET_AUTONEG | MII_BMCR_AUTO_NEG_EN);
+  /* Restart the auto-negotiation. */
+  bmcr = ethernet_mii_read(MII_BMCR);
+  bmcr &= (~MII_BMCR_ISOLATE);
+  ethernet_mii_write(MII_BMCR, bmcr | MII_BMCR_RESET_AUTONEG | MII_BMCR_AUTO_NEG_EN);
 
 #else
-	ethernet_mii_write(MII_BMCR,
-		ETHERNET_MODE // Connection mode.
-		);
+  ethernet_mii_write(MII_BMCR,
+                     ETHERNET_MODE // Connection mode.
+  );
 #endif
-	delayms(1);
+  delayms(1);
 
-	/* Setup defaults for handling packets */
-    ethernet_enable_full_duplex(1);
-    ethernet_enable_crc(1);
-    ethernet_enable_pad(1);
-    ethernet_set_promiscuous(0);
-    ethernet_accept_multicast(0);
+  /* Setup defaults for handling packets */
+  ethernet_enable_full_duplex(1);
+  ethernet_enable_crc(1);
+  ethernet_enable_pad(1);
+  ethernet_set_promiscuous(0);
+  ethernet_accept_multicast(0);
 
-    /* Set MAC address */
-    ethernet_set_mac(mac);
+  /* Set MAC address */
+  ethernet_set_mac(mac);
 }
 
-/** @brief Set the mode of the led 
- *  @param led The number of the led (0 or 1)
- *  @param mode The mode which the led will be in
+/** @brief Set the mode of the led
+ *  @param [in] led  - The number of the led (0 or 1)
+ *  @param [in] mode - The mode which the led will be in
  */
 void ethernet_led_mode(uint8_t led, ethernet_led_mode_t mode)
 {
-    if (led == 0)
-    {
-        ETHPHY->MISC = (ETHPHY->MISC & (~MASK_ETHPHY_MISC_LED0_SEL)) |
-        		((uint32_t)(mode) << BIT_ETHPHY_MISC_LED0_SEL);
-    }
-    else if (led == 1)
-    {
-        ETHPHY->MISC = (ETHPHY->MISC & (~MASK_ETHPHY_MISC_LED1_SEL)) |
-        		((uint32_t)(mode) << BIT_ETHPHY_MISC_LED1_SEL);
-    }
+  if (led == 0)
+  {
+    ETHPHY->MISC = (ETHPHY->MISC & (~MASK_ETHPHY_MISC_LED0_SEL)) |
+                   ((uint32_t)(mode) << BIT_ETHPHY_MISC_LED0_SEL);
+  }
+  else if (led == 1)
+  {
+    ETHPHY->MISC = (ETHPHY->MISC & (~MASK_ETHPHY_MISC_LED1_SEL)) |
+                   ((uint32_t)(mode) << BIT_ETHPHY_MISC_LED1_SEL);
+  }
 }
 
-/** @brief Poll the ethernet peripheral for the receptition of a single packet
- *  @param buf pointer to buffer to store the received packet. This MUST be
- *  	32 bit aligned.
- *  @param blen size of reception buffer
+/** @brief Poll the ethernet peripheral for the receptions of a single packet
+ *  @param [in] buf  - Pointer to buffer to store the received packet. This MUST be 32 bit aligned.
+ *  @param [in] blen - Size of reception buffer
  *  @returns 1 packet received, 0 no packet received
  */
 int ethernet_read(size_t *blen, uint8_t *buf)
 {
-    //uint8_t           *pb;
-    uint16_t          len;
-    uint32_t          w0;
-    uint32_t          *dst;
-    volatile uint32_t *data_reg;
+  uint16_t len;
+  uint32_t w0;
+  uint32_t *dst;
+  volatile uint32_t *data_reg;
 
-    /* check the link is up! */
-    if ((ETH->ETH_RX_CNTL & MASK_ETH_RCR_RX_ENABLE) == 0)
-	{
-        /* no, it's down! */
-        return -1;
-    }
+  /* Check the link is up! */
+  if ((ETH->ETH_RX_CNTL & MASK_ETH_RCR_RX_ENABLE) == 0)
+  {
+    /* No, it's down! */
+    return -1;
+  }
 
-    /* check to see if there are any packets in the fifo */
-    if(ETH->ETH_NUM_PKT == 0)
-    {
-        /* no, no packets in fifo */
-        return 0;
-    }
+  /* Check to see if there are any packets in the fifo */
+  if (ETH->ETH_NUM_PKT == 0)
+  {
+    /* No, no packets in fifo */
+    return 0;
+  }
 
-    dst = __builtin_assume_aligned(buf, sizeof(uint32_t));
+  dst = __builtin_assume_aligned(buf, sizeof(uint32_t));
 
-    /* Store the current interrupt mask and then disable all interrupts.
-     * Note: This is safe to call from within an ISR.
-     */
-	CRITICAL_SECTION_BEGIN
+  /* Store the current interrupt mask and then disable all interrupts.
+   * Note: This is safe to call from within an ISR.
+   */
+  CRITICAL_SECTION_BEGIN
 
-    /* read 32 bits from the ethernet module */
-    w0 = ETH->ETH_DATA;
+  /* Read 32 bits from the ethernet module */
+  w0 = ETH->ETH_DATA;
 
-	/* length from data register is complete frame from destination
-	 * address to CRC32 inclusive PLUS 2 bytes of length itself.
-	 */
-    len = (w0 & 0xffff);
+  /* Length from data register is complete frame from destination
+   * address to CRC32 inclusive PLUS 2 bytes of length itself.
+   */
+  len = (w0 & 0xffff);
 
-    /* remove CRC32 */
-    *blen = len - 4;
+  /* Remove CRC32 */
+  *blen = len - 4;
 
-    /* add on amount to align last streamin.l to a 32 bit boundary */
-    len -= 1;
-    len &= (~3);
+  /* Add on amount to align last streamin.l to a 32 bit boundary */
+  len -= 1;
+  len &= (~3);
 
-    w0 = (w0 & (~0xffff)) |(len & 0xffff);
+  w0 = (w0 & (~0xffff)) | (len & 0xffff);
 
-    /* length and first 2 bytes of packet */
-    *dst = w0;
+  /* Length and first 2 bytes of packet */
+  *dst = w0;
 
-    /* start at aligned location */
-    dst++;
+  /* Start at aligned location */
+  dst++;
 
-    /* transfer the remainder of the packet */
-    data_reg = &ETH->ETH_DATA;
-    __asm__("streamin.l %0,%1,%2" : :"r"(dst), "r"(data_reg), "r"(len): "memory");
+  /* Transfer the remainder of the packet */
+  data_reg = &ETH->ETH_DATA;
+  __asm__("streamin.l %0,%1,%2" : : "r"(dst), "r"(data_reg), "r"(len) : "memory");
 
-    /* Restore previous interrupt mask. */
-	CRITICAL_SECTION_END
+  /* Restore previous interrupt mask. */
+  CRITICAL_SECTION_END
 
-	/* return 1 - we received a packet */
-    return 1;
+  /* return 1 - we received a packet */
+  return 1;
 }
 
-/** @brief outputs a packet on the ethernet interface.
- *  @param buf Pointer to packet to send. This MUST be 32 bit aligned.
- *  	The payload length is the length of the full packet with the
- *  	destination MAC, source MAC and payload length size subtracted.
- *  	ETHERNET_WRITE_HEADER is defined for this purpose.
- *  @param blen Length of packet to send (in bytes). This must
- *  	include the size of the payload length, destination and
- *  	source MAC headers, packet type and payload.
- * 
+/** @brief Outputs a packet on the ethernet interface.
+ *  @param [in] buf  - Pointer to packet to send. This MUST be 32 bit aligned.
+ *                     The payload length is the length of the full packet with the
+ *                     destination MAC, source MAC and payload length size subtracted.
+ *                     ETHERNET_WRITE_HEADER is defined for this purpose.
+ *  @param [in] blen - Length of packet to send (in bytes). This must
+ *                     include the size of the payload length, destination and
+ *                     source MAC headers, packet type and payload.
+ *
  *  The buffer must be in the following format:
- *  To send (n) bytes
- *  buf[0]    lsb of payload length (n & 0xff)
- *  buf[1]    msb of payload length (n >> 16)
- *  buf[2]    destination MAC[0]
- *  buf[3]    destination MAC[1]
- *  buf[4]    destination MAC[2]
- *  buf[5]    destination MAC[3]
- *  buf[6]    destination MAC[4]
- *  buf[7]    destination MAC[5]
- *  buf[8]    source MAC[0]
- *  buf[9]    source MAC[1]
- *  buf[10]    source MAC[2]
- *  buf[11]    source MAC[3]
- *  buf[12]    source MAC[4]
- *  buf[13]    source MAC[5]
- *  buf[14]    packet type
- *  buf[15]    packet type
- *  buf[16]    payload
- *  buf[.]    ...
- *  buf[n+16]    end of payload (n bytes).
+ *  To send (n) bytes:
+ *  | buf[0]    | lsb of payload length (n & 0xff)  |
+ *  | buf[1]    | msb of payload length (n >> 16)   |
+ *  | buf[2]    | destination MAC[0]                |
+ *  | buf[3]    | destination MAC[1]                |
+ *  | buf[4]    | destination MAC[2]                |
+ *  | buf[5]    | destination MAC[3]                |
+ *  | buf[6]    | destination MAC[4]                |
+ *  | buf[7]    | destination MAC[5]                |
+ *  | buf[8]    | source MAC[0]                     |
+ *  | buf[9]    | source MAC[1]                     |
+ *  | buf[10]   | source MAC[2]                     |
+ *  | buf[11]   | source MAC[3]                     |
+ *  | buf[12]   | source MAC[4]                     |
+ *  | buf[13]   | source MAC[5]                     |
+ *  | buf[14]   | packet type                       |
+ *  | buf[15]   | packet type                       |
+ *  | buf[16]   | payload                           |
+ *  | buf[.]    | ...                               |
+ *  | buf[n+16] | end of payload (n bytes).         |
  */
 int ethernet_write(uint8_t *buf, size_t blen)
 {
-    register uint32_t *src;
-    register volatile uint32_t *data_reg;
-    register uint32_t size = (uint32_t)blen;
+  register uint32_t *src;
+  register volatile uint32_t *data_reg;
+  register uint32_t size = (uint32_t)blen;
 
-    /* check to see if the link is up */
-    if ((ETH->ETH_TX_CNTL & MASK_ETH_TCR_TX_ENABLE) == 0)
-	{
-        /* no, it's down! */
-        return -1;
-    }
+  /* Check to see if the link is up */
+  if ((ETH->ETH_TX_CNTL & MASK_ETH_TCR_TX_ENABLE) == 0)
+  {
+    /* No, it's down! */
+    return -1;
+  }
 
-    /* Wait for any previous transmit to complete and free up
-     * the TX RAM. */
-    while (ETH->ETH_TR_REQ) {};
+  /* Wait for any previous transmit to complete and free up the TX RAM. */
+  while (ETH->ETH_TR_REQ) {};
 
-    /* add on amount to align last streamout.l to a 32 bit boundary */
-    size = blen;
-    size += 3;
-    size &= (~3L);
+  /* Add on amount to align last streamout.l to a 32 bit boundary */
+  size = blen;
+  size += 3;
+  size &= (~3L);
 
-    src = __builtin_assume_aligned(buf, sizeof(uint32_t));
-    data_reg = &ETH->ETH_DATA;
+  src = __builtin_assume_aligned(buf, sizeof(uint32_t));
+  data_reg = &ETH->ETH_DATA;
 
-    CRITICAL_SECTION_BEGIN
+  CRITICAL_SECTION_BEGIN
 
-    __asm__("streamout.l %0,%1,%2" : :"r"(data_reg), "r"(src), "r"(size): "memory");
+  __asm__("streamout.l %0,%1,%2" : : "r"(data_reg), "r"(src), "r"(size) : "memory");
 
-    /* send the packet! */
-    ETH->ETH_TR_REQ = 1;
+  /* send the packet! */
+  ETH->ETH_TR_REQ = 1;
 
-    CRITICAL_SECTION_END
+  CRITICAL_SECTION_END
 
-    return 1;
+  return 1;
 }
