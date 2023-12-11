@@ -1,10 +1,7 @@
 /**
     @file ft900_i2cm.h
 
-    @brief
-    I2C Master.
-
-    
+    @brief I2C Master.
 **/
 /*
  * ============================================================================
@@ -53,30 +50,31 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* INCLUDES ************************************************************************/
+
 #include <stdint.h>
 #include <stddef.h>
 
 /* CONSTANTS ***********************************************************************/
 
 /* TYPES ***************************************************************************/
+
 /** @brief Available speed modes */
 typedef enum
 {
-	I2CM_NORMAL_SPEED = 0,  /*!< Range: 98Kbps to 100 kbps */
-	I2CM_FAST_SPEED,        /*!< Range: 130Kbps to 400 kbps */
-	I2CM_FAST_PLUS_SPEED,   /*!< Range: 130Kbps to 1000 kbps */
-	I2CM_HIGH_SPEED         /*!< Range: 529Kbps to 3400 kbps */
+  I2CM_NORMAL_SPEED = 0,        /*!< Range: 98Kbps to 100 kbps */
+  I2CM_FAST_SPEED,              /*!< Range: 130Kbps to 400 kbps */
+  I2CM_FAST_PLUS_SPEED,         /*!< Range: 130Kbps to 1000 kbps */
+  I2CM_HIGH_SPEED               /*!< Range: 529Kbps to 3400 kbps */
 } I2CM_speed_mode;
 
 /** @brief Some common I2C clock speeds to be used in i2cm_init() */
 typedef enum
 {
-	I2CM_100_Kbps = 100000,  	/*!< 100 kbps */
-	I2CM_400_Kbps = 400000,     /*!< 400 kbps */
-	I2CM_1000_Kbps = 1000000,   /*!< 1000 kbps */
-	I2CM_3400_Kbps = 3400000    /*!< 3400 kbps */
+  I2CM_100_Kbps  = 100000,      /*!< 100 kbps */
+  I2CM_400_Kbps  = 400000,      /*!< 400 kbps */
+  I2CM_1000_Kbps = 1000000,     /*!< 1000 kbps */
+  I2CM_3400_Kbps = 3400000      /*!< 3400 kbps */
 } I2CM_clk_speed;
-
 
 /* GLOBAL VARIABLES ****************************************************************/
 
@@ -86,44 +84,43 @@ typedef enum
 
 /** @brief Call once, to initialise the master and reset it to a known state.
  *  @details It is not valid to call any other I2C Master functions before this one.
- *  @param[in] mode 		I2C Master Clock mode
- *  @param[in] i2c_clk_speed 	The clock speed of the I2C bus
+ *  @param [in] mode          - I2C Master Clock mode
+ *  @param [in] i2c_clk_speed - The clock speed of the I2C bus
  */
 void i2cm_init(I2CM_speed_mode mode, uint32_t i2c_clk_speed);
 
 /** @brief Read a specified number of bytes from an I2C device.
  *
- *  Automatically adopts burst mode if the slave supports it, and
- *  more than one byte is to be read.
+ *  Automatically adopts burst mode if the slave supports it, and more than one byte is to be read.
  *
- *  @param[in]  addr             I2C address to write to.
- *  @param[in]  cmd              I2C command byte
- *  @param[in]  data             Buffer containing bytes to write.
- *  @param[in]  number_to_read   Number of bytes to read.
+ *  @param [in] addr           - I2C address to write to.
+ *  @param [in] cmd            - I2C command byte
+ *  @param [in] data           - Buffer containing bytes to write.
+ *  @param [in] number_to_read - Number of bytes to read.
  *  @return 0 on success, -1 on an error
  */
 int8_t i2cm_read(const uint8_t addr, const uint8_t cmd,
-									uint8_t *data, const uint16_t number_to_read);
+                 uint8_t *data, const uint16_t number_to_read);
 
 /** @brief   Write a specified number of bytes to an I2C device.
  *
- *  Automatically adopts burst mode if the slave supports it, and
- *  more than one byte is to be written.
+ *  Automatically adopts burst mode if the slave supports it, and more than one byte is to be
+ *  written.
  *
- *  @param[in]  addr             I2C address to write to.
- *  @param[in]  cmd              I2C command byte
- *  @param[in]  data             Buffer containing bytes to write.
- *  @param[in]  number_to_write  Number of bytes to read.
+ *  @param [in] addr            - I2C address to write to.
+ *  @param [in] cmd             - I2C command byte
+ *  @param [in] data            - Buffer containing bytes to write.
+ *  @param [in] number_to_write - Number of bytes to read.
  *  @return 0 on success, -1 on an error
  */
 int8_t i2cm_write(const uint8_t addr, const uint8_t cmd,
-        const uint8_t *data, const uint16_t number_to_write);
+                  const uint8_t *data, const uint16_t number_to_write);
 
 /** @brief Determine I2C Master status.
  *
  *  | Bit     | Mask Name                  | Set when...                                      |
  *  | ------- | -------------------------- | ------------------------------------------------ |
- *  | 0 (LSB) | MASK_I2CM_STATUS_I2C_BUSY  | The Bus is currently busy transmitting/reveiving |
+ *  | 0 (LSB) | MASK_I2CM_STATUS_I2C_BUSY  | The Bus is currently busy transmitting/reviving  |
  *  | 1       | MASK_I2CM_STATUS_I2C_ERR   | An error occurred (ADDR_ACK, DATA_ACK, ARB_LOST) |
  *  | 2       | MASK_I2CM_STATUS_ADDR_ACK  | Slave address was not acknowledged               |
  *  | 3       | MASK_I2CM_STATUS_DATA_ACK  | Data was not acknowledged                        |
@@ -137,7 +134,7 @@ int8_t i2cm_write(const uint8_t addr, const uint8_t cmd,
 uint8_t i2cm_get_status(void);
 
 /** @brief Enable an interrupt
- *  @param mask The bit pattern of interrupts to enable
+ *  @param [in] mask - The bit pattern of interrupts to enable
  *
  *  | Bit     | Mask Name                           | Interrupts on...                                |
  *  | ------- | ----------------------------------- | ----------------------------------------------- |
@@ -156,14 +153,14 @@ int8_t i2cm_interrupt_enable(uint8_t mask);
 
 /** @brief Disable an interrupt
  *  @see i2cm_interrupt_enable
- *  @param mask The bit pattern of interrupts to disable
+ *  @param [in] mask - The bit pattern of interrupts to disable
  *  @return 0 on success, -1 on an error
  */
 int8_t i2cm_interrupt_disable(uint8_t mask);
 
 /** @brief Check that an interrupt has been fired
  *  @see i2cm_interrupt_enabled
- *  @param mask The bit pattern of interrupts to check
+ *  @param [in] mask - The bit pattern of interrupts to check
  *  @return 1 if the interrupt has been fired, 0 if the interrupt has not been fired, -1 otherwise
  */
 int8_t i2cm_is_interrupted(uint8_t mask);

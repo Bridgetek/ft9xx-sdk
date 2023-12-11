@@ -1,10 +1,7 @@
 /**
     @file ft900_i2cs.h
 
-    @brief
-    I2C Slave.
-
-    
+    @brief I2C Slave.
 **/
 /*
  * ============================================================================
@@ -67,8 +64,8 @@ extern "C" {
 
 /* FUNCTION PROTOTYPES *************************************************************/
 
-/** @brief   Call once, to initialise the slave and reset it to a known state.
- *  @param[in]  addr Slave (read or write) address
+/** @brief Call once, to initialise the slave and reset it to a known state.
+ *  @param[in] addr Slave (read or write) address
  */
 void i2cs_init(uint8_t addr);
 
@@ -78,8 +75,8 @@ void i2cs_init(uint8_t addr);
  *  The number of bytes written may be less than the number
  *  requested if the master terminates the transaction early.
  *
- *  @param[out] data Caller-allocated buffer to receive any bytes read.
- *  @param[in] size The number of bytes to read.
+ *  @param[out] data - Caller-allocated buffer to receive any bytes read.
+ *  @param[in]  size - The number of bytes to read.
  *  @return 0 on success, -1 on an error
  */
 int8_t i2cs_read(uint8_t *data, size_t size);
@@ -90,8 +87,8 @@ int8_t i2cs_read(uint8_t *data, size_t size);
  *  The number of bytes written may be less than the number
  *  requested if the master terminates the transaction early.
  *
- *  @param[in] data Buffer containing bytes to write.
- *  @param[in] size The number of bytes to write.
+ *  @param[in] data - Buffer containing bytes to write.
+ *  @param[in] size - The number of bytes to write.
  *  @return 0 on success, -1 on an error
  */
 int8_t i2cs_write(const uint8_t *data, size_t size);
@@ -114,19 +111,19 @@ int8_t i2cs_write(const uint8_t *data, size_t size);
 uint8_t i2cs_get_status(void);
 
 /** @brief Enable an interrupt
- *  @param mask The bit pattern of interrupts to enable
+ *  @param [in] mask - The bit pattern of interrupts to enable
  *  @return 0 on success, -1 on an error
  */
 int8_t i2cs_enable_interrupt(uint8_t mask);
 
 /** @brief Disable an interrupt
- *  @param mask The bit pattern of interrupts to disable
+ *  @param [in] mask - The bit pattern of interrupts to disable
  *  @return 0 on success, -1 on an error
  */
 int8_t i2cs_disable_interrupt(uint8_t mask);
 
 /** @brief Check the status of an interrupt
- *  @param mask The bit pattern of interrupts to check
+ *  @param [in] mask - The bit pattern of interrupts to check
  *  @return 1 if the interrupt has been fired, 0 if the interrupt has not been fired, -1 otherwise
  */
 int8_t i2cs_is_interrupted (uint8_t mask);

@@ -1,10 +1,7 @@
 /**
-    @file
+    @file i2cs.c
 
-    @brief
-    I2C Slave
-
-    
+    @brief I2C Slave
 **/
 /*
  * ============================================================================
@@ -45,8 +42,8 @@
  * ============================================================================
  */
 
-
 /* INCLUDES ************************************************************************/
+
 #include <ft900_i2cs.h>
 #include <ft900_asm.h>
 #include <registers/ft900_registers.h>
@@ -62,68 +59,71 @@
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
 /* FUNCTIONS ***********************************************************************/
+
 void i2cs_init(uint8_t addr)
 {
-	/* Reset I2CS first */
-	I2CS->I2CS_CNTL_STATUS = MASK_I2CS_CNTL_I2C_RST;
+  /* Reset I2CS first */
+  I2CS->I2CS_CNTL_STATUS = MASK_I2CS_CNTL_I2C_RST;
 
-    /* Slave address */
-    I2CS->I2CS_OWN_ADDR = addr >> 1;
+  /* Slave address */
+  I2CS->I2CS_OWN_ADDR = addr >> 1;
 
-	I2CS->I2CS_CNTL_STATUS = MASK_I2CS_CNTL_DEV_ACTV;
+  I2CS->I2CS_CNTL_STATUS = MASK_I2CS_CNTL_DEV_ACTV;
 
-	I2CS->I2CS_FIFO_INT_PEND = 0xFF; /* Clear all pending interrupts */
+  /* Clear all pending interrupts */
+  I2CS->I2CS_FIFO_INT_PEND = 0xFF;
 }
 
 int8_t i2cs_read(uint8_t *data, size_t size)
 {
-	asm_streamin8(&(I2CS->I2CS_DATA), data, size);
-    return 0;
+  asm_streamin8(&(I2CS->I2CS_DATA), data, size);
+  return 0;
 }
 
 int8_t i2cs_write(const uint8_t *data, size_t size)
 {
-    asm_streamout8(data, &(I2CS->I2CS_DATA), size);
-    return 0;
+  asm_streamout8(data, &(I2CS->I2CS_DATA), size);
+  return 0;
 }
 
 uint8_t i2cs_get_status(void)
 {
-    uint8_t status = I2CS->I2CS_CNTL_STATUS;
+  uint8_t status = I2CS->I2CS_CNTL_STATUS;
 
-    if (status & MASK_I2CS_STATUS_REC_FIN)
-        I2CS->I2CS_CNTL_STATUS |= MASK_I2CS_CNTL_REC_FIN_CLR;
-    if (status & MASK_I2CS_STATUS_SEND_FIN)
-        I2CS->I2CS_CNTL_STATUS |= MASK_I2CS_CNTL_SEND_FIN_CLR;
+  if (status & MASK_I2CS_STATUS_REC_FIN)
+  {
+    I2CS->I2CS_CNTL_STATUS |= MASK_I2CS_CNTL_REC_FIN_CLR;
+  }
 
-    return status;
+  if (status & MASK_I2CS_STATUS_SEND_FIN)
+  {
+    I2CS->I2CS_CNTL_STATUS |= MASK_I2CS_CNTL_SEND_FIN_CLR;
+  }
+
+  return status;
 }
-
 
 int8_t i2cs_enable_interrupt(uint8_t mask)
 {
-    I2CS->I2CS_FIFO_INT_ENABLE |= mask;
-    return 0;
+  I2CS->I2CS_FIFO_INT_ENABLE |= mask;
+  return 0;
 }
-
 
 int8_t i2cs_disable_interrupt(uint8_t mask)
 {
-    I2CS->I2CS_FIFO_INT_ENABLE &= ~mask;
-    return 0;
+  I2CS->I2CS_FIFO_INT_ENABLE &= ~mask;
+  return 0;
 }
 
-
-int8_t i2cs_is_interrupted (uint8_t mask)
+int8_t i2cs_is_interrupted(uint8_t mask)
 {
-    int8_t ret = 0;
+  int8_t ret = 0;
 
-    if ((I2CS->I2CS_FIFO_INT_PEND & mask) == mask)
-    {
-        I2CS->I2CS_FIFO_INT_PEND |= mask;
-        ret = 1;
-    }
+  if ((I2CS->I2CS_FIFO_INT_PEND & mask) == mask)
+  {
+    I2CS->I2CS_FIFO_INT_PEND |= mask;
+    ret = 1;
+  }
 
-    return ret;
+  return ret;
 }
-
