@@ -107,7 +107,10 @@
 #define ADCDAC_N     ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0))
 
 #define SYS_RST      ((ft900_sys_reset_regs_t *)      (REGISTER_BASE_ADDR + 0x00BC))
+
 #define INTERRUPT    ((ft900_interrupt_regs_t *)      (REGISTER_BASE_ADDR + 0x0100))
+#define INTERRUPT_N  ((interrupt_regs_t *)            (REGISTER_BASE_ADDR + 0x0100))
+
 #define USBD         ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0200))
 #define RTC          ((ft900_rtc_regs_t *)            (REGISTER_BASE_ADDR + 0x0400))
 #define SPIM         ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x0440))
@@ -141,7 +144,10 @@
 #define ADCDAC_N     ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0))
 
 #define SYS_RST      ((ft900_sys_reset_regs_t *)      (REGISTER_BASE_ADDR + 0x00BC)) /* for FT900 Rev C onwards */
+
 #define INTERRUPT    ((ft900_interrupt_regs_t *)      (REGISTER_BASE_ADDR + 0x00C0))
+#define INTERRUPT_N  ((interrupt_regs_t *)            (REGISTER_BASE_ADDR + 0x00C0))
+
 #define EHCI         ((ft900_ehci_regs_t *)           (REGISTER_BASE_ADDR + 0x0100))
 #define USBD         ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0180))
 #define USBD_HBW     ((ft900_usbd_hbw_ctrl_regs_t *)  (REGISTER_BASE_ADDR + 0x0A1C)) /* for FT900 Rev C onwards */
