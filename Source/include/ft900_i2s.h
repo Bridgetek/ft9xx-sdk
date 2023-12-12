@@ -1,10 +1,7 @@
 /**
     @file ft900_i2s.h
 
-    @brief
-    I2S Audio
-
-    
+    @brief I2S Audio
 **/
 /*
  * ============================================================================
@@ -61,99 +58,99 @@ extern "C" {
 /* TYPES ***************************************************************************/
 
 /** @brief I2S mode definitions */
-typedef enum 
+typedef enum
 {
-	i2s_mode_slave  = 0x0000, /*!< I2S Slave */
-	i2s_mode_master = 0x0040  /*!< I2S Master */
+  i2s_mode_slave  = 0x0000, /*!< I2S Slave */
+  i2s_mode_master = 0x0040  /*!< I2S Master */
 } i2s_mode_t;
 
 /** @brief I2S RX definitions */
 typedef enum
 {
-	i2s_rx_disabled = 0,    /*!< Receive Disabled */
-	i2s_rx_enabled          /*!< Receive Enabled */
+  i2s_rx_disabled = 0,    /*!< Receive Disabled */
+  i2s_rx_enabled          /*!< Receive Enabled */
 } i2s_rx_t;
 
 /** @brief I2S TX definitions */
 typedef enum
 {
-	i2s_tx_disabled = 0,    /*!< Transmit Disabled */
-	i2s_tx_enabled          /*!< Transmit Enabled */
+  i2s_tx_disabled = 0,    /*!< Transmit Disabled */
+  i2s_tx_enabled          /*!< Transmit Enabled */
 } i2s_tx_t;
 
 /** @brief I2S data length definitions */
 typedef enum
 {
-	i2s_length_16 = 0x0000, /*!< 16 bit data length */
-	i2s_length_20 = 0x0100, /*!< 20 bit data length */
-	i2s_length_24 = 0x0200, /*!< 24 bit data length */
-	i2s_length_32 = 0x0300  /*!< 32 bit data length */
+  i2s_length_16 = 0x0000, /*!< 16 bit data length */
+  i2s_length_20 = 0x0100, /*!< 20 bit data length */
+  i2s_length_24 = 0x0200, /*!< 24 bit data length */
+  i2s_length_32 = 0x0300  /*!< 32 bit data length */
 } i2s_length_t;
 
 /** @brief I2S format definitions */
 typedef enum
 {
-	i2s_format_i2s = 0x0000,        /*!< I2S format */
-	i2s_format_leftjust = 0x0400,   /*!< Left justified format */
-	i2s_format_rightjust = 0x0800   /*!< Right justified format */
+  i2s_format_i2s = 0x0000,        /*!< I2S format */
+  i2s_format_leftjust = 0x0400,   /*!< Left justified format */
+  i2s_format_rightjust = 0x0800   /*!< Right justified format */
 } i2s_format_t;
 
 /** @brief I2S padding definitions */
 typedef enum
 {
-	i2s_padding_0  = 0x0000,    /*!< No padding */
-	i2s_padding_4  = 0x1000,    /*!< 4 bits of padding */
-	i2s_padding_8  = 0x2000,    /*!< 8 bits of padding */
-	i2s_padding_12 = 0x3000,    /*!< 12 bits of padding */
-	i2s_padding_16 = 0x4000     /*!< 16 bits of padding */
+  i2s_padding_0  = 0x0000,    /*!< No padding */
+  i2s_padding_4  = 0x1000,    /*!< 4 bits of padding */
+  i2s_padding_8  = 0x2000,    /*!< 8 bits of padding */
+  i2s_padding_12 = 0x3000,    /*!< 12 bits of padding */
+  i2s_padding_16 = 0x4000     /*!< 16 bits of padding */
 } i2s_padding_t;
 
 /** @brief I2S master input clk frequency definitions */
 typedef enum
 {
-	i2s_master_input_clk_22mhz, /*!< 22.5792 MHz Master clock */
-	i2s_master_input_clk_24mhz  /*!< 24.576 MHz Master clock */
+  i2s_master_input_clk_22mhz, /*!< 22.5792 MHz Master clock */
+  i2s_master_input_clk_24mhz  /*!< 24.576 MHz Master clock */
 } i2s_master_input_clk_t;
 
 /** @brief I2S BCLK speed definitions */
 typedef enum
 {
-	i2s_bclk_div_1  = 0x0000,   /*!< Divide BCLK by 1 */
-	i2s_bclk_div_2  = 0x0001,   /*!< Divide BCLK by 2 */
-	i2s_bclk_div_3  = 0x0002,   /*!< Divide BCLK by 3 */
-	i2s_bclk_div_4  = 0x0003,   /*!< Divide BCLK by 4 */
-	i2s_bclk_div_6  = 0x0004,   /*!< Divide BCLK by 6 */
-	i2s_bclk_div_8  = 0x0005,   /*!< Divide BCLK by 8 */
-	i2s_bclk_div_12 = 0x0006,   /*!< Divide BCLK by 12 */
-	i2s_bclk_div_16 = 0x0007,   /*!< Divide BCLK by 16 */
-	i2s_bclk_div_24 = 0x0008,   /*!< Divide BCLK by 24 */
-	i2s_bclk_div_32 = 0x0009,   /*!< Divide BCLK by 32 */
-	i2s_bclk_div_48 = 0x000A,   /*!< Divide BCLK by 48 */
-	i2s_bclk_div_64 = 0x000B    /*!< Divide BCLK by 64 */
+  i2s_bclk_div_1  = 0x0000,   /*!< Divide BCLK by 1 */
+  i2s_bclk_div_2  = 0x0001,   /*!< Divide BCLK by 2 */
+  i2s_bclk_div_3  = 0x0002,   /*!< Divide BCLK by 3 */
+  i2s_bclk_div_4  = 0x0003,   /*!< Divide BCLK by 4 */
+  i2s_bclk_div_6  = 0x0004,   /*!< Divide BCLK by 6 */
+  i2s_bclk_div_8  = 0x0005,   /*!< Divide BCLK by 8 */
+  i2s_bclk_div_12 = 0x0006,   /*!< Divide BCLK by 12 */
+  i2s_bclk_div_16 = 0x0007,   /*!< Divide BCLK by 16 */
+  i2s_bclk_div_24 = 0x0008,   /*!< Divide BCLK by 24 */
+  i2s_bclk_div_32 = 0x0009,   /*!< Divide BCLK by 32 */
+  i2s_bclk_div_48 = 0x000A,   /*!< Divide BCLK by 48 */
+  i2s_bclk_div_64 = 0x000B    /*!< Divide BCLK by 64 */
 } i2s_bclk_div;
 
 /** @brief I2S MCLK speed definitions */
 typedef enum
 {
-	i2s_mclk_div_1  = 0x0000,   /*!< Divide MCLK by 1 */
-	i2s_mclk_div_2  = 0x0100,   /*!< Divide MCLK by 2 */
-	i2s_mclk_div_3  = 0x0200,   /*!< Divide MCLK by 3 */
-	i2s_mclk_div_4  = 0x0300,   /*!< Divide MCLK by 4 */
-	i2s_mclk_div_6  = 0x0400,   /*!< Divide MCLK by 6 */
-	i2s_mclk_div_8  = 0x0500,   /*!< Divide MCLK by 8 */
-	i2s_mclk_div_12 = 0x0600,   /*!< Divide MCLK by 12 */
-	i2s_mclk_div_16 = 0x0700,   /*!< Divide MCLK by 16 */
-	i2s_mclk_div_24 = 0x0800,   /*!< Divide MCLK by 24 */
-	i2s_mclk_div_32 = 0x0900,   /*!< Divide MCLK by 32 */
-	i2s_mclk_div_48 = 0x0A00,   /*!< Divide MCLK by 48 */
-	i2s_mclk_div_64 = 0x0B00    /*!< Divide MCLK by 64 */
+  i2s_mclk_div_1  = 0x0000,   /*!< Divide MCLK by 1 */
+  i2s_mclk_div_2  = 0x0100,   /*!< Divide MCLK by 2 */
+  i2s_mclk_div_3  = 0x0200,   /*!< Divide MCLK by 3 */
+  i2s_mclk_div_4  = 0x0300,   /*!< Divide MCLK by 4 */
+  i2s_mclk_div_6  = 0x0400,   /*!< Divide MCLK by 6 */
+  i2s_mclk_div_8  = 0x0500,   /*!< Divide MCLK by 8 */
+  i2s_mclk_div_12 = 0x0600,   /*!< Divide MCLK by 12 */
+  i2s_mclk_div_16 = 0x0700,   /*!< Divide MCLK by 16 */
+  i2s_mclk_div_24 = 0x0800,   /*!< Divide MCLK by 24 */
+  i2s_mclk_div_32 = 0x0900,   /*!< Divide MCLK by 32 */
+  i2s_mclk_div_48 = 0x0A00,   /*!< Divide MCLK by 48 */
+  i2s_mclk_div_64 = 0x0B00    /*!< Divide MCLK by 64 */
 } i2s_mclk_div_t;
 
 /** @brief I2S BCLK cycles per channel, used in master mode only */
 typedef enum
 {
-	i2s_bclk_per_channel_16,    /*!< 16 BCLK per channel */
-	i2s_bclk_per_channel_32     /*!< 32 BCLK per channel */
+  i2s_bclk_per_channel_16,    /*!< 16 BCLK per channel */
+  i2s_bclk_per_channel_32     /*!< 32 BCLK per channel */
 } i2s_bclk_per_channel_t;
 
 /* GLOBAL VARIABLES ****************************************************************/
@@ -163,26 +160,26 @@ typedef enum
 /* FUNCTION PROTOTYPES *************************************************************/
 
 /** @brief Call once, to initialise the peripheral and reset it to a known state.
- *  @param[in] mode The I2S Mode
- *  @param[in] length The transfer length
- *  @param[in] format The format of the transfer
- *  @param[in] padding The number of padding buts that have the be added to the transfer
- *  @param[in] mclk_in The MCLK to use
- *  @param[in] bclk_div The BCLK divider
- *  @param[in] mclk_div The MCLK divider
- *  @param[in] bclk_per_channel The number of BCLK per channel
+ *  @param [in] mode             - The I2S Mode
+ *  @param [in] length           - The transfer length
+ *  @param [in] format           - The format of the transfer
+ *  @param [in] padding          - The number of padding buts that have the be added to the transfer
+ *  @param [in] mclk_in          - The MCLK to use
+ *  @param [in] bclk_div         - The BCLK divider
+ *  @param [in] mclk_div         - The MCLK divider
+ *  @param [in] bclk_per_channel - The number of BCLK per channel
  */
 void i2s_init(i2s_mode_t mode, i2s_length_t length, i2s_format_t format,
               i2s_padding_t padding, i2s_master_input_clk_t mclk_in,
               i2s_bclk_div bclk_div, i2s_mclk_div_t mclk_div,
               i2s_bclk_per_channel_t bclk_per_channel);
 
-/** @brief   Read a specified number of bytes from the I2S FIFO.
+/** @brief Read a specified number of bytes from the I2S FIFO.
  *
  *  Reads x number of bytes from the I2S FIFO.
  *
- *  @param[out] data            Caller-allocated buffer to receive any bytes read.
- *  @param[in] num_bytes		Number of bytes to read from the FIFO.
+ *  @param [out] data      - Caller-allocated buffer to receive any bytes read.
+ *  @param [in]  num_bytes - Number of bytes to read from the FIFO.
  */
 size_t i2s_read(uint8_t *data, const size_t num_bytes);
 
@@ -193,8 +190,8 @@ size_t i2s_read(uint8_t *data, const size_t num_bytes);
  *  @warning Due to the hardware implementation of I2S, there is a performance hit when
  *           using this function with 24 bit input.
  *
- *  @param[in] data Buffer containing bytes to write.
- *  @param[in] num_bytes Number of bytes to write to the FIFO.
+ *  @param [in] data      - Buffer containing bytes to write.
+ *  @param [in] num_bytes - Number of bytes to write to the FIFO.
  */
 size_t i2s_write(const uint8_t *data, const size_t num_bytes);
 
@@ -219,18 +216,18 @@ size_t i2s_write(const uint8_t *data, const size_t num_bytes);
  *  | 14      | -                             | -                              |
  *  | 15 (MSB)| -                             | -                              |
  *
- *  @param mask The mask of bits to enable
+ *  @param [in] mask - The mask of bits to enable
  */
 void i2s_enable_int(uint16_t mask);
 
 /** @brief Disable interrupts on the I2S module
- *  @param mask The mask of bits to disable
+ *  @param [in] mask - The mask of bits to disable
  *  @see i2s_enable_int
  */
 void i2s_disable_int(uint16_t mask);
 
 /** @brief Clear interrupt flags on the I2S module
- *  @param mask The mask of bits to clear
+ *  @param [in] mask - The mask of bits to clear
  */
 void i2s_clear_int_flag(uint16_t mask);
 
@@ -241,7 +238,7 @@ uint16_t i2s_get_status(void);
 
 /** @brief Check if an interrupt has been fired
  *  @warning This function will clear the current interrupts you are checking for
- *  @param mask The mask of interrupts to check for
+ *  @param [in] mask - The mask of interrupts to check for
  *  @return 1 when an interrupt has fired, 0 otherwise.
  *  @see i2s_enable_int
  */

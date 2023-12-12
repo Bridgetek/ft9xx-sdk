@@ -171,7 +171,9 @@
 #define UART0        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0320))
 #define UART1        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0330))
 #define TIMER        ((ft900_timer_wdt_regs_t *)      (REGISTER_BASE_ADDR + 0x0340))
+
 #define I2S          ((ft900_i2s_regs_t *)            (REGISTER_BASE_ADDR + 0x0350))
+#define I2S_N        ((i2s_regs_t *)                  (REGISTER_BASE_ADDR + 0x0350))
 
 #define CAM          ((ft900_cam_regs_t *)            (REGISTER_BASE_ADDR + 0x0360))
 #define CAM_N        ((cam_regs_t *)                  (REGISTER_BASE_ADDR + 0x0360))
