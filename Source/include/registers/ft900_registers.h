@@ -164,7 +164,10 @@
 #define CAN1_N       ((can_regs_t *)                  (REGISTER_BASE_ADDR + 0x0260))
 
 #define RTCL         ((ft900_rtc_legacy_regs_t *)     (REGISTER_BASE_ADDR + 0x0280)) /* for FT900 Rev B */
+#define RTCL_N       ((rtc_legacy_regs_t *)           (REGISTER_BASE_ADDR + 0x0280)) /* for FT900 Rev B */
 #define RTC          ((ft900_rtc_regs_t *)            (REGISTER_BASE_ADDR + 0x0900)) /* for FT900 Rev C onwards */
+#define RTC_N        ((rtc_regs_t *)                  (REGISTER_BASE_ADDR + 0x0900)) /* for FT900 Rev C onwards */
+
 #define SPIM         ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev B */
 #define SPIM_EX      ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev C onwards */
 #define SPIS0        ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02C0)) /* for FT900 Rev B */
