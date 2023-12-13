@@ -115,7 +115,9 @@
 #define INTERRUPT_N    ((interrupt_regs_t *)            (REGISTER_BASE_ADDR + 0x0100))
 
 #define USBD           ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0200))
+
 #define RTC            ((ft900_rtc_regs_t *)            (REGISTER_BASE_ADDR + 0x0400))
+#define RTC_N          ((rtc_regs_t *)                  (REGISTER_BASE_ADDR + 0x0400))
 
 #define SPIM           ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x0440))
 #define SPIM_N         ((spim_regs_t *)                 (REGISTER_BASE_ADDR + 0x0440))
