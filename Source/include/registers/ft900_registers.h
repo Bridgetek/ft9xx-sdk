@@ -99,108 +99,113 @@
 
 #if defined(__FT930__)
 
-#define SYS          ((ft900_sys_regs_t *)            (REGISTER_BASE_ADDR + 0x0000))
-#define GPIO         ((ft900_gpio_regs_t *)           (REGISTER_BASE_ADDR + 0x001C))
-#define SLAVECPU     ((ft930_slave_control_regs_t *)  (REGISTER_BASE_ADDR + 0x00A8))
+#define SYS            ((ft900_sys_regs_t *)            (REGISTER_BASE_ADDR + 0x0000))
+#define GPIO           ((ft900_gpio_regs_t *)           (REGISTER_BASE_ADDR + 0x001C))
+#define SLAVECPU       ((ft930_slave_control_regs_t *)  (REGISTER_BASE_ADDR + 0x00A8))
 
-#define ADCDAC       ((ft900_adc_dac_regs_t *)        (REGISTER_BASE_ADDR + 0x00B0))
-#define ADCDAC_N     ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0))
+#define ADCDAC         ((ft900_adc_dac_regs_t *)        (REGISTER_BASE_ADDR + 0x00B0))
+#define ADCDAC_N       ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0))
 
-#define SYS_RST      ((ft900_sys_reset_regs_t *)      (REGISTER_BASE_ADDR + 0x00BC))
+#define SYS_RST        ((ft900_sys_reset_regs_t *)      (REGISTER_BASE_ADDR + 0x00BC))
 
-#define INTERRUPT    ((ft900_interrupt_regs_t *)      (REGISTER_BASE_ADDR + 0x0100))
-#define INTERRUPT_N  ((interrupt_regs_t *)            (REGISTER_BASE_ADDR + 0x0100))
+#define INTERRUPT      ((ft900_interrupt_regs_t *)      (REGISTER_BASE_ADDR + 0x0100))
+#define INTERRUPT_N    ((interrupt_regs_t *)            (REGISTER_BASE_ADDR + 0x0100))
 
-#define USBD         ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0200))
-#define RTC          ((ft900_rtc_regs_t *)            (REGISTER_BASE_ADDR + 0x0400))
-#define SPIM         ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x0440))
-#define SPIS0        ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x0480))
-#define SPIS1        ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x04C0))
+#define USBD           ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0200))
+#define RTC            ((ft900_rtc_regs_t *)            (REGISTER_BASE_ADDR + 0x0400))
+#define SPIM           ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x0440))
+#define SPIS0          ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x0480))
+#define SPIS1          ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x04C0))
 
-#define I2CM         ((ft900_i2cm_regs_t *)           (REGISTER_BASE_ADDR + 0x0500))
-#define I2CM_N       ((i2cm_regs_t *)                 (REGISTER_BASE_ADDR + 0x0500))
-#define I2CS         ((ft900_i2cs_regs_t *)           (REGISTER_BASE_ADDR + 0x0510))
-#define I2CS_N       ((i2cs_regs_t *)                 (REGISTER_BASE_ADDR + 0x0510))
+#define I2CM           ((ft900_i2cm_regs_t *)           (REGISTER_BASE_ADDR + 0x0500))
+#define I2CM_N         ((i2cm_regs_t *)                 (REGISTER_BASE_ADDR + 0x0500))
+#define I2CS           ((ft900_i2cs_regs_t *)           (REGISTER_BASE_ADDR + 0x0510))
+#define I2CS_N         ((i2cs_regs_t *)                 (REGISTER_BASE_ADDR + 0x0510))
 
-#define UART0        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0520))
-#define UART1        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0530))
-#define UART2        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0540))
-#define UART3        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0550))
-#define TIMER        ((ft900_timer_wdt_regs_t *)      (REGISTER_BASE_ADDR + 0x0560))
+#define UART0          ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0520))
+#define UART1          ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0530))
+#define UART2          ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0540))
+#define UART3          ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0550))
+#define TIMER          ((ft900_timer_wdt_regs_t *)      (REGISTER_BASE_ADDR + 0x0560))
 
-#define PWM          ((ft900_pwm_regs_t *)            (REGISTER_BASE_ADDR + 0x05B0))
-#define PWM_N        ((pwm_regs_t *)                  (REGISTER_BASE_ADDR + 0x05B0))
+#define PWM            ((ft900_pwm_regs_t *)            (REGISTER_BASE_ADDR + 0x05B0))
+#define PWM_N          ((pwm_regs_t *)                  (REGISTER_BASE_ADDR + 0x05B0))
 
-#define SDHOST       ((ft900_sdhost_regs_t *)         (REGISTER_BASE_ADDR + 0x0600))
-#define SDHOSTVENDOR ((ft900_sdhost_vendor_regs_t *)  (REGISTER_BASE_ADDR + 0x0700))
-#define FLASHCTRL    ((ft900_flash_regs_t *)          (REGISTER_BASE_ADDR + 0x0800))
+#define SDHOST         ((ft900_sdhost_regs_t *)         (REGISTER_BASE_ADDR + 0x0600))
+#define SDHOST_N       ((sdh_regs_t *)                  (REGISTER_BASE_ADDR + 0x0600))
+#define SDHOSTVENDOR   ((ft900_sdhost_vendor_regs_t *)  (REGISTER_BASE_ADDR + 0x0700))
+#define SDHOSTVENDOR_N ((sdh_vendor_regs_t *)           (REGISTER_BASE_ADDR + 0x0700))
+
+#define FLASHCTRL      ((ft900_flash_regs_t *)          (REGISTER_BASE_ADDR + 0x0800))
 
 #else
 
-#define SYS          ((ft900_sys_regs_t *)            (REGISTER_BASE_ADDR + 0x0000))
-#define GPIO         ((ft900_gpio_regs_t *)           (REGISTER_BASE_ADDR + 0x001C))
+#define SYS            ((ft900_sys_regs_t *)            (REGISTER_BASE_ADDR + 0x0000))
+#define GPIO           ((ft900_gpio_regs_t *)           (REGISTER_BASE_ADDR + 0x001C))
 
-#define ETHPHY       ((ft900_eth_phy_conf_reg_t *)    (REGISTER_BASE_ADDR + 0x00A8))
-#define ETHPHY_N     ((eth_phy_conf_reg_t *)          (REGISTER_BASE_ADDR + 0x00A8))
+#define ETHPHY         ((ft900_eth_phy_conf_reg_t *)    (REGISTER_BASE_ADDR + 0x00A8))
+#define ETHPHY_N       ((eth_phy_conf_reg_t *)          (REGISTER_BASE_ADDR + 0x00A8))
 
-#define ADCDAC       ((ft900_adc_dac_regs_t *)        (REGISTER_BASE_ADDR + 0x00B0))
-#define ADCDAC_N     ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0))
+#define ADCDAC         ((ft900_adc_dac_regs_t *)        (REGISTER_BASE_ADDR + 0x00B0))
+#define ADCDAC_N       ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0)  )
 
-#define SYS_RST      ((ft900_sys_reset_regs_t *)      (REGISTER_BASE_ADDR + 0x00BC)) /* for FT900 Rev C onwards */
+#define SYS_RST        ((ft900_sys_reset_regs_t *)      (REGISTER_BASE_ADDR + 0x00BC)) /* for FT900 Rev C onwards */
 
-#define INTERRUPT    ((ft900_interrupt_regs_t *)      (REGISTER_BASE_ADDR + 0x00C0))
-#define INTERRUPT_N  ((interrupt_regs_t *)            (REGISTER_BASE_ADDR + 0x00C0))
+#define INTERRUPT      ((ft900_interrupt_regs_t *)      (REGISTER_BASE_ADDR + 0x00C0))
+#define INTERRUPT_N    ((interrupt_regs_t *)            (REGISTER_BASE_ADDR + 0x00C0))
 
-#define EHCI         ((ft900_ehci_regs_t *)           (REGISTER_BASE_ADDR + 0x0100))
-#define USBD         ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0180))
-#define USBD_HBW     ((ft900_usbd_hbw_ctrl_regs_t *)  (REGISTER_BASE_ADDR + 0x0A1C)) /* for FT900 Rev C onwards */
+#define EHCI           ((ft900_ehci_regs_t *)           (REGISTER_BASE_ADDR + 0x0100))
+#define USBD           ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0180))
+#define USBD_HBW       ((ft900_usbd_hbw_ctrl_regs_t *)  (REGISTER_BASE_ADDR + 0x0A1C)) /* for FT900 Rev C onwards */
 
-#define ETH          ((ft900_eth_regs_t *)            (REGISTER_BASE_ADDR + 0x0220))
-#define ETH_N        ((eth_regs_t *)                  (REGISTER_BASE_ADDR + 0x0220))
+#define ETH            ((ft900_eth_regs_t *)            (REGISTER_BASE_ADDR + 0x0220))
+#define ETH_N          ((eth_regs_t *)                  (REGISTER_BASE_ADDR + 0x0220))
 
-#define CAN0         ((ft900_can_regs_t *)            (REGISTER_BASE_ADDR + 0x0240))
-#define CAN0_N       ((can_regs_t *)                  (REGISTER_BASE_ADDR + 0x0240))
-#define CAN1         ((ft900_can_regs_t *)            (REGISTER_BASE_ADDR + 0x0260))
-#define CAN1_N       ((can_regs_t *)                  (REGISTER_BASE_ADDR + 0x0260))
+#define CAN0           ((ft900_can_regs_t *)            (REGISTER_BASE_ADDR + 0x0240))
+#define CAN0_N         ((can_regs_t *)                  (REGISTER_BASE_ADDR + 0x0240))
+#define CAN1           ((ft900_can_regs_t *)            (REGISTER_BASE_ADDR + 0x0260))
+#define CAN1_N         ((can_regs_t *)                  (REGISTER_BASE_ADDR + 0x0260))
 
-#define RTCL         ((ft900_rtc_legacy_regs_t *)     (REGISTER_BASE_ADDR + 0x0280)) /* for FT900 Rev B */
-#define RTCL_N       ((rtc_legacy_regs_t *)           (REGISTER_BASE_ADDR + 0x0280)) /* for FT900 Rev B */
-#define RTC          ((ft900_rtc_regs_t *)            (REGISTER_BASE_ADDR + 0x0900)) /* for FT900 Rev C onwards */
-#define RTC_N        ((rtc_regs_t *)                  (REGISTER_BASE_ADDR + 0x0900)) /* for FT900 Rev C onwards */
+#define RTCL           ((ft900_rtc_legacy_regs_t *)     (REGISTER_BASE_ADDR + 0x0280)) /* for FT900 Rev B */
+#define RTCL_N         ((rtc_legacy_regs_t *)           (REGISTER_BASE_ADDR + 0x0280)) /* for FT900 Rev B */
+#define RTC            ((ft900_rtc_regs_t *)            (REGISTER_BASE_ADDR + 0x0900)) /* for FT900 Rev C onwards */
+#define RTC_N          ((rtc_regs_t *)                  (REGISTER_BASE_ADDR + 0x0900)) /* for FT900 Rev C onwards */
 
-#define SPIM         ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev B */
-#define SPIM_EX      ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev C onwards */
-#define SPIS0        ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02C0)) /* for FT900 Rev B */
-#define SPIS0_EX     ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02C0)) /* for FT900 Rev C onwards */
-#define SPIS1        ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02E0)) /* for FT900 Rev B */
-#define SPIS1_EX     ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02E0)) /* for FT900 Rev C onwards */
+#define SPIM           ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev B */
+#define SPIM_EX        ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev C onwards */
+#define SPIS0          ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02C0)) /* for FT900 Rev B */
+#define SPIS0_EX       ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02C0)) /* for FT900 Rev C onwards */
+#define SPIS1          ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02E0)) /* for FT900 Rev B */
+#define SPIS1_EX       ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02E0)) /* for FT900 Rev C onwards */
 
-#define I2CM         ((ft900_i2cm_regs_t *)           (REGISTER_BASE_ADDR + 0x0300))
-#define I2CM_N       ((i2cm_regs_t *)                 (REGISTER_BASE_ADDR + 0x0300))
-#define I2CS         ((ft900_i2cs_regs_t *)           (REGISTER_BASE_ADDR + 0x0310))
-#define I2CS_N       ((i2cs_regs_t *)                 (REGISTER_BASE_ADDR + 0x0310))
+#define I2CM           ((ft900_i2cm_regs_t *)           (REGISTER_BASE_ADDR + 0x0300))
+#define I2CM_N         ((i2cm_regs_t *)                 (REGISTER_BASE_ADDR + 0x0300))
+#define I2CS           ((ft900_i2cs_regs_t *)           (REGISTER_BASE_ADDR + 0x0310))
+#define I2CS_N         ((i2cs_regs_t *)                 (REGISTER_BASE_ADDR + 0x0310))
 
-#define UART0        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0320))
-#define UART1        ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0330))
-#define TIMER        ((ft900_timer_wdt_regs_t *)      (REGISTER_BASE_ADDR + 0x0340))
+#define UART0          ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0320))
+#define UART1          ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0330))
+#define TIMER          ((ft900_timer_wdt_regs_t *)      (REGISTER_BASE_ADDR + 0x0340))
 
-#define I2S          ((ft900_i2s_regs_t *)            (REGISTER_BASE_ADDR + 0x0350))
-#define I2S_N        ((i2s_regs_t *)                  (REGISTER_BASE_ADDR + 0x0350))
+#define I2S            ((ft900_i2s_regs_t *)            (REGISTER_BASE_ADDR + 0x0350))
+#define I2S_N          ((i2s_regs_t *)                  (REGISTER_BASE_ADDR + 0x0350))
 
-#define CAM          ((ft900_cam_regs_t *)            (REGISTER_BASE_ADDR + 0x0360))
-#define CAM_N        ((cam_regs_t *)                  (REGISTER_BASE_ADDR + 0x0360))
+#define CAM            ((ft900_cam_regs_t *)            (REGISTER_BASE_ADDR + 0x0360))
+#define CAM_N          ((cam_regs_t *)                  (REGISTER_BASE_ADDR + 0x0360))
 
-#define PWM          ((ft900_pwm_regs_t *)            (REGISTER_BASE_ADDR + 0x03C0))
-#define PWM_N        ((pwm_regs_t *)                  (REGISTER_BASE_ADDR + 0x03C0))
+#define PWM            ((ft900_pwm_regs_t *)            (REGISTER_BASE_ADDR + 0x03C0))
+#define PWM_N          ((pwm_regs_t *)                  (REGISTER_BASE_ADDR + 0x03C0))
 
-#define SDHOST       ((ft900_sdhost_regs_t *)         (REGISTER_BASE_ADDR + 0x0400))
-#define SDHOSTVENDOR ((ft900_sdhost_vendor_regs_t *)  (REGISTER_BASE_ADDR + 0x0500))
+#define SDHOST         ((ft900_sdhost_regs_t *)         (REGISTER_BASE_ADDR + 0x0400))
+#define SDHOST_N       ((sdh_regs_t *)                  (REGISTER_BASE_ADDR + 0x0400))
+#define SDHOSTVENDOR   ((ft900_sdhost_vendor_regs_t *)  (REGISTER_BASE_ADDR + 0x0500))
+#define SDHOSTVENDOR_N ((sdh_vendor_regs_t *)           (REGISTER_BASE_ADDR + 0x0500))
 
-#define FLASHCTRL    ((ft900_flash_regs_t *)          (REGISTER_BASE_ADDR + 0x0800))
-#define FLASHCTRL_N  ((flash_regs_t *)                (REGISTER_BASE_ADDR + 0x0800))
+#define FLASHCTRL      ((ft900_flash_regs_t *)          (REGISTER_BASE_ADDR + 0x0800))
+#define FLASHCTRL_N    ((flash_regs_t *)                (REGISTER_BASE_ADDR + 0x0800))
 
-#define EHCI_RAM     ((ft900_ehci_ram_t *)            (REGISTER_BASE_ADDR + 0x1000))
-#define EHCI_RAM_SIZE                                 (0x2000)
+#define EHCI_RAM       ((ft900_ehci_ram_t *)            (REGISTER_BASE_ADDR + 0x1000))
+#define EHCI_RAM_SIZE                                   (0x2000)
 
 #endif
 
