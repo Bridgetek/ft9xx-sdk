@@ -144,25 +144,6 @@ typedef union
   REG_ACCESS_U32         U;
 } irq_assign_12_15_reg_u;
 
-/** \brief IRQ12-15 Assignment Register */
-typedef struct
-{
-  uint32_t PR_12_ASSIGN   : 5;    ///< Priority assignment for interrupt 12
-  uint32_t Reserved_5_7   : 3;    ///< Reserved
-  uint32_t PR_13_ASSIGN   : 5;    ///< Priority assignment for interrupt 13
-  uint32_t Reserved_13_15 : 3;    ///< Reserved
-  uint32_t PR_14_ASSIGN   : 5;    ///< Priority assignment for interrupt 14
-  uint32_t Reserved_21_23 : 3;    ///< Reserved
-  uint32_t PR_15_ASSIGN   : 5;    ///< Priority assignment for interrupt 15
-  uint32_t Reserved_29_31 : 3;    ///< Reserved
-} irq_assign_12_15_reg_t;
-
-typedef union
-{
-  irq_assign_12_15_reg_t B;
-  REG_ACCESS_U32         U;
-} irq_assign_12_15_reg_u;
-
 /** \brief IRQ16-19 Assignment Register */
 typedef struct
 {
@@ -266,7 +247,7 @@ typedef struct
   __IO irq_assign_16_19_reg_u IRQ_16_19;
   __IO irq_assign_20_23_reg_u IRQ_20_23;
   __IO irq_assign_24_27_reg_u IRQ_24_27;
-  __IO irq_assign_28_31_reg_u IRQ_24_27;
+  __IO irq_assign_28_31_reg_u IRQ_28_31;
   __IO irq_cntl_reg_t         IRQ_CNTL;
 } interrupt_regs_t;
 

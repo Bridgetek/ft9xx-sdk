@@ -113,9 +113,13 @@
 
 #define USBD           ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0200))
 #define RTC            ((ft900_rtc_regs_t *)            (REGISTER_BASE_ADDR + 0x0400))
+
 #define SPIM           ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x0440))
+#define SPIM_N         ((spim_regs_t *)                 (REGISTER_BASE_ADDR + 0x0440))
 #define SPIS0          ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x0480))
+#define SPIS0_N        ((spis_regs_t *)                 (REGISTER_BASE_ADDR + 0x0480))
 #define SPIS1          ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x04C0))
+#define SPIS1_N        ((spis_regs_t *)                 (REGISTER_BASE_ADDR + 0x04C0))
 
 #define I2CM           ((ft900_i2cm_regs_t *)           (REGISTER_BASE_ADDR + 0x0500))
 #define I2CM_N         ((i2cm_regs_t *)                 (REGISTER_BASE_ADDR + 0x0500))
@@ -147,7 +151,7 @@
 #define ETHPHY_N       ((eth_phy_conf_reg_t *)          (REGISTER_BASE_ADDR + 0x00A8))
 
 #define ADCDAC         ((ft900_adc_dac_regs_t *)        (REGISTER_BASE_ADDR + 0x00B0))
-#define ADCDAC_N       ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0)  )
+#define ADCDAC_N       ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0))
 
 #define SYS_RST        ((ft900_sys_reset_regs_t *)      (REGISTER_BASE_ADDR + 0x00BC)) /* for FT900 Rev C onwards */
 
@@ -172,11 +176,17 @@
 #define RTC_N          ((rtc_regs_t *)                  (REGISTER_BASE_ADDR + 0x0900)) /* for FT900 Rev C onwards */
 
 #define SPIM           ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev B */
+#define SPIM_N         ((spim_origin_regs_t *)          (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev B */
 #define SPIM_EX        ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev C onwards */
+#define SPIM_EX_N      ((spim_regs_ex_t *)              (REGISTER_BASE_ADDR + 0x02A0)) /* for FT900 Rev C onwards */
 #define SPIS0          ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02C0)) /* for FT900 Rev B */
+#define SPIS0_N        ((spis_origin_regs_t *)          (REGISTER_BASE_ADDR + 0x02C0)) /* for FT900 Rev B */
 #define SPIS0_EX       ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02C0)) /* for FT900 Rev C onwards */
+#define SPIS0_EX_N     ((spis_extend_regs_t *)          (REGISTER_BASE_ADDR + 0x02C0)) /* for FT900 Rev C onwards */
 #define SPIS1          ((ft900_spi_regs_t *)            (REGISTER_BASE_ADDR + 0x02E0)) /* for FT900 Rev B */
+#define SPIS1_N        ((spis_origin_regs_t *)          (REGISTER_BASE_ADDR + 0x02E0)) /* for FT900 Rev B */
 #define SPIS1_EX       ((ft900_spi_regs_ex_t *)         (REGISTER_BASE_ADDR + 0x02E0)) /* for FT900 Rev C onwards */
+#define SPIS1_EX_N     ((spis_extend_regs_t *)          (REGISTER_BASE_ADDR + 0x02E0)) /* for FT900 Rev C onwards */
 
 #define I2CM           ((ft900_i2cm_regs_t *)           (REGISTER_BASE_ADDR + 0x0300))
 #define I2CM_N         ((i2cm_regs_t *)                 (REGISTER_BASE_ADDR + 0x0300))

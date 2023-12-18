@@ -554,7 +554,7 @@ typedef struct
 /** \brief Sleep Date Register */
 typedef union
 {
-  rtc_sleep_date_reg_u B;
+  rtc_sleep_date_reg_t B;
   REG_ACCESS_U32       U;
 } rtc_sleep_date_reg_u;
 
@@ -657,7 +657,7 @@ typedef struct
 /** \brief Current Counter Value Register */
 typedef union
 {
-  rtc_ccvr_reg_u B;
+  rtc_ccvr_reg_t B;
   REG_ACCESS_U32 U;
 } rtc_ccvr_reg_u;
 

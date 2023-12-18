@@ -316,7 +316,7 @@ typedef struct
                           ///< Slave device to a known state. A STOP condition will be generated.
                           ///< This bit will be automatically cleared.
 
-  uint8_t I@C_RST : 1;    ///< Resets the whole I2C Master controller.
+  uint8_t I2C_RST : 1;    ///< Resets the whole I2C Master controller.
 } i2cm_cntl_reg_t;
 
 /** \brief Status Register */
@@ -347,9 +347,9 @@ typedef struct
 
 typedef union
 {
-  i2cm_cntl_reg_t   B;
-  i2cm_status_reg_t B;
-  REG_ACCESS_U8   U;
+  i2cm_cntl_reg_t   CNTL;
+  i2cm_status_reg_t STATUS;
+  REG_ACCESS_U8     U;
 } i2cm_cntl_sts_reg_u;
 
 /** \brief Receive / Transmit Data Register */

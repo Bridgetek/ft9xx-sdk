@@ -81,24 +81,24 @@ int8_t dac_mode(uint8_t num, dac_mode_t mode)
 
   if (num == 0)
   {
-    if (mode == DAC_MODE_SINGLE)
+    if (mode == dac_mode_single)
     {
-      ADCDAC_N->DAC_CONF.B.DAC0_CONT = DAC_MODE_SINGLE;
+      ADCDAC_N->DAC_CONF.B.DAC0_CONT = dac_mode_single;
     }
     else
     {
-      ADCDAC_N->DAC_CONF.B.DAC0_CONT = DAC_MODE_CONTINUOUS;
+      ADCDAC_N->DAC_CONF.B.DAC0_CONT = dac_mode_continuous;
     }
   }
   else if (num == 1)
   {
-    if (mode == DAC_MODE_SINGLE)
+    if (mode == dac_mode_single)
     {
-      ADCDAC_N->DAC_CONF.B.DAC1_CONT = DAC_MODE_SINGLE;
+      ADCDAC_N->DAC_CONF.B.DAC1_CONT = dac_mode_single;
     }
     else
     {
-      ADCDAC_N->DAC_CONF.B.DAC1_CONT = DAC_MODE_CONTINUOUS;
+      ADCDAC_N->DAC_CONF.B.DAC1_CONT = dac_mode_continuous;
     }
   }
   else

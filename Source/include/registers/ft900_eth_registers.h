@@ -513,7 +513,7 @@ typedef union
 {
   eth_num_pkt_reg_t B;
   REG_ACCESS_U8     U;
-} eth_num_pkt_reg_t;
+} eth_num_pkt_reg_u;
 
 typedef struct
 {

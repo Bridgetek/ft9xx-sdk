@@ -175,11 +175,11 @@ typedef struct
                           ///< 1: Controller in reset mode; no frame reception and transmission are
                           ///< possible. This mode is used to configure the controller hardware
   uint8_t Reserved  : 5;  ///< Reserved
-} can_mode_t;
+} can_mode_st;
 
 typedef union
 {
-  can_mode_t    B;
+  can_mode_st   B;
   REG_ACCESS_U8 U;
 } can_mode_u;
 
