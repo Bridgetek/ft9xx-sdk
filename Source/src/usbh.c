@@ -174,6 +174,8 @@
 #undef USBH_DEBUG_MEM
 #undef USBH_DEBUG_ALLOC
 #undef USBH_DEBUG_XFER
+#undef USBH_DEBUG_XFER_DETAIL
+#undef USBH_DEBUG_UNLINK
 #undef USBH_DEBUG
 #undef USBH_DEBUG_ISO_ALLOC
 #include <ft900_uart_simple.h>
@@ -458,26 +460,46 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 	{
 		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) & (~MASK_EHCI_USBCMD_PSCH_EN);
 		while (EHCI_REG(usbsts) & MASK_EHCI_USBSTS_PSCH_STS) {};
-			}
+	}
+
+#if USBH_DEBUG_UNLINK
+	printf("\nunlink\nqTD %lx\n", hc_this_qtd);
+	printf("->next %lx\n", EHCI_MEM(hc_this_qtd->next));
+	printf("->token %lx\n", EHCI_MEM(hc_this_qtd->token));
+	printf("->buf %lx\n", EHCI_MEM(hc_this_qtd->buf));
+
+	printf("qH %lx\n", hc_this_qh);
+	printf("->next %lx\n", EHCI_MEM(hc_this_qh->next));
+	printf("->qtd_current %lx\n", EHCI_MEM(hc_this_qh->qtd_current));
+	printf("->ep_char_1 %lx\n", EHCI_MEM(hc_this_qh->ep_char_1));
+	printf("->ep_capab_2 %lx\n", EHCI_MEM(hc_this_qh->ep_capab_2));
+	printf("->overlay.next %lx\n", EHCI_MEM(hc_this_qh->transfer_overlay.next));
+	printf("->overlay.token %lx\n", EHCI_MEM(hc_this_qh->transfer_overlay.token));
+	printf("->overlay.buf %lx\n", EHCI_MEM(hc_this_qh->transfer_overlay.buf));
+#endif // USBH_DEBUG_UNLINK
 
 	// Check the transfer is still active.
 	token = EHCI_MEM(hc_this_qtd->token);
 	if (token & EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE)
-			{
+	{
 		USBH_qtd *hc_next_qtd = (USBH_qtd *)EHCI_MEM(hc_this_qh->transfer_overlay.next);
 		EHCI_MEM(hc_this_qtd->token) = token & (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
 		EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->qtd_current);
 		EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_MEM(hc_this_qh->qtd_current);
 		EHCI_MEM(hc_this_qh->qtd_current) = (uint32_t)hc_next_qtd;
-			}
+
+		// Setup transfer overlay to point to dummy qTD
+		EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_CPU_TO_HC(epThis->hc_dummy_qtd);
+		EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_CPU_TO_HC(epThis->hc_dummy_qtd);
+	}
 
 	// Restart the schedule.
 	if (xferThis->endpoint->type == USBH_EP_BULK)
-		{
+	{
 		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) | MASK_EHCI_USBCMD_ASCH_EN;
-		}
+	}
 	else
-		{
+	{
 		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) | MASK_EHCI_USBCMD_PSCH_EN;
 	}
 
@@ -1222,7 +1244,7 @@ static int8_t usbh_ep_list_remove(USBH_endpoint *epThis, USBH_endpoint *epListHe
 					{
 						usbh_write_periodic_list(i, link);
 #ifdef USBH_DEBUG_PERIODIC_LIST
-						printf("List remove: Changed periodic entry %d to %08x\r\n", i, link);
+						printf("List remove: Changed periodic entry %ld to %08lx\r\n", i, link);
 #endif // USBH_DEBUG_PERIODIC_LIST
 					}
 				}
@@ -2194,11 +2216,19 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 		// head to the current qTD (which is the new first qTD).
 		if (ep->hc_head_qtd == ep->hc_dummy_qtd)
 		{
+			// Always happens if there is one qTD in use.
 			ep->hc_head_qtd = hc_data_qtd;
 		}
 
 		CRITICAL_SECTION_END
 		// UNLOCK
+
+#ifdef USBH_DEBUG_XFER_DETAIL
+		printf("\n\ndata_qtd %p\n", &data_qtd);
+		printf("data_qtd->next %08lx\n", data_qtd.next);
+		printf("data_qtd->token %08lx\n", data_qtd.token);
+		printf("data_qtd->buf %p\n", data_qtd.buf);
+#endif // USBH_DEBUG_XFER_DETAIL
 
 		// Preserve the value of the token field of the SETUP request.
 		token = data_qtd.token;
@@ -2229,6 +2259,40 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 			xferNew->dest_buf = buffer;
 			xferNew->dest_len = 0;
 		}
+
+#ifdef USBH_DEBUG_XFER_DETAIL
+		printf("\ndata_qtd %p\n", &data_qtd);
+		printf("->next %08lx\n", data_qtd.next);
+		printf("->token %08lx\n", data_qtd.token);
+		printf("->buf %p\n", data_qtd.buf);
+
+		printf("\nep %lx\n", (uint32_t)(ep));
+		printf("->next %lx\n", (uint32_t)(ep->next));
+		printf("->list_next %lx\n", (uint32_t)(ep->list_next));
+		printf("->entry %lx\n", (uint32_t)(ep->hc_entry.qh));
+		printf("->head %lx\n", (uint32_t)(ep->hc_head_qtd));
+		printf("->dummy %lx\n", (uint32_t)(ep->hc_dummy_qtd));
+		printf("->direction %x\n", ep->direction);
+
+		printf("\nep qH %lx\n", (uint32_t)(ep->hc_entry.qh));
+		printf("->next %lx\n", EHCI_MEM(ep->hc_entry.qh->next));
+		printf("->qtd_current %lx\n", EHCI_MEM(ep->hc_entry.qh->qtd_current));
+		printf("->ep_char_1 %lx\n", EHCI_MEM(ep->hc_entry.qh->ep_char_1));
+		printf("->ep_capab_2 %lx\n", EHCI_MEM(ep->hc_entry.qh->ep_capab_2));
+		printf("->overlay.next %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.next));
+		printf("->overlay.token %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.token));
+		printf("->overlay.buf %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.buf));
+
+		printf("\nep head %lx\n", (uint32_t)(ep->hc_head_qtd));
+		printf("->next %lx\n", EHCI_MEM(ep->hc_head_qtd->next));
+		printf("->token %lx\n", EHCI_MEM(ep->hc_head_qtd->token));
+		printf("->buf %lx\n", EHCI_MEM(ep->hc_head_qtd->buf));
+
+		printf("\nep dummy %lx\n", (uint32_t)(ep->hc_dummy_qtd));
+		printf("->next %lx\n", EHCI_MEM(ep->hc_dummy_qtd->next));
+		printf("->token %lx\n", EHCI_MEM(ep->hc_dummy_qtd->token));
+		printf("->buf %lx\n", EHCI_MEM(ep->hc_dummy_qtd->buf));
+#endif // USBH_DEBUG_XFER_DETAIL
 
 		// Kick off the transfer by setting the active bit in the setup qTD.
 		// NOTE: setting the token in the qTD MUST be atomic
@@ -3442,6 +3506,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 						printf("Descriptor: Endpoint index: %d %s ", epNew->index, epNew->direction == USBH_DIR_IN?"in":"out");
 #endif // USBH_DEBUG_CONFIG_DESC
 
+						// Take the endpoint interval from the configuration descriptor.
 						epNew->interval = confEndpointDesc->bInterval;
 						if ((confEndpointDesc->bmAttributes & USB_ENDPOINT_DESCRIPTOR_ATTR_MASK) ==
 								USB_ENDPOINT_DESCRIPTOR_ATTR_BULK)
