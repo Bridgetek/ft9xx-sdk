@@ -170,7 +170,9 @@
 
 #define EHCI           ((ft900_ehci_regs_t *)           (REGISTER_BASE_ADDR + 0x0100))
 #define USBD           ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0180))
+
 #define USBD_HBW       ((ft900_usbd_hbw_ctrl_regs_t *)  (REGISTER_BASE_ADDR + 0x0A1C)) /* for FT900 Rev C onwards */
+#define USBD_HBW_N     ((usbd_hbw_ctrl_regs_t *)        (REGISTER_BASE_ADDR + 0x0A1C)) /* for FT900 Rev C onwards */
 
 #define ETH            ((ft900_eth_regs_t *)            (REGISTER_BASE_ADDR + 0x0220))
 #define ETH_N          ((eth_regs_t *)                  (REGISTER_BASE_ADDR + 0x0220))
