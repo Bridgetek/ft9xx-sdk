@@ -100,6 +100,8 @@
 #if defined(__FT930__)
 
 #define SYS            ((ft900_sys_regs_t *)            (REGISTER_BASE_ADDR + 0x0000))
+#define SYS_N          ((sys_regs_t *)                  (REGISTER_BASE_ADDR + 0x0000))
+
 #define GPIO           ((ft900_gpio_regs_t *)           (REGISTER_BASE_ADDR + 0x001C))
 #define SLAVECPU       ((ft930_slave_control_regs_t *)  (REGISTER_BASE_ADDR + 0x00A8))
 
@@ -107,6 +109,7 @@
 #define ADCDAC_N       ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0))
 
 #define SYS_RST        ((ft900_sys_reset_regs_t *)      (REGISTER_BASE_ADDR + 0x00BC))
+#define SYS_RST_N      ((sys_reset_regs_t *)            (REGISTER_BASE_ADDR + 0x00BC))
 
 #define INTERRUPT      ((ft900_interrupt_regs_t *)      (REGISTER_BASE_ADDR + 0x0100))
 #define INTERRUPT_N    ((interrupt_regs_t *)            (REGISTER_BASE_ADDR + 0x0100))
@@ -145,6 +148,8 @@
 #else
 
 #define SYS            ((ft900_sys_regs_t *)            (REGISTER_BASE_ADDR + 0x0000))
+#define SYS_N          ((sys_regs_t *)                  (REGISTER_BASE_ADDR + 0x0000))
+
 #define GPIO           ((ft900_gpio_regs_t *)           (REGISTER_BASE_ADDR + 0x001C))
 
 #define ETHPHY         ((ft900_eth_phy_conf_reg_t *)    (REGISTER_BASE_ADDR + 0x00A8))
@@ -154,6 +159,7 @@
 #define ADCDAC_N       ((adc_dac_regs_t *)              (REGISTER_BASE_ADDR + 0x00B0))
 
 #define SYS_RST        ((ft900_sys_reset_regs_t *)      (REGISTER_BASE_ADDR + 0x00BC)) /* for FT900 Rev C onwards */
+#define SYS_RST_N      ((sys_reset_regs_t *)            (REGISTER_BASE_ADDR + 0x00BC)) /* for FT900 Rev C onwards */
 
 #define INTERRUPT      ((ft900_interrupt_regs_t *)      (REGISTER_BASE_ADDR + 0x00C0))
 #define INTERRUPT_N    ((interrupt_regs_t *)            (REGISTER_BASE_ADDR + 0x00C0))
