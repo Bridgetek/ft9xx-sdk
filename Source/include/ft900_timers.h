@@ -1,10 +1,7 @@
 /**
     @file ft900_timers.h
 
-    @brief
-    Timers
-
-    
+    @brief Timers
 **/
 /*
  * ============================================================================
@@ -53,6 +50,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* INCLUDES ************************************************************************/
+
 #include <stdint.h>
 #include <stddef.h>
 
@@ -63,41 +61,42 @@ extern "C" {
 /** @brief Timer Select */
 typedef enum
 {
-    timer_select_a, /**< Timer A */
-    timer_select_b, /**< Timer B */
-    timer_select_c, /**< Timer C */
-    timer_select_d  /**< Timer D */
+  timer_select_a, /**< Timer A */
+  timer_select_b, /**< Timer B */
+  timer_select_c, /**< Timer C */
+  timer_select_d  /**< Timer D */
 } timer_select_t;
 
 /** @brief Timer count direction */
 typedef enum
 {
-    timer_direction_up,     /**< Count up */
-    timer_direction_down    /**< Count down */
+  timer_direction_up,     /**< Count up */
+  timer_direction_down    /**< Count down */
 } timer_direction_t;
 
 /** @brief Timer count mode */
 typedef enum
 {
-    timer_mode_continuous,  /**< Count continuous */
-    timer_mode_oneshot      /**< Count one shot */
+  timer_mode_continuous,  /**< Count continuous */
+  timer_mode_oneshot      /**< Count one shot */
 } timer_mode_t;
 
 /** @brief Timer prescaler select */
 typedef enum
 {
-    timer_prescaler_select_off, /**< Timer prescaler off */
-    timer_prescaler_select_on   /**< Timer prescaler on */
+  timer_prescaler_select_off, /**< Timer prescaler off */
+  timer_prescaler_select_on   /**< Timer prescaler on */
 } timer_prescaler_select_t;
 
 /* GLOBAL VARIABLES ****************************************************************/
 
 /* MACROS **************************************************************************/
+
 /**
     @brief      Macros to overload timer_prescaler() function.
     @details    Allows the timer_prescaler call to be made with either one parameter(prescaler)
-    			or two parameters (timer, prescaler).
-    			Based on code STARTUP_DFU(...) in ft900_startup_dfu.h
+                or two parameters (timer, prescaler).
+                Based on code STARTUP_DFU(...) in ft900_startup_dfu.h
  **/
 //@{
 
@@ -107,67 +106,69 @@ typedef enum
 #define TIMER_PRESCALER_1(x) TIMER_PRESCALER_2(timer_select_a, x)
 
 /// Macro to choose from multiple parameter list lengths.
-#define TIMER_PRESCALER_CHOOSER(_f1, _f2, _f3, ...) _f3
+#define TIMER_PRESCALER_CHOOSER(_f1, _f2, _f3, ...)     _f3
 #define TIMER_PRESCALER_RECOMPOSER(argsWithParentheses) TIMER_PRESCALER_CHOOSER argsWithParentheses
-#define TIMER_PRESCALER_CHOOSE_FROM_ARG_COUNT(...) TIMER_PRESCALER_RECOMPOSER((__VA_ARGS__, TIMER_PRESCALER_2, TIMER_PRESCALER_1, ))
+#define TIMER_PRESCALER_CHOOSE_FROM_ARG_COUNT(...) \
+        TIMER_PRESCALER_RECOMPOSER((__VA_ARGS__, TIMER_PRESCALER_2, TIMER_PRESCALER_1, ))
 
 #define timer_prescaler(...) TIMER_PRESCALER_CHOOSE_FROM_ARG_COUNT(__VA_ARGS__)(__VA_ARGS__)
 
 //@}
+
 /* FUNCTION PROTOTYPES *************************************************************/
 
 /** @brief Set up the prescaler
- *  @param timer [FT93x ONLY] The timer to set up
- *  @param prescaler The clock prescaler to apply to the timer
+ *  @param [in] timer     - [FT93x ONLY] The timer to set up
+ *  @param [in] prescaler - The clock prescaler to apply to the timer
  *  @returns On success a 0, otherwise -1
  *  @warning 1. This can only be used before starting timers, 2.
  */
 int8_t timer_prescaler_ex(timer_select_t timer, uint16_t prescaler);
 
 /** @brief Initialise a timer
- *  @param timer The timer to set up
- *  @param initial The initial value for the timer
- *  @param dir The direction that the timer should count in
- *  @param prescaler Whether or not this timer should use the prescaler
- *  @param mode If the timer should be continuously counting or a one shot
+ *  @param [in] timer     - The timer to set up
+ *  @param [in] initial   - The initial value for the timer
+ *  @param [in] dir       - The direction that the timer should count in
+ *  @param [in] prescaler - Whether or not this timer should use the prescaler
+ *  @param [in] mode      - If the timer should be continuously counting or a one shot
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_init(timer_select_t timer, uint16_t initial, timer_direction_t dir,
-        timer_prescaler_select_t prescaler, timer_mode_t mode);
+                  timer_prescaler_select_t prescaler, timer_mode_t mode);
 
 /** @brief Start a timer
- *  @param timer The timer to start
+ *  @param [in] timer - The timer to start
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_start(timer_select_t timer);
 
 /** @brief Stop a timer
- *  @param timer The timer to stop
+ *  @param [in] timer - The timer to stop
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_stop(timer_select_t timer);
 
 /** @brief Read the value of a timer
- *  @param timer The timer to read from
- *  @param value A pointer to store the value
+ *  @param [in] timer - The timer to read from
+ *  @param [in] value - A pointer to store the value
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_read(timer_select_t timer, uint16_t *value);
 
 /** @brief Enable the interrupt for a timer
- *  @param timer The timer to enable the interrupt for
+ *  @param [in] timer - The timer to enable the interrupt for
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_enable_interrupt(timer_select_t timer);
 
 /** @brief Disable the interrupt for a timer
- *  @param timer The timer to disable the interrupt for
+ *  @param [in] timer - The timer to disable the interrupt for
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_disable_interrupt(timer_select_t timer);
 
 /** @brief Check if a timer has been interrupted
- *  @param timer The timer to check
+ *  @param [in] timer - The timer to check
  *  @warning This function clears the current interrupt status bit
  *  @returns 1 for if a timer is interrupted, 0 if the timer is not interrupted, -1 otherwise
  */

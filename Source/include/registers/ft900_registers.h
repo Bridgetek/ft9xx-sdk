@@ -135,7 +135,9 @@
 #define UART1          ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0530))
 #define UART2          ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0540))
 #define UART3          ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0550))
+
 #define TIMER          ((ft900_timer_wdt_regs_t *)      (REGISTER_BASE_ADDR + 0x0560))
+#define TIMER_N        ((timer_wdt_regs_t *)            (REGISTER_BASE_ADDR + 0x0560))
 
 #define PWM            ((ft900_pwm_regs_t *)            (REGISTER_BASE_ADDR + 0x05B0))
 #define PWM_N          ((pwm_regs_t *)                  (REGISTER_BASE_ADDR + 0x05B0))
@@ -203,7 +205,9 @@
 
 #define UART0          ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0320))
 #define UART1          ((ft900_uart_regs_t *)           (REGISTER_BASE_ADDR + 0x0330))
+
 #define TIMER          ((ft900_timer_wdt_regs_t *)      (REGISTER_BASE_ADDR + 0x0340))
+#define TIMER_N        ((timer_wdt_regs_t *)            (REGISTER_BASE_ADDR + 0x0340))
 
 #define I2S            ((ft900_i2s_regs_t *)            (REGISTER_BASE_ADDR + 0x0350))
 #define I2S_N          ((i2s_regs_t *)                  (REGISTER_BASE_ADDR + 0x0350))
