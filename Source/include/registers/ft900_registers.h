@@ -170,6 +170,7 @@
 #define INTERRUPT_N    ((interrupt_regs_t *)            (REGISTER_BASE_ADDR + 0x00C0))
 
 #define EHCI           ((ft900_ehci_regs_t *)           (REGISTER_BASE_ADDR + 0x0100))
+#define EHCI_N         ((ehci_regs_t *)                 (REGISTER_BASE_ADDR + 0x0100))
 
 #define USBD           ((ft900_usbd_regs_t *)           (REGISTER_BASE_ADDR + 0x0180))
 #define USBD_N         ((usbd_regs_t *)                 (REGISTER_BASE_ADDR + 0x0180))
