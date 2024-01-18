@@ -448,36 +448,109 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 		return;
 	}
 
-	// Stop the periodic or async schedule
 	if (xferThis->endpoint->type == USBH_EP_BULK)
 	{
-		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) & (~MASK_EHCI_USBCMD_ASCH_EN);
-		while (EHCI_REG(usbsts) & MASK_EHCI_USBSTS_ASCH_STS) {};
+		USBH_qtd *hc_prev_qtd;
+		// Deactivate target qTD.
+		token = EHCI_MEM(hc_this_qtd->token);
+		token &= (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
+		// Deactivate it.
+		EHCI_MEM(hc_this_qtd->token) = token;
+
+		// Check if the qh->current_qtd points to the qTD of the transfer.
+		// If it does then the overlay is from the qTD we need to unlink.
+		if (EHCI_HC_TO_CPU(EHCI_MEM(hc_this_qh->qtd_current)) == (uint32_t)hc_this_qtd)
+		{
+#ifdef USBH_DEBUG_XFER
+			printf("Stopping in overlay\r\n");
+#endif // USBH_DEBUG_XFER
+
+			// Stop the transfer in the overlay.
+			token &= (~MASK_EHCI_QUEUE_TD_TOKEN_TOGGLE);
+			token |= (EHCI_MEM(hc_this_qh->transfer_overlay.token) & MASK_EHCI_QUEUE_TD_TOKEN_TOGGLE);
+
+			EHCI_MEM(hc_this_qh->transfer_overlay.token) = token;
+
+			// Wait for a short time to ensure that the controller passes this
+			// qTD and writes back the overlay.
+			delayms(1);
+			// Re-write the overlay.
+			EHCI_MEM(hc_this_qh->transfer_overlay.token) = token;
+		};
+
+		// Go through queue headers list of qTDs to find the right qTD to remove.
+		hc_prev_qtd = epThis->hc_head_qtd;
+
+		if (hc_prev_qtd == hc_this_qtd)
+		{
+			// The qTD to unlink is the first one in the endpoint's list.
+#ifdef USBH_DEBUG_XFER
+			printf("Unlink qTD: first entry unlinked (overlay)\r\n");
+#endif // USBH_DEBUG_XFER
+		}
+		else
+		{
+			do {
+				// If the next entry is the qTD to unlink then stop.
+				if (EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)) == EHCI_CPU_TO_HC(hc_this_qtd))
+				{
+					break;
+				}
+				if (EHCI_TERMINATE_TD(EHCI_MEM(hc_prev_qtd->next)))
+				{
+					break;
+				}
+				hc_prev_qtd = (USBH_qtd *)EHCI_HC_TO_CPU(EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)));
+				// Stop if we reach the right qTD.
+			} while (hc_prev_qtd != hc_this_qtd);
+
+			if (hc_prev_qtd == hc_this_qtd)
+			{
+#ifdef USBH_DEBUG_XFER
+				printf("Unlink qTD Error: could not find xfer qtd\r\n");
+#endif // USBH_DEBUG_XFER
+				return;
+			}
+
+			// Bypass this qTD in the list.
+			EHCI_MEM(hc_prev_qtd->next) = EHCI_NEXT_TD(EHCI_MEM(hc_this_qtd->next)) |
+					EHCI_TERMINATE_TD(EHCI_MEM(hc_prev_qtd->next));
+
+#ifdef USBH_DEBUG_XFER
+			printf("Unlink qTD: unlinked mid-list entry\r\n");
+#endif // USBH_DEBUG_XFER
+
+			// Deactivate QH current aTD overlay.
+			if (EHCI_MEM(hc_this_qh->qtd_current) == EHCI_HC_TO_CPU(hc_this_qtd))
+			{
+				EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->next);
+
+#ifdef USBH_DEBUG_XFER
+				printf("Unlink qTD: unlinked mid-list overlay\r\n");
+#endif // USBH_DEBUG_XFER
+			}
+		}
 	}
-	else
+	else if ((xferThis->endpoint->type == USBH_EP_INT) ||
+			(xferThis->endpoint->type == USBH_EP_ISOC))
 	{
+		// Stop the async schedule to remove the qTD.
+
 		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) & (~MASK_EHCI_USBCMD_PSCH_EN);
 		while (EHCI_REG(usbsts) & MASK_EHCI_USBSTS_PSCH_STS) {};
-			}
 
-	// Check the transfer is still active.
-	token = EHCI_MEM(hc_this_qtd->token);
-	if (token & EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE)
-			{
-		USBH_qtd *hc_next_qtd = (USBH_qtd *)EHCI_MEM(hc_this_qh->transfer_overlay.next);
-		EHCI_MEM(hc_this_qtd->token) = token & (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
-		EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->qtd_current);
-		EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_MEM(hc_this_qh->qtd_current);
-		EHCI_MEM(hc_this_qh->qtd_current) = (uint32_t)hc_next_qtd;
-			}
-
-	// Restart the schedule.
-	if (xferThis->endpoint->type == USBH_EP_BULK)
+		// Check the transfer is still active.
+		token = EHCI_MEM(hc_this_qtd->token);
+		if (token & EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE)
 		{
-		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) | MASK_EHCI_USBCMD_ASCH_EN;
+			USBH_qtd *hc_next_qtd = (USBH_qtd *)EHCI_MEM(hc_this_qh->transfer_overlay.next);
+			EHCI_MEM(hc_this_qtd->token) = token & (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
+			EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->qtd_current);
+			EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_MEM(hc_this_qh->qtd_current);
+			EHCI_MEM(hc_this_qh->qtd_current) = (uint32_t)hc_next_qtd;
 		}
-	else
-		{
+
+		// Restart the schedule.
 		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) | MASK_EHCI_USBCMD_PSCH_EN;
 	}
 
@@ -3172,14 +3245,18 @@ static int8_t usbh_hub_port_remove(USBH_device *hubDev, uint8_t hubPort)
 			usbh_dev_disconnect(hubDev);
 		}
 
-		// Stop EHCI hardware.
-		usbh_hw_stop();
-		// Delay for at least 16 microframes to scheduler to park
-		// at dummy qH.
-		delayms(2);
+		// Check EHCI hardware is running.
+		if (EHCI_REG(usbcmd) & MASK_EHCI_USBCMD_RS)
+		{
+			// Stop EHCI hardware.
+			usbh_hw_stop();
+			// Delay for at least 16 microframes to scheduler to park
+			// at dummy qH.
+			delayms(2);
 
-		// Check it has halted.
-		while ((EHCI_REG(usbsts) & MASK_EHCI_USBSTS_HCHalted) == 0);
+			// Check it has halted.
+			while ((EHCI_REG(usbsts) & MASK_EHCI_USBSTS_HCHalted) == 0);
+		}
 
 		// Reset addressing
 		devAddr = 1;
@@ -3214,6 +3291,9 @@ static int8_t usbh_hub_port_remove(USBH_device *hubDev, uint8_t hubPort)
 			devChild = devNext;
 		}
 	}
+
+	usbh_update_transactions(&usbh_xferList);
+	usbh_update_transactions(&usbh_xferListPeriodic);
 
 	return status;
 }
