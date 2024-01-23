@@ -130,7 +130,10 @@ typedef enum
 	i2s_bclk_div_32 = 0x0009,   /*!< Divide BCLK by 32 */
 	i2s_bclk_div_48 = 0x000A,   /*!< Divide BCLK by 48 */
 	i2s_bclk_div_64 = 0x000B    /*!< Divide BCLK by 64 */
-} i2s_bclk_div;
+} i2s_bclk_div_t;
+
+/** @brief I2S BCLK speed definition deprecated to keep API compatible. */
+typedef i2s_bclk_div_t i2s_bclk_div __attribute__((deprecated));
 
 /** @brief I2S MCLK speed definitions */
 typedef enum
@@ -174,7 +177,7 @@ typedef enum
  */
 void i2s_init(i2s_mode_t mode, i2s_length_t length, i2s_format_t format,
               i2s_padding_t padding, i2s_master_input_clk_t mclk_in,
-              i2s_bclk_div bclk_div, i2s_mclk_div_t mclk_div,
+              i2s_bclk_div_t bclk_div, i2s_mclk_div_t mclk_div,
               i2s_bclk_per_channel_t bclk_per_channel);
 
 /** @brief   Read a specified number of bytes from the I2S FIFO.

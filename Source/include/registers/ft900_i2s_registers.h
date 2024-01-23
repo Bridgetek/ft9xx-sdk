@@ -278,6 +278,16 @@ typedef struct
 
 /* MACROS **************************************************************************/
 
+/**
+    @name    Definitions for I2S FIFO sizes.
+    @details Definitions for size of the transmit and receive FIFOs available for the I2S interface.
+			 There are 2 kB of FIFO for both receiving and transmitting channels on I2S
+ **/
+//@{
+#define I2S_FIFO_READ (2048)
+#define I2S_FIFO_WRITE (2048)
+//@}
+
 /* FUNCTION PROTOTYPES *************************************************************/
 
 #endif /* FT900_I2S_REGISTERS_H_ */
