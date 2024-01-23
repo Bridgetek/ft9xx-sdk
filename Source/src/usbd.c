@@ -378,9 +378,11 @@ static const uint8_t USBD_test_pattern_bytes[53] =
 #endif // USBD_ENDPOINT_CHECKS
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
-__attribute__((weak)) void USBD_pipe_isr_start(void);
-__attribute__((weak)) void USBD_pipe_isr_stop(void);
-__attribute__((weak)) void USBD_pipe_isr(uint16_t pipe_bitfields);
+
+__attribute__((weak)) void USBDX_pipe_isr_start(void);
+__attribute__((weak)) void USBDX_pipe_isr_stop(void);
+__attribute__((weak)) void USBDX_pipe_isr(uint16_t pipe_bitfields);
+
 __attribute__((weak)) int8_t USBD_standard_req_get_descriptor(
 		USB_device_request *req);
 
@@ -1460,7 +1462,7 @@ static bool usbd_wait_epx_in_ready(USBD_ENDPOINT_NUMBER   ep_number)
 		if (!USBD_transfer_timeout)
 		{
 			/** clear an in-process transaction */
-			/* Writing a ‘1’ to this bit flushes the next packet to be transmitted from the Endpoint 1 IN FIFO.
+			/* Writing a '1' to this bit flushes the next packet to be transmitted from the Endpoint 1 IN FIFO.
 			 * The FIFO pointer is reset and the INPRDY bit is cleared.
 			 **/
 			USBD_EP_SR_REG(ep_number) = (MASK_USBD_EPxSR_FIFO_FLUSH);
