@@ -379,10 +379,6 @@ static const uint8_t USBD_test_pattern_bytes[53] =
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
-__attribute__((weak)) void USBDX_pipe_isr_start(void);
-__attribute__((weak)) void USBDX_pipe_isr_stop(void);
-__attribute__((weak)) void USBDX_pipe_isr(uint16_t pipe_bitfields);
-
 __attribute__((weak)) int8_t USBD_standard_req_get_descriptor(
 		USB_device_request *req);
 
