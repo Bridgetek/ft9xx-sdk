@@ -348,10 +348,9 @@ static const uint8_t USBD_test_pattern_bytes[53] =
 #endif // USBD_ENDPOINT_CHECKS
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
-__attribute__((weak)) void USBD_pipe_isr_start(void);
-__attribute__((weak)) void USBD_pipe_isr_stop(void);
-__attribute__((weak)) void USBD_pipe_isr(uint16_t pipe_bitfields);
-__attribute__((weak)) int8_t USBD_standard_req_get_descriptor(USB_device_request *req);
+
+__attribute__((weak)) int8_t USBD_standard_req_get_descriptor(
+		USB_device_request *req);
 
 static int32_t usbd_out_request(uint8_t ep_number, uint8_t *buffer, size_t length, size_t offset);
 static int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t length, size_t offset);

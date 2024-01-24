@@ -68,7 +68,7 @@ i2s_mode_t i2s_mode; /**< Variable to indicate if the device is I2S master or sl
 
 void i2s_init(i2s_mode_t mode, i2s_length_t length, i2s_format_t format,
               i2s_padding_t padding, i2s_master_input_clk_t mclk_in,
-              i2s_bclk_div bclk_div, i2s_mclk_div_t mclk_div,
+              i2s_bclk_div_t bclk_div, i2s_mclk_div_t mclk_div,
               i2s_bclk_per_channel_t bclk_per_channel)
 {
   uint16_t tmp = 0x0000;

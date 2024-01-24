@@ -85,7 +85,7 @@ endif
 CFLAGS+=-Wall -fmessage-length=0 -ffunction-sections 
 # Toolchain default include directory incase it does not find anything in the
 # other include directories. Note this the last -I parameter.
-CFLAGS+= -I"$(FT9XX_TOOLCHAIN)\hardware\include"
+CFLAGS+= -I"$(FT9XX_TOOLCHAIN)/hardware/include"
 
 # Assembler Flags
 
