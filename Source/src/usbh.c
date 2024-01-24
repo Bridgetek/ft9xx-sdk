@@ -249,9 +249,15 @@ static USBH_endpoint *usbh_async_ep_list;
 /**
     @name    EHCI Root hub and port statuses
     @details Keep track of changes in root hub and root hub port status.
+    The currentPortStatus global variable is accessed from an interrupt
+    service routine. It must therefore be treated as volatile and to
+    guarantee atomic access must be written and read from a critical
+    section. The currentHubStatus is accessed normally.
+    Both structures are defined as 32 bits. The low 16 bits contain
+    the status and the high 16 bits are change bits.
  **/
 //@{
-static USB_hub_port_status currentPortStatus;
+static volatile USB_hub_port_status currentPortStatus;
 static USB_hub_status currentHubStatus;
 //@}
 
@@ -548,8 +554,11 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 			EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->qtd_current);
 			EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_MEM(hc_this_qh->qtd_current);
 			EHCI_MEM(hc_this_qh->qtd_current) = (uint32_t)hc_next_qtd;
-		}
 
+			// Setup transfer overlay to point to dummy qTD
+			EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_CPU_TO_HC(epThis->hc_dummy_qtd);
+			EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_CPU_TO_HC(epThis->hc_dummy_qtd);
+		}
 		// Restart the schedule.
 		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) | MASK_EHCI_USBCMD_PSCH_EN;
 	}
@@ -2768,8 +2777,10 @@ static uint8_t usbh_get_hub_status_worker(USBH_device *hubDev, uint8_t index, US
 
 	if (hubDev == NULL)
 	{
+		CRITICAL_SECTION_BEGIN
 		usbh_hw_update_root_hub_port_status();
-		memcpy(buf, &currentPortStatus, sizeof(USB_hub_port_status));
+		memcpy(buf, (void *)&currentPortStatus, sizeof(USB_hub_port_status));
+		CRITICAL_SECTION_END
 	}
 	else
 	{
@@ -2864,16 +2875,15 @@ static uint8_t usbh_set_hub_port_feature(USBH_device *hubDev, uint8_t hubPort, u
 		{
 			uint32_t val;
 			// Port Features
+			CRITICAL_SECTION_BEGIN
 			switch (feature)
 			{
 			case USB_HUB_CLASS_FEATURE_PORT_RESET:
-				CRITICAL_SECTION_BEGIN
 				// Assert port reset.
 				val = EHCI_REG(portsc);
 				val |= MASK_EHCI_PORTSC_PO_RESET;
 				val &= (~MASK_EHCI_PORTSC_PO_EN);
 				EHCI_REG(portsc) = val;
-				CRITICAL_SECTION_END
 				currentPortStatus.portResetChange = 1;
 				break;
 			case USB_HUB_CLASS_FEATURE_PORT_SUSPEND:
@@ -2910,6 +2920,7 @@ static uint8_t usbh_set_hub_port_feature(USBH_device *hubDev, uint8_t hubPort, u
 				status = USBH_ERR_USBERR;
 				break;
 			}
+			CRITICAL_SECTION_END
 		}
 	}
 
@@ -2964,6 +2975,7 @@ static uint8_t usbh_clear_hub_port_feature(USBH_device *hubDev, uint8_t hubPort,
 			uint32_t val;
 
 			// Port Features
+			CRITICAL_SECTION_BEGIN
 			switch (feature)
 			{
 			case USB_HUB_CLASS_FEATURE_PORT_RESET:
@@ -3022,6 +3034,7 @@ static uint8_t usbh_clear_hub_port_feature(USBH_device *hubDev, uint8_t hubPort,
 				status = USBH_ERR_USBERR;
 				break;
 			}
+			CRITICAL_SECTION_END
 		}
 	}
 
@@ -3142,9 +3155,11 @@ static int8_t usbh_hub_port_update(USBH_device *hubDev, uint8_t hubPort, uint8_t
 	}
 	else
 	{
+		CRITICAL_SECTION_BEGIN
 		usbh_hw_update_root_hub_port_status();
 		//Note: struct copy operation
 		portStatus = currentPortStatus;
+		CRITICAL_SECTION_END
 
 		status = USBH_OK;
 	}
@@ -3161,9 +3176,11 @@ static int8_t usbh_hub_port_update(USBH_device *hubDev, uint8_t hubPort, uint8_t
 		}
 		else
 		{
+			CRITICAL_SECTION_BEGIN
 			usbh_hw_update_root_hub_port_status();
 			//Note: struct copy operation
 			portStatus = currentPortStatus;
+			CRITICAL_SECTION_END
 		}
 
 		connectStatus = portStatus.currentConnectStatus;
@@ -4930,7 +4947,7 @@ static void usbh_hw_update_root_hub_status(void)
 	uint32_t change, value;
 
 	// Copy previous status mask to change variable.
-	memcpy(&change, &currentHubStatus, sizeof(change));
+	memcpy(&change, (void *)&currentHubStatus, sizeof(change));
 
 	// Read EHCI registers.
 	busctrl = EHCI_REG(busctrl);
@@ -4951,9 +4968,14 @@ static void usbh_hw_update_root_hub_status(void)
 	value |= change;
 
 	// Update current status mask and change mask.
-	memcpy(&currentHubStatus, &value, sizeof(currentHubStatus));
+	memcpy((void *)&currentHubStatus, &value, sizeof(USB_hub_status));
 }
 
+// Note: this function is called from a critical section.
+// Also note: this function depends on the sizeof(USB_hub_port_status)
+// being 32 bits in total. It is defined as 32 bits in the EHCI
+// specification, upper 16 bits are the changed bits for the lower
+// 16 bits.
 static void usbh_hw_update_root_hub_port_status(void)
 {
 	// EHCI registers used to work out port status.
@@ -4964,7 +4986,7 @@ static void usbh_hw_update_root_hub_port_status(void)
 	//USB_hub_port_status lastPortStatus;
 
 	// Copy previous status mask to change variable.
-	memcpy(&change, &currentPortStatus, sizeof(change));
+	memcpy(&change, (uint32_t *)&currentPortStatus, sizeof(change));
 
 	busctrl = EHCI_REG(busctrl);
 	portsc = EHCI_REG(portsc);
@@ -4986,7 +5008,7 @@ static void usbh_hw_update_root_hub_port_status(void)
 	currentPortStatus.portSuspend = portsc >> BIT_EHCI_PORTSC_PO_SUSP;
 
 	// Copy current mask to calculate change mask.
-	memcpy(&value, &currentPortStatus, sizeof(value));
+	memcpy(&value, (uint32_t *)&currentPortStatus, sizeof(value));
 
 	// Update change bits using exclusive or.
 	change = (change & 0xffff) ^ (value & 0xffff);
@@ -4996,7 +5018,7 @@ static void usbh_hw_update_root_hub_port_status(void)
 	value |= change;
 
 	// Update current status mask and change mask.
-	memcpy(&currentPortStatus, &value, sizeof(currentHubStatus));
+	memcpy((uint32_t *)&currentPortStatus, &value, sizeof(USB_hub_port_status));
 }
 
 void usbh_hw_wait_for_doorbell(void)
@@ -5174,8 +5196,10 @@ void USBH_initialise(USBH_ctx *ctx)
 		usbh_aoa_compat_delay = ctx->aoa_compatibility_delay;
 	}
 
-	memset(&currentPortStatus, 0, sizeof(currentPortStatus));
-	memset(&currentHubStatus, 0, sizeof(currentHubStatus));
+	CRITICAL_SECTION_BEGIN
+	memset((void *)&currentPortStatus, 0, sizeof(currentPortStatus));
+	CRITICAL_SECTION_END
+  memset((void *)&currentHubStatus, 0, sizeof(currentHubStatus));
 
 	// Clear Status Register
 	usbh_hw_clrsts();
@@ -5198,8 +5222,8 @@ void USBH_finalise(void)
 	interrupt_detach(interrupt_usb_host);
 
 	CRITICAL_SECTION_BEGIN
-				   usbh_intr_xfer = 0;
-				   usbh_intr_port = 0;
+	usbh_intr_xfer = 0;
+	usbh_intr_port = 0;
 	CRITICAL_SECTION_END
 
 	// Clear Status Register
@@ -6109,9 +6133,11 @@ int8_t USBH_get_hub_port_status(USBH_device_handle hub,
 	}
 	else
 	{
+		CRITICAL_SECTION_BEGIN
 		usbh_hw_update_root_hub_port_status();
 		//Note: struct copy operation
 		*portStatus = currentPortStatus;
+		CRITICAL_SECTION_END
 	}
 
 	return status;
