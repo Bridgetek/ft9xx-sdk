@@ -181,6 +181,9 @@
 #endif // USBH_LIBRARY_DEBUG_ENABLED
 //@}
 
+// TO MOVE TO ft900_usbh_internal.h
+#define USBH_COMPLETE_TIMEOUT 0x02
+
 /* GLOBAL VARIABLES ****************************************************************/
 
 /* LOCAL VARIABLES *****************************************************************/
@@ -551,8 +554,8 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 		{
 			USBH_qtd *hc_next_qtd = (USBH_qtd *)EHCI_MEM(hc_this_qh->transfer_overlay.next);
 			EHCI_MEM(hc_this_qtd->token) = token & (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
-			EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->qtd_current);
-			EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_MEM(hc_this_qh->qtd_current);
+			//EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->qtd_current);
+			//EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_MEM(hc_this_qh->qtd_current);
 			EHCI_MEM(hc_this_qh->qtd_current) = (uint32_t)hc_next_qtd;
 
 			// Setup transfer overlay to point to dummy qTD
@@ -745,8 +748,7 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 	// Decrement timeout on all current transactions
 	while (xferThis)
 	{
-
-		if (xferThis->timeout > 0)
+		if ((xferThis->timeout > 0) && (xferThis->status == USBH_NOT_COMPLETE))
 		{
 			xferThis->timeout--;
 			if (xferThis->timeout == 0)
@@ -756,10 +758,9 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 					token = EHCI_MEM(xferThis->hc_qtd->token);
 					if (token & EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE)
 					{
-						// Timeout expired.
-						usbh_unlink_qtd(xferThis);
+            EHCI_MEM(xferThis->hc_qtd->token) = token & (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
 
-						xferThis->status = USBH_ERR_TIMEOUT;
+						xferThis->status = USBH_COMPLETE_TIMEOUT;
 						// Expired transaction is removed by USBH_process
 
 #ifdef USBH_DEBUG_XFER
@@ -770,12 +771,11 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 				else if (xferThis->hc_entry.type == USBH_list_entry_type_siTD)
 				{
 					token = EHCI_MEM(xferThis->hc_entry.siTD->transfer_state);
-
 					if (token & EHCI_SPLIT_ISO_TD_STATUS_ACTIVE)
 					{
-						EHCI_MEM(xferThis->hc_entry.siTD->transfer_state) = token & ~EHCI_SPLIT_ISO_TD_STATUS_ACTIVE;
+						EHCI_MEM(xferThis->hc_entry.siTD->transfer_state) = token & (~EHCI_SPLIT_ISO_TD_STATUS_ACTIVE);
 
-						xferThis->status = USBH_ERR_TIMEOUT;
+						xferThis->status = USBH_COMPLETE_TIMEOUT;
 						// Expired transaction is removed by USBH_process
 
 #ifdef USBH_DEBUG_XFER
@@ -798,10 +798,10 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 						for (microframe = 0; microframe < 8; microframe++)
 						{
 							token = EHCI_MEM(xferThis->hc_entry.iTD->status_control_list[microframe]);
-							EHCI_MEM(xferThis->hc_entry.iTD->status_control_list[microframe]) = token & ~EHCI_ISO_TD_STATUS_ACTIVE;
+							EHCI_MEM(xferThis->hc_entry.iTD->status_control_list[microframe]) = token & (~EHCI_ISO_TD_STATUS_ACTIVE);
 						}
 
-						xferThis->status = USBH_ERR_TIMEOUT;
+						xferThis->status = USBH_COMPLETE_TIMEOUT;
 						// Expired transaction is removed by USBH_process
 #ifdef USBH_DEBUG_XFER
 						printf("Xfer: timeout iTD %08x token %08x\r\n", xferThis->hc_entry.iTD, token);
@@ -887,7 +887,8 @@ static int8_t usbh_hub_change(uint32_t id, int8_t status, size_t len, uint8_t *c
 
 static void usbh_update_transactions(USBH_xfer **list)
 {
-	USBH_xfer *xferThis;
+  USBH_xfer *xferThis;
+  USBH_xfer *xferNext;
 
 	// Signal all the completed transactions for non-Period transfers
 	xferThis = *list;
@@ -895,7 +896,9 @@ static void usbh_update_transactions(USBH_xfer **list)
 
 	while (xferThis)
 	{
-		// Is xferThis completed?
+    xferNext = xferThis->next;
+
+    // Is xferThis completed?
 		status = usbh_xfer_complete(xferThis);
 		if (status != USBH_NOT_COMPLETE)
 		{
@@ -974,15 +977,11 @@ static void usbh_update_transactions(USBH_xfer **list)
 					usbh_xfer_remove(xferThis, list);
 					usbh_free_transfer(xferThis);
 				}
-				else
-				{
-					//CRITICAL_SECTION_END
-				}
 			}
 		}
 
 		// Move to next item in list
-		xferThis = xferThis->next;
+		xferThis = xferNext;
 	}; // while
 }
 
@@ -1827,6 +1826,19 @@ static int8_t usbh_xfer_complete(USBH_xfer *xferComplete)
 		// Store new status in the transfer.
 		xferComplete->status = status;
 	}
+	else if (xferComplete->status == USBH_COMPLETE_TIMEOUT)
+	{
+	  // Complete any xfers that have timed out.
+    if (xferComplete->hc_entry.type == USBH_list_entry_type_qH)
+    {
+      // xfer will be removed in caller usbh_update_transactions if
+      // there is a callback or in usbh_transfer_queued_worker when
+      // the API is waiting for a response.
+      usbh_unlink_qtd(xferComplete);
+    }
+
+    xferComplete->status = USBH_ERR_TIMEOUT;
+	}
 
 	return xferComplete->status;
 }
@@ -2153,10 +2165,10 @@ static int8_t usbh_wait_complete(USBH_xfer *xferWait)
 		USBH_process();
 		status = xferWait->status;
 		// Our qTD must be active (completed to continue).
-		if (status != USBH_NOT_COMPLETE)
-		{
-			break;
-		}
+    if ((status != USBH_COMPLETE_TIMEOUT) && (status != USBH_NOT_COMPLETE))
+    {
+      break;
+    }
 	}
 
 	return status;
