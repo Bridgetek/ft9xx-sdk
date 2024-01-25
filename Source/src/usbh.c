@@ -257,7 +257,7 @@ static USBH_endpoint *usbh_async_ep_list;
     the status and the high 16 bits are change bits.
  **/
 //@{
-static volatile USB_hub_port_status currentPortStatus;
+static USB_hub_port_status currentPortStatus;
 static USB_hub_status currentHubStatus;
 //@}
 
@@ -731,6 +731,7 @@ static uint8_t usbh_xfer_iso_td_remove(USBH_xfer *xferOld)
 	return status;
 }
 
+// This function is only called from USBH_timer at interrupt level.
 static void usbh_update_xfer_timeouts(USBH_xfer *list)
 {
 	// NOTE: At interrupt level
@@ -808,11 +809,9 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 					}
 				}
 
-				//CRITICAL_SECTION_BEGIN
 				// Signal an interrupt to ensure USBH_process picks this up
 				// and removed expired transactions.
 				usbh_intr_xfer = 1;
-				//CRITICAL_SECTION_END
 			}
 		}
 		xferThis = xferThis->next;
@@ -2777,10 +2776,8 @@ static uint8_t usbh_get_hub_status_worker(USBH_device *hubDev, uint8_t index, US
 
 	if (hubDev == NULL)
 	{
-		CRITICAL_SECTION_BEGIN
 		usbh_hw_update_root_hub_port_status();
 		memcpy(buf, (void *)&currentPortStatus, sizeof(USB_hub_port_status));
-		CRITICAL_SECTION_END
 	}
 	else
 	{
@@ -2875,15 +2872,16 @@ static uint8_t usbh_set_hub_port_feature(USBH_device *hubDev, uint8_t hubPort, u
 		{
 			uint32_t val;
 			// Port Features
-			CRITICAL_SECTION_BEGIN
 			switch (feature)
 			{
 			case USB_HUB_CLASS_FEATURE_PORT_RESET:
+				CRITICAL_SECTION_BEGIN
 				// Assert port reset.
 				val = EHCI_REG(portsc);
 				val |= MASK_EHCI_PORTSC_PO_RESET;
 				val &= (~MASK_EHCI_PORTSC_PO_EN);
 				EHCI_REG(portsc) = val;
+				CRITICAL_SECTION_END
 				currentPortStatus.portResetChange = 1;
 				break;
 			case USB_HUB_CLASS_FEATURE_PORT_SUSPEND:
@@ -2920,7 +2918,6 @@ static uint8_t usbh_set_hub_port_feature(USBH_device *hubDev, uint8_t hubPort, u
 				status = USBH_ERR_USBERR;
 				break;
 			}
-			CRITICAL_SECTION_END
 		}
 	}
 
@@ -2975,16 +2972,17 @@ static uint8_t usbh_clear_hub_port_feature(USBH_device *hubDev, uint8_t hubPort,
 			uint32_t val;
 
 			// Port Features
-			CRITICAL_SECTION_BEGIN
 			switch (feature)
 			{
 			case USB_HUB_CLASS_FEATURE_PORT_RESET:
 				// Deassert port reset.
 				// After clear operation, start command must be called in less than 3ms
 				// or host will go into suspend state.
+	      CRITICAL_SECTION_BEGIN
 				val = EHCI_REG(portsc);
 				val &= (~MASK_EHCI_PORTSC_PO_RESET);
 				EHCI_REG(portsc) = val;
+	      CRITICAL_SECTION_END
 				break;
 			case USB_HUB_CLASS_FEATURE_PORT_ENABLE:
 				EHCI_REG(portsc) &= (~MASK_EHCI_PORTSC_PO_EN); //clear port enable
@@ -3034,7 +3032,6 @@ static uint8_t usbh_clear_hub_port_feature(USBH_device *hubDev, uint8_t hubPort,
 				status = USBH_ERR_USBERR;
 				break;
 			}
-			CRITICAL_SECTION_END
 		}
 	}
 
@@ -3155,11 +3152,9 @@ static int8_t usbh_hub_port_update(USBH_device *hubDev, uint8_t hubPort, uint8_t
 	}
 	else
 	{
-		CRITICAL_SECTION_BEGIN
 		usbh_hw_update_root_hub_port_status();
 		//Note: struct copy operation
 		portStatus = currentPortStatus;
-		CRITICAL_SECTION_END
 
 		status = USBH_OK;
 	}
@@ -3176,11 +3171,9 @@ static int8_t usbh_hub_port_update(USBH_device *hubDev, uint8_t hubPort, uint8_t
 		}
 		else
 		{
-			CRITICAL_SECTION_BEGIN
 			usbh_hw_update_root_hub_port_status();
 			//Note: struct copy operation
 			portStatus = currentPortStatus;
-			CRITICAL_SECTION_END
 		}
 
 		connectStatus = portStatus.currentConnectStatus;
@@ -4467,26 +4460,24 @@ static void usbh_force_close_xfer(USBH_endpoint *ep, USBH_xfer *list)
 
 static void usbh_free_endpoint(USBH_endpoint *epFree)
 {
+  CRITICAL_SECTION_BEGIN
 	// Remove endpoint from active lists and therefore remove the
 	// qH from the Asynchronous or Periodic Queues.
 	if ((epFree->type == USBH_EP_BULK) || (epFree->type == USBH_EP_CTRL))
 	{
 		// For BULK endpoints link in to list of asynch QHs
 		usbh_ep_list_remove(epFree, usbh_async_ep_list);
-		CRITICAL_SECTION_BEGIN
 		// Remove any xfers for this endpoint from asynchronous list.
 		usbh_force_close_xfer(epFree, usbh_xferList);
-		CRITICAL_SECTION_END
 	}
 	else
 	{
 		// For Periodic endpoints link in to list of periodic QHs
 		usbh_ep_list_remove(epFree, usbh_periodic_ep_list);
-		CRITICAL_SECTION_BEGIN
 		// Remove any xfers for this endpoint from periodic list.
 		usbh_force_close_xfer(epFree, usbh_xferListPeriodic);
-		CRITICAL_SECTION_END
 	}
+  CRITICAL_SECTION_END
 
 	// Free qH for endpoint.
 	usbh_free_hc_2_blocks((void *)epFree->hc_entry.qh);
@@ -4971,8 +4962,7 @@ static void usbh_hw_update_root_hub_status(void)
 	memcpy((void *)&currentHubStatus, &value, sizeof(USB_hub_status));
 }
 
-// Note: this function is called from a critical section.
-// Also note: this function depends on the sizeof(USB_hub_port_status)
+// Note: this function depends on the sizeof(USB_hub_port_status)
 // being 32 bits in total. It is defined as 32 bits in the EHCI
 // specification, upper 16 bits are the changed bits for the lower
 // 16 bits.
@@ -5108,6 +5098,7 @@ static void usbh_hub_poll_start(USBH_device *hubDev)
 
 /** @brief Millisecond timer handler for USB Host stack.
  *  Provides a timeout response to USB transfers that require this functionality.
+ *  This will typically be called from an interrupt service routine.
  */
 void USBH_timer(void)
 {
@@ -5144,12 +5135,10 @@ int8_t USBH_process(void)
 	if (intr_xfer)
 	{
 		// Check for transaction completion.
-		//CRITICAL_SECTION_BEGIN
 		// delay needed for AOA initialization in some android devices
 		delayus(usbh_aoa_compat_delay);
 		usbh_update_transactions(&usbh_xferList);
 		usbh_update_transactions(&usbh_xferListPeriodic);
-		//CRITICAL_SECTION_END
 	}
 
 	if (intr_port)
@@ -5196,9 +5185,7 @@ void USBH_initialise(USBH_ctx *ctx)
 		usbh_aoa_compat_delay = ctx->aoa_compatibility_delay;
 	}
 
-	CRITICAL_SECTION_BEGIN
 	memset((void *)&currentPortStatus, 0, sizeof(currentPortStatus));
-	CRITICAL_SECTION_END
   memset((void *)&currentHubStatus, 0, sizeof(currentHubStatus));
 
 	// Clear Status Register
@@ -5407,20 +5394,18 @@ int8_t USBH_clear_endpoint_transfers(USBH_endpoint_handle endpoint)
 
 	// Remove endpoint from active lists and therefore remove the
 	// qH from the Asynchronous or Periodic Queues.
+  CRITICAL_SECTION_BEGIN
 	if ((epFree->type == USBH_EP_BULK) || (epFree->type == USBH_EP_CTRL))
 	{
-		CRITICAL_SECTION_BEGIN
 		// Remove any xfers for this endpoint from asynchronous list.
 		usbh_force_close_xfer(epFree, usbh_xferList);
-		CRITICAL_SECTION_END
 	}
 	else
 	{
-		CRITICAL_SECTION_BEGIN
 		// Remove any xfers for this endpoint from periodic list.
 		usbh_force_close_xfer(epFree, usbh_xferListPeriodic);
-		CRITICAL_SECTION_END
 	}
+  CRITICAL_SECTION_END
 
 	return USBH_OK;
 }
@@ -6133,11 +6118,9 @@ int8_t USBH_get_hub_port_status(USBH_device_handle hub,
 	}
 	else
 	{
-		CRITICAL_SECTION_BEGIN
 		usbh_hw_update_root_hub_port_status();
 		//Note: struct copy operation
 		*portStatus = currentPortStatus;
-		CRITICAL_SECTION_END
 	}
 
 	return status;
@@ -6397,26 +6380,25 @@ int8_t USBH_set_interface(USBH_interface_handle interface,
 			epOld = ifaceOld->endpoints;
 			while (epOld)
 			{
+        CRITICAL_SECTION_BEGIN
 				if (epOld->type == USBH_EP_BULK)
 				{
 					// For BULK endpoints link in to list of asynch QHs
 					usbh_ep_list_remove(epOld, usbh_async_ep_list);
 
-					CRITICAL_SECTION_BEGIN
 					// Remove any xfers for this endpoint from asynchronous list.
 					usbh_force_close_xfer(epOld, usbh_xferList);
-					CRITICAL_SECTION_END
 				}
 				else
 				{
 					// For Periodic endpoints link in to list of periodic QHs
 					usbh_ep_list_remove(epOld, usbh_periodic_ep_list);
-					CRITICAL_SECTION_BEGIN
 					// Remove any xfers for this endpoint from periodic list.
 					usbh_force_close_xfer(epOld, usbh_xferListPeriodic);
-					CRITICAL_SECTION_END
 				}
-				// Free the old queue header if it exists. Iso endpoints will
+        CRITICAL_SECTION_END
+
+        // Free the old queue header if it exists. Iso endpoints will
 				// have a null pointer for their iTD or siTDs.
 				if (epOld->hc_entry.type == USBH_list_entry_type_qH)
 				{
