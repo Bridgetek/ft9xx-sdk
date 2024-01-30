@@ -3,79 +3,6 @@
 
     @brief
     General Purpose I/O and Pad control
-
-	@details
-
-	Pin function map for FT90x
-    | Pin                              | pad_func_0     | pad_func_1     | pad_func_2     | pad_func_3     |
-    | -------------------------------- | -------------- | -------------- | -------------- | -------------- |
-    | VBUS_DISCH/GPIO0                 | GPIO0          |                |                |                |
-    | OC_N/GPIO1                       | GPIO1          | OC_N           |                |                |
-    | PSW_N/GPIO2                      | GPIO2          |                |                |                |
-    | VBUS_DTC/GPIO3                   | GPIO3          | VBUS_DTC       |                |                |
-    | ENET_LED0/GPIO4                  | GPIO4          | ENET_LED0      |                |                |
-    | ENET_LED1/GPIO5                  | GPIO5          | ENET_LED1      |                |                |
-    | ADC1/CAM_XCLK/GPIO6              | GPIO6          | CAM_XCLK       |                | ADC1           |
-    | ADC2/CAM_PCLK/GPIO7              | GPIO7          | CAM_PCLK       |                | ADC2           |
-    | ADC3/CAM_VD/GPIO8                | GPIO8          | CAM_VD         |                | ADC3           |
-    | ADC4/CAM_HD/GPIO9                | GPIO9          | CAM_HD         |                | ADC4           |
-    | ADC5/CAM_D7/GPIO10               | GPIO10         | CAM_D7         |                | ADC5           |
-    | ADC6/CAM_D6/GPIO11               | GPIO11         | CAM_D6         |                | ADC6           |
-    | ADC7/CAM_D5/GPIO12               | GPIO12         | CAM_D5         |                | ADC7           |
-    | DAC1/CAM_D4/GPIO13               | GPIO13         | CAM_D4         |                | DAC1           |
-    | DAC0/CAM_D3/GPIO14               | GPIO14         | CAM_D3         |                | DAC0           |
-    | CAN0_TXD/CAM_D2/GPIO15           | GPIO15         | CAM_D2         | CAN0_TXD       |                |
-    | CAN0_RXD/CAM_D1/GPIO16           | GPIO16         | CAM_D1         | CAN0_RXD       |                |
-    | CAN1_TXD/CAM_D0/GPIO17           | GPIO17         | CAM_D0         | CAN1_TXD       |                |
-    | CAN1_RXD/GPIO18                  | GPIO18         |                | CAN1_RXD       |                |
-    | SD_CLK/GPIO19                    | GPIO19         | SD_CLK         |                |                |
-    | SD_CMD/GPIO20                    | GPIO20         | SD_CMD         |                |                |
-    | SD_DATA3/GPIO21                  | GPIO21         | SD_DATA3       |                |                |
-    | SD_DATA2/GPIO22                  | GPIO22         | SD_DATA2       |                |                |
-    | SD_DATA1/GPIO23                  | GPIO23         | SD_DATA1       |                |                |
-    | SD_DATA0/GPIO24                  | GPIO24         | SD_DATA0       |                |                |
-    | SD_CD/GPIO25                     | GPIO25         | SD_CD          |                |                |
-    | SD_WP/GPIO26                     | GPIO26         | SD_WP          |                |                |
-    | SPIM_CLK/GPIO27                  | GPIO27         | SPIM_CLK       |                |                |
-    | SPIM_SS0/GPIO28                  | GPIO28         | SPIM_SS0       |                |                |
-    | SPIM_MOSI/GPIO29                 | GPIO29         | SPIM_MOSI      |                |                |
-    | SPIM_MISO/GPIO30                 | GPIO30         | SPIM_MISO      |                |                |
-    | SPIM_IO2/GPIO31                  | GPIO31         | SPIM_IO2       |                |                |
-    | SPIM_IO3/GPIO32                  | GPIO32         | SPIM_IO3       |                |                |
-    | SPIM_SS1/GPIO33                  | GPIO33         | SPIM_SS1       |                |                |
-    | SPIM_SS2/GPIO34                  | GPIO34         | SPIM_SS2       |                |                |
-    | SPIM_SS3/GPIO35                  | GPIO35         | SPIM_SS3       |                |                |
-    | SPIS0_CLK/GPIO36                 | GPIO36         | SPIS0_CLK      |                |                |
-    | SPIS0_SS/GPIO37                  | GPIO37         | SPIS0_SS       |                |                |
-    | SPIS0_MOSI/GPIO38                | GPIO38         | SPIS0_MOSI     |                |                |
-    | SPIS0_MISO/GPIO39                | GPIO39         | SPIS0_MISO     |                |                |
-    | SPIS1_CLK/GPIO40                 | GPIO40         | SPIS1_CLK      |                |                |
-    | SPIS1_SS/GPIO41                  | GPIO41         | SPIS1_SS       |                |                |
-    | SPIS1_MOSI/GPIO42                | GPIO42         | SPIS1_MOSI     |                |                |
-    | SPIS1_MISO/GPIO43                | GPIO43         | SPIS1_MISO     |                |                |
-    | I2C0_SCL/GPIO44                  | GPIO44         | I2C0_SCL       |                |                |
-    | I2C0_SDA/GPIO45                  | GPIO45         | I2C0_SDA       |                |                |
-    | I2C1_SCL/GPIO46                  | GPIO46         | I2C1_SCL       |                |                |
-    | I2C1_SDA/GPIO47                  | GPIO47         | I2C1_SDA       |                |                |
-    | UART0_TXD/GPIO48                 | GPIO48         |                |                | UART0_TXD      |
-    | UART0_RXD/GPIO49                 | GPIO49         |                |                | UART0_RXD      |
-    | UART0_RTS/GPIO50                 | GPIO50         |                |                | UART0_RTS      |
-    | UART0_CTS/GPIO51                 | GPIO51         |                |                | UART0_CTS      |
-    | UART0_DTR/UART1_TXD/PWM4/GPIO52  | GPIO52         | PWM4           | UART1_TXD      | UART0_DTR      |
-    | UART0_DSR/UART1_RXD/PWM5/GPIO53  | GPIO53         | PWM5           | UART1_RXD      | UART0_DSR      |
-    | UART0_DCD/UART1_RTS/PWM6/GPIO54  | GPIO54         | PWM6           | UART1_RTS      | UART0_DCD      |
-    | UART0_RI/UART1_CTS/PWM7/GPIO55   | GPIO55         | PWM7           | UART1_CTS      | UART0_RI       |
-    | PWM0/GPIO56                      | GPIO56         | PWM0           |                |                |
-    | PWM1/GPIO57                      | GPIO57         | PWM1           |                |                |
-    | PWM2/GPIO58                      | GPIO58         | PWM2           |                |                |
-    | PWM3/GPIO59                      | GPIO59         | PWM3           |                |                |
-    | I2S_SDAO/GPIO60                  | GPIO60         | I2S_SDAO       |                |                |
-    | I2S_SDAI/GPIO61                  | GPIO61         | I2S_SDAI       |                |                |
-    | I2S_BCLK/GPIO62                  | GPIO62         | I2S_BCLK       | I2SS_BCLK      |                |
-    | I2S_LRCLK/GPIO63                 | GPIO63         | I2S_LRCLK      | I2SS_LRCLK     |                |
-    | I2S_MCLK/GPIO64                  | GPIO64         | I2S_MCLK       |                |                |
-    | I2S_CLK22/GPIO65                 | GPIO65         | I2S_CLK22      |                |                |
-    | I2S_CLK24/GPIO66                 | GPIO66         | I2S_CLK24      |                |                |
 **/
 /*
  * ============================================================================
@@ -127,6 +54,123 @@ extern "C" {
 /* INCLUDES ************************************************************************/
 #include <stdint.h>
 #include <stddef.h>
+
+/**
+ * Pin function map for FT90x
+    | Pin                               | pad_func_0 | pad_func_1 | pad_func_2 | pad_func_3 |
+    | --------------------------------- | ---------- | ---------- | ---------- | ---------- |
+    | VBUS_DISCH/GPIO0                  | GPIO0      |            |            |            |
+    | OC_N/GPIO1                        | GPIO1      | OC_N       |            |            |
+    | PSW_N/GPIO2                       | GPIO2      |            |            |            |
+    | VBUS_DTC/GPIO3                    | GPIO3      | VBUS_DTC   |            |            |
+    | ENET_LED0/GPIO4                   | GPIO4      | ENET_LED0  |            |            |
+    | ENET_LED1/GPIO5                   | GPIO5      | ENET_LED1  |            |            |
+    | ADC1/CAM_XCLK/GPIO6               | GPIO6      | CAM_XCLK   |            | ADC1       |
+    | ADC2/CAM_PCLK/GPIO7               | GPIO7      | CAM_PCLK   |            | ADC2       |
+    | ADC3/CAM_VD/GPIO8                 | GPIO8      | CAM_VD     |            | ADC3       |
+    | ADC4/CAM_HD/GPIO9                 | GPIO9      | CAM_HD     |            | ADC4       |
+    | ADC5/CAM_D7/GPIO10                | GPIO10     | CAM_D7     |            | ADC5       |
+    | ADC6/CAM_D6/GPIO11                | GPIO11     | CAM_D6     |            | ADC6       |
+    | ADC7/CAM_D5/GPIO12                | GPIO12     | CAM_D5     |            | ADC7       |
+    | DAC1/CAM_D4/GPIO13                | GPIO13     | CAM_D4     |            | DAC1       |
+    | DAC0/CAM_D3/GPIO14                | GPIO14     | CAM_D3     |            | DAC0       |
+    | CAN0_TXD/CAM_D2/GPIO15            | GPIO15     | CAM_D2     | CAN0_TXD   |            |
+    | CAN0_RXD/CAM_D1/GPIO16            | GPIO16     | CAM_D1     | CAN0_RXD   |            |
+    | CAN1_TXD/CAM_D0/GPIO17            | GPIO17     | CAM_D0     | CAN1_TXD   |            |
+    | CAN1_RXD/GPIO18                   | GPIO18     |            | CAN1_RXD   |            |
+    | SD_CLK/GPIO19                     | GPIO19     | SD_CLK     |            |            |
+    | SD_CMD/GPIO20                     | GPIO20     | SD_CMD     |            |            |
+    | SD_DATA3/GPIO21                   | GPIO21     | SD_DATA3   |            |            |
+    | SD_DATA2/GPIO22                   | GPIO22     | SD_DATA2   |            |            |
+    | SD_DATA1/GPIO23                   | GPIO23     | SD_DATA1   |            |            |
+    | SD_DATA0/GPIO24                   | GPIO24     | SD_DATA0   |            |            |
+    | SD_CD/GPIO25                      | GPIO25     | SD_CD      |            |            |
+    | SD_WP/GPIO26                      | GPIO26     | SD_WP      |            |            |
+    | SPIM_CLK/GPIO27                   | GPIO27     | SPIM_CLK   |            |            |
+    | SPIM_SS0/GPIO28                   | GPIO28     | SPIM_SS0   |            |            |
+    | SPIM_MOSI/GPIO29                  | GPIO29     | SPIM_MOSI  |            |            |
+    | SPIM_MISO/GPIO30                  | GPIO30     | SPIM_MISO  |            |            |
+    | SPIM_IO2/GPIO31                   | GPIO31     | SPIM_IO2   |            |            |
+    | SPIM_IO3/GPIO32                   | GPIO32     | SPIM_IO3   |            |            |
+    | SPIM_SS1/GPIO33                   | GPIO33     | SPIM_SS1   |            |            |
+    | SPIM_SS2/GPIO34                   | GPIO34     | SPIM_SS2   |            |            |
+    | SPIM_SS3/GPIO35                   | GPIO35     | SPIM_SS3   |            |            |
+    | SPIS0_CLK/GPIO36                  | GPIO36     | SPIS0_CLK  |            |            |
+    | SPIS0_SS/GPIO37                   | GPIO37     | SPIS0_SS   |            |            |
+    | SPIS0_MOSI/GPIO38                 | GPIO38     | SPIS0_MOSI |            |            |
+    | SPIS0_MISO/GPIO39                 | GPIO39     | SPIS0_MISO |            |            |
+    | SPIS1_CLK/GPIO40                  | GPIO40     | SPIS1_CLK  |            |            |
+    | SPIS1_SS/GPIO41                   | GPIO41     | SPIS1_SS   |            |            |
+    | SPIS1_MOSI/GPIO42                 | GPIO42     | SPIS1_MOSI |            |            |
+    | SPIS1_MISO/GPIO43                 | GPIO43     | SPIS1_MISO |            |            |
+    | I2C0_SCL/GPIO44                   | GPIO44     | I2C0_SCL   |            |            |
+    | I2C0_SDA/GPIO45                   | GPIO45     | I2C0_SDA   |            |            |
+    | I2C1_SCL/GPIO46                   | GPIO46     | I2C1_SCL   |            |            |
+    | I2C1_SDA/GPIO47                   | GPIO47     | I2C1_SDA   |            |            |
+    | UART0_TXD/GPIO48                  | GPIO48     |            |            | UART0_TXD  |
+    | UART0_RXD/GPIO49                  | GPIO49     |            |            | UART0_RXD  |
+    | UART0_RTS/GPIO50                  | GPIO50     |            |            | UART0_RTS  |
+    | UART0_CTS/GPIO51                  | GPIO51     |            |            | UART0_CTS  |
+    | UART0_DTR/UART1_TXD/PWM4/GPIO52   | GPIO52     | PWM4       | UART1_TXD  | UART0_DTR  |
+    | UART0_DSR/UART1_RXD/PWM5/GPIO53   | GPIO53     | PWM5       | UART1_RXD  | UART0_DSR  |
+    | UART0_DCD/UART1_RTS/PWM6/GPIO54   | GPIO54     | PWM6       | UART1_RTS  | UART0_DCD  |
+    | UART0_RI/UART1_CTS/PWM7/GPIO55    | GPIO55     | PWM7       | UART1_CTS  | UART0_RI   |
+    | PWM0/GPIO56                       | GPIO56     | PWM0       |            |            |
+    | PWM1/GPIO57                       | GPIO57     | PWM1       |            |            |
+    | PWM2/GPIO58                       | GPIO58     | PWM2       |            |            |
+    | PWM3/GPIO59                       | GPIO59     | PWM3       |            |            |
+    | I2S_SDAO/GPIO60                   | GPIO60     | I2S_SDAO   |            |            |
+    | I2S_SDAI/GPIO61                   | GPIO61     | I2S_SDAI   |            |            |
+    | I2S_BCLK/GPIO62                   | GPIO62     | I2S_BCLK   | I2SS_BCLK  |            |
+    | I2S_LRCLK/GPIO63                  | GPIO63     | I2S_LRCLK  | I2SS_LRCLK |            |
+    | I2S_MCLK/GPIO64                   | GPIO64     | I2S_MCLK   |            |            |
+    | I2S_CLK22/GPIO65                  | GPIO65     | I2S_CLK22  |            |            |
+    | I2S_CLK24/GPIO66                  | GPIO66     | I2S_CLK24  |            |            |
+
+ * Pin function map for FT93x
+    | Pin                               | pad_func_0 | pad_func_1 | pad_func_2 | pad_func_3 |
+    | --------------------------------- | ---------- | ---------- | ---------- | ---------- |
+    | SD_CLK/SPIS_CLK/GPIO0             | GPIO0      | SPIS0_CLK  | SD_CLK     |            |
+    | SD_CMD/SPIS_MISO/GPIO1            | GPIO1      | SPIS0_MISO | SD_CMD     |            |
+    | SD_CD/SPIS_MOSI/GPIO2             | GPIO2      | SPIS0_MOSI | SD_CD      |            |
+    | SD_DATA0/SPIS_SS/GPIO3            | GPIO3      | SPIS0_SS   | SD_DATA0   |            |
+    | PWM0/SD_DATA1/PWM7/GPIO4          | GPIO4      | PWM7       | SD_DATA1   | PWM0       |
+    | PWM6/SD_DATA2/PWM1/GPIO5          | GPIO5      | PWM6       | SD_DATA2   | PWM1       |
+    | SD_DATA3/PWM5/GPIO6               | GPIO6      | PWM5       | SD_DATA3   |            |
+    | SD_WP/PWM4/GPIO7                  | GPIO7      | PWM4       | SD_WP      |            |
+    | PWM3/GPIO8                        | GPIO8      | PWM3       |            |            |
+    | PWM2/GPIO9                        | GPIO9      | PWM2       |            |            |
+    | PWM1/GPIO10                       | GPIO10     | PWM0       |            |            |
+    | PWM0/GPIO11                       | GPIO11     | PWM1       |            |            |
+    | I2CS_SCL/I2CM_SCL/GPIO12          | GPIO12     | I2C0_SCL   | I2CS_SCL   |            |
+    | I2CS_SDA/I2CM_SDA/GPIO13          | GPIO13     | I2C0_SDA   | I2CS_SDA   |            |
+    | UART2_RXD/GPIO14                  | GPIO14     | UART2_RXD  |            |            |
+    | UART2_TXD/GPIO15                  | GPIO15     | UART2_TXD  |            |            |
+    | UART2_RTS/GPIO16                  | GPIO16     | UART2_RTS  |            |            |
+    | UART2_CTS/GPIO17                  | GPIO17     | UART2_CTS  |            |            |
+    | UART3_RXD/UART2_DTR/GPIO18        | GPIO18     | UART2_DTR  | UART3_RXD  |            |
+    | UART3_TXD/UART2_DSR/GPIO19        | GPIO19     | UART2_DSR  | UART3_TXD  |            |
+    | UART3_RTS/UART2_DCD/GPIO20        | GPIO20     | UART2_DCD  | UART3_RTS  |            |
+    | UART3_CTS/UART2_RI/GPIO21         | GPIO21     | UART2_RI   | UART3_CTS  |            |
+    | PWM3/UART0_RXD/GPIO22             | GPIO22     | UART0_RXD  | PWM3       |            |
+    | PWM2/UART0_TXD/GPIO23             | GPIO23     | UART0_TXD  | PWM2       |            |
+    | PWM1/UART0_RTS/GPIO24             | GPIO24     | UART0_RTS  | PWM1       |            |
+    | PWM0/UART0_CTS/GPIO25             | GPIO25     | UART0_CTS  | PWM0       |            |
+    | UART1_RXD/UART0_DTR/GPIO26        | GPIO26     | UART0_DTR  | UART1_TXD  |            |
+    | UART1_TXD/UART0_DSR/GPIO27        | GPIO27     | UART0_DSR  | UART1_RXD  |            |
+    | UART1_RTS/UART0_DCD/GPIO28        | GPIO28     | UART0_DCD  | UART1_RTS  |            |
+    | SPIM_SS0/UART1_CTS/UART0_RI/GPIO29| GPIO29     | UART0_RI   | UART1_CTS  | SPIM_SS0   |
+    | SPIM_SS0/GPIO30                   | GPIO30     | SPIM_SS0   |            |            |
+    | SPIM_SS1/GPIO31                   | GPIO31     | SPIM_SS1   |            |            |
+    | SPIM_SS2/GPIO32                   | GPIO32     | SPIM_SS2   |            |            |
+    | SPIM_SS3/GPIO33                   | GPIO33     | SPIM_SS3   |            |            |
+    | SPIS_CLK/SPIM_CLK/GPIO34          | GPIO34     | SPIM_CLK   | SPIS0_CLK  |            |
+    | SPIS_MISO/SPIM_MISO/GPIO35        | GPIO35     | SPIM_MISO  | SPIS0_MISO |            |
+    | SPIS_MOSI/SPIM_MOSI/GPIO36        | GPIO36     | SPIM_MOSI  | SPIS0_MOSI |            |
+    | SPIS_SS/SPIM_IO2/GPIO37           | GPIO37     | SPIM_IO2   | SPIS0_SS   |            |
+    | RTC_REF/SPIM_IO3/GPIO38           | GPIO38     | SPIM_IO3   | RTC_REF    |            |
+    | VBUS_DTC/GPIO39                   | GPIO39     | VBUS_DTC   |            |            |
+*/
 
 /* CONSTANTS ***********************************************************************/
 
