@@ -45,8 +45,7 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
-#include "../Includes/ft900_rtc.h"
-#include<ft900_sys.h>
+#include <ft900.h>
 
 /* MACROS ***********************************************************************/
 #define GPIO_UART0_TX 	48
@@ -64,6 +63,7 @@ static inline void print_time(ext_rtc_time_t time)
 	if(time.fmt_12_24)
 		printf("%s",t_conv[time.AM_PM]);
 	printf(" \r\n");
+	fflush(stdout);
 }
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
