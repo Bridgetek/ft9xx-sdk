@@ -1,10 +1,7 @@
 /**
-    @file
+    @file pwm.c
 
-    @brief
-    Pulse Width Modulation
-
-    
+    @brief Pulse Width Modulation
 **/
 /*
  * ============================================================================
@@ -46,11 +43,14 @@
  */
 
 /* INCLUDES ************************************************************************/
+
 #include <ft900_pwm.h>
 #include <registers/ft900_registers.h>
 
 /* CONSTANTS ***********************************************************************/
-#define PWM_N_CHANNELS      (8U)
+
+#define PWM_N_CHANNELS (8U)
+
 /* GLOBAL VARIABLES ****************************************************************/
 
 /* LOCAL VARIABLES *****************************************************************/
@@ -62,200 +62,268 @@
 /* FUNCTIONS ***********************************************************************/
 
 /** @brief Initialise the PWM subsystem
- *  @param prescaler The prescaler for the PWM subsystem (0 = /1)
- *  @param maxcount The maximum count of the 16 bit master counter
- *  @param shots The number of loops the PWM subsystem will make, 0 is infinity
+ *  @param [in] prescaler - The prescaler for the PWM subsystem (0 = /1)
+ *  @param [in] maxcount  - The maximum count of the 16 bit master counter
+ *  @param [in] shots     - The number of loops the PWM subsystem will make, 0 is infinity
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_init(uint8_t prescaler, uint16_t maxcount, uint8_t shots)
 {
-    PWM->PWM_PRESCALER = prescaler;
-    /* LSB is written first followed by MSB */
-    PWM->PWM_CNTL = (maxcount >> 0) & 0x00FF;
-    PWM->PWM_CNTH = (maxcount >> 8) & 0x00FF;
-    PWM->PWM_CTRL_BL_CMP8 = shots;
+  PWM->PWM_PRESCALER = prescaler;
+  /* LSB is written first followed by MSB */
+  PWM->PWM_CNTL = (maxcount >> 0) & 0x00FF;
+  PWM->PWM_CNTH = (maxcount >> 8) & 0x00FF;
+  PWM->PWM_CTRL_BL_CMP8 = shots;
 
-    return 0;
+  return 0;
 }
-
 
 /** @brief Enable the PWM subsystem
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_enable(void)
 {
-    PWM->PWM_CTRL1 |= MASK_PWM_CTRL1_PWMEN;
-    return 0;
+  PWM->PWM_CTRL1 |= MASK_PWM_CTRL1_PWMEN;
+  return 0;
 }
-
 
 /** @brief Disable the PWM subsystem
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_disable(void)
 {
-    PWM->PWM_CTRL1 &= ~MASK_PWM_CTRL1_PWMEN;
-    return 0;
+  PWM->PWM_CTRL1 &= ~MASK_PWM_CTRL1_PWMEN;
+  return 0;
 }
 
-
 /** @brief Set up the logic levels for a PWM counter
- *  @param channel The channel to use
- *  @param initstate The initial state of the counter (high or low)
- *  @param restorestate The rollover restore setting
+ *  @param [in] channel      - The channel to use
+ *  @param [in] initstate    - The initial state of the counter (high or low)
+ *  @param [in] restorestate - The rollover restore setting
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_levels(uint8_t channel, pwm_state_t initstate, pwm_restore_t restorestate)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if (channel >= PWM_N_CHANNELS)
+  if (channel >= PWM_N_CHANNELS)
+  {
+    iRet = -1; /* Invalid channel */
+  }
+
+  if (iRet == 0)
+  {
+    /* Set up the initial counter state */
+    switch (initstate)
     {
-        iRet = -1; /* Invalid channel */
+    case pwm_state_high:
+      PWM->PWM_INIT |= (1 << channel);
+      break;
+    case pwm_state_low:
+      PWM->PWM_INIT &= ~(1 << channel);
+      break;
+    default:
+      iRet = -1;
+      break;
     }
 
-    if (iRet == 0)
+    /* Set up the restore state */
+    switch (restorestate)
     {
-        /* Set up the initial counter state */
-        switch(initstate)
-        {
-            case pwm_state_high: PWM->PWM_INIT |= (1 << channel); break;
-            case pwm_state_low: PWM->PWM_INIT &= ~(1 << channel); break;
-            default: iRet = -1; break;
-        }
-
-        /* Set up the restore state */
-        switch(restorestate)
-        {
-            case pwm_restore_enable: PWM->PWM_OUT_CLR_EN |= (1 << channel); break;
-            case pwm_restore_disable: PWM->PWM_OUT_CLR_EN &= ~(1 << channel); break;
-            default: iRet = -1; break;
-        }
-
+    case pwm_restore_enable:
+      PWM->PWM_OUT_CLR_EN |= (1 << channel);
+      break;
+    case pwm_restore_disable:
+      PWM->PWM_OUT_CLR_EN &= ~(1 << channel);
+      break;
+    default:
+      iRet = -1;
+      break;
     }
+  }
 
-    return iRet;
+  return iRet;
 }
 
-
 /** @brief Set a compare value for a PWM counter
- *  @param channel The channel to use
- *  @param value The value to toggle on
+ *  @param [in] channel - The channel to use
+ *  @param [in] value   - The value to toggle on
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_compare(uint8_t channel, uint16_t value)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    /* Set up the compare value */
-    /* LSB of the 16 bit register is written first followed by MSB */
-    switch(channel)
-    {
-        case 0: PWM->PWM_CMP0L = (value >> 0) & 0x00FF; PWM->PWM_CMP0H = (value >> 8) & 0x00FF; break;
-        case 1: PWM->PWM_CMP1L = (value >> 0) & 0x00FF; PWM->PWM_CMP1H = (value >> 8) & 0x00FF; break;
-        case 2: PWM->PWM_CMP2L = (value >> 0) & 0x00FF; PWM->PWM_CMP2H = (value >> 8) & 0x00FF; break;
-        case 3: PWM->PWM_CMP3L = (value >> 0) & 0x00FF; PWM->PWM_CMP3H = (value >> 8) & 0x00FF; break;
-        case 4: PWM->PWM_CMP4L = (value >> 0) & 0x00FF; PWM->PWM_CMP4H = (value >> 8) & 0x00FF; break;
-        case 5: PWM->PWM_CMP5L = (value >> 0) & 0x00FF; PWM->PWM_CMP5H = (value >> 8) & 0x00FF; break;
-        case 6: PWM->PWM_CMP6L = (value >> 0) & 0x00FF; PWM->PWM_CMP6H = (value >> 8) & 0x00FF; break;
-        case 7: PWM->PWM_CMP7L = (value >> 0) & 0x00FF; PWM->PWM_CMP7H = (value >> 8) & 0x00FF; break;
-        default: iRet = -1; break;
-    }
+  /* Set up the compare value */
+  /* LSB of the 16 bit register is written first followed by MSB */
+  switch (channel)
+  {
+  case 0:
+    PWM->PWM_CMP0L = (value >> 0) & 0x00FF;
+    PWM->PWM_CMP0H = (value >> 8) & 0x00FF;
+    break;
+  case 1:
+    PWM->PWM_CMP1L = (value >> 0) & 0x00FF;
+    PWM->PWM_CMP1H = (value >> 8) & 0x00FF;
+    break;
+  case 2:
+    PWM->PWM_CMP2L = (value >> 0) & 0x00FF;
+    PWM->PWM_CMP2H = (value >> 8) & 0x00FF;
+    break;
+  case 3:
+    PWM->PWM_CMP3L = (value >> 0) & 0x00FF;
+    PWM->PWM_CMP3H = (value >> 8) & 0x00FF;
+    break;
+  case 4:
+    PWM->PWM_CMP4L = (value >> 0) & 0x00FF;
+    PWM->PWM_CMP4H = (value >> 8) & 0x00FF;
+    break;
+  case 5:
+    PWM->PWM_CMP5L = (value >> 0) & 0x00FF;
+    PWM->PWM_CMP5H = (value >> 8) & 0x00FF;
+    break;
+  case 6:
+    PWM->PWM_CMP6L = (value >> 0) & 0x00FF;
+    PWM->PWM_CMP6H = (value >> 8) & 0x00FF;
+    break;
+  case 7:
+    PWM->PWM_CMP7L = (value >> 0) & 0x00FF;
+    PWM->PWM_CMP7H = (value >> 8) & 0x00FF;
+    break;
+  default:
+    iRet = -1;
+    break;
+  }
 
-    return iRet;
+  return iRet;
 }
 
-
 /** @brief Add a toggle to a specific PWM channel
- *  @param channel The channel to add the toggle to
- *  @param toggle The channel to toggle on
+ *  @param [in] channel - The channel to add the toggle to
+ *  @param [in] toggle  - The channel to toggle on
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_add_toggle(uint8_t channel, uint8_t toggle)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if (channel >= PWM_N_CHANNELS || toggle >= PWM_N_CHANNELS)
+  if (channel >= PWM_N_CHANNELS || toggle >= PWM_N_CHANNELS)
+  {
+    iRet = -1; /* Invalid channel */
+  }
+
+  if (iRet == 0)
+  {
+    switch (channel)
     {
-        iRet = -1; /* Invalid channel */
+    case 0:
+      PWM->PWM_TOGGLE0 |= (1 << toggle);
+      break;
+    case 1:
+      PWM->PWM_TOGGLE1 |= (1 << toggle);
+      break;
+    case 2:
+      PWM->PWM_TOGGLE2 |= (1 << toggle);
+      break;
+    case 3:
+      PWM->PWM_TOGGLE3 |= (1 << toggle);
+      break;
+    case 4:
+      PWM->PWM_TOGGLE4 |= (1 << toggle);
+      break;
+    case 5:
+      PWM->PWM_TOGGLE5 |= (1 << toggle);
+      break;
+    case 6:
+      PWM->PWM_TOGGLE6 |= (1 << toggle);
+      break;
+    case 7:
+      PWM->PWM_TOGGLE7 |= (1 << toggle);
+      break;
+    default:
+      break;
     }
+  }
 
-    if (iRet == 0)
-    {
-        switch(channel)
-        {
-            case 0: PWM->PWM_TOGGLE0 |= (1 << toggle); break;
-            case 1: PWM->PWM_TOGGLE1 |= (1 << toggle); break;
-            case 2: PWM->PWM_TOGGLE2 |= (1 << toggle); break;
-            case 3: PWM->PWM_TOGGLE3 |= (1 << toggle); break;
-            case 4: PWM->PWM_TOGGLE4 |= (1 << toggle); break;
-            case 5: PWM->PWM_TOGGLE5 |= (1 << toggle); break;
-            case 6: PWM->PWM_TOGGLE6 |= (1 << toggle); break;
-            case 7: PWM->PWM_TOGGLE7 |= (1 << toggle); break;
-            default: break;
-        }
-    }
-
-    return iRet;
+  return iRet;
 }
 
-
 /** @brief Remove a toggle to a specific PWM channel
- *  @param channel The channel to remove the toggle from
- *  @param toggle The channel to remove the toggle of
+ *  @param [in] channel - The channel to remove the toggle from
+ *  @param [in] toggle  - The channel to remove the toggle of
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_remove_toggle(uint8_t channel, uint8_t toggle)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if (channel >= PWM_N_CHANNELS || toggle >= PWM_N_CHANNELS)
+  if (channel >= PWM_N_CHANNELS || toggle >= PWM_N_CHANNELS)
+  {
+    iRet = -1; /* Invalid channel */
+  }
+
+  if (iRet == 0)
+  {
+    switch (channel)
     {
-        iRet = -1; /* Invalid channel */
+    case 0:
+      PWM->PWM_TOGGLE0 &= ~(1 << toggle);
+      break;
+    case 1:
+      PWM->PWM_TOGGLE1 &= ~(1 << toggle);
+      break;
+    case 2:
+      PWM->PWM_TOGGLE2 &= ~(1 << toggle);
+      break;
+    case 3:
+      PWM->PWM_TOGGLE3 &= ~(1 << toggle);
+      break;
+    case 4:
+      PWM->PWM_TOGGLE4 &= ~(1 << toggle);
+      break;
+    case 5:
+      PWM->PWM_TOGGLE5 &= ~(1 << toggle);
+      break;
+    case 6:
+      PWM->PWM_TOGGLE6 &= ~(1 << toggle);
+      break;
+    case 7:
+      PWM->PWM_TOGGLE7 &= ~(1 << toggle);
+      break;
+    default:
+      break;
     }
+  }
 
-    if (iRet == 0)
-    {
-        switch(channel)
-        {
-            case 0: PWM->PWM_TOGGLE0 &= ~(1 << toggle); break;
-            case 1: PWM->PWM_TOGGLE1 &= ~(1 << toggle); break;
-            case 2: PWM->PWM_TOGGLE2 &= ~(1 << toggle); break;
-            case 3: PWM->PWM_TOGGLE3 &= ~(1 << toggle); break;
-            case 4: PWM->PWM_TOGGLE4 &= ~(1 << toggle); break;
-            case 5: PWM->PWM_TOGGLE5 &= ~(1 << toggle); break;
-            case 6: PWM->PWM_TOGGLE6 &= ~(1 << toggle); break;
-            case 7: PWM->PWM_TOGGLE7 &= ~(1 << toggle); break;
-            default: break;
-        }
-    }
-
-    return iRet;
+  return iRet;
 }
 
-
 /** @brief Set the external trigger settings
- *  @param trigger The trigger setting
+ *  @param [in] trigger - The trigger setting
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_trigger(pwm_trigger_t trigger)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    switch(trigger)
-    {
-        case pwm_trigger_disabled:
-            PWM->PWM_CTRL1 = (PWM->PWM_CTRL1 & MASK_PWM_CTRL1_PWMTRIG) | (0 << BIT_PWM_CTRL1_PWMTRIG); break;
-        case pwm_trigger_negative_edge:
-            PWM->PWM_CTRL1 = (PWM->PWM_CTRL1 & MASK_PWM_CTRL1_PWMTRIG) | (1 << BIT_PWM_CTRL1_PWMTRIG); break;
-        case pwm_trigger_positive_edge:
-            PWM->PWM_CTRL1 = (PWM->PWM_CTRL1 & MASK_PWM_CTRL1_PWMTRIG) | (2 << BIT_PWM_CTRL1_PWMTRIG); break;
-        case pwm_trigger_any_edge:
-            PWM->PWM_CTRL1 = (PWM->PWM_CTRL1 & MASK_PWM_CTRL1_PWMTRIG) | (3 << BIT_PWM_CTRL1_PWMTRIG); break;
-        default:
-            iRet = -1; break;
-    }
+  switch (trigger)
+  {
+  case pwm_trigger_disabled:
+    PWM->PWM_CTRL1 = (PWM->PWM_CTRL1 & MASK_PWM_CTRL1_PWMTRIG) | (0 << BIT_PWM_CTRL1_PWMTRIG);
+    break;
+  case pwm_trigger_negative_edge:
+    PWM->PWM_CTRL1 = (PWM->PWM_CTRL1 & MASK_PWM_CTRL1_PWMTRIG) | (1 << BIT_PWM_CTRL1_PWMTRIG);
+    break;
+  case pwm_trigger_positive_edge:
+    PWM->PWM_CTRL1 = (PWM->PWM_CTRL1 & MASK_PWM_CTRL1_PWMTRIG) | (2 << BIT_PWM_CTRL1_PWMTRIG);
+    break;
+  case pwm_trigger_any_edge:
+    PWM->PWM_CTRL1 = (PWM->PWM_CTRL1 & MASK_PWM_CTRL1_PWMTRIG) | (3 << BIT_PWM_CTRL1_PWMTRIG);
+    break;
+  default:
+    iRet = -1;
+    break;
+  }
 
-    return iRet;
+  return iRet;
 }
-

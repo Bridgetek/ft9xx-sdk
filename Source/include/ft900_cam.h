@@ -1,11 +1,9 @@
 /**
-    @file ft900_cam.h
+  @file ft900_cam.h
 
-    @brief
-    Camera interface
-
-    
+  @brief Camera interface
 **/
+
 /*
  * ============================================================================
  * History
@@ -53,44 +51,49 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* INCLUDES ************************************************************************/
+
 #include <stdint.h>
 #include <stddef.h>
 
 /* CONSTANTS ***********************************************************************/
 
 /* TYPES ***************************************************************************/
-/** @brief Camera vertical/horizontal trigger mode
-    Control at what logic levels the camera will accept data.*/
+
+/** @brief Camera vertical/horizontal trigger mode. Control at what logic levels the
+ *         camera will accept data.*/
 typedef enum
 {
-    cam_trigger_mode_0 = 1, /*!< VD = L, HD = L */
-    cam_trigger_mode_1 = 2, /*!< VD = L, HD = H */
-    cam_trigger_mode_2 = 4, /*!< VD = H, HD = L */
-    cam_trigger_mode_3 = 8  /*!< VD = H, HD = H */
+  cam_trigger_mode_0 = 1, /*!< VD = L, HD = L */
+  cam_trigger_mode_1 = 2, /*!< VD = L, HD = H */
+  cam_trigger_mode_2 = 4, /*!< VD = H, HD = L */
+  cam_trigger_mode_3 = 8  /*!< VD = H, HD = H */
 } cam_trigger_mode_t;
 
 /** @brief Camera clock polarity */
 typedef enum
 {
-    cam_clock_pol_falling, /*!< Sample data on a falling PCLK edge */
-    cam_clock_pol_raising  /*!< Sample data on a raising PCLK edge */
+  cam_clock_pol_falling, /*!< Sample data on a falling PCLK edge */
+  cam_clock_pol_raising  /*!< Sample data on a raising PCLK edge */
 } cam_clock_pol_t;
 
 /* GLOBAL VARIABLES ****************************************************************/
 
 /* MACROS **************************************************************************/
 
+#define CAM_ENABLE  (1)
+#define CAM_DISABLE (0)
+
 /* FUNCTION PROTOTYPES *************************************************************/
 
 /** @brief Initialise the Camera interface
- *  @param triggers The VD/HD levels to trigger on
- *  @param clkpol The clock polarity of the input
+ *  @param [in] triggers - The VD/HD levels to trigger on
+ *  @param [in] clkpol   - The clock polarity of the input
  *  @returns 0 on success, -1 otherwise
  */
 int8_t cam_init(cam_trigger_mode_t triggers, cam_clock_pol_t clkpol);
 
 /** @brief Start capturing data
- *  @param bytes The number of bytes to capture
+ *  @param [in] bytes - The number of bytes to capture
  *  @returns 0 on success, -1 otherwise
  */
 int8_t cam_start(uint16_t bytes);
@@ -101,14 +104,13 @@ int8_t cam_start(uint16_t bytes);
 int8_t cam_stop(void);
 
 /** @brief Set the threshold for when the camera interrupt fires
- *  @param n The number of bytes to fill the FIFO with before the interrupt fires
- *           (this must be a multiple of 4)
+ *  @param [in] n - The number of bytes to fill the FIFO with before the interrupt
+ *                  fires (this must be a multiple of 4)
  *  @returns 0 on success, -1 otherwise
  */
 int8_t cam_set_threshold(uint16_t n);
 
-/** @brief Empty out the camera buffer
- */
+/** @brief Empty out the camera buffer */
 void cam_flush(void);
 
 /** @brief Check how many bytes are available on the FIFO
@@ -117,13 +119,14 @@ void cam_flush(void);
 uint16_t cam_available(void);
 
 /** @brief Check how many bytes have been read by the Camera Interface
-  *  @returns The number of bytes read
+ *  @returns The number of bytes read
  */
 uint16_t cam_total_read(void);
 
 /** @brief Read a number of bytes from the FIFO
- *  @param b A pointer to read the data into
- *  @param len The number of bytes to read from the FIFO (this must be a multiple of 4)
+ *  @param [inout] b   - A pointer to read the data into
+ *  @param [in]    len - The number of bytes to read from the FIFO
+ *                       (this must be a multiple of 4)
  *  @returns The number of bytes read, 0 otherwise
  */
 uint16_t cam_readn(uint8_t *b, size_t len);
@@ -139,7 +142,9 @@ int8_t cam_enable_interrupt(void);
 int8_t cam_disable_interrupt(void);
 
 /** @brief Check that an interrupt has occurred
- *  @returns 0 when the interrupt hasn't been fired, 1 when the interrupt has fired and -1 otherwise
+ *  @returns  0 when the interrupt hasn't been fired
+ *            1 when the interrupt has fired
+ *           -1 otherwise
  */
 int8_t cam_is_interrupted(void);
 

@@ -43,14 +43,14 @@
 # has no liability in relation to those amendments.
 # ============================================================================
 
-# The TARGET and BUILD parameters are required (they are case-sensitive). 
+# The TARGET and BUILD parameters are required (they are case-sensitive).
 # The INSTALL parameter allows the source code path to be set for object files to facilitate debugging.
 # Example Windows builds:
 # make -B TARGET=ft900 BUILD=Debug INSTALL="C:\Program Files (x86)\Bridgetek\FT9xx Toolchain\Toolchain\hardware"
 # Example Linux builds:
 # make -B TARGET=ft900 BUILD=Debug INSTALL="/opt/ft9xx-toolchain/hardware"
 
-.PHONY := clean all 
+.PHONY := clean all
 
 # Determine what GCC version to use
 ifndef PREFIX
@@ -77,7 +77,7 @@ SRC_DIR := ./src
 INCLUDE_DIR := ./include
 
 # Set up flags and a destination directory....
-CFLAGS += -c -I$(INCLUDE_DIR) 
+CFLAGS += -c -I$(INCLUDE_DIR)
 CFLAGS += -fmessage-length=0 -ffunction-sections
 CFLAGS += -Wall -Wextra
 #extension for named address spaces is only supported by gcc for plain C only, not for C99
@@ -119,7 +119,7 @@ LDFLAGS +=
 else
 ifeq ($(BUILD), Debug)
 # Debug settings
-CFLAGS += -g3 
+CFLAGS += -g3
 CFLAGS += -DDEBUG
 CFLAGS += -Og
 LDFLAGS +=
@@ -133,7 +133,7 @@ endif # ifeq ($(BUILD), Release)
 DESTDIR := $(LIBDIR)/$(BUILD)/$(TARGET)
 
 ifeq ($(TARGET), ft900)
-CFLAGS += -D__FT900__ 
+CFLAGS += -D__FT900__
 
 SRCFILES := adc.c \
 		bootstrap.c \
@@ -171,28 +171,28 @@ ifeq ($(TARGET), ft930)
 CFLAGS += -D__FT930__ -mcompress -mft32b
 
 SRCFILES := adc.c \
-		bootstrap.c \
-		dac.c \
-		delay.c \
-		gpio.c \
-		i2cm.c \
-		i2cs.c \
-		interrupt.c \
-		memctl.c \
-		pwm.c \
-		pwm_pcm.c \
-		rtc.c \
-		sdhost.c \
-		spi.c \
-		sys.c \
-		timers.c \
-		usbd.c \
-		usbdx.c \
-		usbd_dfu.c \
-		usbd_startup_dfu.c \
-		uart_simple.c \
-		wdt.c \
-		dlog.c 
+        bootstrap.c \
+        dac.c \
+        delay.c \
+        gpio.c \
+        i2cm.c \
+        i2cs.c \
+        interrupt.c \
+        memctl.c \
+        pwm.c \
+        pwm_pcm.c \
+        rtc.c \
+        sdhost.c \
+        spi.c \
+        sys.c \
+        timers.c \
+        usbd.c \
+        usbdx.c \
+        usbd_dfu.c \
+        usbd_startup_dfu.c \
+        uart_simple.c \
+        wdt.c \
+        dlog.c
 
 else
 $(error Please choose TARGET=ft900 or TARGET=ft930)

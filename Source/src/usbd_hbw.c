@@ -1,5 +1,5 @@
 /**
-    @file
+    @file usbd_hbw.c
 
     @brief
     API for USB High Bandwidth Isochronous IN endpoint support on FT90x Rev C onwards.
@@ -49,7 +49,6 @@
 
 /* INCLUDES ************************************************************************/
 
-
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -66,6 +65,7 @@
 #include <ft900_usbd_hbw.h>
 
 /* CONSTANTS ***********************************************************************/
+
 /**
     @name    USB Macros to enable/disable debugging output of the driver
     @details These macros will enable debug output to a linked printf function.
@@ -80,20 +80,25 @@
  @details Automatically inserts the UVC header (USB_UVC_Payload_Header_PTS)
           and transfers the existing FIFO data to USB bus.
  */
-#define USBD_HBW_REG_HBWMODE_SET			0x03
-#define	USBD_HBW_REG_MAX_TRANSFER_SIZE		0x0f
+#define USBD_HBW_REG_HBWMODE_SET 0x03
+#define USBD_HBW_REG_MAX_TRANSFER_SIZE 0x0f
 
 #ifdef USBD_HBW_ISOCHRONOUS_AUTOHEADER
-#define USBD_HBW_REG_FIFO_SIZE				0x30
+#define USBD_HBW_REG_FIFO_SIZE 0x30
 #else
-#define USBD_HBW_REG_FIFO_SIZE				0x40
+#define USBD_HBW_REG_FIFO_SIZE 0x40
 #endif
 
 /* TYPES ***************************************************************************/
+
 /* GLOBAL VARIABLES ****************************************************************/
+
 /* LOCAL VARIABLES *****************************************************************/
+
 /* MACROS **************************************************************************/
+
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
+
 /* from USBD.C */
 int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t length);
 
@@ -102,133 +107,128 @@ int32_t usbd_in_request(uint8_t ep_number, const uint8_t *buffer, size_t length)
 #ifdef USBD_HBW_ISOCHRONOUS_AUTOHEADER
 void USBD_HBW_send_end_of_frame(void)
 {
-	//Preserve endpoint number hooked and
-	//Set SEQDATA_END bit
-    USBD_HBW->ctrl3 = ((USBD_HBW->ctrl3) & MASK_USBD_HBW_CTRL3_ENDP_NUM) | MASK_USBD_HBW_CTRL3_SEQDATA_END;
+  // Preserve endpoint number hooked and
+  // Set SEQDATA_END bit
+  USBD_HBW->ctrl3 = ((USBD_HBW->ctrl3) & MASK_USBD_HBW_CTRL3_ENDP_NUM) |
+                    MASK_USBD_HBW_CTRL3_SEQDATA_END;
 }
 #endif
 
 int8_t USBD_HBW_is_space_avail(void)
 {
-	return (USBD_HBW->ctrl3 & MASK_USBD_HBW_CTRL3_HAVESPACE);
+  return (USBD_HBW->ctrl3 & MASK_USBD_HBW_CTRL3_HAVESPACE);
 }
 
 int8_t USBD_HBW_is_fifo_full(void)
 {
-	return (USBD_HBW->ctrl3 & MASK_USBD_HBW_CTRL3_FULL);
+  return (USBD_HBW->ctrl3 & MASK_USBD_HBW_CTRL3_FULL);
 }
 
-int32_t USBD_HBW_iso_transfer(USBD_ENDPOINT_NUMBER   ep_number,
-		uint8_t *buffer,
-		size_t length,
-		uint8_t part,
-		size_t offset)
+int32_t USBD_HBW_iso_transfer(USBD_ENDPOINT_NUMBER ep_number, uint8_t *buffer, size_t length,
+                              uint8_t part, size_t offset)
 {
-	size_t packetLen;
-	size_t totalLen = length;
-	uint8_t *pdata = buffer;
-	size_t max_bytes = 1024;
-	int32_t transferred = 0;
+  size_t packetLen;
+  size_t totalLen = length;
+  uint8_t *pdata = buffer;
+  size_t max_bytes = 1024;
+  int32_t transferred = 0;
 #ifdef USBD_HBW_DEBUG_ISO_TRANSFER
-	int	loop_count = 0;
-#endif //USBD_DEBUG_TRANSFER
+  int loop_count = 0;
+#endif // USBD_HBW_DEBUG_ISO_TRANSFER
 
-	// Offset is only interesting if we are part way through a packet.
-	// It doesn't matter how many packets through we are.
-	offset = offset % max_bytes;
+  // Offset is only interesting if we are part way through a packet.
+  // It doesn't matter how many packets through we are.
+  offset = offset % max_bytes;
 
-	do
-	{
-		// Work out the number of bytes to transfer in this packet.
-		// Can be up to wMaxPacket size for the endpoint. However, if
-		// this is a partial transfer (i.e. will read only a part of a
-		// packet) there may be an initial offset to account for.
-		packetLen = totalLen;
-		if (packetLen > (max_bytes - offset))
-		{
-			packetLen = (max_bytes - offset);
-		}
-		// Decrement the total length remaining in the transfer.
-		totalLen = totalLen - packetLen;
+  do
+  {
+    // Work out the number of bytes to transfer in this packet. Can be up to wMaxPacket size for the
+    // endpoint. However, if this is a partial transfer (i.e. will read only a part of a packet)
+    // there may be an initial offset to account for.
+    packetLen = totalLen;
+    if (packetLen > (max_bytes - offset))
+    {
+      packetLen = (max_bytes - offset);
+    }
+    // Decrement the total length remaining in the transfer.
+    totalLen = totalLen - packetLen;
 
-		{
-			// Wait for buffer space to become available.
-			while (USBD_HBW->ctrl3 & MASK_USBD_HBW_CTRL3_FULL)
-			{
+    {
+      // Wait for buffer space to become available.
+      while (USBD_HBW->ctrl3 & MASK_USBD_HBW_CTRL3_FULL)
+      {
 #ifdef USBD_HBW_DEBUG_ISO_TRANSFER
-				loop_count++;
-				if (loop_count > 500000)
-				{
-					loop_count = 0;
-					printf ("%d: sr=0x%x, exceeded loop_count\n", ep_number, USBD_HBW->ctrl3);
-				}
-#endif //USBD_DEBUG_TRANSFER
-			}
+        loop_count++;
+        if (loop_count > 500000)
+        {
+          loop_count = 0;
+          printf("%d: sr=0x%x, exceeded loop_count\n", ep_number, USBD_HBW->ctrl3);
+        }
+#endif // USBD_DEBUG_TRANSFER
+      }
 #ifdef USBD_HBW_DEBUG_ISO_TRANSFER
-			printf ("ctrl3=0x%x,tlen:%d, plen: %d\n", USBD_HBW->ctrl3, totalLen, packetLen);
+      printf("ctrl3=0x%x,tlen:%d, plen: %d\n", USBD_HBW->ctrl3, totalLen, packetLen);
 #endif
-			transferred += usbd_in_request(ep_number, pdata, packetLen);
+      transferred += usbd_in_request(ep_number, pdata, packetLen);
 
-			// If this is the last packet.
-			if (totalLen == 0)
-			{
-				if (part == 0)
-				{
-					// Acknowledge end of packet if flag is set.
-					//USBD_EP_SR_REG(ep_number) = (MASK_USBD_EPxSR_INPRDY);
+      // If this is the last packet.
+      if (totalLen == 0)
+      {
+        if (part == 0)
+        {
+          // Acknowledge end of packet if flag is set.
+          // USBD_EP_SR_REG(ep_number) = (MASK_USBD_EPxSR_INPRDY);
 #ifdef USBD_HBW_DEBUG_ISO_TRANSFER
-			printf ("INPRDY set\n");
+          printf("INPRDY set\n");
 #endif
 #ifndef USBD_HBW_ISOCHRONOUS_AUTOHEADER
-					USBD_HBW->ctrl3 |= MASK_USBD_HBW_CTRL3_INPRDY;
+          USBD_HBW->ctrl3 |= MASK_USBD_HBW_CTRL3_INPRDY;
 #endif
-				}
-				break;
-			}
+        }
+        break;
+      }
 
-			// There are still more data to send so just set the INPRDY bit.
-			//USBD_EP_SR_REG(ep_number) = (MASK_USBD_EPxSR_INPRDY);
-		}
-		// Move pointer to next chunk of data to send.
-		pdata += (max_bytes - offset);
-		// By definition offset will now be zero as we have taken that into
-		// account at the start of the first packet we send.
-		offset = 0;
+      // There are still more data to send so just set the INPRDY bit.
+      // USBD_EP_SR_REG(ep_number) = (MASK_USBD_EPxSR_INPRDY);
+    }
+    // Move pointer to next chunk of data to send.
+    pdata += (max_bytes - offset);
+    // By definition offset will now be zero as we have taken that into
+    // account at the start of the first packet we send.
+    offset = 0;
 
-		// Until all data has been transfered.
-	} while (totalLen > 0);
+    // Until all data has been transferred.
+  } while (totalLen > 0);
 
-	return transferred;
+  return transferred;
 }
 
-void USBD_HBW_init_endpoint(USBD_ENDPOINT_NUMBER   ep_number,
-							uint16_t fifo_size,
-							USBD_HBW_HBWMODE mode)
+void USBD_HBW_init_endpoint(USBD_ENDPOINT_NUMBER ep_number, uint16_t fifo_size,
+                            USBD_HBW_HBWMODE mode)
 {
-	uint32_t reg_data = 0;
+  uint32_t reg_data = 0;
 
-	/* Trigger reset to HBW ISO-IN pipe */
-	reg_data = MASK_USBD_HBW_CTRL0_HBW_INI;
+  /* Trigger reset to HBW ISO-IN pipe */
+  reg_data = MASK_USBD_HBW_CTRL0_HBW_INI;
 #ifdef USBD_HBW_ISOCHRONOUS_AUTOHEADER
-	/* Enable the insertion of UVC header and transfer the existing FIFO data to
-	 * USB bus
-	 */
-	reg_data |= MASK_USBD_HBW_CTRL0_AUTO_HEADER;
-#endif
-	
-	USBD_HBW->ctrl0 = reg_data;
+  /* Enable the insertion of UVC header and transfer the existing FIFO data to
+   * USB bus
+   */
+  reg_data |= MASK_USBD_HBW_CTRL0_AUTO_HEADER;
+#endif // USBD_HBW_ISOCHRONOUS_AUTOHEADER
 
-	/* FIFO size for HBW ISO IN pipe allocated in SRAM (FIFO_SIZE * 64) Bytes */
-	USBD_HBW->ctrl1 = ((fifo_size >> 6) & MASK_USBD_HBW_CTRL1_FIFO_SIZE); /* in terms of 64 bytes */
+  USBD_HBW->ctrl0 = reg_data;
 
-	/* set transaction Mode & Max packet size
-	 * Max packet size = (MAXPKTSIZE[3:0] + 1) * 64 Bytes */
-	reg_data = USBD_ep_max_size(ep_number);
-	reg_data = ((reg_data >> 6) - 1)<<BIT_USBD_HBW_CTRL2_MAXPKTSIZE; /* in terms of 64 bytes */
-    reg_data |= (mode << BIT_USBD_HBW_CTRL2_HBWMODE);
-    USBD_HBW->ctrl2 = reg_data;
+  /* FIFO size for HBW ISO IN pipe allocated in SRAM (FIFO_SIZE * 64) Bytes */
+  USBD_HBW->ctrl1 = ((fifo_size >> 6) & MASK_USBD_HBW_CTRL1_FIFO_SIZE); /* in terms of 64 bytes */
 
-    /* hook up the HBW ISO IN pipe to endpoint number */
-	USBD_HBW->ctrl3 = ep_number;
+  /* set transaction Mode & Max packet size
+   * Max packet size = (MAXPKTSIZE[3:0] + 1) * 64 Bytes */
+  reg_data = USBD_ep_max_size(ep_number);
+  reg_data = ((reg_data >> 6) - 1) << BIT_USBD_HBW_CTRL2_MAXPKTSIZE; /* in terms of 64 bytes */
+  reg_data |= (mode << BIT_USBD_HBW_CTRL2_HBWMODE);
+  USBD_HBW->ctrl2 = reg_data;
 
+  /* hook up the HBW ISO IN pipe to endpoint number */
+  USBD_HBW->ctrl3 = ep_number;
 }

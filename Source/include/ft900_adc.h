@@ -1,10 +1,7 @@
 /**
     @file ft900_adc.h
 
-    @brief
-    Analogue to Digital Converter
-
-    
+    @brief Analogue to Digital Converter
 **/
 /*
  * ============================================================================
@@ -62,37 +59,60 @@ extern "C" {
 /** @brief ADC Run Mode */
 typedef enum
 {
-    adc_mode_single,        /*!< One analogue reading will be taken and then the ADC stopped */
-    adc_mode_continuous     /*!< The ADC will continuously aquire analogue readings */
+  adc_mode_single,    /*!< One analogue reading will be taken and then the ADC stopped */
+  adc_mode_continuous /*!< The ADC will continuously acquire analogue readings */
 } adc_mode_t;
 
 /** @brief ADC Resolution. ADC is configurable to support 8 or 10 bit resolution. */
 typedef enum
 {
-	adc_10bit,				/*!< 10-bit ADC resolution */
-	adc_8bit				/*!< 8-bit ADC resolution */
-}adc_resolution_t;
+  adc_10bit,   /*!< 10-bit ADC resolution */
+  adc_8bit     /*!< 8-bit ADC resolution */
+} adc_resolution_t;
 
 /** @brief ADC Frequency */
 typedef enum
 {
-	adc_12_5_MHz,			/*!< ADC clock is 12.5 MHz */
-	adc_6_25_MHz			/*!< ADC clock is 6.25 MHz */
-}adc_clock_t;
+  adc_12_5_MHz,    /*!< ADC clock is 12.5 MHz */
+  adc_6_25_MHz     /*!< ADC clock is 6.25 MHz */
+} adc_clock_t;
+
+/** @brief ADC channel name */
+typedef enum
+{
+  ADC_CHANNEL_NONE,   ///< 0: No channel is selected
+  ADC_CHANNEL_0,      ///< 1: Channel 0 selected
+  ADC_CHANNEL_1,      ///< 2: Channel 1 selected
+  ADC_CHANNEL_2,      ///< 3: Channel 2 selected
+#if defined(__FT930__)
+  ADC_CHANNEL_3,      ///< 4: Channel 3 selected
+  ADC_CHANNEL_4,      ///< 5: Channel 4 selected
+  ADC_CHANNEL_5,      ///< 6: Channel 5 selected
+  ADC_CHANNEL_6,      ///< 7: Channel 6 selected
+#endif
+  ADC_CHANNEL_LAST    ///< Last member
+} adc_channel_e;
+
 /* GLOBAL VARIABLES ****************************************************************/
 
 /* MACROS **************************************************************************/
 
+#define ADC_ENABLE  (1)
+#define ADC_DISABLE (0)
+
+#define ADC_10BIT_ENABLE (0)
+#define ADC_8BIT_ENABLE  (1)
+
 /* FUNCTION PROTOTYPES *************************************************************/
 
 /** @brief Choose the mode that the ADC will run in
- *  @param mode The mode (single or continuous)
+ *  @param [in] mode - The mode (single or continuous)
  *  @returns 0 on success, -1 otherwise
  */
 int8_t adc_mode(adc_mode_t mode);
 
 /** @brief Start the ADC capturing
- *  @param channel The channel to select
+ *  @param [in] channel The channel to select
  *  @returns 0 on success, -1 otherwise
  */
 int8_t adc_start(uint8_t channel);
@@ -104,20 +124,20 @@ int8_t adc_stop(void);
 
 /** @brief Get the number of ADC samples available
  *  @warning This function should only be called when ADC continuous mode is enabled,
- *  	     and should be called inside ISR context.
+ *           and should be called inside ISR context.
  *  @returns The number of ADC samples available in FIFO
  */
 uint8_t adc_available(void);
 
 /** @brief Get the next sample from the ADC
- *  @param val A pointer to store the sample
+ *  @param [inout] val A pointer to store the sample
  *  @returns The number of samples read, -1 otherwise
  */
 int8_t adc_read(uint16_t *val);
 
 /** @brief Get a collection of samples from the ADC
- *  @param val An array pointer to store the samples
- *  @param len The length of the array
+ *  @param [inout] val - An array pointer to store the samples
+ *  @param [in]    len - The length of the array
  *  @warning This function will only work when the ADC is in continuous mode
  *  @returns The number of samples read, -1 otherwise
  */
@@ -140,18 +160,28 @@ int8_t adc_disable_interrupt(void);
 int8_t adc_is_interrupted(void);
 
 /** @brief Select ADC resolution.
- *  @param resolution The resolution(10bit/8bit)
+ *  @param [in] resolution  -The resolution(10bit/8bit)
  *  @returns On success a 0, otherwise -1
  *  @warning This feature is only supported in FT900 revision C
  */
 int8_t adc_select_resolution(adc_resolution_t resolution);
 
 /** @brief Select ADC frequency.
- *  @param frequency The frequency(12.5MHz/6.25MHz)
+ *  @param [in] frequency - The frequency(12.5MHz/6.25MHz)
  *  @returns On success a 0, otherwise -1
  *  @warning This feature is only supported in FT900 revision C
  */
 int8_t adc_select_frequency(adc_clock_t frequency);
+
+/** @brief Enable the ADC rail to rail mode
+ *  @returns None
+ */
+void adc_enable_rail_rail(void);
+
+/** @brief Disable the ADC rail to rail mode
+ *  @returns None
+ */
+void adc_disable_rail_rail(void);
 
 #ifdef __cplusplus
 } /* extern "C" */

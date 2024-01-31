@@ -51,40 +51,42 @@
 #include <string.h>
 
 void setup(void);
-void myputc(void* p, char c);
+void myputc(void *p, char c);
 void adcISR(void);
 void loop(void);
 
-#define ADC_DATA (ADCDAC->DAC_DATA0_ADC_DATA)
+#define ADC_INTERRUPT_READ_SAMPLE       (64) // Must be 64
+/** @brief Value must be power of 2, the more data print the larger the value */
+#define ADC_NUMBER_OF_BUFFER_COUNT      (32)
+#define ADC_CIRCULAR_TOTAL_SAMPLE_COUNT (32 * ADC_INTERRUPT_READ_SAMPLE)
+#define ADC_INTERRUPT_READ_SAMPLE_MASK  (ADC_CIRCULAR_TOTAL_SAMPLE_COUNT - 1)
+#define MAX_ADC_CAPTURE_SAMPLE_COUNT    (1024)
 
-#define ADC_INTERRUPT_READ_SAMPLE			64 // Must be 64
-#define ADC_NUMBER_OF_BUFFER_COUNT			32 // Value must be power of 2, the more data print the larger the value
-#define ADC_CIRCULAR_TOTAL_SAMPLE_COUNT		(32*ADC_INTERRUPT_READ_SAMPLE)
-#define ADC_INTERRUPT_READ_SAMPLE_MASK		(ADC_CIRCULAR_TOTAL_SAMPLE_COUNT-1)
-#define MAX_ADC_CAPTURE_SAMPLE_COUNT		1024
+#define LOOP_COUNT 0x400
+#define LOOP_COUNT_MASK (LOOP_COUNT - 1)
 
 /*
  *  Variables used for circular buffer
  */
-static uint16_t	 g_u16AdcBuffer[ADC_CIRCULAR_TOTAL_SAMPLE_COUNT];
+static uint16_t g_u16AdcBuffer[ADC_CIRCULAR_TOTAL_SAMPLE_COUNT];
 static volatile uint32_t g_uHead;
 static volatile uint32_t g_uTail;
 /*
  * Variable is used for application loop dumping sample from circular buffer.
  */
-static uint16_t	 g_u16AppBuffer[ADC_INTERRUPT_READ_SAMPLE];
+static uint16_t g_u16AppBuffer[ADC_INTERRUPT_READ_SAMPLE];
 
 /*
  * Return number of unread samples stored in circular buffer(g_u16AdcBuffer)
  */
 static __inline uint32_t adc_sample_available()
 {
-	uint32_t uAvail;
-	CRITICAL_SECTION_BEGIN
-	uAvail = g_uHead - g_uTail;
-	uAvail &= ADC_INTERRUPT_READ_SAMPLE_MASK;
-	CRITICAL_SECTION_END
-	return uAvail;
+  uint32_t uAvail;
+  CRITICAL_SECTION_BEGIN
+  uAvail = g_uHead - g_uTail;
+  uAvail &= ADC_INTERRUPT_READ_SAMPLE_MASK;
+  CRITICAL_SECTION_END
+  return uAvail;
 }
 
 /*
@@ -93,154 +95,157 @@ static __inline uint32_t adc_sample_available()
  *
  *  Application should call adc_sample_available() for uSamples to read.
  */
-static __inline void adc_read_samples(uint16_t* pBuf, uint32_t uSamples)
+static __inline void adc_read_samples(uint16_t *pBuf, uint32_t uSamples)
 {
-	uint32_t uRead;
-	uint16_t* pSrc;
+  uint32_t uRead;
+  uint16_t *pSrc;
 
-	CRITICAL_SECTION_BEGIN
-	while (0 < uSamples)
-	{
-    	pSrc = &g_u16AdcBuffer[g_uTail];
-		uRead = ADC_CIRCULAR_TOTAL_SAMPLE_COUNT - g_uTail;
-    	if (uRead > uSamples) {
-    		uRead = uSamples;
-    	}
-		memcpy(pBuf, pSrc, uRead*2);
-		pBuf += uRead;
-		uSamples -= uRead;
-		g_uTail += uRead;
-		g_uTail &= ADC_INTERRUPT_READ_SAMPLE_MASK;
-	}
-	CRITICAL_SECTION_END
+  CRITICAL_SECTION_BEGIN
+  while (0 < uSamples)
+  {
+    pSrc = &g_u16AdcBuffer[g_uTail];
+    uRead = ADC_CIRCULAR_TOTAL_SAMPLE_COUNT - g_uTail;
+    if (uRead > uSamples)
+    {
+      uRead = uSamples;
+    }
+    memcpy(pBuf, pSrc, uRead * 2);
+    pBuf += uRead;
+    uSamples -= uRead;
+    g_uTail += uRead;
+    g_uTail &= ADC_INTERRUPT_READ_SAMPLE_MASK;
+  }
+  CRITICAL_SECTION_END
 }
-
 
 int main(void)
 {
-    setup();
-    for(;;) loop();
-    return 0;
+  setup();
+  for (;;)
+    loop();
+  return 0;
 }
 
 void setup(void)
 {
-	sys_reset_all();
-    /* Enable the UART Device... */
-    sys_enable(sys_device_uart0);
-    /* Set UART0 GPIO functions to UART0_TXD and UART0_RXD... */
+  sys_reset_all();
+  /* Enable the UART Device... */
+  sys_enable(sys_device_uart0);
+  /* Set UART0 GPIO functions to UART0_TXD and UART0_RXD... */
 #if defined(__FT900__)
-    gpio_function(48, pad_uart0_txd); /* UART0 TXD */
-    gpio_function(49, pad_uart0_rxd); /* UART0 RXD */
+  gpio_function(48, pad_uart0_txd); /* UART0 TXD */
+  gpio_function(49, pad_uart0_rxd); /* UART0 RXD */
 #elif defined(__FT930__)
-    gpio_function(23, pad_uart0_txd); /* UART0 TXD */
-    gpio_function(22, pad_uart0_rxd); /* UART0 RXD */
+  gpio_function(23, pad_uart0_txd); /* UART0 TXD */
+  gpio_function(22, pad_uart0_rxd); /* UART0 RXD */
 #endif
-    uart_open(UART0,                    /* Device */
-              1,                        /* Prescaler = 1 */
-              UART_DIVIDER_19200_BAUD,  /* Divider = 1302 */
-              uart_data_bits_8,         /* No. Data Bits */
-              uart_parity_none,         /* Parity */
-              uart_stop_bits_1);        /* No. Stop Bits */
+  uart_open(UART0,                   /* Device */
+            1,                       /* Pre-scaler = 1 */
+            UART_DIVIDER_19200_BAUD, /* Divider = 1302 */
+            uart_data_bits_8,        /* No. Data Bits */
+            uart_parity_none,        /* Parity */
+            uart_stop_bits_1);       /* No. Stop Bits */
 
-    /* Print out a welcome message... */
-    uart_puts(UART0,
-        "\x1B[2J" /* ANSI/VT100 - Clear the Screen */
-        "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
-        "Copyright (C) Bridgetek Pte Ltd \r\n"
-        "--------------------------------------------------------------------- \r\n"
-        "Welcome to ADC Example 2... \r\n"
-        "\r\n"
-        "Use interrupt to capture samples and store them in a circular buffer, \n"
-		" print 64 samples of ADC 1 from the circular buffer at a regular interval.\r\n"
-        "--------------------------------------------------------------------- \r\n"
-        );
+  /* Print out a welcome message... */
+  uart_puts(UART0,
+            "\x1B[2J" /* ANSI/VT100 - Clear the Screen */
+            "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
+            "Copyright (C) Bridgetek Pte Ltd \r\n"
+            "--------------------------------------------------------------------- \r\n"
+            "Welcome to ADC Example 2... \r\n"
+            "\r\n"
+            "Use interrupt to capture samples and store them in a circular buffer, \n"
+            " print 64 samples of ADC 1 from the circular buffer at a regular interval.\r\n"
+            "--------------------------------------------------------------------- \r\n");
 
-    /* Enable the ADCs... */
-    sys_enable(sys_device_adc);
+  /* Enable the ADCs... */
+  sys_enable(sys_device_adc);
 
 #if defined(__FT900__)
-    /* Set GPIO6 to ADC1... */
-    gpio_function(6, pad_adc1);
+  /* Set GPIO6 to ADC1... */
+  gpio_function(6, pad_adc1);
 #endif
 
-    /* Continuously read data... */
-    adc_mode(adc_mode_continuous);
+  /* Continuously read data... */
+  adc_mode(adc_mode_continuous);
 
-	/* Register the ADC interrupt... */
-	interrupt_attach(interrupt_adc, (uint8_t) interrupt_adc, adcISR);
-	interrupt_enable_globally();
+  /* Register the ADC interrupt... */
+  interrupt_attach(interrupt_adc, (uint8_t)interrupt_adc, adcISR);
+  interrupt_enable_globally();
 
-	/* Enable the ADC to fire an interrupt... */
-	adc_enable_interrupt();
+  /* Enable the ADC to fire an interrupt... */
+  adc_enable_interrupt();
 
-    /* Start the ADC and use ADC1... */
-    adc_start(1);
-    
+  /* Start the ADC and use ADC1... */
+  adc_start(1);
 }
 
 void adcISR()
 {
-    if (adc_is_interrupted())
+  if (adc_is_interrupted())
+  {
+    /* Get number of available sample available in hardware FIFO */
+    uint32_t uCount = adc_available();
+    if (0 < uCount)
     {
-    	/* Get number of available sample available in hardware FIFO */
-    	uint32_t uCount = adc_available();
-    	if (0 < uCount) {
-    		/* Hardware FIFO return 1 less sample than actual count,
-    		 * so we need incrementing 1 more sample to read
-    		 */
-			uCount++;
-			uint32_t uRead;
-	    	uint16_t* pBuf;
-	    	while (0 < uCount) {
-	    		/*
-	    		 * We need to make sure we won't write over to end of circular buffer,
-	    		 * uRead is the count from g_uHead to the end of circular buffer.
-	    		 * */
-				uRead = ADC_CIRCULAR_TOTAL_SAMPLE_COUNT - g_uHead;
-		    	/* pBuf will point to start of current g_uHead location */
-				pBuf = &g_u16AdcBuffer[g_uHead];
-		    	/* Make sure we won't read more than available to read */
-		    	if (uRead > uCount) {
-		    		uRead = uCount;
-		    	}
-		    	adc_readn(pBuf, uRead);
-				//asm_streamin16(&ADCDAC->DAC_DATA0_ADC_DATA, pBuf, uRead*2);
-				g_uHead += uRead;
-		    	g_uHead &= ADC_INTERRUPT_READ_SAMPLE_MASK;
-		    	uCount -= uRead;
-			}
-    	}
+      /* Hardware FIFO return 1 less sample than actual count,
+       * so we need incrementing 1 more sample to read
+       */
+      uCount++;
+      uint32_t uRead;
+      uint16_t *pBuf;
+      while (0 < uCount)
+      {
+        /*
+         * We need to make sure we won't write over to end of circular buffer,
+         * uRead is the count from g_uHead to the end of circular buffer.
+         * */
+        uRead = ADC_CIRCULAR_TOTAL_SAMPLE_COUNT - g_uHead;
+        /* pBuf will point to start of current g_uHead location */
+        pBuf = &g_u16AdcBuffer[g_uHead];
+        /* Make sure we won't read more than available to read */
+        if (uRead > uCount)
+        {
+          uRead = uCount;
+        }
+        adc_readn(pBuf, uRead);
+        g_uHead += uRead;
+        g_uHead &= ADC_INTERRUPT_READ_SAMPLE_MASK;
+        uCount -= uRead;
+      }
     }
+  }
 }
 
 void loop(void)
 {
-#define LOOP_COUNT			0x400
-#define LOOP_COUNT_MASK		(LOOP_COUNT - 1)
-	static uint32_t uLoopCount = 0;
-	/* uAdcCount stores number of un-read sample from circular buffer */
-	uint32_t uAdcCount = adc_sample_available();
+  static uint32_t uLoopCount = 0;
+  /* uAdcCount stores number of un-read sample from circular buffer */
+  uint32_t uAdcCount = adc_sample_available();
 
-	if (ADC_INTERRUPT_READ_SAMPLE <= uAdcCount) {
-		while (ADC_INTERRUPT_READ_SAMPLE <= uAdcCount)
-		{
-			// We keep consume adc buffer from circular buffer
-			adc_read_samples(g_u16AppBuffer, ADC_INTERRUPT_READ_SAMPLE);
-			uAdcCount -= ADC_INTERRUPT_READ_SAMPLE;
-		}
-		uLoopCount++;
-		uLoopCount &= LOOP_COUNT_MASK;
-		/* We will only output samples for every LOOP_COUNT count */
-		if (!uLoopCount) {
-			for (uint32_t i=0; i<ADC_INTERRUPT_READ_SAMPLE; i++) {
-				printf("%03d ", (uint16_t)g_u16AppBuffer[i]);
-			}
-			printf("\n\n");
-		}
-	}
-	else {
-		/* Samples less than ADC_INTERRUPT_READ_SAMPLE, delay 1 ms and return */
-		delayms(1);
-	}
+  if (ADC_INTERRUPT_READ_SAMPLE <= uAdcCount)
+  {
+    while (ADC_INTERRUPT_READ_SAMPLE <= uAdcCount)
+    {
+      // We keep consume adc buffer from circular buffer
+      adc_read_samples(g_u16AppBuffer, ADC_INTERRUPT_READ_SAMPLE);
+      uAdcCount -= ADC_INTERRUPT_READ_SAMPLE;
+    }
+    uLoopCount++;
+    uLoopCount &= LOOP_COUNT_MASK;
+    /* We will only output samples for every LOOP_COUNT count */
+    if (!uLoopCount)
+    {
+      for (uint32_t i = 0; i < ADC_INTERRUPT_READ_SAMPLE; i++)
+      {
+        printf("%03d ", (uint16_t)g_u16AppBuffer[i]);
+      }
+      printf("\n\n");
+    }
+  }
+  else
+  {
+    /* Samples less than ADC_INTERRUPT_READ_SAMPLE, delay 1 ms and return */
+    delayms(1);
+  }
 }

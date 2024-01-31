@@ -1,10 +1,7 @@
 /**
     @file ft900_rtc.h
 
-    @brief
-    Real Time Clock
-
-    
+    @brief Real Time Clock
 **/
 /*
  * ============================================================================
@@ -53,6 +50,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* INCLUDES ************************************************************************/
+
 #include <stdint.h>
 #include <stddef.h>
 #include <time.h>
@@ -64,36 +62,37 @@ extern "C" {
 /** @brief RTC Interrupts */
 typedef enum
 {
-	/* Below ENUMS applicable to FT930 and FT900 Rev C onwards! */
-    rtc_interrupt_alarm1,              	/**< Alarm 1 Interrupt */
-    rtc_interrupt_alarm2,              	/**< Alarm 2 Interrupt */
-    rtc_interrupt_ext_osc_stopped,   	/**< External Oscillator Stopped Interrupt */
-    rtc_interrupt_int_osc_stopped,   	/**< Internal Oscillator Stopped Interrupt */
-    rtc_interrupt_int_auto_calibration,   	/**< RTC auto-calibration Interrupt */
-    rtc_interrupt_max,                   /**< Max enum */
-	rtc_legacy_interrupt_alarm			/**< This ENUM is ONLY applicable to FT900 Rev B */
+  /* Below ENUMS applicable to FT930 and FT900 Rev C onwards! */
+  rtc_interrupt_alarm1,                 /**< Alarm 1 Interrupt */
+  rtc_interrupt_alarm2,                 /**< Alarm 2 Interrupt */
+  rtc_interrupt_ext_osc_stopped,        /**< External Oscillator Stopped Interrupt */
+  rtc_interrupt_int_osc_stopped,        /**< Internal Oscillator Stopped Interrupt */
+  rtc_interrupt_int_auto_calibration,   /**< RTC auto-calibration Interrupt */
+  rtc_interrupt_max,                    /**< Max enum */
+  rtc_legacy_interrupt_alarm            /**< This ENUM is ONLY applicable to FT900 Rev B */
 } rtc_interrupt_t;
 
 /** @brief RTC Alarm Type */
 typedef enum
 {
-	/* Below ENUMS applicable to FT930 and FT900 Rev C onwards! */
-    rtc_alarm_1Hz,              			/**< Alarm every second */
-    rtc_alarm_match_sec,              		/**< Alarm when seconds match*/
-    rtc_alarm_match_min_sec,   				/**< Alarm when minutes and seconds match */
-	rtc_alarm_match_hr_min_sec,   			/**< Alarm when hours, minutes and seconds match */
-	rtc_alarm_match_date_hr_min_sec,		/**< Alarm when date, hours, minutes and second match */
-	rtc_alarm_match_day_hr_min_sec,			/**< Alarm when day, hours, minutes and second match */
-	rtc_legacy_alarm						/**< This ENUM is ONLY applicable to FT900 Rev B */
+  /* Below ENUMS applicable to FT930 and FT900 Rev C onwards! */
+  rtc_alarm_1Hz,                    /**< Alarm every second */
+  rtc_alarm_match_sec,              /**< Alarm when seconds match*/
+  rtc_alarm_match_min_sec,          /**< Alarm when minutes and seconds match */
+  rtc_alarm_match_hr_min_sec,       /**< Alarm when hours, minutes and seconds match */
+  rtc_alarm_match_date_hr_min_sec,  /**< Alarm when date, hours, minutes and second match */
+  rtc_alarm_match_day_hr_min_sec,   /**< Alarm when day, hours, minutes and second match */
+  rtc_legacy_alarm                  /**< This ENUM is ONLY applicable to FT900 Rev B */
 } rtc_alarm_type_t;
 
 /** @brief RTC Options */
 typedef enum
 {
-	rtc_option_auto_refresh,          /**< Enable or disable the Auto Refresh of RTC */
-	/* Below ENUMS are ONLY applicable to FT900 Rev B */
-	rtc_option_wrap,					/**< Enable or disable RTC Wrap around  */
-	rtc_option_mask_interrupt         /**< Option to set whether the Real Time Clock module should mask the match interrupt line */
+  rtc_option_auto_refresh,          /**< Enable or disable the Auto Refresh of RTC */
+  /* Below ENUMS are ONLY applicable to FT900 Rev B */
+  rtc_option_wrap,                  /**< Enable or disable RTC Wrap around  */
+  rtc_option_mask_interrupt         /**< Option to set whether the Real Time Clock module should
+                                         mask the match interrupt line */
 } rtc_option_t;
 
 /* GLOBAL VARIABLES ****************************************************************/
@@ -118,48 +117,47 @@ int8_t rtc_start(void);
 int8_t rtc_stop(void);
 
 /** @brief Set the Real Time Clock to a value
- *  @param time A pointer of type struct tm (defined in <time.h>) contains
- *  			time to be written into the RTC for FT93x and FT90x rev C.
- *  			Only the field tm.sec should contain the RTC time to be written in
- *  			case of FT90x rev B.
+ *  @param [in] time - A pointer of type struct tm (defined in <time.h>) contains
+ *                     time to be written into the RTC for FT93x and FT90x rev C.
+ *                     Only the field tm.sec should contain the RTC time to be written in
+ *                     case of FT90x rev B.
  *  @returns 0 on success, -1 otherwise
  */
-
 int8_t rtc_write(const struct tm* time);
 
 /** @brief Read the current value of the Real Time Clock
- *  @param time A pointer of type struct tm (defined in <time.h>) to which
- *  			the RTC time is read in case of FT93x and FT90x rev C.
- *  			Only the field tm.sec is written to with RTC time in
- *  			case of FT90x rev B.
+ *  @param [in] time - A pointer of type struct tm (defined in <time.h>) to which
+ *                     the RTC time is read in case of FT93x and FT90x rev C.
+ *                     Only the field tm.sec is written to with RTC time in
+ *                     case of FT90x rev B.
  *  @returns 0 on success, -1 otherwise
  */
 
 int8_t rtc_read(struct tm* const time);
 
 /** @brief Set up various RTC options
- *  @param opt The type of option selected
- *  @param val The value of the option selected
+ *  @param [in] opt - The type of option selected
+ *  @param [in] val - The value of the option selected
  *  @returns 0 on success, -1 otherwise
  */
 int8_t rtc_option(rtc_option_t opt, uint8_t val);
 
 /** @brief Set up the an alarm for the RTC
- *  @param number The Alarm number (1 or 2)
- *  @param time The time that the alarm should fire at
- *  @param alarm_type The type of the alarm that determines the match conditions
+ *  @param [in] number     - The Alarm number (1 or 2)
+ *  @param [in] time       - The time that the alarm should fire at
+ *  @param [in] alarm_type - The type of the alarm that determines the match conditions
  *  @returns 0 on success, -1 otherwise
  */
-int8_t rtc_set_alarm(uint8_t number,  struct tm* time, rtc_alarm_type_t alarm_type);
+int8_t rtc_set_alarm(uint8_t number, struct tm* time, rtc_alarm_type_t alarm_type);
 
 /** @brief Enable an interrupt on the RTC
- *  @param interrupt The interrupt type to enable
+ *  @param [in] interrupt - The interrupt type to enable
  *  @returns 0 on success, -1 otherwise
  */
 int8_t rtc_enable_interrupt(rtc_interrupt_t interrupt);
 
 /** @brief Enable an interrupt on the RTC
- *  @param interrupt The interrupt type to disable
+ *  @param [in] interrupt - The interrupt type to disable
  *  @returns 0 on success, -1 otherwise
  */
 int8_t rtc_disable_interrupt(rtc_interrupt_t interrupt);
@@ -175,7 +173,7 @@ int8_t rtc_disable_interrupts_globally(void);
 int8_t rtc_enable_interrupts_globally(void);
 
 /** @brief Check if an interrupt has been triggered
- *  @param interrupt The interrupt to check
+ *  @param [in] interrupt - The interrupt to check
  *  @warning This function clears the current interrupt status bit
  *  @returns 1 when interrupted, 0 when not interrupted, -1 otherwise
  */
