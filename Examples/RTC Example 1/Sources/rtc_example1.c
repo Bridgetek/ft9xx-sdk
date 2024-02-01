@@ -137,5 +137,6 @@ void loop(void)
 		printf("Uptime %2d h %2d m %2d s\r",
 			time.tm_hour, time.tm_min, time.tm_sec);
 	}
+    fflush(stdout);
     delayms(500);
 }

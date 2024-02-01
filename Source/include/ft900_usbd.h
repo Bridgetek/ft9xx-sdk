@@ -751,6 +751,16 @@ void USBD_set_test_mode(USBD_TESTMODE_SELECT test_selector);
  */
 void USBD_suspend_device(void);
 
+/** @brief      Handle a change to the power management state of the USB device.
+ *  @details    When a power management interrupt is detected and the Power Management
+ *         Register (PMCFG) is updated the USB device state will need changed. This
+ *         function will call the required state change functions depending on the
+ *         bits set. It will move the state to suspend, resume, attach and detach.
+ *         It is expected to be called from a power management interrupt handler
+ *         when interrupt_0 is set.
+ */
+void USBD_power_change(void);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */

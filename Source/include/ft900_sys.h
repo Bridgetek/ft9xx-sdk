@@ -195,6 +195,17 @@ int sys_i2c_swop(uint8_t swop);
 int sys_pwm_ext_trigger(sys_pwm_trigger_t exttrigger);
 
 #endif
+
+/** @brief Start sleep mode.
+ *  @details Turn off both PLL and Oscillator and enable low power mode.
+ */
+void sys_sleep(void);
+
+/** @brief End sleep mode.
+ *  @details Turn on both PLL and Oscillator and disable low power mode.
+ */
+void sys_wake(void);
+
 /** @brief Reset all peripherals */
 void sys_reset_all(void);
 

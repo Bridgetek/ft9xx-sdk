@@ -471,6 +471,36 @@ int8_t rtc_option(rtc_option_t opt, uint8_t val)
   return iRet;
 }
 
+void rtc_alarm_change(void)
+{
+  if (!sys_check_ft900_revB()) //FT900 rev C or FT930
+  {
+    if (SYS->PMCFG_H & MASK_SYS_PMCFG_RTC_ALARM_IRQ_PEND)
+    {
+      SYS->PMCFG_H = MASK_SYS_PMCFG_RTC_ALARM_IRQ_PEND;
+      delayms(1); /* RTC needs a delay before access when you wakeup from sleep */
+    }
+  }
+}
+
+void rtc_alarm_set(void)
+{
+  if (!sys_check_ft900_revB()) //FT900 rev C or FT930
+  {
+    /* Allow RTC alarm to wakeup the system */
+    SYS->PMCFG_L |= MASK_SYS_PMCFG_RTC_ALARM_IRQ_EN;
+  }
+}
+
+void rtc_alarm_clear(void)
+{
+  if (!sys_check_ft900_revB()) //FT900 rev C or FT930
+  {
+    /* Stop RTC alarm to waking up the system */
+    SYS->PMCFG_L &= ~MASK_SYS_PMCFG_RTC_ALARM_IRQ_EN;
+  }
+}
+
 static uint32_t get_time(const struct tm *time)
 {
   rtc_time t;

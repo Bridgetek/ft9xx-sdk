@@ -249,6 +249,7 @@ void rtcISR(void)
 #if SLEEP_MODE
         seconds_to_sleep = seconds;
 #endif
+        fflush(stdout);
     }
 }
 
@@ -258,14 +259,13 @@ void enter_sleep(void)
 {
 	if (!sys_check_ft900_revB()) //FT900 rev C or FT930
 	{
-		/* Allow RTC alarm to wakeup the system */
-		SYS->PMCFG_L |= MASK_SYS_PMCFG_RTC_ALARM_IRQ_EN;
+		rtc_alarm_set();
 	}
 
 	interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
 
 	/* Turn off both PLL and Oscillator */
-	SYS->PMCFG_L |= MASK_SYS_PMCFG_PM_PWRDN | MASK_SYS_PMCFG_PM_PWRDN_MODE;
+	sys_sleep();
 
 	delayms(10);
 }
@@ -275,26 +275,18 @@ void exit_sleep(void)
 	if (!sys_check_ft900_revB()) //FT900 rev C or FT930
 	{
 		/* Remove the RTC alarm as a wakeup source */
-		SYS->PMCFG_L &= ~MASK_SYS_PMCFG_RTC_ALARM_IRQ_EN;
+		rtc_alarm_clear();
 	}
 
 	/* Clear power down mode flags */
-	SYS->PMCFG_L &= ~(MASK_SYS_PMCFG_PM_PWRDN_MODE | MASK_SYS_PMCFG_PM_PWRDN);
-
+	sys_wake();
 }
 
 
 /* Power management ISR */
 void power_management_ISR(void)
 {
-	if (!sys_check_ft900_revB()) //FT900 rev C or FT930
-	{
-		if (SYS->PMCFG_H & MASK_SYS_PMCFG_RTC_ALARM_IRQ_PEND)
-		{
-			SYS->PMCFG_H = MASK_SYS_PMCFG_RTC_ALARM_IRQ_PEND;
-			delayms(1); /* RTC needs a delay before access when you wakeup from sleep */
-		}
-	}
+	rtc_power_change();
 }
 
 #endif	// SLEEP_MODE

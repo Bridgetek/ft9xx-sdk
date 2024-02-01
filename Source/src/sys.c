@@ -304,6 +304,20 @@ int sys_pwm_ext_trigger(sys_pwm_trigger_t exttrigger)
 }
 #endif
 
+
+void sys_sleep(void)
+{
+  /* Turn off both PLL and Oscillator */
+  SYS->PMCFG_L |= MASK_SYS_PMCFG_PM_PWRDN | MASK_SYS_PMCFG_PM_PWRDN_MODE;
+}
+
+void sys_wake(void)
+{
+  /* Clear power down mode flags */
+  SYS->PMCFG_L &= ~(MASK_SYS_PMCFG_PM_PWRDN | MASK_SYS_PMCFG_PM_PWRDN_MODE);
+}
+
+
 /** @brief Reset all peripherals */
 void sys_reset_all(void)
 {

@@ -179,6 +179,32 @@ int8_t rtc_enable_interrupts_globally(void);
  */
 int8_t rtc_is_interrupted(rtc_interrupt_t interrupt);
 
+/**
+ *   @brief Handle a change to the alarm state of the RTC.
+ *   @details When an RTC alarm interrupt is detected the Power Management
+ *     Register (PMCFG) is updated with the RTC alarm state set. Only
+ *     supported by FT93x or Rev C of FT90x.
+ *     It is expected to be called from a power management interrupt handler
+ *     when interrupt_0 is set.
+ **/
+void rtc_power_change(void);
+
+/**
+ *   @brief      Enable the RTC alarm.
+ *   @details    Set the enable bit to allow an RTC alarm interrupt to be detected
+ *     by the Power Management Register (PMCFG). Only supported by FT93x or Rev C
+ *     of FT90x.
+ **/
+void rtc_alarm_set(void);
+
+/**
+ *   @brief      Disable the RTC alarm.
+ *   @details    Clear the enable bit to allow an RTC alarm interrupt to be detected
+ *     by the Power Management Register (PMCFG). Only supported by FT93x or Rev C
+ *     of FT90x.
+ **/
+void rtc_alarm_clear(void);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* __cplusplus */
