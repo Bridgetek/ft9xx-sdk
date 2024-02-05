@@ -175,7 +175,6 @@
 #undef USBH_DEBUG_ALLOC
 #undef USBH_DEBUG_XFER
 #undef USBH_DEBUG_XFER_DETAIL
-#undef USBH_DEBUG_UNLINK
 #undef USBH_DEBUG
 #undef USBH_DEBUG_ISO_ALLOC
 #include <ft900_uart_simple.h>
@@ -1304,7 +1303,7 @@ static int8_t usbh_ep_list_remove(USBH_endpoint *epThis, USBH_endpoint *epListHe
 					{
 						usbh_write_periodic_list(i, link);
 #ifdef USBH_DEBUG_PERIODIC_LIST
-						printf("List remove: Changed periodic entry %ld to %08lx\r\n", i, link);
+						printf("List remove: Changed periodic entry %d to %08x\r\n", i, link);
 #endif // USBH_DEBUG_PERIODIC_LIST
 					}
 				}
@@ -2289,21 +2288,21 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 		// head to the current qTD (which is the new first qTD).
 		if (ep->hc_head_qtd == ep->hc_dummy_qtd)
 		{
-			// Always happens if there is one qTD in use.
-			ep->hc_head_qtd = hc_data_qtd;
+		  // Always happens if there is one qTD in use.
+		  ep->hc_head_qtd = hc_data_qtd;
 		}
 
 		CRITICAL_SECTION_END
 		// UNLOCK
 
 #ifdef USBH_DEBUG_XFER_DETAIL
-		printf("\n\ndata_qtd %p\n", &data_qtd);
-		printf("data_qtd->next %08lx\n", data_qtd.next);
-		printf("data_qtd->token %08lx\n", data_qtd.token);
-		printf("data_qtd->buf %p\n", data_qtd.buf);
+    printf("\n\ndata_qtd %p\n", &data_qtd);
+    printf("data_qtd->next %08lx\n", data_qtd.next);
+    printf("data_qtd->token %08lx\n", data_qtd.token);
+    printf("data_qtd->buf %p\n", data_qtd.buf);
 #endif // USBH_DEBUG_XFER_DETAIL
 
-		// Preserve the value of the token field of the SETUP request.
+    // Preserve the value of the token field of the SETUP request.
 		token = data_qtd.token;
 		// Disable the SETUP request qTD for now.
 		data_qtd.token = EHCI_QUEUE_TD_TOKEN_STATUS_HALTED;
@@ -2334,40 +2333,40 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 		}
 
 #ifdef USBH_DEBUG_XFER_DETAIL
-		printf("\ndata_qtd %p\n", &data_qtd);
-		printf("->next %08lx\n", data_qtd.next);
-		printf("->token %08lx\n", data_qtd.token);
-		printf("->buf %p\n", data_qtd.buf);
+    printf("\ndata_qtd %p\n", &data_qtd);
+    printf("->next %08lx\n", data_qtd.next);
+    printf("->token %08lx\n", data_qtd.token);
+    printf("->buf %p\n", data_qtd.buf);
 
-		printf("\nep %lx\n", (uint32_t)(ep));
-		printf("->next %lx\n", (uint32_t)(ep->next));
-		printf("->list_next %lx\n", (uint32_t)(ep->list_next));
-		printf("->entry %lx\n", (uint32_t)(ep->hc_entry.qh));
-		printf("->head %lx\n", (uint32_t)(ep->hc_head_qtd));
-		printf("->dummy %lx\n", (uint32_t)(ep->hc_dummy_qtd));
-		printf("->direction %x\n", ep->direction);
+    printf("\nep %lx\n", (uint32_t)(ep));
+    printf("->next %lx\n", (uint32_t)(ep->next));
+    printf("->list_next %lx\n", (uint32_t)(ep->list_next));
+    printf("->entry %lx\n", (uint32_t)(ep->hc_entry.qh));
+    printf("->head %lx\n", (uint32_t)(ep->hc_head_qtd));
+    printf("->dummy %lx\n", (uint32_t)(ep->hc_dummy_qtd));
+    printf("->direction %x\n", ep->direction);
 
-		printf("\nep qH %lx\n", (uint32_t)(ep->hc_entry.qh));
-		printf("->next %lx\n", EHCI_MEM(ep->hc_entry.qh->next));
-		printf("->qtd_current %lx\n", EHCI_MEM(ep->hc_entry.qh->qtd_current));
-		printf("->ep_char_1 %lx\n", EHCI_MEM(ep->hc_entry.qh->ep_char_1));
-		printf("->ep_capab_2 %lx\n", EHCI_MEM(ep->hc_entry.qh->ep_capab_2));
-		printf("->overlay.next %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.next));
-		printf("->overlay.token %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.token));
-		printf("->overlay.buf %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.buf));
+    printf("\nep qH %lx\n", (uint32_t)(ep->hc_entry.qh));
+    printf("->next %lx\n", EHCI_MEM(ep->hc_entry.qh->next));
+    printf("->qtd_current %lx\n", EHCI_MEM(ep->hc_entry.qh->qtd_current));
+    printf("->ep_char_1 %lx\n", EHCI_MEM(ep->hc_entry.qh->ep_char_1));
+    printf("->ep_capab_2 %lx\n", EHCI_MEM(ep->hc_entry.qh->ep_capab_2));
+    printf("->overlay.next %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.next));
+    printf("->overlay.token %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.token));
+    printf("->overlay.buf %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.buf));
 
-		printf("\nep head %lx\n", (uint32_t)(ep->hc_head_qtd));
-		printf("->next %lx\n", EHCI_MEM(ep->hc_head_qtd->next));
-		printf("->token %lx\n", EHCI_MEM(ep->hc_head_qtd->token));
-		printf("->buf %lx\n", EHCI_MEM(ep->hc_head_qtd->buf));
+    printf("\nep head %lx\n", (uint32_t)(ep->hc_head_qtd));
+    printf("->next %lx\n", EHCI_MEM(ep->hc_head_qtd->next));
+    printf("->token %lx\n", EHCI_MEM(ep->hc_head_qtd->token));
+    printf("->buf %lx\n", EHCI_MEM(ep->hc_head_qtd->buf));
 
-		printf("\nep dummy %lx\n", (uint32_t)(ep->hc_dummy_qtd));
-		printf("->next %lx\n", EHCI_MEM(ep->hc_dummy_qtd->next));
-		printf("->token %lx\n", EHCI_MEM(ep->hc_dummy_qtd->token));
-		printf("->buf %lx\n", EHCI_MEM(ep->hc_dummy_qtd->buf));
+    printf("\nep dummy %lx\n", (uint32_t)(ep->hc_dummy_qtd));
+    printf("->next %lx\n", EHCI_MEM(ep->hc_dummy_qtd->next));
+    printf("->token %lx\n", EHCI_MEM(ep->hc_dummy_qtd->token));
+    printf("->buf %lx\n", EHCI_MEM(ep->hc_dummy_qtd->buf));
 #endif // USBH_DEBUG_XFER_DETAIL
 
-		// Kick off the transfer by setting the active bit in the setup qTD.
+    // Kick off the transfer by setting the active bit in the setup qTD.
 		// NOTE: setting the token in the qTD MUST be atomic
 		EHCI_MEM(hc_data_qtd->token) = token;
 
@@ -2573,7 +2572,7 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 			EHCI_MEM(hc_itd->pointer_list[5]) = 0;
 			EHCI_MEM(hc_itd->pointer_list[6]) = 0;
 
-#ifdef USBH_DEBUG_XFER
+#ifdef USBH_DEBUG_XFER_DETAIL
 			printf("iTD next %08x\r\n", hc_itd->next);
 			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[0]);
 			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[1]);
@@ -2590,7 +2589,7 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[4]);
 			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[5]);
 			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[6]);
-#endif // USBH_DEBUG_XFER
+#endif // USBH_DEBUG_XFER_DETAIL
 		}
 		// Full-speed endpoint.
 		else //if (xferNew->hc_entry.type == USBH_list_entry_type_siTD)
@@ -2666,7 +2665,7 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 													| MASK_EHCI_SPLIT_ISO_TD_IOC
 													| EHCI_SPLIT_ISO_TD_STATUS_ACTIVE;
 
-#ifdef USBH_DEBUG_XFER
+#ifdef USBH_DEBUG_XFER_DETAIL
 			printf("siTD next %08x\r\n", hc_sitd->next);
 			printf("siTD ep_char_1 %08x\r\n", hc_sitd->ep_char_1);
 			printf("siTD ep_capab_2 %08x\r\n", hc_sitd->ep_capab_2);
@@ -2674,7 +2673,7 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 			printf("siTD pointer_list %08x\r\n", hc_sitd->pointer_list[0]);
 			printf("siTD pointer_list %08x\r\n", hc_sitd->pointer_list[1]);
 			printf("siTD back %08x\r\n", hc_sitd->back);
-#endif // USBH_DEBUG_XFER
+#endif // USBH_DEBUG_XFER_DETAIL
 
 		}
 
@@ -3588,7 +3587,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 						printf("Descriptor: Endpoint index: %d %s ", epNew->index, epNew->direction == USBH_DIR_IN?"in":"out");
 #endif // USBH_DEBUG_CONFIG_DESC
 
-						// Take the endpoint interval from the configuration descriptor.
+            // Take the endpoint interval from the configuration descriptor.
 						epNew->interval = confEndpointDesc->bInterval;
 						if ((confEndpointDesc->bmAttributes & USB_ENDPOINT_DESCRIPTOR_ATTR_MASK) ==
 								USB_ENDPOINT_DESCRIPTOR_ATTR_BULK)
@@ -5264,6 +5263,12 @@ void USBH_finalise(void)
 	usbh_hub_port_remove(NULL, 1);
 	usbh_hw_disable_int();
 	interrupt_detach(interrupt_usb_host);
+  usbh_hw_stop();
+
+  // Turn off VBUS in EHCI controller
+  usbh_clear_hub_port_feature(0, 1, USB_HUB_CLASS_FEATURE_PORT_POWER);
+  // Set PSW_N pin to high
+  gpio_write(2, 1);
 
 	CRITICAL_SECTION_BEGIN
 	usbh_intr_xfer = 0;
@@ -5272,9 +5277,9 @@ void USBH_finalise(void)
 
 	// Clear Status Register
 	usbh_hw_clrsts();
-	usbh_hw_stop();
 	usbh_hw_reset();
-	sys_disable(sys_device_usb_host);
+
+  sys_disable(sys_device_usb_host);
 }
 
 int8_t USBH_endpoint_halt(USBH_endpoint_handle endpoint,
