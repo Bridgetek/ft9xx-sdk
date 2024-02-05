@@ -2946,6 +2946,8 @@ static uint8_t usbh_set_hub_port_feature(USBH_device *hubDev, uint8_t hubPort, u
 			case USB_HUB_CLASS_FEATURE_PORT_POWER:
 				// Turn on VBus
 				EHCI_REG(busctrl) &= (~MASK_EHCI_BUSCTRL_VBUS_OFF);
+			  // Set PSW_N pin to low
+			  gpio_write(2, 0);
 				// Not used by driver
 				currentPortStatus.portPower = 1;
 				currentPortStatus.portPowerChange = 1;
@@ -3049,7 +3051,10 @@ static uint8_t usbh_clear_hub_port_feature(USBH_device *hubDev, uint8_t hubPort,
 				currentPortStatus.portSuspendChange = 1;
 				break;
 			case USB_HUB_CLASS_FEATURE_PORT_POWER:
+        // Turn off VBus
 				EHCI_REG(busctrl) |= (MASK_EHCI_BUSCTRL_VBUS_OFF);
+			  // Set PSW_N pin to high
+			  gpio_write(2, 1);
 				currentPortStatus.portPowerChange = 1;
 				break;
 			case USB_HUB_CLASS_FEATURE_C_PORT_CONNECTION:
@@ -4872,9 +4877,8 @@ static void usbh_hw_pad_setup(void)
 
 	delayus(100);
 
-	// Set PSW_N pin to low
+	// Set PSW_N pin to an output
 	gpio_dir(2, pad_dir_output);
-	gpio_write(2, 0);
 }
 
 static void usbh_hw_run(void)
@@ -5267,8 +5271,6 @@ void USBH_finalise(void)
 
   // Turn off VBUS in EHCI controller
   usbh_clear_hub_port_feature(0, 1, USB_HUB_CLASS_FEATURE_PORT_POWER);
-  // Set PSW_N pin to high
-  gpio_write(2, 1);
 
 	CRITICAL_SECTION_BEGIN
 	usbh_intr_xfer = 0;
