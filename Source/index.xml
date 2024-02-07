@@ -42,7 +42,7 @@
     <library name="Ethernet Driver" desc="Ethernet Interface Driver." ft900="yes" ft930="no" >
 		<include>hw/include</include>
 		<file dest="hw/include/ft900_eth.h" src="include/ft900_eth.h" />
-		<file dest="hw/src/eth.c" src="src/eth.c" />
+		<file dest="hw/src/ethernet.c" src="src/ethernet.c" />
 	</library>
     <library name="GPIO Driver" desc="General Purpose I/O Interface Driver." ft900="yes" ft930="yes" >
 		<include>hw/include</include>
@@ -100,7 +100,7 @@
 		<include>hw/include</include>
 		<file dest="hw/include/ft900_startup_dfu.h" src="include/ft900_startup_dfu.h" />
 		<file dest="hw/include/ft900_usbd_dfu.h" src="include/ft900_usbd_dfu.h" />
-		<file dest="hw/src/startup_dfu.c" src="src/startup_dfu.c" />
+		<file dest="hw/src/usbd_startup_dfu.c" src="src/usbd_startup_dfu.c" />
 		<file dest="hw/src/usbd_dfu.c" src="src/usbd_dfu.c" />
 	</library>
     <library name="SYS Driver" desc="Top-level System Driver." ft900="yes" ft930="yes" >
