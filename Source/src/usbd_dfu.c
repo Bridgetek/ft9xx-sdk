@@ -376,7 +376,14 @@ void USBD_DFU_class_req_getstatus(uint16_t requestLen)
 
 	USBD_transfer_ep0(USBD_DIR_IN, (uint8_t *) &buf, sizeof(USB_dfu_status), requestLen);
 
-	if (dfuState == DFUSTATE_DNLOAD_SYNC)
+#if !(USBD_DFU_ATTRIBUTES & USB_DFU_BMATTRIBUTES_MANIFESTATIONTOLERANT)
+  if (USBD_DFU_is_wait_reset())
+  {
+    USBD_DFU_reset();
+  }
+#endif // !(USBD_DFU_ATTRIBUTES & USB_DFU_BMATTRIBUTES_MANIFESTATIONTOLERANT)
+
+  if (dfuState == DFUSTATE_DNLOAD_SYNC)
 	{
 		dfuState = DFUSTATE_DNLOAD_IDLE;
 	}
@@ -395,12 +402,6 @@ void USBD_DFU_class_req_getstatus(uint16_t requestLen)
 	/* Respond with an ACK. */
 	USBD_transfer_ep0(USBD_DIR_OUT, NULL, 0, 0);
 
-#if !(USBD_DFU_ATTRIBUTES & USB_DFU_BMATTRIBUTES_MANIFESTATIONTOLERANT)
-	if (USBD_DFU_is_wait_reset())
-	{
-		USBD_DFU_reset();
-	}
-#endif // !(USBD_DFU_ATTRIBUTES & USB_DFU_BMATTRIBUTES_MANIFESTATIONTOLERANT)
 }
 
 void USBD_DFU_class_req_clrstatus(void)
