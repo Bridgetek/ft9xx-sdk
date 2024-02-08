@@ -420,7 +420,6 @@ static inline uint32_t usbh_read_periodic_list(uint32_t offset)
  */
 static void ISR_usbh(void)
 {
-#ifdef USBH_USE_INTERRUPTS
 	uint32_t intStatus;
 
 	// Clear complete and error bits
@@ -435,8 +434,6 @@ static void ISR_usbh(void)
 	{
 		usbh_intr_port = 1;
 	}
-
-#endif // USBH_USE_INTERRUPTS
 }
 
 static void usbh_unlink_qtd(USBH_xfer *xferThis)
@@ -4839,6 +4836,7 @@ static void usbh_hw_init(void)
 	usbh_hw_stop();
 }
 
+#ifdef USBH_USE_INTERRUPTS
 static void usbh_hw_enable_int(void)
 {
 	uint32_t reg;
@@ -4852,6 +4850,7 @@ static void usbh_hw_enable_int(void)
 			| MASK_EHCI_USBINTR_USB_INT_EN
 			| MASK_EHCI_USBINTR_PO_CHG_INT_EN );
 }
+#endif // USBH_USE_INTERRUPTS
 
 static void usbh_hw_disable_int(void)
 {
