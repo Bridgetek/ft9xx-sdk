@@ -1,11 +1,9 @@
 /**
-    @file
+    @file cam.c
 
-    @brief
-    Parallel Camera Interface
-
-    
+    @brief Parallel Camera Interface
 **/
+
 /*
  * ============================================================================
  * History
@@ -46,6 +44,7 @@
  */
 
 /* INCLUDES ************************************************************************/
+
 #include <ft900_cam.h>
 #include <ft900_asm.h>
 #include <registers/ft900_registers.h>
@@ -64,106 +63,113 @@
 /* FUNCTIONS ***********************************************************************/
 
 /** @brief Initialise the Camera interface
- *  @param triggers
- *  @param clkpol
+ *  @param [in] triggers - The VD/HD levels to trigger on
+ *  @param [in] clkpol   - The clock polarity of the input
  *  @returns 0 on success, -1 otherwise
  */
 int8_t cam_init(cam_trigger_mode_t triggers, cam_clock_pol_t clkpol)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if (triggers > cam_trigger_mode_3 || clkpol > cam_clock_pol_raising)
+  if (triggers > cam_trigger_mode_3 || clkpol > cam_clock_pol_raising)
+  {
+    return -1;  /* Out of range */
+  }
+
+  if (iRet == 0)
+  {
+    CAM_N->CAM_REG1.B.TRIG_PAT = 0;
+
+    switch (triggers)
     {
-        iRet = -1; /* Out of range */
+    case cam_trigger_mode_0:
+      CAM_N->CAM_REG1.B.TRIG_PAT = cam_trigger_mode_0;
+      break;
+    case cam_trigger_mode_1:
+      CAM_N->CAM_REG1.B.TRIG_PAT = cam_trigger_mode_1;
+      break;
+    case cam_trigger_mode_2:
+      CAM_N->CAM_REG1.B.TRIG_PAT = cam_trigger_mode_2;
+      break;
+    case cam_trigger_mode_3:
+      CAM_N->CAM_REG1.B.TRIG_PAT = cam_trigger_mode_3;
+      break;
+    default:
+      break;
     }
 
-    if (iRet == 0)
+    switch (clkpol)
     {
-        CAM->CAM_REG1 &= ~(MASK_CAM_REG1_TRIGPAT0 | MASK_CAM_REG1_TRIGPAT1
-                       | MASK_CAM_REG1_TRIGPAT2 | MASK_CAM_REG1_TRIGPAT3);
-
-        switch(triggers)
-        {
-            case cam_trigger_mode_0: CAM->CAM_REG1 |= MASK_CAM_REG1_TRIGPAT0; break;
-            case cam_trigger_mode_1: CAM->CAM_REG1 |= MASK_CAM_REG1_TRIGPAT1; break;
-            case cam_trigger_mode_2: CAM->CAM_REG1 |= MASK_CAM_REG1_TRIGPAT2; break;
-            case cam_trigger_mode_3: CAM->CAM_REG1 |= MASK_CAM_REG1_TRIGPAT3; break;
-            default: break;
-        }
-
-        switch(clkpol)
-        {
-            case cam_clock_pol_falling: CAM->CAM_REG4 &= ~MASK_CAM_REG4_CLKSENSE; break;
-            case cam_clock_pol_raising: CAM->CAM_REG4 |= MASK_CAM_REG4_CLKSENSE; break;
-            default: break;
-        }
+    case cam_clock_pol_falling:
+      CAM_N->CAM_REG4.B.CLK_SENSE = cam_clock_pol_falling;
+      break;
+    case cam_clock_pol_raising:
+      CAM_N->CAM_REG4.B.CLK_SENSE = cam_clock_pol_raising;
+      break;
+    default:
+      break;
     }
+  }
 
-    return iRet;
+  return iRet;
 }
 
-
 /** @brief Start capturing data
- *  @param bytes The number of bytes to capture
+ *  @param [in] bytes - The number of bytes to capture
  *  @returns 0 on success, -1 otherwise
  */
 int8_t cam_start(uint16_t bytes)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if ((bytes % 4) != 0)
-    {
-        iRet = -1;
-    }
+  if ((bytes % 4) != 0)
+  {
+    return -1;
+  }
 
-    if (iRet == 0)
-    {
-        CAM->CAM_REG1 = (CAM->CAM_REG1 & ~MASK_CAM_REG1_COUNT) | (bytes << BIT_CAM_REG1_COUNT);
-    }
+  CAM_N->CAM_REG1.B.COUNT = bytes;
 
-    return iRet;
+  return iRet;
 }
-
 
 /** @brief Stop capturing data
  *  @returns 0 on success, -1 otherwise
  */
 int8_t cam_stop(void)
 {
-    CAM->CAM_REG1 &= ~MASK_CAM_REG1_COUNT;
-    return 0;
+  CAM_N->CAM_REG1.B.COUNT = 0;
+  return 0;
 }
 
-
 /** @brief Set the threshold for when the camera interrupt fires
- *  @param n The number of bytes to fill the FIFO with before the interrupt fires
- *           (this must be a multiple of 4)
+ *  @param [in] n - The number of bytes to fill the FIFO with before the interrupt fires
+ *                  (this must be a multiple of 4)
  *  @returns 0 on success, -1 otherwise
  */
 int8_t cam_set_threshold(uint16_t n)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if ((n % 4) != 0 || n > 2048)
-    {
-        iRet = -1;
-    }
+  if ((n % 4) != 0 || n > 2048)
+  {
+    return -1;
+  }
 
-    if (iRet == 0)
-    {
-        CAM->CAM_REG1 = (CAM->CAM_REG1 & ~MASK_CAM_REG1_THRESHOLD) | (n << BIT_CAM_REG1_THRESHOLD);
-    }
+  CAM_N->CAM_REG1.B.THRESHOLD = n;
 
-    return iRet;
+  return iRet;
 }
 
 /** @brief Empty out the camera buffer
  */
 void cam_flush(void)
 {
-    FT900_ATTR_UNUSED uint32_t dummy;
-    while(cam_available())
-        dummy = CAM->CAM_REG3;
+  FT900_ATTR_UNUSED uint32_t dummy;
+
+  while (cam_available())
+  {
+    dummy = CAM_N->CAM_REG3.B.DATA;
+  }
 }
 
 /** @brief Check how many bytes are available on the FIFO
@@ -171,67 +177,63 @@ void cam_flush(void)
  */
 uint16_t cam_available(void)
 {
-    return (CAM->CAM_REG2 & MASK_CAM_REG2_FULLNESS);
+  return (CAM_N->CAM_REG2.B.FULLNESS & MASK_CAM_REG2_FULLNESS);
 }
-
 
 /** @brief Check how many bytes have been read by the Camera Interface
  *  @returns The number of bytes read
  */
-uint16_t cam_total_read()
+uint16_t cam_total_read(void)
 {
-    return (CAM->CAM_REG1 & MASK_CAM_REG1_COUNT) >> BIT_CAM_REG1_COUNT;
+  return CAM_N->CAM_REG1.B.COUNT;
 }
 
-
 /** @brief Read a number of bytes from the FIFO
- *  @param b A pointer to read the data into
- *  @param len The number of bytes to read from the FIFO (this must be a multiple of 4)
+ *  @param [inout] b   - A pointer to read the data into
+ *  @param [in]    len - The number of bytes to read from the FIFO
+ *                       (this must be a multiple of 4)
  *  @returns The number of bytes read, 0 otherwise
  */
 uint16_t cam_readn(uint8_t *b, size_t len)
 {
-    uint16_t iRet = 0;
+  uint16_t iRet = 0;
 
-    if ((len % 4) != 0)
-    {
-        iRet = -1;
-    }
+  if ((len % 4) != 0)
+  {
+    return -1;
+  }
 
-    if (iRet == 0)
-    {
-        /* TODO: There may be an endianness issues with this */
-        asm_streamin32(&(CAM->CAM_REG3), b, len);
-        iRet = len;
-    }
+  /* TODO: There may be an endianness issues with this */
+  asm_streamin32(&(CAM_N->CAM_REG3), b, len);
+  iRet = len;
 
-    return iRet;
+  return iRet;
 }
-
 
 /** @brief Enable the threshold interrupt
  *  @returns 0 on success, -1 otherwise
  */
 int8_t cam_enable_interrupt(void)
 {
-    CAM->CAM_REG4 |= MASK_CAM_REG4_INTEN;
-    return 0;
+  CAM_N->CAM_REG4.B.INT_ENB = CAM_ENABLE;
+  return 0;
 }
-
 
 /** @brief Disable the threshold interrupt
  *  @returns 0 on success, -1 otherwise
  */
 int8_t cam_disable_interrupt(void)
 {
-    CAM->CAM_REG4 &= ~MASK_CAM_REG4_INTEN;
-    return 0;
+  CAM_N->CAM_REG4.B.INT_ENB = CAM_DISABLE;
+  return 0;
 }
 
 /** @brief Check that an interrupt has occurred
- *  @returns 0 when the interrupt hasn't been fired, 1 when the interrupt has fired and -1 otherwise
+ *  @returns  0 - When the interrupt hasn't been fired,
+ *            1 - When the interrupt has fired and
+ *           -1 - Otherwise
  */
 int8_t cam_is_interrupted(void)
 {
-    return (CAM->CAM_REG4 & MASK_CAM_REG4_HASDATA) ? 1 : 0;
+  return (CAM_N->CAM_REG4.B.HAS_DATA) ? 1 : 0;
 }

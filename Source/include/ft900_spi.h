@@ -1,10 +1,7 @@
 /**
     @file ft900_spi.h
 
-    @brief
-     SPI
-
-    
+    @brief SPI
 **/
 /*
  * ============================================================================
@@ -53,6 +50,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* INCLUDES ************************************************************************/
+
 #include <stdint.h>
 #include <stddef.h>
 
@@ -65,84 +63,85 @@ extern "C" {
 /** @brief SPI Direction */
 typedef enum
 {
-    spi_dir_slave = 0, /**< The SPI Device is in Slave mode */
-    spi_dir_master = 1 /**< The SPI Device is in Master mode */
+  spi_dir_slave  = 0,                     /**< The SPI Device is in Slave mode */
+  spi_dir_master = 1                      /**< The SPI Device is in Master mode */
 } spi_dir_t;
 
 /** @brief The SPI mode */
 typedef enum
 {
-    spi_mode_0,  /**< CPOL = 0, CPHA = 0 */
-    spi_mode_1,  /**< CPOL = 0, CPHA = 1 */
-    spi_mode_2,  /**< CPOL = 1, CPHA = 0 */
-    spi_mode_3   /**< CPOL = 1, CPHA = 1 */
+  spi_mode_0,                             /**< CPOL = 0, CPHA = 0 */
+  spi_mode_1,                             /**< CPOL = 0, CPHA = 1 */
+  spi_mode_2,                             /**< CPOL = 1, CPHA = 0 */
+  spi_mode_3                              /**< CPOL = 1, CPHA = 1 */
 } spi_clock_mode_t;
 
 /** @brief SPI Data Bus Width */
 typedef enum
 {
-    spi_width_1bit = 1, /**< The SPI Device is working in 1 bit wide mode (i.e. 4 wire SPI) */
-    spi_width_2bit = 2, /**< The SPI Device is working in 2 bit wide mode */
-    spi_width_4bit = 4 /**< The SPI Device is working in 4 bit wide mode */
+  spi_width_1bit = 1,                     /**< The SPI Device is working in 1 bit wide mode (i.e. 4 wire SPI) */
+  spi_width_2bit = 2,                     /**< The SPI Device is working in 2 bit wide mode */
+  spi_width_4bit = 4                      /**< The SPI Device is working in 4 bit wide mode */
 } spi_width_t;
 
 /** @brief SPI FIFO size */
 typedef enum
 {
-    spi_fifo_size_16 = 16,  /**< Use a 16 level FIFO */
-    spi_fifo_size_64 = 64 /**< Use a 64 Byte FIFO */
+  spi_fifo_size_16 = 16,                  /**< Use a 16 level FIFO */
+  spi_fifo_size_64 = 64                   /**< Use a 64 Byte FIFO */
 } spi_fifo_size_t;
 
-/** @brief SPI Interrupts 
+/** @brief SPI Interrupts
  *  Note: Call spi_is_interrupted() to clear interrupt flags */
 typedef enum
 {
-    spi_interrupt_transmit_empty,           /**< When SPI master is idle and the transmitter FIFO is empty.*/
-    spi_interrupt_data_ready,               /**< A transmission or reception was completed *or* the FIFO was filled to a trigger level.*/
-    spi_interrupt_transmit_1bit_complete,   /**< Transmission was complete when using the SPI1BIT method.*/
-    spi_interrupt_fault,                    /**< The SPI device was asserted when in Master mode.*/
-	/* Below extension flags are available from FT900 Rev C and F93X */
-	spi_interrupt_ex_tx_trigger_en,			/**< Flag to be enabled to received interrupts when transmit FIFO level reaches trigger level */ 
-	spi_interrupt_ex_rx_trigger_en,			/**< Flag to be enabled to received interrupts when receive FIFO level reaches trigger level */
-	spi_interrupt_ex_rx_fifo_full,			/**< Flag to check if receive FIFO is full */
-	spi_interrupt_ex_rx_fifo_overridden,	/**< Flag to check if receive FIFO overflows and data is overridden */
+  spi_interrupt_transmit_empty,           /**< When SPI master is idle and the transmitter FIFO is empty.*/
+  spi_interrupt_data_ready,               /**< A transmission or reception was completed *or* the FIFO was filled to a trigger level.*/
+  spi_interrupt_transmit_1bit_complete,   /**< Transmission was complete when using the SPI1BIT method.*/
+  spi_interrupt_fault,                    /**< The SPI device was asserted when in Master mode.*/
+
+  /* Below extension flags are available from FT900 Rev C and F93X */
+  spi_interrupt_ex_tx_trigger_en,         /**< Flag to be enabled to received interrupts when transmit FIFO level reaches trigger level */
+  spi_interrupt_ex_rx_trigger_en,         /**< Flag to be enabled to received interrupts when receive FIFO level reaches trigger level */
+  spi_interrupt_ex_rx_fifo_full,          /**< Flag to check if receive FIFO is full */
+  spi_interrupt_ex_rx_fifo_overridden,    /**< Flag to check if receive FIFO overflows and data is overridden */
 } spi_interrupt_t;
 
 /** @brief SS Assertion control */
 typedef enum
 {
-    spi_ss_assertions_force, /**< SS will reflect the staus of SPISS */
-    spi_ss_assertions_auto   /**< SS will go low during transmissions if selected */
+  spi_ss_assertions_force,                /**< SS will reflect the status of SPISS */
+  spi_ss_assertions_auto                  /**< SS will go low during transmissions if selected */
 } spi_ss_assertions_t;
 
 /** @brief SPI Options */
 typedef enum
 {
-    spi_option_fifo,                  /**< Enable or disable the FIFO */
-    spi_option_fifo_size,             /**< Set the size of the FIFO */
-    spi_option_fifo_receive_trigger,  /**< Set the FIFO receive trigger level */
-    spi_option_force_ss_assertions,   /**< Force SS to go low in assert */
-    spi_option_bus_width,             /**< Set the SPI bus width */
-    spi_option_multi_receive,       /**< Set the SPI device to clock in data without loading it into the RX FIFO */
-    spi_option_fifo_transmit_trigger,  /**< Set the FIFO transmit trigger level */
-	spi_option_baud_factor,         /**< Applicable in FT930 and FT900 RevC. SCK frequency is determined by BAUD FACTOR ( divided 2 to divided by 256)*/
-	spi_option_fast_spi,              /**< Applicable in FT900 RevC. The master clock is set to CLK (system clock)/2 */
-	spi_option_change_spi_rate,     /**< SCK frequency is determined by CHG_SPI and SPR[0:2] bits ( CLK gets divided 2 to divided by 511)*/
-    spi_option_ignore_incoming,
-	spi_option_slave_select_control
+  spi_option_fifo,                        /**< Enable or disable the FIFO */
+  spi_option_fifo_size,                   /**< Set the size of the FIFO */
+  spi_option_fifo_receive_trigger,        /**< Set the FIFO receive trigger level */
+  spi_option_force_ss_assertions,         /**< Force SS to go low in assert */
+  spi_option_bus_width,                   /**< Set the SPI bus width */
+  spi_option_multi_receive,               /**< Set the SPI device to clock in data without loading it into the RX FIFO */
+  spi_option_fifo_transmit_trigger,       /**< Set the FIFO transmit trigger level */
+  spi_option_baud_factor,                 /**< Applicable in FT930 and FT900 RevC. SCK frequency is determined by BAUD FACTOR ( divided 2 to divided by 256)*/
+  spi_option_fast_spi,                    /**< Applicable in FT900 RevC. The master clock is set to CLK (system clock)/2 */
+  spi_option_change_spi_rate,             /**< SCK frequency is determined by CHG_SPI and SPR[0:2] bits ( CLK gets divided 2 to divided by 511)*/
+  spi_option_ignore_incoming,
+  spi_option_slave_select_control
 } spi_option_t;
 
 // Slave Select definitions
 typedef enum
 {
-	DQSPI_SS_0 = 0x01,
-	DQSPI_SS_1 = 0x02,
-	DQSPI_SS_2 = 0x04,
-	DQSPI_SS_3 = 0x08,
-	DQSPI_SS_4 = 0x10,
-	DQSPI_SS_5 = 0x20,
-	DQSPI_SS_6 = 0x40,
-	DQSPI_SS_7 = 0x80
+  DQSPI_SS_0 = 0x01,
+  DQSPI_SS_1 = 0x02,
+  DQSPI_SS_2 = 0x04,
+  DQSPI_SS_3 = 0x08,
+  DQSPI_SS_4 = 0x10,
+  DQSPI_SS_5 = 0x20,
+  DQSPI_SS_6 = 0x40,
+  DQSPI_SS_7 = 0x80
 } spi_slave_select_t;
 
 /* GLOBAL VARIABLES ****************************************************************/
@@ -153,10 +152,10 @@ typedef enum
 
 /** @brief Initialise the SPI device
  *
- *  @param dev the device to use
- *  @param dir The direction for the device to work in (Master/Slave)
- *  @param clock_mode The SPI Clock mode to use
- *  @param div The clock divider to use (4,8,16,32,64,128,256,512)
+ *  @param [in] dev        - The device to use
+ *  @param [in] dir        - The direction for the device to work in (Master/Slave)
+ *  @param [in] clock_mode - The SPI Clock mode to use
+ *  @param [in] div        - The clock divider to use (4,8,16,32,64,128,256,512)
  *
  *  @returns 0 on a success or -1 for a failure
  *
@@ -165,43 +164,43 @@ typedef enum
 int8_t spi_init(ft900_spi_regs_t* dev, spi_dir_t dir, spi_clock_mode_t clock_mode, uint16_t div);
 
 /** @brief Enable the SPI device
- *  @param dev the device to use
+ *  @param [in] dev - the device to use
  *  @returns 0 on a success or -1 for a failure
  */
 int8_t spi_enable(ft900_spi_regs_t* dev);
 
 /** @brief Disable the SPI device
- *  @param dev the device to use
+ *  @param [in] dev - the device to use
  *  @returns 0 on a success or -1 for a failure
  */
 int8_t spi_uninit(ft900_spi_regs_t* dev);
 
 /** @brief Select a device to start communicating with
- *  @param dev the device to use
- *  @param num The device to select
+ *  @param [in] dev - The device to use
+ *  @param [in] num - The device to select
  *  @returns 0 on a success or -1 for a failure
  */
 int8_t spi_open(ft900_spi_regs_t* dev, uint8_t num);
 
 /** @brief Stop communicating with a certain device.
- *  @param dev the device to use
- *  @param num The device to select
+ *  @param [in] dev - The device to use
+ *  @param [in] num - The device to select
  *  @returns 0 on a success or -1 for a failure
  */
 int8_t spi_close(ft900_spi_regs_t* dev, uint8_t num);
 
 /** @brief Writes a byte to the SPI device
- *  @param dev the device to use
- *  @param b The byte to send
+ *  @param [in] dev - The device to use
+ *  @param [in] b   - The byte to send
  *  @returns The number of bytes written or -1 for a failure
  */
-#define spi_write(dev,b) 	spi_writen((dev),&(b),1)
+#define spi_write(dev,b)   spi_writen((dev),&(b),1)
 
 /** @brief Writes several bytes to the SPI device
  *
- *  @param dev the device to use
- *  @param b A pointer to the array to sendspi_open
- *  @param len The number of bytes to write
+ *  @param [in ] dev - The device to use
+ *  @param [in ] b   - A pointer to the array to sendspi_open
+ *  @param [in ] len - The number of bytes to write
  *
  *  @returns The number of bytes written or -1 for a failure
  */
@@ -212,8 +211,8 @@ int32_t spi_writen(ft900_spi_regs_t* dev, const uint8_t *b, size_t len);
  *  Read the most current byte in the buffer.
  *  For multi-bit wide busses (Dual and Quad), the SPI device will cause a read on the bus
  *
- *  @param dev the device to use
- *  @param b A variable to store the byte
+ *  @param [in] dev - The device to use
+ *  @param [in] b   - A variable to store the byte
  *
  *  @returns The number of bytes read or -1 for a failure
  */
@@ -224,9 +223,9 @@ int32_t spi_writen(ft900_spi_regs_t* dev, const uint8_t *b, size_t len);
  *  Read the most current bytes in the buffer, for a Non-FIFO mode one byte will be read
  *  For multi-bit wide busses (Dual and Quad), the SPI device will cause multiple reads on the bus
  *
- *  @param dev the device to use
- *  @param b A pointer to the array to read into
- *  @param len The number of bytes to read
+ *  @param [in] dev - The device to use
+ *  @param [in] b   - A pointer to the array to read into
+ *  @param [in] len - The number of bytes to read
  *
  *  @returns The number of bytes read or -1 for a failure
  */
@@ -238,9 +237,9 @@ int32_t spi_readn(ft900_spi_regs_t* dev, uint8_t *b, size_t len);
  *  Transfer single byte by sending and receiving.
  *  Transfer is valid only for single channel use case, using this api in dual/quad setting will return error.
  *
- *  @param dev the device to use
- *  @param binp A pointer to input buffer/read buffer
- *  @param bout A pointer to output buffer/write buffer
+ *  @param [in] dev  - The device to use
+ *  @param [in] binp - A pointer to input buffer/read buffer
+ *  @param [in] bout - A pointer to output buffer/write buffer
  *
  *  @returns The number of bytes transferred or -1 for a failure
  */
@@ -251,46 +250,46 @@ int32_t spi_readn(ft900_spi_regs_t* dev, uint8_t *b, size_t len);
  *  Exchange len number of bytes.
  *  Exchange is valid only for single SPI channel use case and returns error otherwise.
  *
- *  @param dev the device to use
- *  @param binp A pointer to input buffer/read buffer
- *  @param bout A pointer to output buffer/write buffer
- *  @param len The number of bytes to transfer
+ *  @param [in] dev  - The device to use
+ *  @param [in] binp - A pointer to input buffer/read buffer
+ *  @param [in] bout - A pointer to output buffer/write buffer
+ *  @param [in] len  - The number of bytes to transfer
  *
  *  @returns The number of bytes transferred or -1 for a failure
  */
 int32_t spi_xchangen(ft900_spi_regs_t* dev, uint8_t *binp, uint8_t *bout, size_t len);
 
 /** @brief Enables the SPI device to generate an interrupt
- *  @param dev the device to use
+ *  @param [in] dev - The device to use
  *  @returns 0 on a success or -1 for a failure
  */
 int8_t spi_enable_interrupts_globally(ft900_spi_regs_t* dev);
 
 /** @brief Disables the SPI device from generating an interrupt
- *  @param dev the device to use
+ *  @param [in] dev - The device to use
  *  @returns 0 on a success or -1 for a failure
  */
 int8_t spi_disable_interrupts_globally(ft900_spi_regs_t* dev);
 
 /** @brief Enables an interrupt for the SPI device
- *  @param dev the device to use
- *  @param interrupt The interrupt to enable
+ *  @param [in] dev       - The device to use
+ *  @param [in] interrupt - The interrupt to enable
  *  @returns 0 on a success or -1 for a failure
  *  @see spim_enable_interrupts_globally
  */
 int8_t spi_enable_interrupt(ft900_spi_regs_t* dev, spi_interrupt_t interrupt);
 
 /** @brief Disables an interrupt for the SPI device
- *  @param dev The device to use
- *  @param interrupt The interrupt to disable
+ *  @param [in] dev       - The device to use
+ *  @param [in] interrupt - The interrupt to disable
  *  @returns 0 on a success or -1 for a failure
  *  @see spim_disable_interrupts_globally
  */
 int8_t spi_disable_interrupt(ft900_spi_regs_t* dev, spi_interrupt_t interrupt);
 
 /** @brief Disables an interrupt for the QSPI device
- *  @param dev The device to use
- *  @param interrupt The interrupt to check
+ *  @param [in] dev       - The device to use
+ *  @param [in] interrupt - The interrupt to check
  *  @returns 1 when interrupted, 0 when not interrupted, -1 otherwise
  *  @see spi_disable_interrupts_globally
  */
@@ -309,7 +308,7 @@ int8_t spi_is_interrupted(ft900_spi_regs_t* dev, spi_interrupt_t interrupt);
  *  | 6    | WCOL   | Data Register Write Collision occurred | --                                |
  *  | 7    | IRQ    | An interrupt occurred                  | --                                |
  *
- *  @param dev The device to use
+ *  @param [in] dev - The device to use
  *  @returns A copy of the SPISTAT register
  */
 uint8_t spi_status(ft900_spi_regs_t* dev);
@@ -318,20 +317,20 @@ uint8_t spi_status(ft900_spi_regs_t* dev);
  *
  *  This function will set various options for the driver.
  *
- *  | Option                           | Description                  | Values                                         |
- *  | :------------------------------- | :--------------------------- | :--------------------------------------------- |
- *  | spim_option_fifo                 | Enable or disable the FIFO   | 0 = Disabled (Default) \n 1 = Enabled [Note 1] |
- *  | spim_option_fifo_size            | Set the size of the FIFO     | 16 = 16 Byte FIFO (default) \n 64 = Byte FIFO  |
+ *  | Option                           | Description                  | Values                                                             |
+ *  | :------------------------------- | :--------------------------- | :----------------------------------------------------------------- |
+ *  | spim_option_fifo                 | Enable or disable the FIFO   | 0 = Disabled (Default) \n 1 = Enabled [Note 1]                     |
+ *  | spim_option_fifo_size            | Set the size of the FIFO     | 16 = 16 Byte FIFO (default) \n 64 = Byte FIFO                      |
  *  | spim_option_fifo_receive_trigger | Set the FIFO trigger level   | For 16 Byte FIFOs: 1, 4, 8, 14 \n For 64 Byte FIFOs: 1, 16, 32, 56 |
- *  | spim_option_force_ss_assertions  | Force SS to go low in assert | 0 = Automatic Assertions \n 1 = Force Assertions (Default) |
- *  | spim_option_bus_width            | Set the SPI bus width        | 1 = Single (Default) \n 2 = Dual \n 4 = Quad   |
- *  | spim_option_dual_quad_direction  | Set the multi-bit direction  | 0 = Read \n 1 = Write                          |
+ *  | spim_option_force_ss_assertions  | Force SS to go low in assert | 0 = Automatic Assertions \n 1 = Force Assertions (Default)         |
+ *  | spim_option_bus_width            | Set the SPI bus width        | 1 = Single (Default) \n 2 = Dual \n 4 = Quad                       |
+ *  | spim_option_dual_quad_direction  | Set the multi-bit direction  | 0 = Read \n 1 = Write                                              |
  *
  *  Note 1: Enabling the FIFO will cause the driver to clear its contents.
  *
- *  @param dev The device to use
- *  @param opt The option to configure
- *  @param val The value to use
+ *  @param [in] dev - The device to use
+ *  @param [in] opt - The option to configure
+ *  @param [in] val - The value to use
  *
  *  @returns 0 on a success or -1 for a failure
  */

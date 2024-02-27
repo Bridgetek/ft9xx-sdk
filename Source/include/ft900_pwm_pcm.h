@@ -1,10 +1,7 @@
 /**
     @file ft900_pwm_pcm.h
 
-    @brief
-    PWM Audio
-
-    
+    @brief PWM Audio
 **/
 /*
  * ============================================================================
@@ -53,70 +50,72 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* INCLUDES ************************************************************************/
+
 #include <stdint.h>
 #include <stddef.h>
 
 /* CONSTANTS ***********************************************************************/
 
 /* TYPES ***************************************************************************/
+
 /** @brief PWM Channel selection */
 typedef enum
 {
-    pwm_pcm_channels_mono = 1,  /*!< Mono */
-    pwm_pcm_channels_stereo = 2 /*!< Stereo */
+  pwm_pcm_channels_mono   = 1, /*!< Mono */
+  pwm_pcm_channels_stereo = 2  /*!< Stereo */
 } pwm_pcm_channels_t;
 
 /** @brief PWM data size selection */
 typedef enum
 {
-    pwm_pcm_data_size_8 = 8,    /*!< 8 bit */
-    pwm_pcm_data_size_16 = 16   /*!< 16 bit */
-} pwm_pcm_data_size_t ;
+  pwm_pcm_data_size_8  = 8,    /*!< 8 bit */
+  pwm_pcm_data_size_16 = 16    /*!< 16 bit */
+} pwm_pcm_data_size_t;
 
 /** @brief PWM endianness selection */
 typedef enum
 {
-    pwm_pcm_endianness_big,     /*!< Big endian data */
-    pwm_pcm_endianness_little   /*!< Little endian data */
+  pwm_pcm_endianness_big,      /*!< Big endian data */
+  pwm_pcm_endianness_little    /*!< Little endian data */
 } pwm_pcm_endianness_t;
 
 /** @brief PWM PCM Filter */
 typedef enum
 {
-    pwm_pcm_filter_off = 0, /*!< Off */
-    pwm_pcm_filter_on = 1   /*!< On */
+  pwm_pcm_filter_off = 0,      /*!< Off */
+  pwm_pcm_filter_on  = 1       /*!< On */
 } pwm_pcm_filter_t;
 
 /** @brief PWM PCM Volume */
 typedef enum
 {
-    pwm_pcm_volume_mute = 0,
-    pwm_pcm_volume_6,           /**< 6.25% volume */
-    pwm_pcm_volume_12,          /**< 12.5% volume */
-    pwm_pcm_volume_19,          /**< 19% volume */
-    pwm_pcm_volume_25,          /**< 25% volume */
-    pwm_pcm_volume_31,          /**< 31% volume */
-    pwm_pcm_volume_37,          /**< 37% volume */
-    pwm_pcm_volume_44,          /**< 44% volume */
-    pwm_pcm_volume_50,          /**< 50% volume */
-    pwm_pcm_volume_56,          /**< 56% volume */
-    pwm_pcm_volume_63,          /**< 63% volume */
-    pwm_pcm_volume_69,          /**< 69% volume */
-    pwm_pcm_volume_75,          /**< 75% volume */
-    pwm_pcm_volume_81,          /**< 81% volume */
-    pwm_pcm_volume_88,          /**< 88% volume */
-    pwm_pcm_volume_94,          /**< 94% volume */
-    pwm_pcm_volume_100          /**< 100% volume */
+  pwm_pcm_volume_mute = 0,
+  pwm_pcm_volume_6,            /**< 6.25% volume */
+  pwm_pcm_volume_12,           /**< 12.5% volume */
+  pwm_pcm_volume_19,           /**< 19% volume */
+  pwm_pcm_volume_25,           /**< 25% volume */
+  pwm_pcm_volume_31,           /**< 31% volume */
+  pwm_pcm_volume_37,           /**< 37% volume */
+  pwm_pcm_volume_44,           /**< 44% volume */
+  pwm_pcm_volume_50,           /**< 50% volume */
+  pwm_pcm_volume_56,           /**< 56% volume */
+  pwm_pcm_volume_63,           /**< 63% volume */
+  pwm_pcm_volume_69,           /**< 69% volume */
+  pwm_pcm_volume_75,           /**< 75% volume */
+  pwm_pcm_volume_81,           /**< 81% volume */
+  pwm_pcm_volume_88,           /**< 88% volume */
+  pwm_pcm_volume_94,           /**< 94% volume */
+  pwm_pcm_volume_100           /**< 100% volume */
 } pwm_pcm_volume_t;
 
 /** @brief PWM PCM Interrupt selection */
 typedef enum
 {
-    pwm_pcm_interrupt_empty,        /*!< FIFO Empty */
-    pwm_pcm_interrupt_full,         /*!< FIFO Full */
-    pwm_pcm_interrupt_half_full,    /*!< FIFO Half Full */
-    pwm_pcm_interrupt_overflow,     /*!< FIFO Overflow */
-    pwm_pcm_interrupt_underflow     /*!< FIFO Underflow */
+  pwm_pcm_interrupt_empty,     /*!< FIFO Empty */
+  pwm_pcm_interrupt_full,      /*!< FIFO Full */
+  pwm_pcm_interrupt_half_full, /*!< FIFO Half Full */
+  pwm_pcm_interrupt_overflow,  /*!< FIFO Overflow */
+  pwm_pcm_interrupt_underflow  /*!< FIFO Underflow */
 } pwm_pcm_interrupt_t;
 
 /* GLOBAL VARIABLES ****************************************************************/
@@ -126,15 +125,15 @@ typedef enum
 /* FUNCTION PROTOTYPES *************************************************************/
 
 /** @brief Initialise the PWM PCM output
- *  @param channels The number of channels to output.
- *  @param samplerate The sample rate of the audio data.
- *  @param datasize The word size of the samples (8 or 16 bit).
- *  @param endianness The endianness of the 16 bit word. In 8 bit mode this will be ignored.
- *  @param filter If a PCM filter will be used to filter out the PWM carrier.
+ *  @param [in] channels   - The number of channels to output.
+ *  @param [in] samplerate - The sample rate of the audio data.
+ *  @param [in] datasize   - The word size of the samples (8 or 16 bit).
+ *  @param [in] endianness - The endianness of the 16 bit word. In 8 bit mode this will be ignored.
+ *  @param [in] filter     - If a PCM filter will be used to filter out the PWM carrier.
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_pcm_open(pwm_pcm_channels_t channels, uint16_t samplerate, pwm_pcm_data_size_t datasize,
-        pwm_pcm_endianness_t endianness, pwm_pcm_filter_t filter);
+                    pwm_pcm_endianness_t endianness, pwm_pcm_filter_t filter);
 
 /** @brief Close the PWM PCM Output
  *  @returns On success a 0, otherwise -1
@@ -142,38 +141,38 @@ int8_t pwm_pcm_open(pwm_pcm_channels_t channels, uint16_t samplerate, pwm_pcm_da
 int8_t pwm_pcm_close(void);
 
 /** @brief Write a word of data to the PWM PCM device
- *  @param data The data to write. If 8 bit mode is selected, the top 8 bits will be ignored
+ *  @param [in] data - The data to write. If 8 bit mode is selected, the top 8 bits will be ignored
  *  @returns The number of bytes written to the FIFO, otherwise -1
  */
 int8_t pwm_pcm_write(uint16_t data);
 
 /** @brief Write a word of data to the PWM PCM device
- *  @param data The data to write. If 8 bit mode is selected, the top 8 bits will be ignored
- *  @param len The size of data to write.
+ *  @param [in] data - The data to write. If 8 bit mode is selected, the top 8 bits will be ignored
+ *  @param [in] len  - The size of data to write.
  *  @returns The number of bytes written to the FIFO, otherwise -1
  */
 int8_t pwm_pcm_writen(uint16_t *data, size_t len);
 
 /** @brief Set the volume of the PWM PCM device.
- *  @param vol The volume to set to.
+ *  @param [in] vol - The volume to set to.
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_pcm_volume(pwm_pcm_volume_t vol);
 
 /** @brief Enable an interrupt
- *  @param interrupt The interrupt to enable
+ *  @param [in] interrupt - The interrupt to enable
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_pcm_enable_interrupt(pwm_pcm_interrupt_t interrupt);
 
 /** @brief Disable an interrupt
- *  @param interrupt The interrupt to disable
+ *  @param [in] interrupt - The interrupt to disable
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_pcm_disable_interrupt(pwm_pcm_interrupt_t interrupt);
 
 /** @brief Query if an interrupt has fired
- *  @param interrupt The interrupt to query
+ *  @param [in] interrupt - The interrupt to query
  *  @warning This function will clear the interrupt being queried and the global PWM interrupt flag
  *  @returns 1 for if PWM is interrupted, 0 if PWM is not interrupted, -1 otherwise
  */

@@ -4,7 +4,7 @@
     @brief
     DFU device for USB device stack API.
 
-	@details
+    @details
     API functions for USB Device DFU interfaces. These functions provide functionality
     required to communicate with a DFU application through the USB Device interface.
 
@@ -86,9 +86,9 @@ extern "C" {
             supported then the host must reset the USB after a detach
             request. This will cause the device to reset and enter DFU mode.
         USB_DFU_BMATTRIBUTES_MANIFESTATIONTOLERANT - Continue to allow
-        	DFU requests after a download has completed. This is not
-        	turned on to force the default behaviour to be that the
-        	device will run any new firmware after it is downloaded.
+            DFU requests after a download has completed. This is not
+            turned on to force the default behaviour to be that the
+            device will run any new firmware after it is downloaded.
         Un-defining attributes will remove support for that feature
         from the library. Firmware may not need all the features
         and can disable them in the configuration descriptor.
@@ -96,8 +96,8 @@ extern "C" {
 //@{
 #ifndef USBD_DFU_ATTRIBUTES
 #define USBD_DFU_ATTRIBUTES (USB_DFU_BMATTRIBUTES_CANDNLOAD |\
-		USB_DFU_BMATTRIBUTES_WILLDETACH |\
-		USB_DFU_BMATTRIBUTES_CANUPLOAD)
+    USB_DFU_BMATTRIBUTES_WILLDETACH |\
+    USB_DFU_BMATTRIBUTES_CANUPLOAD)
 #endif // USBD_DFU_ATTRIBUTES
 //@}
 
@@ -113,8 +113,8 @@ uint8_t USBD_DFU_is_runtime(void);
             dfuMANIFEST-WAIT-RESET and is therefore waiting
             for a host reset or detach/attach sequence.
             If the bmAttributes value set in the USBD_DFU_ATTRIBUTES
- 	 	 	does support manifestation then this function should
- 	 	 	not be required.
+            does support manifestation then this function should
+            not be required.
  **/
 uint8_t USBD_DFU_is_wait_reset(void);
 
@@ -132,9 +132,9 @@ void USBD_DFU_set_dfumode(void);
              An ACK packet is sent on the USB control IN endpoint
              to the host to acknowledge successful completion of
              this request.
- 	 	 	 The bmAttributes value set in the USBD_DFU_ATTRIBUTES
- 	 	 	 determines the actions that are taken upon a detach.
- @param[in]  timeout - number of milliseconds timeout before reverting
+             The bmAttributes value set in the USBD_DFU_ATTRIBUTES
+             determines the actions that are taken upon a detach.
+ @param [in] timeout - number of milliseconds timeout before reverting
              to appIDLE if no USB reset is forthcoming from the host.
  **/
 void USBD_DFU_class_req_detach(uint16_t timeout);
@@ -154,12 +154,12 @@ void USBD_DFU_class_req_detach(uint16_t timeout);
              to the host to acknowledge successful completion of
              this request.
              If the bmAttributes value set in the USBD_DFU_ATTRIBUTES
- 	 	 	 does not support download then this function will have
- 	 	 	 no body.
- @param[in]  block - Starting block number (address) of data to program.
+             does not support download then this function will have
+             no body.
+ @param [in] block - Starting block number (address) of data to program.
              It is up to the calling program to make sure this
              is calculated correctly.
- @param[in]  dataLength - Number of bytes to program. This can be
+ @param [in] dataLength - Number of bytes to program. This can be
              between the control endpoint max packet size and
              DFU_MAX_BLOCK_SIZE.
  **/
@@ -177,12 +177,12 @@ void USBD_DFU_class_req_download(uint32_t block, uint16_t dataLength);
              to the host to acknowledge successful completion of
              this request.
              If the bmAttributes value set in the USBD_DFU_ATTRIBUTES
- 	 	 	 does not support upload then this function will have
- 	 	 	 no body.
- @param[in]  block - Starting block number (address) of data to read.
+             does not support upload then this function will have
+             no body.
+ @param [in] block - Starting block number (address) of data to read.
              It is up to the calling program to make sure this
              is calculated correctly.
- @param[in]  dataLength - Number of bytes to read. This can be
+ @param [in] dataLength - Number of bytes to read. This can be
              between the control endpoint max packet size and
              DFU_MAX_BLOCK_SIZE.
  **/
@@ -197,9 +197,9 @@ void USBD_DFU_class_req_upload(uint32_t block, uint16_t dataLength);
              status of the device is.
              The structure is written via the control IN
              endpoint to the host.
- 	 	 	 The bmAttributes value set in the USBD_DFU_ATTRIBUTES
- 	 	 	 determines the actions that are taken upon a GET_STATUS.
- @param		 requestLen - number of bytes requested by the host.
+             The bmAttributes value set in the USBD_DFU_ATTRIBUTES
+             determines the actions that are taken upon a GET_STATUS.
+ @param [in] requestLen - number of bytes requested by the host.
  **/
 void USBD_DFU_class_req_getstatus(uint16_t requestLen);
 
@@ -221,23 +221,23 @@ void USBD_DFU_class_req_abort(void);
              current DFU state machine byte.
              The data is written via the control IN endpoint
              to the host.
- @param		 requestLen - number of bytes requested by the host.
+ @param [in] requestLen - number of bytes requested by the host.
  **/
 void USBD_DFU_class_req_getstate(uint16_t requestLen);
 
 /**
  @brief      Implementation of USB reset state handler for DFU.
  @details    Move Reset or advance the DFU state machine when a
- 	 	 	 USB reset is encountered. This will change the state
- 	 	 	 to dfuIDLE if it was in appDETACH state before. It will
- 	 	 	 change to dfuERROR if a download was in progress.
- 	 	 	 Otherwise it will return to appIDLE.
+             USB reset is encountered. This will change the state
+             to dfuIDLE if it was in appDETACH state before. It will
+             change to dfuERROR if a download was in progress.
+             Otherwise it will return to appIDLE.
              Return a  byte to the host indicating if the next state
              change of the DFU state machine byte requires code
              to be reloaded and run. i.e. a new program needs to
              be run.
- 	 	 	 The bmAttributes value set in the USBD_DFU_ATTRIBUTES
- 	 	 	 determines the actions that are taken upon a reset.
+             The bmAttributes value set in the USBD_DFU_ATTRIBUTES
+             determines the actions that are taken upon a reset.
  @return     status - non-zero if new program is to be run.
  **/
 uint8_t USBD_DFU_reset(void);
@@ -245,13 +245,13 @@ uint8_t USBD_DFU_reset(void);
 /**
  @brief      Decrements the detach_counter and adjusts state accordingly.
  @details    If the state is appDETACH moves to dfuIDLE state if we
- 	 	 	 have been in the appDETACH state for longer than the
- 	 	 	 attach timeout specified by the DFU_DETACH request.
+             have been in the appDETACH state for longer than the
+             attach timeout specified by the DFU_DETACH request.
 
              Note: This is run from INTERRUPT LEVEL as a handler for an ISR.
- 	 	 	 The bmAttributes value set in the USBD_DFU_ATTRIBUTES
- 	 	 	 determines the actions that are taken upon a timer event (i.e.
- 	 	 	 may call a detach).
+             The bmAttributes value set in the USBD_DFU_ATTRIBUTES
+             determines the actions that are taken upon a timer event (i.e.
+             may call a detach).
  @return     Zero if timer running, non-zero if timer expired.
  **/
 uint8_t USBD_DFU_timer(void);

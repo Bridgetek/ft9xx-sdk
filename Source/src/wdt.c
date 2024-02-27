@@ -1,10 +1,7 @@
 /**
-    @file
+    @file wdt.c
 
-    @brief
-    Watchdog Timer
-
-    
+    @brief Watchdog Timer
 **/
 /*
  * ============================================================================
@@ -46,6 +43,7 @@
  */
 
 /* INCLUDES ************************************************************************/
+
 #include <ft900_wdt.h>
 #include <registers/ft900_registers.h>
 
@@ -62,36 +60,36 @@
 /* FUNCTIONS ***********************************************************************/
 
 /** @brief Initialise and start the Watchdog timer
- *  @param timeout The timeout value of the Watchdog
+ *  @param [in] timeout - The timeout value of the Watchdog
  *  @returns 0 on success, -1 otherwise
  */
 int8_t wdt_init(wdt_counter_t timeout)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if (timeout < wdt_counter_1_clocks || timeout > wdt_counter_2G_clocks)
-    {
-        iRet = -1;
-    }
+  if (timeout < wdt_counter_1_clocks || timeout > wdt_counter_2G_clocks)
+  {
+    iRet = -1;
+  }
 
-    if (iRet == 0)
-    {
-        TIMER->TIMER_WDG = (timeout << BIT_TIMER_WDG_WRITE) & MASK_TIMER_WDG_WRITE;
+  if (iRet == 0)
+  {
+    TIMER->TIMER_WDG = (timeout << BIT_TIMER_WDG_WRITE) & MASK_TIMER_WDG_WRITE;
 
-        TIMER->TIMER_CONTROL_2 |= MASK_TIMER_CONTROL_2_CLEAR_WDT; /* Clear the timer just to be sure */
-        TIMER->TIMER_CONTROL_2 |= MASK_TIMER_CONTROL_2_WDG_INT_EN | MASK_TIMER_CONTROL_2_START_WDT; /* Turn on the WDG and its Interrupt */
+    /* Clear the timer just to be sure */
+    TIMER->TIMER_CONTROL_2 |= MASK_TIMER_CONTROL_2_CLEAR_WDT;
+    /* Turn on the WDG and its Interrupt */
+    TIMER->TIMER_CONTROL_2 |= MASK_TIMER_CONTROL_2_WDG_INT_EN | MASK_TIMER_CONTROL_2_START_WDT;
+  }
 
-    }
-
-    return iRet;
+  return iRet;
 }
-
 
 /** @brief Reset a running Watchdog Timer
  *  @returns 0 on success, -1 otherwise
  */
 int8_t wdt_kick(void)
 {
-    TIMER->TIMER_CONTROL_2 |= MASK_TIMER_CONTROL_2_CLEAR_WDT;
-    return 0;
+  TIMER->TIMER_CONTROL_2 |= MASK_TIMER_CONTROL_2_CLEAR_WDT;
+  return 0;
 }

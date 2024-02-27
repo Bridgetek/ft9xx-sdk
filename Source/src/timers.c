@@ -1,10 +1,7 @@
 /**
-    @file
+    @file timers.c
 
-    @brief
-    Timers
-
-    
+    @brief Timers
 **/
 /*
  * ============================================================================
@@ -46,6 +43,7 @@
  */
 
 /* INCLUDES ************************************************************************/
+
 #include <ft900_timers.h>
 #include <registers/ft900_registers.h>
 #include <ft900_sys.h>
@@ -61,247 +59,272 @@
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
 /* FUNCTIONS ***********************************************************************/
+
 /** @brief Initialise a timer
- *  @param timer The timer to set up
- *  @param initial The initial value for the timer
- *  @param dir The direction that the timer should count in
- *  @param prescaler Whether or not this timer should use the prescaler
- *  @param mode If the timer should be continuously counting or a one shot
+ *  @param [in] timer     - The timer to set up
+ *  @param [in] initial   - The initial value for the timer
+ *  @param [in] dir       - The direction that the timer should count in
+ *  @param [in] prescaler - Whether or not this timer should use the prescaler
+ *  @param [in] mode      - If the timer should be continuously counting or a one shot
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_init(timer_select_t timer, uint16_t initial, timer_direction_t dir,
-        timer_prescaler_select_t prescaler, timer_mode_t mode)
+                  timer_prescaler_select_t prescaler, timer_mode_t mode)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if ((timer < timer_select_a || timer > timer_select_d) ||
-        (dir < timer_direction_up || dir > timer_direction_down) ||
-        (prescaler < timer_prescaler_select_off || prescaler > timer_prescaler_select_on) ||
-        (mode < timer_mode_continuous || mode > timer_mode_oneshot))
+  if ((timer < timer_select_a || timer > timer_select_d) ||
+      (dir < timer_direction_up || dir > timer_direction_down) ||
+      (prescaler < timer_prescaler_select_off || prescaler > timer_prescaler_select_on) ||
+      (mode < timer_mode_continuous || mode > timer_mode_oneshot))
+  {
+    iRet = -1; /* Out of range */
+  }
+
+  if (iRet == 0)
+  {
+    switch (timer)
     {
-        iRet = -1; /* Out of range */
-    }
-
-    if (iRet == 0)
+    case timer_select_a:
+    case timer_select_b:
+    case timer_select_c:
+    case timer_select_d:
     {
-        switch(timer)
-        {
-            case timer_select_a:
-            case timer_select_b:
-            case timer_select_c:
-            case timer_select_d:
-            {
-                TIMER->TIMER_CONTROL_1 |= MASK_TIMER_CONTROL_1_STOP(timer);
+      TIMER->TIMER_CONTROL_1 |= MASK_TIMER_CONTROL_1_STOP(timer);
 
-                TIMER->TIMER_SELECT = (timer << BIT_TIMER_SELECT_TIMER_WRITE_SEL);
-                TIMER->TIMER_WRITE_LS = initial & 0xFF;
-                TIMER->TIMER_WRITE_MS = initial >> 8;
+      TIMER->TIMER_SELECT = (timer << BIT_TIMER_SELECT_TIMER_WRITE_SEL);
+      TIMER->TIMER_WRITE_LS = initial & 0xFF;
+      TIMER->TIMER_WRITE_MS = initial >> 8;
 
-                uint8_t control3 = TIMER->TIMER_CONTROL_3;
-                uint8_t control2 = TIMER->TIMER_CONTROL_2;
+      uint8_t control3 = TIMER->TIMER_CONTROL_3;
+      uint8_t control2 = TIMER->TIMER_CONTROL_2;
 
-                control3 &= ~(MASK_TIMER_CONTROL_3_DIRECTION(timer) | MASK_TIMER_CONTROL_3_MODE(timer));
-                control2 &= ~(MASK_TIMER_CONTROL_2_PRESCALER_EN(timer));
+      control3 &= ~(MASK_TIMER_CONTROL_3_DIRECTION(timer) |
+                    MASK_TIMER_CONTROL_3_MODE(timer));
+      control2 &= ~(MASK_TIMER_CONTROL_2_PRESCALER_EN(timer));
 
-                if (dir == timer_direction_up)
-                    control3 |= (MASK_TIMER_CONTROL_3_DIRECTION(timer));
+      if (dir == timer_direction_up)
+      {
+        control3 |= (MASK_TIMER_CONTROL_3_DIRECTION(timer));
+      }
 
-                if (mode == timer_mode_oneshot)
-                    control3 |= (MASK_TIMER_CONTROL_3_MODE(timer));
+      if (mode == timer_mode_oneshot)
+      {
+        control3 |= (MASK_TIMER_CONTROL_3_MODE(timer));
+      }
 
-                if (prescaler == timer_prescaler_select_on)
-                    control2 |= (MASK_TIMER_CONTROL_2_PRESCALER_EN(timer));
+      if (prescaler == timer_prescaler_select_on)
+      {
+        control2 |= (MASK_TIMER_CONTROL_2_PRESCALER_EN(timer));
+      }
 
-                TIMER->TIMER_CONTROL_3 = control3;
-                TIMER->TIMER_CONTROL_2 = control2;
-            }
-            break;
-
-            default: break;
-
-        }
-
+      TIMER->TIMER_CONTROL_3 = control3;
+      TIMER->TIMER_CONTROL_2 = control2;
     }
+    break;
 
-    return iRet;
+    default:
+      break;
+    }
+  }
+
+  return iRet;
 }
 
-
 /** @brief Set up the prescaler
- *  @param prescaler The clock prescaler to apply to the timer
+ *  @param [in] prescaler - The clock prescaler to apply to the timer
  *  @returns On success a 0, otherwise -1
  *  @warning This can only be used before starting timers
  */
 int8_t timer_prescaler_ex(timer_select_t timer, uint16_t prescaler)
 {
-	if (sys_check_ft900_revB()) //90x series rev B
-	{
-		TIMER->TIMER_CONTROL_4 |= MASK_TIMER_CONTROL_4_PRESC_CLEAR;
-	}
-	else
-	{
-	   if (timer > timer_select_d) return -1;
-		TIMER->TIMER_SELECT = (timer << BIT_TIMER_SELECT_TIMER_WRITE_SEL);
-		TIMER->TIMER_CONTROL_4 |= (MASK_TIMER_CONTROL_4_PRESC_CLEAR_A << timer);
-	}
-    TIMER->TIMER_PRESC_LS = (prescaler & 0x00FF) >> 0;
-    TIMER->TIMER_PRESC_MS = (prescaler & 0xFF00) >> 8;
-    return 0;
+  if (sys_check_ft900_revB()) // 90x series rev B
+  {
+    TIMER->TIMER_CONTROL_4 |= MASK_TIMER_CONTROL_4_PRESC_CLEAR;
+  }
+  else
+  {
+    if (timer > timer_select_d)
+    {
+      return -1;
+    }
+
+    TIMER->TIMER_SELECT = (timer << BIT_TIMER_SELECT_TIMER_WRITE_SEL);
+    TIMER->TIMER_CONTROL_4 |= (MASK_TIMER_CONTROL_4_PRESC_CLEAR_A << timer);
+  }
+  TIMER->TIMER_PRESC_LS = (prescaler & 0x00FF) >> 0;
+  TIMER->TIMER_PRESC_MS = (prescaler & 0xFF00) >> 8;
+  return 0;
 }
 
-
 /** @brief Start a timer
- *  @param timer The timer to start
+ *  @param [in] timer - The timer to start
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_start(timer_select_t timer)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    switch(timer)
-    {
-        case timer_select_a:
-        case timer_select_b:
-        case timer_select_c:
-        case timer_select_d:
-        {
-            TIMER->TIMER_CONTROL_1 |= MASK_TIMER_CONTROL_1_START(timer);
-        }
-        break;
-        default: iRet = -1; break;
-    }
+  switch (timer)
+  {
+  case timer_select_a:
+  case timer_select_b:
+  case timer_select_c:
+  case timer_select_d:
+  {
+    TIMER->TIMER_CONTROL_1 |= MASK_TIMER_CONTROL_1_START(timer);
+  }
+  break;
+  default:
+    iRet = -1;
+    break;
+  }
 
-    return iRet;
+  return iRet;
 }
 
 /** @brief Stop a timer
- *  @param timer The timer to stop
+ *  @param [in] timer - The timer to stop
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_stop(timer_select_t timer)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    switch(timer)
-    {
-        case timer_select_a: 
-        case timer_select_b:
-        case timer_select_c:
-        case timer_select_d:
-        {
-            TIMER->TIMER_CONTROL_1 |= MASK_TIMER_CONTROL_1_STOP(timer); break;
-        }
-        default: iRet = -1; break;
-    }
+  switch (timer)
+  {
+  case timer_select_a:
+  case timer_select_b:
+  case timer_select_c:
+  case timer_select_d:
+  {
+    TIMER->TIMER_CONTROL_1 |= MASK_TIMER_CONTROL_1_STOP(timer);
+    break;
+  }
+  default:
+    iRet = -1;
+    break;
+  }
 
-    return iRet;
+  return iRet;
 }
 
 /** @brief Read the value of a timer
- *  @param timer The timer to read from
- *  @param value A pointer to store the value
+ *  @param [in] timer - The timer to read from
+ *  @param [in] value - A pointer to store the value
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_read(timer_select_t timer, uint16_t *value)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    switch(timer)
-    {
-        case timer_select_a:
-        case timer_select_b:
-        case timer_select_c:
-        case timer_select_d:
-            TIMER->TIMER_SELECT = (timer << BIT_TIMER_SELECT_TIMER_READ_SEL); break;
-        default: iRet = -1; break;
-    }
+  switch (timer)
+  {
+  case timer_select_a:
+  case timer_select_b:
+  case timer_select_c:
+  case timer_select_d:
+    TIMER->TIMER_SELECT = (timer << BIT_TIMER_SELECT_TIMER_READ_SEL);
+    break;
+  default:
+    iRet = -1;
+    break;
+  }
 
-    if (iRet != -1)
-    {
-        *value = (TIMER->TIMER_READ_MS << 8) | (TIMER->TIMER_READ_LS);
-    }
+  if (iRet != -1)
+  {
+    *value = (TIMER->TIMER_READ_MS << 8) | (TIMER->TIMER_READ_LS);
+  }
 
-    return iRet;
+  return iRet;
 }
 
-
 /** @brief Enable the interrupt for a timer
- *  @param timer The timer to enable the interrupt for
+ *  @param [in] timer - The timer to enable the interrupt for
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_enable_interrupt(timer_select_t timer)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    switch(timer)
-    {
-        case timer_select_a:
-        case timer_select_b:
-        case timer_select_c:
-        case timer_select_d:
-            TIMER->TIMER_INT |= (MASK_TIMER_INT_TIMER_INT_EN(timer) | MASK_TIMER_INT_TIMER_INT(timer)); break;
-        default: iRet = -1; break;
-    }
+  switch (timer)
+  {
+  case timer_select_a:
+  case timer_select_b:
+  case timer_select_c:
+  case timer_select_d:
+    TIMER->TIMER_INT |= (MASK_TIMER_INT_TIMER_INT_EN(timer) |
+                         MASK_TIMER_INT_TIMER_INT(timer));
+    break;
+  default:
+    iRet = -1;
+    break;
+  }
 
-    return iRet;
+  return iRet;
 }
 
-
 /** @brief Disable the interrupt for a timer
- *  @param timer The timer to disable the interrupt for
+ *  @param [in] timer - The timer to disable the interrupt for
  *  @returns On success a 0, otherwise -1
  */
 int8_t timer_disable_interrupt(timer_select_t timer)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    switch(timer)
-    {
-        case timer_select_a:
-        case timer_select_b:
-        case timer_select_c:
-        case timer_select_d:
-            TIMER->TIMER_INT &= ~MASK_TIMER_INT_TIMER_INT_EN(timer); break;
-        default: iRet = -1; break;
-    }
+  switch (timer)
+  {
+  case timer_select_a:
+  case timer_select_b:
+  case timer_select_c:
+  case timer_select_d:
+    TIMER->TIMER_INT &= ~MASK_TIMER_INT_TIMER_INT_EN(timer);
+    break;
+  default:
+    iRet = -1;
+    break;
+  }
 
-    return iRet;
+  return iRet;
 }
 
-
 /** @brief Check if a timer has been interrupted
- *  @param timer The timer to check
+ *  @param [in] timer - The timer to check
  *  @warning This function clears the current interrupt status bit
  *  @returns 1 for if a timer is interrupted, 0 if the timer is not interrupted, -1 otherwise
  */
 int8_t timer_is_interrupted(timer_select_t timer)
 {
-    int8_t iRet = 0;
-    uint8_t timer_int_ens = TIMER->TIMER_INT &
-            (MASK_TIMER_INT_TIMER_INT_EN(timer_select_a) | MASK_TIMER_INT_TIMER_INT_EN(timer_select_b) |
-             MASK_TIMER_INT_TIMER_INT_EN(timer_select_c) | MASK_TIMER_INT_TIMER_INT_EN(timer_select_d));
+  int8_t iRet = 0;
+  uint8_t timer_int_ens = (TIMER->TIMER_INT) &
+                          (MASK_TIMER_INT_TIMER_INT_EN(timer_select_a) |
+                           MASK_TIMER_INT_TIMER_INT_EN(timer_select_b) |
+                           MASK_TIMER_INT_TIMER_INT_EN(timer_select_c) |
+                           MASK_TIMER_INT_TIMER_INT_EN(timer_select_d));
 
-    switch(timer)
+  switch (timer)
+  {
+  case timer_select_a:
+  case timer_select_b:
+  case timer_select_c:
+  case timer_select_d:
+  {
+    if (TIMER->TIMER_INT & MASK_TIMER_INT_TIMER_INT(timer))
     {
-        case timer_select_a:
-        case timer_select_b:
-        case timer_select_c:
-        case timer_select_d:
-        {
-            if (TIMER->TIMER_INT & MASK_TIMER_INT_TIMER_INT(timer))
-            {
-                TIMER->TIMER_INT = timer_int_ens | MASK_TIMER_INT_TIMER_INT(timer);
-                iRet = 1;
-            }
-            else
-            {
-                iRet = 0;
-            }
-        }
-        break;
-
-        default: iRet = -1; break;
+      TIMER->TIMER_INT = timer_int_ens | MASK_TIMER_INT_TIMER_INT(timer);
+      iRet = 1;
     }
+    else
+    {
+      iRet = 0;
+    }
+  }
+  break;
 
-    return iRet;
+  default:
+    iRet = -1;
+    break;
+  }
+
+  return iRet;
 }

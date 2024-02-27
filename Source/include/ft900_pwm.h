@@ -1,10 +1,7 @@
 /**
     @file ft900_pwm.h
 
-    @brief
-    Pulse Width Modulation
-
-    
+    @brief Pulse Width Modulation
 **/
 /*
  * ============================================================================
@@ -54,32 +51,34 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* INCLUDES ************************************************************************/
+
 #include <stdint.h>
 #include <stddef.h>
 
 /* CONSTANTS ***********************************************************************/
 
 /* TYPES ***************************************************************************/
+
 /** @brief PWM Triggering */
 typedef enum
 {
-    pwm_trigger_disabled,       /*!< Do not trigger */
-    pwm_trigger_positive_edge,  /*!< Trigger on a positive edge */
-    pwm_trigger_negative_edge,  /*!< Trigger on a negative edge */
-    pwm_trigger_any_edge        /*!< Trigger on any edge */
+  pwm_trigger_disabled,      /*!< Do not trigger */
+  pwm_trigger_positive_edge, /*!< Trigger on a positive edge */
+  pwm_trigger_negative_edge, /*!< Trigger on a negative edge */
+  pwm_trigger_any_edge       /*!< Trigger on any edge */
 } pwm_trigger_t;
 
 /*!< @brief PWM setup state */
 typedef enum
 {
-    pwm_state_low,  /*!< Setup as low */
-    pwm_state_high  /*!< Setup as high */
+  pwm_state_low,             /*!< Setup as low */
+  pwm_state_high             /*!< Setup as high */
 } pwm_state_t;
 
 typedef enum
 {
-    pwm_restore_disable, /*!< Do not restore the setup state on wrap around */
-    pwm_restore_enable /*!< Do not restore the setup state on wrap around */
+  pwm_restore_disable,       /*!< Do not restore the setup state on wrap around */
+  pwm_restore_enable         /*!< Do not restore the setup state on wrap around */
 } pwm_restore_t;
 
 /* GLOBAL VARIABLES ****************************************************************/
@@ -89,9 +88,9 @@ typedef enum
 /* FUNCTION PROTOTYPES *************************************************************/
 
 /** @brief Initialise the PWM subsystem
- *  @param prescaler The prescaler for the PWM subsystem
- *  @param maxcount The maximum count of the 16 bit master counter
- *  @param shots The number of loops the PWM subsystem will make, 0 is infinity
+ *  @param [in] prescaler - The prescaler for the PWM subsystem
+ *  @param [in] maxcount  - The maximum count of the 16 bit master counter
+ *  @param [in] shots     - The number of loops the PWM subsystem will make, 0 is infinity
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_init(uint8_t prescaler, uint16_t maxcount, uint8_t shots);
@@ -107,36 +106,36 @@ int8_t pwm_enable(void);
 int8_t pwm_disable(void);
 
 /** @brief Set up the logic levels for a PWM counter
- *  @param channel The channel to use
- *  @param initstate The initial state of the counter (high or low)
- *  @param restorestate The rollover restore setting
+ *  @param [in] channel      - The channel to use
+ *  @param [in] initstate    - The initial state of the counter (high or low)
+ *  @param [in] restorestate - The rollover restore setting
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_levels(uint8_t channel, pwm_state_t initstate, pwm_restore_t restorestate);
 
 /** @brief Set a compare value for a PWM counter
- *  @param channel The channel to use
- *  @param value The value to toggle on
+ *  @param [in] channel - The channel to use
+ *  @param [in] value   - The value to toggle on
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_compare(uint8_t channel, uint16_t value);
 
 /** @brief Add a toggle to a specific PWM channel
- *  @param channel The channel to add the toggle to
- *  @param toggle The channel to toggle on
+ *  @param [in] channel - The channel to add the toggle to
+ *  @param [in] toggle  - The channel to toggle on
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_add_toggle(uint8_t channel, uint8_t toggle);
 
 /** @brief Remove a toggle to a specific PWM channel
- *  @param channel The channel to remove the toggle from
- *  @param toggle The channel to remove the toggle of
+ *  @param [in] channel - The channel to remove the toggle from
+ *  @param [in] toggle  - The channel to remove the toggle of
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_remove_toggle(uint8_t channel, uint8_t toggle);
 
 /** @brief Set the external trigger settings
- *  @param trigger The trigger setting
+ *  @param [in] trigger - The trigger setting
  *  @returns On success a 0, otherwise -1
  */
 int8_t pwm_trigger(pwm_trigger_t trigger);
