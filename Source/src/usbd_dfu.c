@@ -340,25 +340,32 @@ void USBD_DFU_class_req_upload(uint32_t address, uint16_t dataLength)
 
 void USBD_DFU_class_req_getstatus(uint16_t requestLen)
 {
-  // space to hold our response...
-  USB_dfu_status buf;
+	// space to hold our response...
+	USB_dfu_status buf;
 
-  buf.bStatus = dfuStatus;
-  // Ask that there are 1ms between GetStatus requests.
-  buf.bwPollTimeout[0] = 1;
-  buf.bwPollTimeout[1] = 0;
-  buf.bwPollTimeout[2] = 0;
-  buf.bState = dfuState;
-  buf.iString = 0x00;
+	buf.bStatus = dfuStatus;
+	// Ask that there are 1ms between GetStatus requests.
+	buf.bwPollTimeout[0] = 1;
+	buf.bwPollTimeout[1] = 0;
+	buf.bwPollTimeout[2] = 0;
+	buf.bState = dfuState;
+	buf.iString = 0x00;
 
-  USBD_transfer_ep0(USBD_DIR_IN, (uint8_t *)&buf, sizeof(USB_dfu_status), requestLen);
+	USBD_transfer_ep0(USBD_DIR_IN, (uint8_t *) &buf, sizeof(USB_dfu_status), requestLen);
+
+#if !(USBD_DFU_ATTRIBUTES & USB_DFU_BMATTRIBUTES_MANIFESTATIONTOLERANT)
+  if (USBD_DFU_is_wait_reset())
+  {
+    USBD_DFU_reset();
+  }
+#endif // !(USBD_DFU_ATTRIBUTES & USB_DFU_BMATTRIBUTES_MANIFESTATIONTOLERANT)
 
   if (dfuState == DFUSTATE_DNLOAD_SYNC)
-  {
-    dfuState = DFUSTATE_DNLOAD_IDLE;
-  }
-  else if (dfuState == DFUSTATE_MANIFEST_SYNC)
-  {
+	{
+		dfuState = DFUSTATE_DNLOAD_IDLE;
+	}
+	else if (dfuState == DFUSTATE_MANIFEST_SYNC)
+	{
 #if !(USBD_DFU_ATTRIBUTES & USB_DFU_BMATTRIBUTES_MANIFESTATIONTOLERANT)
     // Choose not to allow further communications with DFU utility.
     dfuState = DFUSTATE_MANIFEST_WAIT_RESET;
@@ -371,13 +378,6 @@ void USBD_DFU_class_req_getstatus(uint16_t requestLen)
 
   /* Respond with an ACK. */
   USBD_transfer_ep0(USBD_DIR_OUT, NULL, 0, 0);
-
-#if !(USBD_DFU_ATTRIBUTES & USB_DFU_BMATTRIBUTES_MANIFESTATIONTOLERANT)
-  if (USBD_DFU_is_wait_reset())
-  {
-    USBD_DFU_reset();
-  }
-#endif // !(USBD_DFU_ATTRIBUTES & USB_DFU_BMATTRIBUTES_MANIFESTATIONTOLERANT)
 }
 
 void USBD_DFU_class_req_clrstatus(void)
