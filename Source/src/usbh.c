@@ -174,12 +174,16 @@
 #undef USBH_DEBUG_MEM
 #undef USBH_DEBUG_ALLOC
 #undef USBH_DEBUG_XFER
+#undef USBH_DEBUG_XFER_DETAIL
 #undef USBH_DEBUG
 #undef USBH_DEBUG_ISO_ALLOC
 #include <ft900_uart_simple.h>
 #include "../tinyprintf/tinyprintf.h"
 #endif // USBH_LIBRARY_DEBUG_ENABLED
 //@}
+
+// TO MOVE TO ft900_usbh_internal.h
+#define USBH_COMPLETE_TIMEOUT 0x02
 
 /* GLOBAL VARIABLES ****************************************************************/
 
@@ -249,6 +253,12 @@ static USBH_endpoint *usbh_async_ep_list;
 /**
     @name    EHCI Root hub and port statuses
     @details Keep track of changes in root hub and root hub port status.
+    The currentPortStatus global variable is accessed from an interrupt
+    service routine. It must therefore be treated as volatile and to
+    guarantee atomic access must be written and read from a critical
+    section. The currentHubStatus is accessed normally.
+    Both structures are defined as 32 bits. The low 16 bits contain
+    the status and the high 16 bits are change bits.
  **/
 //@{
 static USB_hub_port_status currentPortStatus;
@@ -410,7 +420,6 @@ static inline uint32_t usbh_read_periodic_list(uint32_t offset)
  */
 static void ISR_usbh(void)
 {
-#ifdef USBH_USE_INTERRUPTS
 	uint32_t intStatus;
 
 	// Clear complete and error bits
@@ -425,8 +434,6 @@ static void ISR_usbh(void)
 	{
 		usbh_intr_port = 1;
 	}
-
-#endif // USBH_USE_INTERRUPTS
 }
 
 static void usbh_unlink_qtd(USBH_xfer *xferThis)
@@ -448,36 +455,112 @@ static void usbh_unlink_qtd(USBH_xfer *xferThis)
 		return;
 	}
 
-	// Stop the periodic or async schedule
 	if (xferThis->endpoint->type == USBH_EP_BULK)
 	{
-		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) & (~MASK_EHCI_USBCMD_ASCH_EN);
-		while (EHCI_REG(usbsts) & MASK_EHCI_USBSTS_ASCH_STS) {};
+		USBH_qtd *hc_prev_qtd;
+		// Deactivate target qTD.
+		token = EHCI_MEM(hc_this_qtd->token);
+		token &= (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
+		// Deactivate it.
+		EHCI_MEM(hc_this_qtd->token) = token;
+
+		// Check if the qh->current_qtd points to the qTD of the transfer.
+		// If it does then the overlay is from the qTD we need to unlink.
+		if (EHCI_HC_TO_CPU(EHCI_MEM(hc_this_qh->qtd_current)) == (uint32_t)hc_this_qtd)
+		{
+#ifdef USBH_DEBUG_XFER
+			printf("Stopping in overlay\r\n");
+#endif // USBH_DEBUG_XFER
+
+			// Stop the transfer in the overlay.
+			token &= (~MASK_EHCI_QUEUE_TD_TOKEN_TOGGLE);
+			token |= (EHCI_MEM(hc_this_qh->transfer_overlay.token) & MASK_EHCI_QUEUE_TD_TOKEN_TOGGLE);
+
+			EHCI_MEM(hc_this_qh->transfer_overlay.token) = token;
+
+			// Wait for a short time to ensure that the controller passes this
+			// qTD and writes back the overlay.
+			delayms(1);
+			// Re-write the overlay.
+			EHCI_MEM(hc_this_qh->transfer_overlay.token) = token;
+		};
+
+		// Go through queue headers list of qTDs to find the right qTD to remove.
+		hc_prev_qtd = epThis->hc_head_qtd;
+
+		if (hc_prev_qtd == hc_this_qtd)
+		{
+			// The qTD to unlink is the first one in the endpoint's list.
+#ifdef USBH_DEBUG_XFER
+			printf("Unlink qTD: first entry unlinked (overlay)\r\n");
+#endif // USBH_DEBUG_XFER
+		}
+		else
+		{
+			do {
+				// If the next entry is the qTD to unlink then stop.
+				if (EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)) == EHCI_CPU_TO_HC(hc_this_qtd))
+				{
+					break;
+				}
+				if (EHCI_TERMINATE_TD(EHCI_MEM(hc_prev_qtd->next)))
+				{
+					break;
+				}
+				hc_prev_qtd = (USBH_qtd *)EHCI_HC_TO_CPU(EHCI_NEXT_TD(EHCI_MEM(hc_prev_qtd->next)));
+				// Stop if we reach the right qTD.
+			} while (hc_prev_qtd != hc_this_qtd);
+
+			if (hc_prev_qtd == hc_this_qtd)
+			{
+#ifdef USBH_DEBUG_XFER
+				printf("Unlink qTD Error: could not find xfer qtd\r\n");
+#endif // USBH_DEBUG_XFER
+				return;
+			}
+
+			// Bypass this qTD in the list.
+			EHCI_MEM(hc_prev_qtd->next) = EHCI_NEXT_TD(EHCI_MEM(hc_this_qtd->next)) |
+					EHCI_TERMINATE_TD(EHCI_MEM(hc_prev_qtd->next));
+
+#ifdef USBH_DEBUG_XFER
+			printf("Unlink qTD: unlinked mid-list entry\r\n");
+#endif // USBH_DEBUG_XFER
+
+			// Deactivate QH current aTD overlay.
+			if (EHCI_MEM(hc_this_qh->qtd_current) == EHCI_HC_TO_CPU(hc_this_qtd))
+			{
+				EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->next);
+
+#ifdef USBH_DEBUG_XFER
+				printf("Unlink qTD: unlinked mid-list overlay\r\n");
+#endif // USBH_DEBUG_XFER
+			}
+		}
 	}
-	else
+	else if ((xferThis->endpoint->type == USBH_EP_INT) ||
+			(xferThis->endpoint->type == USBH_EP_ISOC))
 	{
+		// Stop the async schedule to remove the qTD.
+
 		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) & (~MASK_EHCI_USBCMD_PSCH_EN);
 		while (EHCI_REG(usbsts) & MASK_EHCI_USBSTS_PSCH_STS) {};
-			}
 
-	// Check the transfer is still active.
-	token = EHCI_MEM(hc_this_qtd->token);
-	if (token & EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE)
-			{
-		USBH_qtd *hc_next_qtd = (USBH_qtd *)EHCI_MEM(hc_this_qh->transfer_overlay.next);
-		EHCI_MEM(hc_this_qtd->token) = token & (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
-		EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->qtd_current);
-		EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_MEM(hc_this_qh->qtd_current);
-		EHCI_MEM(hc_this_qh->qtd_current) = (uint32_t)hc_next_qtd;
-			}
-
-	// Restart the schedule.
-	if (xferThis->endpoint->type == USBH_EP_BULK)
+		// Check the transfer is still active.
+		token = EHCI_MEM(hc_this_qtd->token);
+		if (token & EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE)
 		{
-		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) | MASK_EHCI_USBCMD_ASCH_EN;
+			USBH_qtd *hc_next_qtd = (USBH_qtd *)EHCI_MEM(hc_this_qh->transfer_overlay.next);
+			EHCI_MEM(hc_this_qtd->token) = token & (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
+			//EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_MEM(hc_this_qh->qtd_current);
+			//EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_MEM(hc_this_qh->qtd_current);
+			EHCI_MEM(hc_this_qh->qtd_current) = (uint32_t)hc_next_qtd;
+
+			// Setup transfer overlay to point to dummy qTD
+			EHCI_MEM(hc_this_qh->transfer_overlay.next) = EHCI_CPU_TO_HC(epThis->hc_dummy_qtd);
+			EHCI_MEM(hc_this_qh->transfer_overlay.alt_next) = EHCI_CPU_TO_HC(epThis->hc_dummy_qtd);
 		}
-	else
-		{
+		// Restart the schedule.
 		EHCI_REG(usbcmd) = EHCI_REG(usbcmd) | MASK_EHCI_USBCMD_PSCH_EN;
 	}
 
@@ -649,6 +732,7 @@ static uint8_t usbh_xfer_iso_td_remove(USBH_xfer *xferOld)
 	return status;
 }
 
+// This function is only called from USBH_timer at interrupt level.
 static void usbh_update_xfer_timeouts(USBH_xfer *list)
 {
 	// NOTE: At interrupt level
@@ -662,8 +746,7 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 	// Decrement timeout on all current transactions
 	while (xferThis)
 	{
-
-		if (xferThis->timeout > 0)
+		if ((xferThis->timeout > 0) && (xferThis->status == USBH_NOT_COMPLETE))
 		{
 			xferThis->timeout--;
 			if (xferThis->timeout == 0)
@@ -673,10 +756,9 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 					token = EHCI_MEM(xferThis->hc_qtd->token);
 					if (token & EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE)
 					{
-						// Timeout expired.
-						usbh_unlink_qtd(xferThis);
+            EHCI_MEM(xferThis->hc_qtd->token) = token & (~EHCI_QUEUE_TD_TOKEN_STATUS_ACTIVE);
 
-						xferThis->status = USBH_ERR_TIMEOUT;
+						xferThis->status = USBH_COMPLETE_TIMEOUT;
 						// Expired transaction is removed by USBH_process
 
 #ifdef USBH_DEBUG_XFER
@@ -687,12 +769,11 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 				else if (xferThis->hc_entry.type == USBH_list_entry_type_siTD)
 				{
 					token = EHCI_MEM(xferThis->hc_entry.siTD->transfer_state);
-
 					if (token & EHCI_SPLIT_ISO_TD_STATUS_ACTIVE)
 					{
-						EHCI_MEM(xferThis->hc_entry.siTD->transfer_state) = token & ~EHCI_SPLIT_ISO_TD_STATUS_ACTIVE;
+						EHCI_MEM(xferThis->hc_entry.siTD->transfer_state) = token & (~EHCI_SPLIT_ISO_TD_STATUS_ACTIVE);
 
-						xferThis->status = USBH_ERR_TIMEOUT;
+						xferThis->status = USBH_COMPLETE_TIMEOUT;
 						// Expired transaction is removed by USBH_process
 
 #ifdef USBH_DEBUG_XFER
@@ -715,10 +796,10 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 						for (microframe = 0; microframe < 8; microframe++)
 						{
 							token = EHCI_MEM(xferThis->hc_entry.iTD->status_control_list[microframe]);
-							EHCI_MEM(xferThis->hc_entry.iTD->status_control_list[microframe]) = token & ~EHCI_ISO_TD_STATUS_ACTIVE;
+							EHCI_MEM(xferThis->hc_entry.iTD->status_control_list[microframe]) = token & (~EHCI_ISO_TD_STATUS_ACTIVE);
 						}
 
-						xferThis->status = USBH_ERR_TIMEOUT;
+						xferThis->status = USBH_COMPLETE_TIMEOUT;
 						// Expired transaction is removed by USBH_process
 #ifdef USBH_DEBUG_XFER
 						printf("Xfer: timeout iTD %08x token %08x\r\n", xferThis->hc_entry.iTD, token);
@@ -726,11 +807,9 @@ static void usbh_update_xfer_timeouts(USBH_xfer *list)
 					}
 				}
 
-				//CRITICAL_SECTION_BEGIN
 				// Signal an interrupt to ensure USBH_process picks this up
 				// and removed expired transactions.
 				usbh_intr_xfer = 1;
-				//CRITICAL_SECTION_END
 			}
 		}
 		xferThis = xferThis->next;
@@ -806,7 +885,8 @@ static int8_t usbh_hub_change(uint32_t id, int8_t status, size_t len, uint8_t *c
 
 static void usbh_update_transactions(USBH_xfer **list)
 {
-	USBH_xfer *xferThis;
+  USBH_xfer *xferThis;
+  USBH_xfer *xferNext;
 
 	// Signal all the completed transactions for non-Period transfers
 	xferThis = *list;
@@ -814,7 +894,9 @@ static void usbh_update_transactions(USBH_xfer **list)
 
 	while (xferThis)
 	{
-		// Is xferThis completed?
+    xferNext = xferThis->next;
+
+    // Is xferThis completed?
 		status = usbh_xfer_complete(xferThis);
 		if (status != USBH_NOT_COMPLETE)
 		{
@@ -893,15 +975,11 @@ static void usbh_update_transactions(USBH_xfer **list)
 					usbh_xfer_remove(xferThis, list);
 					usbh_free_transfer(xferThis);
 				}
-				else
-				{
-					//CRITICAL_SECTION_END
-				}
 			}
 		}
 
 		// Move to next item in list
-		xferThis = xferThis->next;
+		xferThis = xferNext;
 	}; // while
 }
 
@@ -1746,6 +1824,19 @@ static int8_t usbh_xfer_complete(USBH_xfer *xferComplete)
 		// Store new status in the transfer.
 		xferComplete->status = status;
 	}
+	else if (xferComplete->status == USBH_COMPLETE_TIMEOUT)
+	{
+	  // Complete any xfers that have timed out.
+    if (xferComplete->hc_entry.type == USBH_list_entry_type_qH)
+    {
+      // xfer will be removed in caller usbh_update_transactions if
+      // there is a callback or in usbh_transfer_queued_worker when
+      // the API is waiting for a response.
+      usbh_unlink_qtd(xferComplete);
+    }
+
+    xferComplete->status = USBH_ERR_TIMEOUT;
+	}
 
 	return xferComplete->status;
 }
@@ -2072,10 +2163,10 @@ static int8_t usbh_wait_complete(USBH_xfer *xferWait)
 		USBH_process();
 		status = xferWait->status;
 		// Our qTD must be active (completed to continue).
-		if (status != USBH_NOT_COMPLETE)
-		{
-			break;
-		}
+    if ((status != USBH_COMPLETE_TIMEOUT) && (status != USBH_NOT_COMPLETE))
+    {
+      break;
+    }
 	}
 
 	return status;
@@ -2194,13 +2285,21 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 		// head to the current qTD (which is the new first qTD).
 		if (ep->hc_head_qtd == ep->hc_dummy_qtd)
 		{
-			ep->hc_head_qtd = hc_data_qtd;
+		  // Always happens if there is one qTD in use.
+		  ep->hc_head_qtd = hc_data_qtd;
 		}
 
 		CRITICAL_SECTION_END
 		// UNLOCK
 
-		// Preserve the value of the token field of the SETUP request.
+#ifdef USBH_DEBUG_XFER_DETAIL
+    printf("\n\ndata_qtd %p\n", &data_qtd);
+    printf("data_qtd->next %08lx\n", data_qtd.next);
+    printf("data_qtd->token %08lx\n", data_qtd.token);
+    printf("data_qtd->buf %p\n", data_qtd.buf);
+#endif // USBH_DEBUG_XFER_DETAIL
+
+    // Preserve the value of the token field of the SETUP request.
 		token = data_qtd.token;
 		// Disable the SETUP request qTD for now.
 		data_qtd.token = EHCI_QUEUE_TD_TOKEN_STATUS_HALTED;
@@ -2230,7 +2329,41 @@ static int32_t usbh_transfer_queued_worker(USBH_endpoint  *ep,
 			xferNew->dest_len = 0;
 		}
 
-		// Kick off the transfer by setting the active bit in the setup qTD.
+#ifdef USBH_DEBUG_XFER_DETAIL
+    printf("\ndata_qtd %p\n", &data_qtd);
+    printf("->next %08lx\n", data_qtd.next);
+    printf("->token %08lx\n", data_qtd.token);
+    printf("->buf %p\n", data_qtd.buf);
+
+    printf("\nep %lx\n", (uint32_t)(ep));
+    printf("->next %lx\n", (uint32_t)(ep->next));
+    printf("->list_next %lx\n", (uint32_t)(ep->list_next));
+    printf("->entry %lx\n", (uint32_t)(ep->hc_entry.qh));
+    printf("->head %lx\n", (uint32_t)(ep->hc_head_qtd));
+    printf("->dummy %lx\n", (uint32_t)(ep->hc_dummy_qtd));
+    printf("->direction %x\n", ep->direction);
+
+    printf("\nep qH %lx\n", (uint32_t)(ep->hc_entry.qh));
+    printf("->next %lx\n", EHCI_MEM(ep->hc_entry.qh->next));
+    printf("->qtd_current %lx\n", EHCI_MEM(ep->hc_entry.qh->qtd_current));
+    printf("->ep_char_1 %lx\n", EHCI_MEM(ep->hc_entry.qh->ep_char_1));
+    printf("->ep_capab_2 %lx\n", EHCI_MEM(ep->hc_entry.qh->ep_capab_2));
+    printf("->overlay.next %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.next));
+    printf("->overlay.token %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.token));
+    printf("->overlay.buf %lx\n", EHCI_MEM(ep->hc_entry.qh->transfer_overlay.buf));
+
+    printf("\nep head %lx\n", (uint32_t)(ep->hc_head_qtd));
+    printf("->next %lx\n", EHCI_MEM(ep->hc_head_qtd->next));
+    printf("->token %lx\n", EHCI_MEM(ep->hc_head_qtd->token));
+    printf("->buf %lx\n", EHCI_MEM(ep->hc_head_qtd->buf));
+
+    printf("\nep dummy %lx\n", (uint32_t)(ep->hc_dummy_qtd));
+    printf("->next %lx\n", EHCI_MEM(ep->hc_dummy_qtd->next));
+    printf("->token %lx\n", EHCI_MEM(ep->hc_dummy_qtd->token));
+    printf("->buf %lx\n", EHCI_MEM(ep->hc_dummy_qtd->buf));
+#endif // USBH_DEBUG_XFER_DETAIL
+
+    // Kick off the transfer by setting the active bit in the setup qTD.
 		// NOTE: setting the token in the qTD MUST be atomic
 		EHCI_MEM(hc_data_qtd->token) = token;
 
@@ -2436,7 +2569,7 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 			EHCI_MEM(hc_itd->pointer_list[5]) = 0;
 			EHCI_MEM(hc_itd->pointer_list[6]) = 0;
 
-#ifdef USBH_DEBUG_XFER
+#ifdef USBH_DEBUG_XFER_DETAIL
 			printf("iTD next %08x\r\n", hc_itd->next);
 			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[0]);
 			printf("iTD status_control_list %08x\r\n", hc_itd->status_control_list[1]);
@@ -2453,7 +2586,7 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[4]);
 			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[5]);
 			printf("iTD pointer_list %08x\r\n", hc_itd->pointer_list[6]);
-#endif // USBH_DEBUG_XFER
+#endif // USBH_DEBUG_XFER_DETAIL
 		}
 		// Full-speed endpoint.
 		else //if (xferNew->hc_entry.type == USBH_list_entry_type_siTD)
@@ -2529,7 +2662,7 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 													| MASK_EHCI_SPLIT_ISO_TD_IOC
 													| EHCI_SPLIT_ISO_TD_STATUS_ACTIVE;
 
-#ifdef USBH_DEBUG_XFER
+#ifdef USBH_DEBUG_XFER_DETAIL
 			printf("siTD next %08x\r\n", hc_sitd->next);
 			printf("siTD ep_char_1 %08x\r\n", hc_sitd->ep_char_1);
 			printf("siTD ep_capab_2 %08x\r\n", hc_sitd->ep_capab_2);
@@ -2537,7 +2670,7 @@ static int32_t usbh_transfer_iso_worker(USBH_endpoint  *ep,
 			printf("siTD pointer_list %08x\r\n", hc_sitd->pointer_list[0]);
 			printf("siTD pointer_list %08x\r\n", hc_sitd->pointer_list[1]);
 			printf("siTD back %08x\r\n", hc_sitd->back);
-#endif // USBH_DEBUG_XFER
+#endif // USBH_DEBUG_XFER_DETAIL
 
 		}
 
@@ -2696,7 +2829,7 @@ static uint8_t usbh_get_hub_status_worker(USBH_device *hubDev, uint8_t index, US
 	if (hubDev == NULL)
 	{
 		usbh_hw_update_root_hub_port_status();
-		memcpy(buf, &currentPortStatus, sizeof(USB_hub_port_status));
+		memcpy(buf, (void *)&currentPortStatus, sizeof(USB_hub_port_status));
 	}
 	else
 	{
@@ -2810,6 +2943,8 @@ static uint8_t usbh_set_hub_port_feature(USBH_device *hubDev, uint8_t hubPort, u
 			case USB_HUB_CLASS_FEATURE_PORT_POWER:
 				// Turn on VBus
 				EHCI_REG(busctrl) &= (~MASK_EHCI_BUSCTRL_VBUS_OFF);
+			  // Set PSW_N pin to low
+			  gpio_write(2, 0);
 				// Not used by driver
 				currentPortStatus.portPower = 1;
 				currentPortStatus.portPowerChange = 1;
@@ -2897,9 +3032,11 @@ static uint8_t usbh_clear_hub_port_feature(USBH_device *hubDev, uint8_t hubPort,
 				// Deassert port reset.
 				// After clear operation, start command must be called in less than 3ms
 				// or host will go into suspend state.
+	      CRITICAL_SECTION_BEGIN
 				val = EHCI_REG(portsc);
 				val &= (~MASK_EHCI_PORTSC_PO_RESET);
 				EHCI_REG(portsc) = val;
+	      CRITICAL_SECTION_END
 				break;
 			case USB_HUB_CLASS_FEATURE_PORT_ENABLE:
 				EHCI_REG(portsc) &= (~MASK_EHCI_PORTSC_PO_EN); //clear port enable
@@ -2911,7 +3048,10 @@ static uint8_t usbh_clear_hub_port_feature(USBH_device *hubDev, uint8_t hubPort,
 				currentPortStatus.portSuspendChange = 1;
 				break;
 			case USB_HUB_CLASS_FEATURE_PORT_POWER:
+        // Turn off VBus
 				EHCI_REG(busctrl) |= (MASK_EHCI_BUSCTRL_VBUS_OFF);
+			  // Set PSW_N pin to high
+			  gpio_write(2, 1);
 				currentPortStatus.portPowerChange = 1;
 				break;
 			case USB_HUB_CLASS_FEATURE_C_PORT_CONNECTION:
@@ -3172,14 +3312,18 @@ static int8_t usbh_hub_port_remove(USBH_device *hubDev, uint8_t hubPort)
 			usbh_dev_disconnect(hubDev);
 		}
 
-		// Stop EHCI hardware.
-		usbh_hw_stop();
-		// Delay for at least 16 microframes to scheduler to park
-		// at dummy qH.
-		delayms(2);
+		// Check EHCI hardware is running.
+		if (EHCI_REG(usbcmd) & MASK_EHCI_USBCMD_RS)
+		{
+			// Stop EHCI hardware.
+			usbh_hw_stop();
+			// Delay for at least 16 microframes to scheduler to park
+			// at dummy qH.
+			delayms(2);
 
-		// Check it has halted.
-		while ((EHCI_REG(usbsts) & MASK_EHCI_USBSTS_HCHalted) == 0);
+			// Check it has halted.
+			while ((EHCI_REG(usbsts) & MASK_EHCI_USBSTS_HCHalted) == 0);
+		}
 
 		// Reset addressing
 		devAddr = 1;
@@ -3214,6 +3358,9 @@ static int8_t usbh_hub_port_remove(USBH_device *hubDev, uint8_t hubPort)
 			devChild = devNext;
 		}
 	}
+
+	usbh_update_transactions(&usbh_xferList);
+	usbh_update_transactions(&usbh_xferListPeriodic);
 
 	return status;
 }
@@ -3442,6 +3589,7 @@ static int8_t usbh_enumerate_parse_config_desc(USBH_endpoint *epZero, uint8_t *b
 						printf("Descriptor: Endpoint index: %d %s ", epNew->index, epNew->direction == USBH_DIR_IN?"in":"out");
 #endif // USBH_DEBUG_CONFIG_DESC
 
+            // Take the endpoint interval from the configuration descriptor.
 						epNew->interval = confEndpointDesc->bInterval;
 						if ((confEndpointDesc->bmAttributes & USB_ENDPOINT_DESCRIPTOR_ATTR_MASK) ==
 								USB_ENDPOINT_DESCRIPTOR_ATTR_BULK)
@@ -4370,26 +4518,24 @@ static void usbh_force_close_xfer(USBH_endpoint *ep, USBH_xfer *list)
 
 static void usbh_free_endpoint(USBH_endpoint *epFree)
 {
+  CRITICAL_SECTION_BEGIN
 	// Remove endpoint from active lists and therefore remove the
 	// qH from the Asynchronous or Periodic Queues.
 	if ((epFree->type == USBH_EP_BULK) || (epFree->type == USBH_EP_CTRL))
 	{
 		// For BULK endpoints link in to list of asynch QHs
 		usbh_ep_list_remove(epFree, usbh_async_ep_list);
-		CRITICAL_SECTION_BEGIN
 		// Remove any xfers for this endpoint from asynchronous list.
 		usbh_force_close_xfer(epFree, usbh_xferList);
-		CRITICAL_SECTION_END
 	}
 	else
 	{
 		// For Periodic endpoints link in to list of periodic QHs
 		usbh_ep_list_remove(epFree, usbh_periodic_ep_list);
-		CRITICAL_SECTION_BEGIN
 		// Remove any xfers for this endpoint from periodic list.
 		usbh_force_close_xfer(epFree, usbh_xferListPeriodic);
-		CRITICAL_SECTION_END
 	}
+  CRITICAL_SECTION_END
 
 	// Free qH for endpoint.
 	usbh_free_hc_2_blocks((void *)epFree->hc_entry.qh);
@@ -4690,6 +4836,7 @@ static void usbh_hw_init(void)
 	usbh_hw_stop();
 }
 
+#ifdef USBH_USE_INTERRUPTS
 static void usbh_hw_enable_int(void)
 {
 	uint32_t reg;
@@ -4703,6 +4850,7 @@ static void usbh_hw_enable_int(void)
 			| MASK_EHCI_USBINTR_USB_INT_EN
 			| MASK_EHCI_USBINTR_PO_CHG_INT_EN );
 }
+#endif // USBH_USE_INTERRUPTS
 
 static void usbh_hw_disable_int(void)
 {
@@ -4728,9 +4876,8 @@ static void usbh_hw_pad_setup(void)
 
 	delayus(100);
 
-	// Set PSW_N pin to low
+	// Set PSW_N pin to an output
 	gpio_dir(2, pad_dir_output);
-	gpio_write(2, 0);
 }
 
 static void usbh_hw_run(void)
@@ -4850,7 +4997,7 @@ static void usbh_hw_update_root_hub_status(void)
 	uint32_t change, value;
 
 	// Copy previous status mask to change variable.
-	memcpy(&change, &currentHubStatus, sizeof(change));
+	memcpy(&change, (void *)&currentHubStatus, sizeof(change));
 
 	// Read EHCI registers.
 	busctrl = EHCI_REG(busctrl);
@@ -4871,9 +5018,13 @@ static void usbh_hw_update_root_hub_status(void)
 	value |= change;
 
 	// Update current status mask and change mask.
-	memcpy(&currentHubStatus, &value, sizeof(currentHubStatus));
+	memcpy((void *)&currentHubStatus, &value, sizeof(USB_hub_status));
 }
 
+// Note: this function depends on the sizeof(USB_hub_port_status)
+// being 32 bits in total. It is defined as 32 bits in the EHCI
+// specification, upper 16 bits are the changed bits for the lower
+// 16 bits.
 static void usbh_hw_update_root_hub_port_status(void)
 {
 	// EHCI registers used to work out port status.
@@ -4884,7 +5035,7 @@ static void usbh_hw_update_root_hub_port_status(void)
 	//USB_hub_port_status lastPortStatus;
 
 	// Copy previous status mask to change variable.
-	memcpy(&change, &currentPortStatus, sizeof(change));
+	memcpy(&change, (uint32_t *)&currentPortStatus, sizeof(change));
 
 	busctrl = EHCI_REG(busctrl);
 	portsc = EHCI_REG(portsc);
@@ -4906,7 +5057,7 @@ static void usbh_hw_update_root_hub_port_status(void)
 	currentPortStatus.portSuspend = portsc >> BIT_EHCI_PORTSC_PO_SUSP;
 
 	// Copy current mask to calculate change mask.
-	memcpy(&value, &currentPortStatus, sizeof(value));
+	memcpy(&value, (uint32_t *)&currentPortStatus, sizeof(value));
 
 	// Update change bits using exclusive or.
 	change = (change & 0xffff) ^ (value & 0xffff);
@@ -4916,7 +5067,7 @@ static void usbh_hw_update_root_hub_port_status(void)
 	value |= change;
 
 	// Update current status mask and change mask.
-	memcpy(&currentPortStatus, &value, sizeof(currentHubStatus));
+	memcpy((uint32_t *)&currentPortStatus, &value, sizeof(USB_hub_port_status));
 }
 
 void usbh_hw_wait_for_doorbell(void)
@@ -5006,6 +5157,7 @@ static void usbh_hub_poll_start(USBH_device *hubDev)
 
 /** @brief Millisecond timer handler for USB Host stack.
  *  Provides a timeout response to USB transfers that require this functionality.
+ *  This will typically be called from an interrupt service routine.
  */
 void USBH_timer(void)
 {
@@ -5042,12 +5194,10 @@ int8_t USBH_process(void)
 	if (intr_xfer)
 	{
 		// Check for transaction completion.
-		//CRITICAL_SECTION_BEGIN
 		// delay needed for AOA initialization in some android devices
 		delayus(usbh_aoa_compat_delay);
 		usbh_update_transactions(&usbh_xferList);
 		usbh_update_transactions(&usbh_xferListPeriodic);
-		//CRITICAL_SECTION_END
 	}
 
 	if (intr_port)
@@ -5094,8 +5244,8 @@ void USBH_initialise(USBH_ctx *ctx)
 		usbh_aoa_compat_delay = ctx->aoa_compatibility_delay;
 	}
 
-	memset(&currentPortStatus, 0, sizeof(currentPortStatus));
-	memset(&currentHubStatus, 0, sizeof(currentHubStatus));
+	memset((void *)&currentPortStatus, 0, sizeof(currentPortStatus));
+  memset((void *)&currentHubStatus, 0, sizeof(currentHubStatus));
 
 	// Clear Status Register
 	usbh_hw_clrsts();
@@ -5116,17 +5266,21 @@ void USBH_finalise(void)
 	usbh_hub_port_remove(NULL, 1);
 	usbh_hw_disable_int();
 	interrupt_detach(interrupt_usb_host);
+  usbh_hw_stop();
+
+  // Turn off VBUS in EHCI controller
+  usbh_clear_hub_port_feature(0, 1, USB_HUB_CLASS_FEATURE_PORT_POWER);
 
 	CRITICAL_SECTION_BEGIN
-				   usbh_intr_xfer = 0;
-				   usbh_intr_port = 0;
+	usbh_intr_xfer = 0;
+	usbh_intr_port = 0;
 	CRITICAL_SECTION_END
 
 	// Clear Status Register
 	usbh_hw_clrsts();
-	usbh_hw_stop();
 	usbh_hw_reset();
-	sys_disable(sys_device_usb_host);
+
+  sys_disable(sys_device_usb_host);
 }
 
 int8_t USBH_endpoint_halt(USBH_endpoint_handle endpoint,
@@ -5303,20 +5457,18 @@ int8_t USBH_clear_endpoint_transfers(USBH_endpoint_handle endpoint)
 
 	// Remove endpoint from active lists and therefore remove the
 	// qH from the Asynchronous or Periodic Queues.
+  CRITICAL_SECTION_BEGIN
 	if ((epFree->type == USBH_EP_BULK) || (epFree->type == USBH_EP_CTRL))
 	{
-		CRITICAL_SECTION_BEGIN
 		// Remove any xfers for this endpoint from asynchronous list.
 		usbh_force_close_xfer(epFree, usbh_xferList);
-		CRITICAL_SECTION_END
 	}
 	else
 	{
-		CRITICAL_SECTION_BEGIN
 		// Remove any xfers for this endpoint from periodic list.
 		usbh_force_close_xfer(epFree, usbh_xferListPeriodic);
-		CRITICAL_SECTION_END
 	}
+  CRITICAL_SECTION_END
 
 	return USBH_OK;
 }
@@ -6291,26 +6443,25 @@ int8_t USBH_set_interface(USBH_interface_handle interface,
 			epOld = ifaceOld->endpoints;
 			while (epOld)
 			{
+        CRITICAL_SECTION_BEGIN
 				if (epOld->type == USBH_EP_BULK)
 				{
 					// For BULK endpoints link in to list of asynch QHs
 					usbh_ep_list_remove(epOld, usbh_async_ep_list);
 
-					CRITICAL_SECTION_BEGIN
 					// Remove any xfers for this endpoint from asynchronous list.
 					usbh_force_close_xfer(epOld, usbh_xferList);
-					CRITICAL_SECTION_END
 				}
 				else
 				{
 					// For Periodic endpoints link in to list of periodic QHs
 					usbh_ep_list_remove(epOld, usbh_periodic_ep_list);
-					CRITICAL_SECTION_BEGIN
 					// Remove any xfers for this endpoint from periodic list.
 					usbh_force_close_xfer(epOld, usbh_xferListPeriodic);
-					CRITICAL_SECTION_END
 				}
-				// Free the old queue header if it exists. Iso endpoints will
+        CRITICAL_SECTION_END
+
+        // Free the old queue header if it exists. Iso endpoints will
 				// have a null pointer for their iTD or siTDs.
 				if (epOld->hc_entry.type == USBH_list_entry_type_qH)
 				{
