@@ -259,18 +259,18 @@ typedef enum
     pad_gpio38      = pad_func_0, /**< RTC_REF/SPIM_IO3/GPIO38 Pad function 0 */
     pad_gpio39      = pad_func_0, /**< VBUS_DTC/GPIO39 Pad function 0 */
 
-    pad_spis0_clk_0 = pad_func_1, /**< SD_CLK/SPIS_CLK/GPIO0 Pad function 1 */
-    pad_spis0_miso_1= pad_func_1, /**< SD_CMD/SPIS_MISO/GPIO1 Pad function 1 */
-    pad_spis0_mosi_2= pad_func_1, /**< SD_CD/SPIS_MOSI/GPIO2 Pad function 1 */
-    pad_spis0_ss_3  = pad_func_1, /**< SD_DATA0/SPIS_SS/GPIO3 Pad function 1 */
+    pad_spis0_clk   = pad_func_1, /**< SD_CLK/SPIS_CLK/GPIO0 Pad function 1 */
+    pad_spis0_miso  = pad_func_1, /**< SD_CMD/SPIS_MISO/GPIO1 Pad function 1 */
+    pad_spis0_mosi  = pad_func_1, /**< SD_CD/SPIS_MOSI/GPIO2 Pad function 1 */
+    pad_spis0_ss    = pad_func_1, /**< SD_DATA0/SPIS_SS/GPIO3 Pad function 1 */
     pad_pwm7        = pad_func_1, /**< PWM0/SD_DATA1/PWM7/GPIO4 Pad function 1 */
     pad_pwm6        = pad_func_1, /**< PWM6/SD_DATA2/PWM1/GPIO5 Pad function 1 */
     pad_pwm5        = pad_func_1, /**< SD_DATA3/PWM5/GPIO6 Pad function 1 */
     pad_pwm4        = pad_func_1, /**< SD_WP/PWM4/GPIO7 Pad function 1 */
-    pad_pwm3_8      = pad_func_1, /**< PWM3/GPIO8 Pad function 1 */
-    pad_pwm2_9      = pad_func_1, /**< PWM2/GPIO9 Pad function 1 */
-    pad_pwm0_11     = pad_func_1, /**< PWM0/GPIO11 Pad function 1 */
-    pad_pwm1_10     = pad_func_1, /**< PWM1/GPIO10 Pad function 1 */
+    pad_pwm3        = pad_func_1, /**< PWM3/GPIO8 Pad function 1 */
+    pad_pwm2        = pad_func_1, /**< PWM2/GPIO9 Pad function 1 */
+    pad_pwm0        = pad_func_1, /**< PWM0/GPIO11 Pad function 1 */
+    pad_pwm1        = pad_func_1, /**< PWM1/GPIO10 Pad function 1 */
     pad_i2cm_scl    = pad_func_1, /**< I2CS_SCL/I2CM_SCL/GPIO12 Pad function 1 */
     pad_i2cm_sda    = pad_func_1, /**< I2CS_SDA/I2CM_SDA/GPIO13 Pad function 1 */
     pad_uart2_rxd   = pad_func_1, /**< UART2_RXD/GPIO14 Pad function 1 */
@@ -289,7 +289,7 @@ typedef enum
     pad_uart0_dsr   = pad_func_1, /**< UART1_TXD/UART0_DSR/GPIO27 Pad function 1 */
     pad_uart0_dcd   = pad_func_1, /**< UART1_RTS/UART0_DCD/GPIO28 Pad function 1 */
     pad_uart0_ri    = pad_func_1, /**< SPIM_SS0/UART1_CTS/UART0_RI/GPIO29 Pad function 1 */
-    pad_spim_ss0_30 = pad_func_1, /**< SPIM_SS0/GPIO30 Pad function 1 */
+    pad_spim_ss0    = pad_func_1, /**< SPIM_SS0/GPIO30 Pad function 1 */
     pad_spim_ss1    = pad_func_1, /**< SPIM_SS1/GPIO31 Pad function 1 */
     pad_spim_ss2    = pad_func_1, /**< SPIM_SS2/GPIO32 Pad function 1 */
     pad_spim_ss3    = pad_func_1, /**< SPIM_SS3/GPIO33 Pad function 1 */
@@ -316,40 +316,40 @@ typedef enum
     pad_uart3_txd   = pad_func_2, /**< UART3_TXD/UART2_DSR/GPIO19 Pad function 2 */
     pad_uart3_rts   = pad_func_2, /**< UART3_RTS/UART2_DCD/GPIO20 Pad function 2 */
     pad_uart3_cts   = pad_func_2, /**< UART3_CTS/UART2_RI/GPIO21 Pad function 2 */
-    pad_pwm3_22     = pad_func_2, /**< PWM3/UART0_RXD/GPIO22 Pad function 1 */
-    pad_pwm2_23     = pad_func_2, /**< PWM2/UART0_TXD/GPIO23 Pad function 1 */
-    pad_pwm1_24     = pad_func_2, /**< PWM1/UART0_RTS/GPIO24 Pad function 2 */
-    pad_pwm0_25     = pad_func_2, /**< PWM0/UART0_CTS/GPIO25 Pad function 2 */
+    pad_pwm3_2      = pad_func_2, /**< PWM3/UART0_RXD/GPIO22 Pad function 2 */
+    pad_pwm2_2      = pad_func_2, /**< PWM2/UART0_TXD/GPIO23 Pad function 2 */
+    pad_pwm1_2      = pad_func_2, /**< PWM1/UART0_RTS/GPIO24 Pad function 2 */
+    pad_pwm0_2      = pad_func_2, /**< PWM0/UART0_CTS/GPIO25 Pad function 2 */
     pad_uart1_txd   = pad_func_2, /**< UART1_RXD/UART0_DTR/GPIO26 Pad function 2 */
     pad_uart1_rxd   = pad_func_2, /**< UART1_TXD/UART0_DSR/GPIO27 Pad function 2 */
     pad_uart1_rts   = pad_func_2, /**< UART1_RTS/UART0_DCD/GPIO28 Pad function 2 */
     pad_uart1_cts   = pad_func_2, /**< SPIM_SS0/UART1_CTS/UART0_RI/GPIO29 Pad function 2 */
 
-    pad_spis0_clk   = pad_func_2, /**< SPIM_CLK/SPIS_CLK/GPIO34 Pad function 2 */
-    pad_spis0_miso  = pad_func_2, /**< SPIS_MISO/SPIM_MISO/GPIO35 Pad function 2 */
-    pad_spis0_mosi  = pad_func_2, /**< SPIS_MOSI/SPIM_MOSI/GPIO36 Pad function 2 */
-    pad_spis0_ss    = pad_func_2, /**< SPIS_SS/SPIM_IO2/GPIO37 Pad function 2 */
+    pad_spis0_clk_2 = pad_func_2, /**< SPIM_CLK/SPIS_CLK/GPIO34 Pad function 2 */
+    pad_spis0_miso_2= pad_func_2, /**< SPIS_MISO/SPIM_MISO/GPIO35 Pad function 2 */
+    pad_spis0_mosi_2= pad_func_2, /**< SPIS_MOSI/SPIM_MOSI/GPIO36 Pad function 2 */
+    pad_spis0_ss_2  = pad_func_2, /**< SPIS_SS/SPIM_IO2/GPIO37 Pad function 2 */
     pad_rtc_ref     = pad_func_2, /**< RTC_REF/SPIM_IO3/GPIO38 Pad function 2 */
 
-    pad_spim_ss0_29 = pad_func_3, /**< SPIM_SS0/UART1_CTS/UART0_RI/GPIO29 Pad function 3 */
-    pad_pwm0_4      = pad_func_3, /**< PWM0/SD_DATA1/PWM7/GPIO4 Pad function 3 */
-    pad_pwm1_5      = pad_func_3, /**< PWM1/SD_DATA2/PWM6/GPIO5 Pad function 3 */
+    pad_spim_ss0_3  = pad_func_3, /**< SPIM_SS0/UART1_CTS/UART0_RI/GPIO29 Pad function 3 */
+    pad_pwm0_3      = pad_func_3, /**< PWM0/SD_DATA1/PWM7/GPIO4 Pad function 3 */
+    pad_pwm1_3      = pad_func_3, /**< PWM1/SD_DATA2/PWM6/GPIO5 Pad function 3 */
 } pad_func_t;
 
 typedef enum
 {
-    gpio_spis0_clk_0 = 0, /**< SD_CLK/SPIS_CLK/GPIO0 Pad function 1 */
-    gpio_spis0_miso_1= 1, /**< SD_CMD/SPIS_MISO/GPIO1 Pad function 1 */
-    gpio_spis0_mosi_2= 2, /**< SD_CD/SPIS_MOSI/GPIO2 Pad function 1 */
-    gpio_spis0_ss_3  = 3, /**< SD_DATA0/SPIS_SS/GPIO3 Pad function 1 */
+    gpio_spis0_clk   = 0, /**< SD_CLK/SPIS_CLK/GPIO0 Pad function 1 */
+    gpio_spis0_miso  = 1, /**< SD_CMD/SPIS_MISO/GPIO1 Pad function 1 */
+    gpio_spis0_mosi  = 2, /**< SD_CD/SPIS_MOSI/GPIO2 Pad function 1 */
+    gpio_spis0_ss    = 3, /**< SD_DATA0/SPIS_SS/GPIO3 Pad function 1 */
     gpio_pwm7        = 4, /**< PWM0/SD_DATA1/PWM7/GPIO4 Pad function 1 */
     gpio_pwm6        = 5, /**< PWM6/SD_DATA2/PWM1/GPIO5 Pad function 1 */
     gpio_pwm5        = 6, /**< SD_DATA3/PWM5/GPIO6 Pad function 1 */
     gpio_pwm4        = 7, /**< SD_WP/PWM4/GPIO7 Pad function 1 */
-    gpio_pwm3_8      = 8, /**< PWM3/GPIO8 Pad function 1 */
-    gpio_pwm2_9      = 9, /**< PWM2/GPIO9 Pad function 1 */
-    gpio_pwm0_10     = 11, /**< PWM0/GPIO11 Pad function 1 */
-    gpio_pwm1_11     = 10, /**< PWM1/GPIO10 Pad function 1 */
+    gpio_pwm3        = 8, /**< PWM3/GPIO8 Pad function 1 */
+    gpio_pwm2        = 9, /**< PWM2/GPIO9 Pad function 1 */
+    gpio_pwm0        = 11, /**< PWM0/GPIO11 Pad function 1 */
+    gpio_pwm1        = 10, /**< PWM1/GPIO10 Pad function 1 */
     gpio_i2cm_scl    = 12, /**< I2CS_SCL/I2CM_SCL/GPIO12 Pad function 1 */
     gpio_i2cm_sda    = 13, /**< I2CS_SDA/I2CM_SDA/GPIO13 Pad function 1 */
     gpio_uart2_rxd   = 14, /**< UART2_RXD/GPIO14 Pad function 1 */
@@ -368,7 +368,7 @@ typedef enum
     gpio_uart0_dsr   = 27, /**< UART1_TXD/UART0_DSR/GPIO27 Pad function 1 */
     gpio_uart0_dcd   = 28, /**< UART1_RTS/UART0_DCD/GPIO28 Pad function 1 */
     gpio_uart0_ri    = 29, /**< SPIM_SS0/UART1_CTS/UART0_RI/GPIO29 Pad function 1 */
-    gpio_spim_ss0_30 = 30, /**< SPIM_SS0/GPIO30 Pad function 1 */
+    gpio_spim_ss0    = 30, /**< SPIM_SS0/GPIO30 Pad function 1 */
     gpio_spim_ss1    = 31, /**< SPIM_SS1/GPIO31 Pad function 1 */
     gpio_spim_ss2    = 32, /**< SPIM_SS2/GPIO32 Pad function 1 */
     gpio_spim_ss3    = 33, /**< SPIM_SS3/GPIO33 Pad function 1 */
@@ -395,24 +395,24 @@ typedef enum
     gpio_uart3_txd   = 19, /**< UART3_TXD/UART2_DSR/GPIO19 Pad function 2 */
     gpio_uart3_rts   = 20, /**< UART3_RTS/UART2_DCD/GPIO20 Pad function 2 */
     gpio_uart3_cts   = 21, /**< UART3_CTS/UART2_RI/GPIO21 Pad function 2 */
-    gpio_pwm3_22     = 22, /**< PWM3/UART0_RXD/GPIO22 Pad function 1 */
-    gpio_pwm2_23     = 23, /**< PWM2/UART0_TXD/GPIO23 Pad function 1 */
-    gpio_pwm1_24     = 24, /**< PWM1/UART0_RTS/GPIO24 Pad function 2 */
-    gpio_pwm0_25     = 25, /**< PWM0/UART0_CTS/GPIO25 Pad function 2 */
+    gpio_pwm3_2      = 22, /**< PWM3/UART0_RXD/GPIO22 Pad function 2 */
+    gpio_pwm2_2      = 23, /**< PWM2/UART0_TXD/GPIO23 Pad function 2 */
+    gpio_pwm1_2      = 24, /**< PWM1/UART0_RTS/GPIO24 Pad function 2 */
+    gpio_pwm0_2      = 25, /**< PWM0/UART0_CTS/GPIO25 Pad function 2 */
     gpio_uart1_txd   = 26, /**< UART1_RXD/UART0_DTR/GPIO26 Pad function 2 */
     gpio_uart1_rxd   = 27, /**< UART1_TXD/UART0_DSR/GPIO27 Pad function 2 */
     gpio_uart1_rts   = 28, /**< UART1_RTS/UART0_DCD/GPIO28 Pad function 2 */
     gpio_uart1_cts   = 29, /**< SPIM_SS0/UART1_CTS/UART0_RI/GPIO29 Pad function 2 */
 
-    gpio_spis0_clk   = 34, /**< SPIM_CLK/SPIS_CLK/GPIO34 Pad function 2 */
-    gpio_spis0_miso  = 35, /**< SPIS_MISO/SPIM_MISO/GPIO35 Pad function 2 */
-    gpio_spis0_mosi  = 36, /**< SPIS_MOSI/SPIM_MOSI/GPIO36 Pad function 2 */
-    gpio_spis0_ss    = 37, /**< SPIS_SS/SPIM_IO2/GPIO37 Pad function 2 */
+    gpio_spis0_clk_2 = 34, /**< SPIM_CLK/SPIS_CLK/GPIO34 Pad function 2 */
+    gpio_spis0_miso_2= 35, /**< SPIS_MISO/SPIM_MISO/GPIO35 Pad function 2 */
+    gpio_spis0_mosi_2= 36, /**< SPIS_MOSI/SPIM_MOSI/GPIO36 Pad function 2 */
+    gpio_spis0_ss_2  = 37, /**< SPIS_SS/SPIM_IO2/GPIO37 Pad function 2 */
     gpio_rtc_ref     = 38, /**< RTC_REF/SPIM_IO3/GPIO38 Pad function 2 */
 
-    gpio_spim_ss0_29 = 29, /**< SPIM_SS0/UART1_CTS/UART0_RI/GPIO29 Pad function 3 */
-    gpio_pwm0        = 4, /**< PWM0/SD_DATA1/PWM7/GPIO4 Pad function 3 */
-    gpio_pwm1        = 5, /**< PWM1/SD_DATA2/PWM6/GPIO5 Pad function 3 */
+    gpio_spim_ss0_3  = 29, /**< SPIM_SS0/UART1_CTS/UART0_RI/GPIO29 Pad function 3 */
+    gpio_pwm0_3      = 4, /**< PWM0/SD_DATA1/PWM7/GPIO4 Pad function 3 */
+    gpio_pwm1_3      = 5, /**< PWM1/SD_DATA2/PWM6/GPIO5 Pad function 3 */
 } gpio_func_t;
 
 #else
