@@ -45,7 +45,8 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
-#include <ft900.h>
+
+#include "../Includes/ft900_rtc_external.h"
 
 /* MACROS ***********************************************************************/
 #define GPIO_UART0_TX 	48

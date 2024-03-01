@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
-		<cconfiguration id="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.1919626781">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.1919626781" moduleId="org.eclipse.cdt.core.settings" name="FT90x_Debug">
+		<cconfiguration id="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.413033367">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.413033367" moduleId="org.eclipse.cdt.core.settings" name="FT90x_Debug">
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -14,54 +14,50 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.1919626781" name="FT90x_Debug" parent="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base">
-					<folderInfo id="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.1919626781." name="/" resourcePath="">
-						<toolChain id="com.brtchip.toolchain.ft900.debug.base.444635963" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft900.debug.base">
-							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.643035968" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
-							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize.1316810452" name="Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.path.1911743355" name="Toolchain Path" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.path" useByScannerDiscovery="true" value="${FT9XX_TOOLCHAIN}" valueType="string"/>
-							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x.1954061605" isAbstract="false" osList="all" superClass="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
-							<builder buildPath="${workspace_loc:/External RTC Example 1}/FT90x_Debug" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.753720554" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
-							<tool id="com.brtchip.compiler.ft900.debug.base.1251362849" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.debug.base">
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags.1963321310" name="Other optimization flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-Og" valueType="string"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.308666767" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other.1549986156" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.2077328390" name="Include paths (-I)" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.413033367" name="FT90x_Debug" parent="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base">
+					<folderInfo id="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.413033367." name="/" resourcePath="">
+						<toolChain id="com.brtchip.toolchain.ft900.debug.base.762840759" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft900.debug.base">
+							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.901027273" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
+							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize.974976367" name="Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x.1268301417" isAbstract="false" osList="all" superClass="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
+							<builder buildPath="${workspace_loc:/RTC External Example 1}/FT90x_Debug" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.342991156" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
+							<tool id="com.brtchip.compiler.ft900.debug.base.1323589859" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.debug.base">
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags.216333971" name="Other optimization flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-Og" valueType="string"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.1149728879" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other.1046473225" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.1433496761" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
-
-									<listOptionValue builtIn="false" value="&quot;../Includes&quot;"/>
 								</option>
-								<option id="gnu.c.compiler.option.dialect.std.290528072" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1483859938" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1404053311" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.54351156" name="FT9xx G++ Compiler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler">
-								<option id="gnu.cpp.compiler.option.optimization.level.1676517418" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.332606450" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.895616438" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.none" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.1036030007" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.other.54779282" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.166568059" name="FT9xx G++ Compiler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler">
+								<option id="gnu.cpp.compiler.option.optimization.level.1111959404" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.553149166" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.409915915" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.none" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.2026707472" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.other.1026208097" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
 							</tool>
-							<tool id="com.brtchip.linker.ft900.debug.base.936107363" name="FT9xx GCC Linker" superClass="com.brtchip.linker.ft900.debug.base">
-								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1049372234" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+							<tool id="com.brtchip.linker.ft900.debug.base.146506234" name="FT9xx GCC Linker" superClass="com.brtchip.linker.ft900.debug.base">
+								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1838911132" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
 							</tool>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1350087852" name="FT9xx G++ Linker" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker"/>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver.2067894445" name="FT9xx GCC Archiver" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver"/>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.assembler.1377823362" name="FT9xx GCC Assembler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.assembler">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.896157583" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.849403155" name="FT9xx G++ Linker" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver.665621739" name="FT9xx GCC Archiver" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.assembler.1368885166" name="FT9xx GCC Assembler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.assembler">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1851578118" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash.1590690969" name="FT9xx Flash File Generator" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash"/>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.printsize.1965951052" name="FT9xx Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.printsize"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash.1531892005" name="FT9xx Flash File Generator" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.printsize.1354873640" name="FT9xx Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.printsize"/>
 						</toolChain>
 					</folderInfo>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 		</cconfiguration>
-		<cconfiguration id="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.1807858885.497237418">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.1807858885.497237418" moduleId="org.eclipse.cdt.core.settings" name="FT90x_Release">
+		<cconfiguration id="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.2022498711">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.2022498711" moduleId="org.eclipse.cdt.core.settings" name="FT90x_Release">
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -73,41 +69,40 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.1807858885.497237418" name="FT90x_Release" parent="com.brtchip.managedbuild.config.gnu.cross.ft900release.base">
-					<folderInfo id="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.1807858885.497237418." name="/" resourcePath="">
-						<toolChain id="com.brtchip.toolchain.ft900.release.base.1222322554" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft900.release.base">
-							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.715144822" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash" useByScannerDiscovery="false"/>
-							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize.2088480951" name="Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x.88016855" isAbstract="false" osList="all" superClass="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
-							<builder buildPath="${workspace_loc:/UART Example 1}/FT90x_Release" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.1357162825" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
-							<tool id="com.brtchip.compiler.ft900.release.base.828161915" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.release.base">
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level.221806087" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.241958826" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.362048663" name="Include paths (-I)" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.2022498711" name="FT90x_Release" parent="com.brtchip.managedbuild.config.gnu.cross.ft900release.base">
+					<folderInfo id="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.2022498711." name="/" resourcePath="">
+						<toolChain id="com.brtchip.toolchain.ft900.release.base.152664604" name="Bridgetek FT9xx GCC" superClass="com.brtchip.toolchain.ft900.release.base">
+							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash.1776308201" name="Create Flash Image" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.createflash"/>
+							<option id="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize.503405986" name="Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.option.printsize" value="true" valueType="boolean"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x.147674401" isAbstract="false" osList="all" superClass="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
+							<builder buildPath="${workspace_loc:/RTC External Example 1}/FT90x_Release" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.27459928" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
+							<tool id="com.brtchip.compiler.ft900.release.base.1897596821" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.release.base">
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level.359481662" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.716141830" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths.1478488241" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
-
 								</option>
-								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1628153011" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.957273424" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.153443778" name="FT9xx G++ Compiler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler">
-								<option id="gnu.cpp.compiler.option.optimization.level.748812433" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.1871226170" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.541348786" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.1116933878" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1487417506" name="FT9xx G++ Compiler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler">
+								<option id="gnu.cpp.compiler.option.optimization.level.1680551542" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.1571653014" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.1174885581" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.359259140" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 							</tool>
-							<tool id="com.brtchip.linker.ft900.release.base.320433589" name="FT9xx GCC Linker" superClass="com.brtchip.linker.ft900.release.base">
-								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.541132452" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+							<tool id="com.brtchip.linker.ft900.release.base.2005339586" name="FT9xx GCC Linker" superClass="com.brtchip.linker.ft900.release.base">
+								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1708176198" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
 							</tool>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.466269528" name="FT9xx G++ Linker" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker"/>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver.471745774" name="FT9xx GCC Archiver" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver"/>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.assembler.71776588" name="FT9xx GCC Assembler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.assembler">
-								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.2083757381" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.546830142" name="FT9xx G++ Linker" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver.604994372" name="FT9xx GCC Archiver" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.assembler.1894007163" name="FT9xx GCC Assembler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.assembler">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.391369085" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash.1591110449" name="FT9xx Flash File Generator" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash"/>
-							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.printsize.1745104670" name="FT9xx Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.printsize"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash.286631031" name="FT9xx Flash File Generator" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash"/>
+							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.printsize.285288705" name="FT9xx Display Image Size" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.printsize"/>
 						</toolChain>
 					</folderInfo>
 				</configuration>
@@ -116,19 +111,18 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="External RTC Example 1.com.brtchip.ft9xx.build.gcc.ft9xxproj.base.547799352" name="Executable" projectType="com.brtchip.ft90x.build.gcc.ft9xxproj.base"/>
+		<project id="RTC External Example 1.com.brtchip.ft9xx.build.gcc.ft9xxproj.base.1348873085" name="Executable" projectType="com.brtchip.ft90x.build.gcc.ft9xxproj.base"/>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.1919626781;com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.1919626781.;com.brtchip.compiler.ft900.debug.base.1251362849;cdt.managedbuild.tool.gnu.c.compiler.input.1483859938">
+		<scannerConfigBuildInfo instanceId="com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.413033367;com.brtchip.managedbuild.config.gnu.cross.ft900debug.base.413033367.;com.brtchip.compiler.ft900.debug.base.1323589859;cdt.managedbuild.tool.gnu.c.compiler.input.1404053311">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.brtchip.managedbuild.config.gnu.cross.ft900release.base.2022498711;com.brtchip.managedbuild.config.gnu.cross.ft900release.base.2022498711.;com.brtchip.compiler.ft900.release.base.1897596821;cdt.managedbuild.tool.gnu.c.compiler.input.957273424">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="FT90x_Debug">
-			<resource resourceType="PROJECT" workspacePath="/RTC External Example 1"/>
-		</configuration>
-	</storageModule>
+	<storageModule moduleId="refreshScope"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>
