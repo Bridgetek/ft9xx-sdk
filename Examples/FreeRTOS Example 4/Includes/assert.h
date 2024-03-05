@@ -1,7 +1,6 @@
 /**
-  @file 
-  @brief 
-  Assertion helpers
+  @file assert.h
+  @brief Assertion helpers
 */
 /*
  * ============================================================================
@@ -12,7 +11,7 @@
  * Copyright (C) Bridgetek Pte Ltd
  * ============================================================================
  *
- * This source code ("the Software") is provided by Bridgetek Pte Ltd 
+ * This source code ("the Software") is provided by Bridgetek Pte Ltd
  * ("Bridgetek") subject to the licence terms set out
  * http://brtchip.com/BRTSourceCodeLicenseAgreement/ ("the Licence Terms").
  * You must read the Licence Terms before downloading or using the Software.
@@ -42,25 +41,23 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
- 
+
 #ifndef __ASSERT_H
 #define __ASSERT_H
 
 #ifndef NO_ASSERT
 
-#   define ASSERT_P(a,b,msg)            \
-    do {                                \
-        if ((a) != (b))                 \
-        {                               \
-            printf("Assert Failed:" \
-               __FILE__ ":%d: "         \
-               msg,                     \
-               __LINE__);               \
-            for(;;);                    \
-        }                               \
-    } while(0)
-    
-#   define ASSERT(a,b) ASSERT_P(a,b, #a  " != " #b)
+#define ASSERT_P(a, b, msg)                                    \
+  do                                                           \
+  {                                                            \
+    if ((a) != (b))                                            \
+    {                                                          \
+      printf("Assert Failed:" __FILE__ ":%d: " msg, __LINE__); \
+      \ for (;;);                                              \
+    }                                                          \
+  } while (0)
+
+#define ASSERT(a, b) ASSERT_P(a, b, #a " != " #b)
 
 #endif
 

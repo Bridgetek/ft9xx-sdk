@@ -305,16 +305,28 @@
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft930.debug.d2xx.1083473055;com.brtchip.build.config.ft930.debug.d2xx.1083473055.;com.brtchip.compiler.ft930.cust.debug.d2xx.1832477808;cdt.managedbuild.tool.gnu.c.compiler.input.941768234">
+		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft900.release.d2xx.1376161851;com.brtchip.build.config.ft900.release.d2xx.1376161851.;com.brtchip.compiler.ft900.release.d2xx.344807476;cdt.managedbuild.tool.gnu.c.compiler.input.1596900779">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft930.release.d2xx.1382608150;com.brtchip.build.config.ft930.release.d2xx.1382608150.;com.brtchip.compiler.ft900.cust.release.d2xx.1335862853;cdt.managedbuild.tool.gnu.c.compiler.input.177606947">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.d2xx.ft900.debug.base.692404863;com.brtchip.build.config.d2xx.ft900.debug.base.692404863.;com.brtchip.compiler.ft900.debug.d2xx.983964594;cdt.managedbuild.tool.gnu.c.compiler.input.382788294">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft930.debug.d2xx.1083473055;com.brtchip.build.config.ft930.debug.d2xx.1083473055.;com.brtchip.compiler.ft930.cust.debug.d2xx.1832477808;cdt.managedbuild.tool.gnu.c.compiler.input.941768234">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.d2xx.ft900.debug.base.692404863;com.brtchip.build.config.d2xx.ft900.debug.base.692404863.;com.brtchip.managedbuild.gnu.cross.ft90x.tool.c.compiler.188399893;cdt.managedbuild.tool.gnu.c.compiler.input.1329921302">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft930.release.d2xx.1771276815;com.brtchip.build.config.ft930.release.d2xx.1771276815.;com.brtchip.compiler.ft900.cust.release.d2xx.597219205;cdt.managedbuild.tool.gnu.c.compiler.input.1564217803">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft900.release.d2xx.819813001;com.brtchip.build.config.ft900.release.d2xx.819813001.;com.brtchip.managedbuild.gnu.cross.ft90x.tool.c.compiler.158469771;cdt.managedbuild.tool.gnu.c.compiler.input.1394305308">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft930.debug.d2xx.302436148;com.brtchip.build.config.ft930.debug.d2xx.302436148.;com.brtchip.compiler.ft930.cust.debug.d2xx.8627101;cdt.managedbuild.tool.gnu.c.compiler.input.1933988121">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>

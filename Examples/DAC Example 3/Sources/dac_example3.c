@@ -44,6 +44,7 @@
  */
 
 #include <stdio.h>
+#include <stdint.h>
 #include <ft900.h>
 
 static const uint16_t sin_wave[64] = {
