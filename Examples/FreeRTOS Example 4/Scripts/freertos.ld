@@ -5,6 +5,7 @@ SEARCH_DIR("/opt/ft32/ft32-elf/lib");
 /* Allow the command line to override the memory region sizes.  */
 __PMSIZE = DEFINED(__PMSIZE)  ? __PMSIZE : 256K;
 __RAMSIZE = DEFINED(__RAMSIZE) ? __RAMSIZE : 64K;
+
 MEMORY
 {
   flash     (rx)   : ORIGIN = 0,        LENGTH = __PMSIZE
@@ -22,9 +23,9 @@ SECTIONS
     *(.init)
     *(.fini)
     . = ALIGN(4);
-     _etext = . ;
+    _etext = . ;
   }  > flash
-  
+
   .tors :
   {
     ___ctors = . ;
@@ -40,23 +41,23 @@ SECTIONS
   	. = ALIGN(4);
     __data = .;
     *(.data)
-	*(.data*)
-	*(.rodata)
+    *(.data*)
+    *(.rodata)
     *(.rodata*)
-  . = ALIGN(4);
-     _edata = . ;
+    . = ALIGN(4);
+    _edata = . ;
   }  > ram AT>flash
   .bss  SIZEOF(.data) + ADDR(.data) (NOLOAD) :
   {
-     _bss_start = . ;
+    _bss_start = . ;
     *(.bss)
     *(COMMON)
-     _end = . ;
-  }  > ram
-   __data_load_start = LOADADDR(.data);
-   __data_load_end = __data_load_start + SIZEOF(.data);
-   
-   
+    _end = . ;
+  } > ram
+
+  __data_load_start = LOADADDR(.data);
+  __data_load_end = __data_load_start + SIZEOF(.data);
+
   .stab 0 (NOLOAD) :
   {
     *(.stab)

@@ -43,13 +43,14 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <ft900.h>
 #include <string.h>
+
 void setup(void);
-void myputc(void *p, char c);
 void adcISR(void);
 void loop(void);
 
