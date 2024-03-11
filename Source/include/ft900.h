@@ -56,7 +56,7 @@ extern "C" {
  *         !!! To be updated in every release !!!
  */
 #define FT9XX_LIBRARY_MAJOR   2
-#define FT9XX_LIBRARY_MINOR   6
+#define FT9XX_LIBRARY_MINOR   8
 #define FT9XX_LIBRARY_PATCH   0
 
 #define STR_HELPER(x) #x
