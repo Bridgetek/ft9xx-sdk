@@ -1,10 +1,7 @@
 /**
-    @file
+    @file ft900_uart_registers.h
 
-    @brief
-    UART registers
-
-
+    @brief UART registers
 **/
 /*
  * ============================================================================
@@ -45,15 +42,19 @@
  * ============================================================================
  */
 
-#ifndef FT900_UART_REGSITERS_H_
-#define FT900_UART_REGSITERS_H_
+#ifndef FT900_UART_REGISTERS_H_
+#define FT900_UART_REGISTERS_H_
 
 
 /* INCLUDES ************************************************************************/
+
 #include <stdint.h>
 
+#include "ft900_regs_std.h"
+
 /* CONSTANTS ***********************************************************************/
-//LCR bits
+
+// LCR bits
 #define BIT_UART_LCR_WLS                (0)
 #define MASK_UART_LCR_WLS               (0x3 << BIT_UART_LCR_WLS)
 #define BIT_UART_LCR_STB                (2)
@@ -69,7 +70,7 @@
 #define BIT_UART_LCR_DLAB               (7)
 #define MASK_UART_LCR_DLAB              (1 << BIT_UART_LCR_DLAB)
 
-//LSR bits
+// LSR bits
 #define BIT_UART_LSR_DR                 (0)
 #define MASK_UART_LSR_DR                (1 << BIT_UART_LSR_DR)
 #define BIT_UART_LSR_OE                 (1)
@@ -87,7 +88,7 @@
 #define BIT_UART_LSR_RHRERR             (7)
 #define MASK_UART_LSR_RHRERR            (1 << BIT_UART_LSR_RHRERR)
 
-//IER bits
+// IER bits
 #define BIT_UART_IER_ERBFI              (0)
 #define MASK_UART_IER_ERBFI             (1 << BIT_UART_IER_ERBFI)
 #define BIT_UART_IER_ETBEI              (1)
@@ -105,7 +106,7 @@
 #define BIT_UART_IER_CTSIMASK           (7)
 #define MASK_UART_IER_CTSIMASK          (1 << BIT_UART_IER_CTSIMASK)
 
-//MCR bits
+// MCR bits
 #define BIT_UART_MCR_DTR                (0)
 #define MASK_UART_MCR_DTR               (1 << BIT_UART_MCR_DTR)
 #define BIT_UART_MCR_RTS                (1)
@@ -123,7 +124,7 @@
 #define BIT_UART_MCR_PRESCALAR          (7)
 #define MASK_UART_MCR_PRESCALAR         (1 << BIT_UART_MCR_PRESCALAR)
 
-//MSR bits
+// MSR bits
 #define BIT_UART_MSR_DCTS               (0)
 #define MASK_UART_MSR_DCTS              (1 << BIT_UART_MSR_DCTS)
 #define BIT_UART_MSR_DDSR               (1)
@@ -239,8 +240,7 @@
 
 #define OFFSET_UART_SPR_GDS             (16U)
 
-
-/* SPR bits*/
+/* SPR bits */
 #define BIT_UART_SPR_TX_9BIT            (0)
 #define MASK_UART_SPR_TX_9BIT           (1 << BIT_UART_SPR_TX_9BIT)
 
@@ -298,17 +298,18 @@
 #define MASK_UART_NMR_9_SC4             (1 << BIT_UART_NMR_9_SC4)
 
 /* TYPES ***************************************************************************/
+
 /** @brief Register mappings for UART registers */
 typedef struct
 {
-    volatile uint8_t RHR_THR_DLL;
-    volatile uint8_t IER_DLH_ASR;
-    volatile uint8_t ISR_FCR_EFR;
-    volatile uint8_t LCR_RFL;
-    volatile uint8_t MCR_XON1_TFL;
-    volatile uint8_t LSR_ICR_XON2;
-    volatile uint8_t MSR_XOFF1;
-    volatile uint8_t SPR_XOFF2;
+  __IO uint8_t RHR_THR_DLL;
+  __IO uint8_t IER_DLH_ASR;
+  __IO uint8_t ISR_FCR_EFR;
+  __IO uint8_t LCR_RFL;
+  __IO uint8_t MCR_XON1_TFL;
+  __IO uint8_t LSR_ICR_XON2;
+  __IO uint8_t MSR_XOFF1;
+  __IO uint8_t SPR_XOFF2;
 } ft900_uart_regs_t;
 
 /* GLOBAL VARIABLES ****************************************************************/
@@ -317,5 +318,5 @@ typedef struct
 
 /* FUNCTION PROTOTYPES *************************************************************/
 
-#endif /* FT900_UART_REGSITERS_H_ */
+#endif /* FT900_UART_REGISTERS_H_ */
 

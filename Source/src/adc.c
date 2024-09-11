@@ -1,10 +1,7 @@
 /**
-    @file
+    @file adc.c
 
-    @brief
-    Analogue to Digital Converter
-
-    
+    @brief  Analogue to Digital Converter
 **/
 /*
  * ============================================================================
@@ -45,8 +42,8 @@
  * ============================================================================
  */
 
-
 /* INCLUDES ************************************************************************/
+
 #include <ft900_adc.h>
 #include <ft900_asm.h>
 #include <registers/ft900_registers.h>
@@ -59,176 +56,169 @@
 /* LOCAL VARIABLES *****************************************************************/
 
 /* MACROS **************************************************************************/
+
 #if defined(__FT930__)
 #define ADC_MAX_CHANNEL 3
 #else
 #define ADC_MAX_CHANNEL 7
 #endif
 
-#define ADC_DATA (ADCDAC->DAC_DATA0_ADC_DATA)
-
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
 /* FUNCTIONS ***********************************************************************/
 
-
 /** @brief Select ADC resolution.
- *  @param resolution The resolution(10bit/8bit)
+ *  @param [in] resolution - The resolution(10bit/8bit)
  *  @returns On success a 0, otherwise -1
  *  @warning This feature is only supported in FT900 revision C
  */
 int8_t adc_select_resolution(adc_resolution_t resolution)
 {
-	uint8_t iRet = 0;
+  uint8_t iRet = 0;
 
 #if defined(__FT900__)
-	/*Resolution switching is only supported in FT900 revision C */
-	if (sys_check_ft900_revB()) //90x series rev B
-	{
-		iRet = -1;
-	}
-	else
-	{
-		if(resolution == adc_8bit)
-		{
-			ADCDAC->IRQ_CTRL |= MASK_CONF_ADC_8BIT_MODE;
-		}
-		else if(resolution == adc_10bit)
-		{
-			ADCDAC->IRQ_CTRL &= ~MASK_CONF_ADC_8BIT_MODE;
-		}
-		else
-		{
-			iRet = -1;
-		}
-	}
+  /* Resolution switching is only supported in FT900 revision C */
+  if (sys_check_ft900_revB()) // 90x series rev B
+  {
+    iRet = -1;
+  }
+  else
+  {
+    if (resolution == adc_8bit)
+    {
+      ADCDAC_N->IRQ_CRTL.B.ADC_8BIT_MODE = ADC_8BIT_ENABLE;
+    }
+    else if (resolution == adc_10bit)
+    {
+      ADCDAC_N->IRQ_CRTL.B.ADC_8BIT_MODE = ADC_10BIT_ENABLE;
+    }
+    else
+    {
+      iRet = -1;
+    }
+  }
 #else
-	(void)resolution;
-	iRet = -1;
+  (void)resolution;
+  iRet = -1;
 #endif
 
-	return iRet;
+  return iRet;
 }
 
 /** @brief Select ADC frequency.
- *  @param frequency The frequency(12.5MHz/6.25MHz)
+ *  @param [in] frequency - The frequency(12.5MHz/6.25MHz)
  *  @returns On success a 0, otherwise -1
  *  @warning This feature is only supported in FT900 revision C
  */
 int8_t adc_select_frequency(adc_clock_t frequency)
 {
-	uint8_t iRet = 0;
+  uint8_t iRet = 0;
 
 #if defined(__FT900__)
-	/*frequency switching is only supported in FT900 revision C */
-	if (sys_check_ft900_revB()) //90x series rev B
-	{
-		iRet = -1;
-	}
-	else
-	{
-		if(frequency == adc_6_25_MHz)
-		{
-			ADCDAC->IRQ_CTRL |= MASK_CONF_ADC_HALF_RATE;
-		}
-		else if(frequency == adc_12_5_MHz)
-		{
-			ADCDAC->IRQ_CTRL &= ~MASK_CONF_ADC_HALF_RATE;
-		}
-		else
-		{
-			iRet = -1;
-		}
-	}
+  /* frequency switching is only supported in FT900 revision C */
+  if (sys_check_ft900_revB()) // 90x series rev B
+  {
+    iRet = -1;
+  }
+  else
+  {
+    if (frequency == adc_6_25_MHz)
+    {
+      ADCDAC_N->IRQ_CRTL.B.ADC_HALF_RATE = adc_6_25_MHz;
+    }
+    else if (frequency == adc_12_5_MHz)
+    {
+      ADCDAC_N->IRQ_CRTL.B.ADC_HALF_RATE = adc_12_5_MHz;
+    }
+    else
+    {
+      iRet = -1;
+    }
+  }
 #else
-	(void)frequency;
-	iRet = -1;
+  (void)frequency;
+  iRet = -1;
 #endif
-	return iRet;
+  return iRet;
 }
 
-
 /** @brief Choose the mode that the ADC will run in
- *  @param mode The mode (single or continuous)
+ *  @param [in] mode - The mode (single or continuous)
  *  @returns 0 on success, -1 otherwise
  */
 int8_t adc_mode(adc_mode_t mode)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if (mode == adc_mode_continuous)
-    {
-    	ADCDAC->ADC_CONF |= MASK_ADC_CONF_ADC_CONT;
-    }
-    else if (mode == adc_mode_single)
-    {
-    	ADCDAC->ADC_CONF &= ~MASK_ADC_CONF_ADC_CONT;
-    }
-    else
-    {
-        iRet = -1;
-    }
+  if (mode == adc_mode_continuous)
+  {
+    ADCDAC_N->ADC_CONF.B.ADC_CONT = adc_mode_continuous;
+  }
+  else if (mode == adc_mode_single)
+  {
+    ADCDAC_N->ADC_CONF.B.ADC_CONT = adc_mode_single;
+  }
+  else
+  {
+    iRet = -1;
+  }
 
-    return iRet;
+  return iRet;
 }
 
-
 /** @brief Start the ADC capturing
- *  @param channel The channel to select
+ *  @param [in] channel - The channel to select
  *  @returns 0 on success, -1 otherwise
  */
 int8_t adc_start(uint8_t channel)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if (channel == 0 || channel > ADC_MAX_CHANNEL)
-    {
-        iRet = -1;
-    }
+  if (channel == 0 || channel > ADC_MAX_CHANNEL)
+  {
+    iRet = -1;
+  }
 
-    if (iRet == 0)
-    {
-    	ADCDAC->ADC_CONF &= ~MASK_ADC_CONF_ADC_CHANNEL;
-    	ADCDAC->ADC_CONF |= (channel << BIT_ADC_CONF_ADC_CHANNEL) & MASK_ADC_CONF_ADC_CHANNEL;
-    	ADCDAC->ADC_CONF |= MASK_ADC_CONF_ADC_START;
-    }
+  if (iRet == 0)
+  {
+    ADCDAC_N->ADC_CONF.B.ADC_START = ADC_DISABLE;
+    ADCDAC_N->ADC_CONF.B.ADC_CHANNEL = channel;
+    ADCDAC_N->ADC_CONF.B.ADC_START = ADC_ENABLE;
+  }
 
-    return iRet;
+  return iRet;
 }
-
 
 /** @brief Stop the ADC from capturing
  *  @returns 0 on success, -1 otherwise
  */
 int8_t adc_stop(void)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if (ADCDAC->ADC_CONF & MASK_ADC_CONF_ADC_START)
-    {
-        ADCDAC->ADC_CONF &= ~MASK_ADC_CONF_ADC_START;
-        ADCDAC->ADC_CONF &= ~MASK_ADC_CONF_ADC_CHANNEL; /* Set channel to 0 when unused */
-    }
-    else
-    {
-        iRet = -1;
-    }
+  if (ADCDAC_N->ADC_CONF.B.ADC_START)
+  {
+    ADCDAC_N->ADC_CONF.B.ADC_START   = ADC_DISABLE;
+    ADCDAC_N->ADC_CONF.B.ADC_CHANNEL = ADC_CHANNEL_NONE;
+  }
+  else
+  {
+    iRet = -1;
+  }
 
-    return iRet;
+  return iRet;
 }
-
 
 /** @brief Get the number of ADC samples available
  *  @warning This function should only be called when ADC continuous mode is enabled,
- *  	     and should be called inside ISR context.
+ *           and should be called inside ISR context.
  *  @returns The number of ADC samples available in FIFO
  */
 uint8_t adc_available(void)
 {
-	/* ADC counter always return 1 sample less, so we need to increment by 1 sample */
-    return ((ADCDAC->DAC_ADC_CNT & MASK_DAC_ADC_CNT_ADC_DATA_COUNT) >> BIT_DAC_ADC_CNT_ADC_DATA_COUNT) + 1;
+  /* ADC counter always return 1 sample less, so we need to increment by 1 sample */
+  return ADCDAC_N->DAC_ADC_CNT.B.ADC_DATA_COUNT + 1;
 }
-
 
 /** @brief Get the next sample from the ADC
  *  @param val A pointer to store the sample
@@ -236,62 +226,59 @@ uint8_t adc_available(void)
  */
 int8_t adc_read(uint16_t *val)
 {
-    asm_streamin16(&ADC_DATA, val, 2);
-    return 1;
+  asm_streamin16(&ADCDAC_N->DAC0_ADC_DATA, val, 2);
+  return 1;
 }
 
-
 /** @brief Get a collection of samples from the ADC
- *  @param val An array pointer to store the samples
- *  @param len The length of the array
+ *  @param [in] val - An array pointer to store the samples
+ *  @param [in] len - The length of the array
  *  @warning This function will only work when the ADC is in continuous mode
  *  @returns The number of samples read, -1 otherwise
  */
 int adc_readn(uint16_t *val, size_t len)
 {
-    int iRet = 0;
-    size_t iAvailable = 0;
+  int iRet = 0;
+  size_t iAvailable = 0;
+  uint8_t isContinuousMode = ADCDAC_N->ADC_CONF.B.ADC_CONT;
 
-    if ((ADCDAC->ADC_CONF & MASK_ADC_CONF_ADC_CONT))
+  if (isContinuousMode)
+  {
+    /* Make sure we only read what we can */
+    iAvailable = (size_t)adc_available();
+    if (iAvailable < len)
     {
-		/* Make sure we only read what we can */
-		iAvailable = (size_t)adc_available();
-        if (iAvailable < len)
-        {
-            len = iAvailable;
-        }
-        asm_streamin16(&ADC_DATA, val, len*2);
-        iRet = len;
+      len = iAvailable;
     }
-    else
-    {
-        /* Not in continuous mode */
-        iRet = -1;
-    }
+    asm_streamin16(&ADCDAC_N->DAC0_ADC_DATA, val, len * 2);
+    iRet = len;
+  }
+  else
+  {
+    /* Not in continuous mode */
+    iRet = -1;
+  }
 
-    return iRet;
+  return iRet;
 }
-
 
 /** @brief Enable the Interrupt on the ADC
  *  @returns 0 on success, -1 otherwise
  */
 int8_t adc_enable_interrupt(void)
 {
-    ADCDAC->IRQ_CTRL |= MASK_IRQ_CTRL_ADC_IRQ_EN;
-    return 0;
+  ADCDAC_N->IRQ_CRTL.B.ADC_IRQ_EN = ADC_ENABLE;
+  return 0;
 }
-
 
 /** @brief Disable the Interrupt on the ADC
  *  @returns 0 on success, -1 otherwise
  */
 int8_t adc_disable_interrupt(void)
 {
-    ADCDAC->IRQ_CTRL &= ~MASK_IRQ_CTRL_ADC_IRQ_EN;
-    return 0;
+  ADCDAC_N->IRQ_CRTL.B.ADC_IRQ_EN = ADC_DISABLE;
+  return 0;
 }
-
 
 /** @brief Check that the ADC has been interrupted
  *  @warning This function will clear the current interrupt bit when called
@@ -299,13 +286,29 @@ int8_t adc_disable_interrupt(void)
  */
 int8_t adc_is_interrupted(void)
 {
-    int8_t iRet = 0;
+  int8_t iRet = 0;
 
-    if (ADCDAC->IRQ_STATUS_ERR & MASK_IRQ_STATUS_ERR_ADC_IRQ_PEND)
-    {
-        iRet = 1;
-        ADCDAC->IRQ_STATUS_ERR = MASK_IRQ_STATUS_ERR_ADC_IRQ_PEND;
-    }
+  if (ADCDAC_N->IRQ_STATUS_ERR.B.ADC_IRQ_PEND)
+  {
+    ADCDAC_N->IRQ_STATUS_ERR.B.ADC_IRQ_PEND = ADC_ENABLE;
+    iRet = 1;
+  }
 
-    return iRet;
+  return iRet;
+}
+
+/** @brief Enable the ADC rail to rail mode
+ *  @returns None
+ */
+void adc_enable_rail_rail(void)
+{
+  ADCDAC_N->ADC_CONF.B.ADC_EXT_VREF = ADC_ENABLE;
+}
+
+/** @brief Disable the ADC rail to rail mode
+ *  @returns None
+ */
+void adc_disable_rail_rail(void)
+{
+  ADCDAC_N->ADC_CONF.B.ADC_EXT_VREF = ADC_DISABLE;
 }

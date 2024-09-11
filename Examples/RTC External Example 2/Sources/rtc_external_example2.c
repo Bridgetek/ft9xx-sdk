@@ -45,8 +45,8 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
-#include "../Includes/ft900_rtc.h"
-#include <ft900.h>
+
+#include "../Includes/ft900_rtc_external.h"
 
 /* MACROS ***********************************************************************/
 #define GPIO_UART0_TX 	48
@@ -66,6 +66,7 @@ static inline void print_time(ext_rtc_time_t time)
 	if(time.fmt_12_24)
 		printf("%s",t_conv[time.AM_PM]);
 	printf(" \r\n");
+	fflush(stdout);
 }
 
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
@@ -222,7 +223,7 @@ void enter_sleep(void)
 	interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
 
 	/* Turn off both PLL and Oscillator */
-	SYS->PMCFG_L |= (MASK_SYS_PMCFG_PM_PWRDN | MASK_SYS_PMCFG_PM_PWRDN_MODE);
+	sys_sleep();
 
 	delayms(10);
 }
@@ -230,7 +231,8 @@ void enter_sleep(void)
 void exit_sleep(void)
 {
 	/* Clear power down mode flags */
-	SYS->PMCFG_L &= ~(MASK_SYS_PMCFG_PM_PWRDN_MODE | MASK_SYS_PMCFG_PM_PWRDN);
+	sys_wake();
+	
 	interrupt_detach(interrupt_0);
 }
 

@@ -61,3 +61,7 @@ Source/.settings/*
 !Source/.settings/org.eclipse.cdt.core.prefs
 !Source/.project
 !Source/.cproject
+
+# Examples build files
+Examples/*/Makefile
+Examples/*/CMakeLists.txt

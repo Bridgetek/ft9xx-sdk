@@ -56,79 +56,78 @@
 #include <ft900_startup_dfu.h>
 #include <ft900.h>
 
-
 /* UART support for printf output. */
 #define DEBUG
 
 #ifdef DEBUG
-#define dbg(s,...)	printf ((s), ##__VA_ARGS__)
+#define dbg(s, ...) printf((s), ##__VA_ARGS__)
 #else
-#define dbg(s,...)
+#define dbg(s, ...)
 #endif
 
 /* MACROS ***********************************************************************/
 #if defined(__FT930__)
 /// FTDI Product ID for FT930 variants
-#define USB_PID_FTDI_FT930_1                      0x6034
-#define USB_PID_FTDI_FT930_2                      0x6035
-#define USB_PID_FTDI_FT930_3                      0x6036
-#define USB_PID_FTDI_FT930_4                      0x6037
-#define USB_PID_FTDI_FT930_5                      0x6038
-#define USB_PID_FTDI_FT930_6                      0x6039
-#define USB_PID_FTDI_FT930_7                      0x603A
+#define USB_PID_FTDI_FT930_1 0x6034
+#define USB_PID_FTDI_FT930_2 0x6035
+#define USB_PID_FTDI_FT930_3 0x6036
+#define USB_PID_FTDI_FT930_4 0x6037
+#define USB_PID_FTDI_FT930_5 0x6038
+#define USB_PID_FTDI_FT930_6 0x6039
+#define USB_PID_FTDI_FT930_7 0x603A
 #else
 /// FTDI Product ID for FT900 variants
-#define USB_PID_FTDI_FT900_1                      0x6031
-#define USB_PID_FTDI_FT900_2                      0x6032
-#define USB_PID_FTDI_FT900_3                      0x6033
+#define USB_PID_FTDI_FT900_1 0x6031
+#define USB_PID_FTDI_FT900_2 0x6032
+#define USB_PID_FTDI_FT900_3 0x6033
 #endif
 
 #define GPIO_REMOTE_WAKEUP
 
 #ifdef GPIO_REMOTE_WAKEUP
 #if defined(__FT930__)
-//GPIO12 in FT930Q mini module board
-#define GPIO_PIN  12
+// GPIO12 in FT930Q mini module board
+#define GPIO_PIN 12
 #else
-#define GPIO_PIN  18
+#define GPIO_PIN 18
 #endif
 #endif
 
-#define MAX_READBUFFER_SIZE  1024
+#define MAX_READBUFFER_SIZE 1024
 
-#define TEST_WAKEUP_SOURCE_RESET 				(1 << 0)
-#define TEST_WAKEUP_SOURCE_RESUME 				(1 << 1)
-#define TEST_WAKEUP_SOURCE_GPIO 				(1 << 2)
-#define TEST_WAKEUP_SOURCE_READY				(1 << 3)
-#define TEST_WAKEUP_SOURCE_CONNECT				(1 << 4)
-#define TEST_WAKEUP_SOURCE_DISCONNECT			(1 << 5)
-#define TEST_WAKEUP_SOURCE_OTHERS				(1 << 6)
-#define TEST_WAKEUP_SOURCE_SLAVE				(1 << 7)
+#define TEST_WAKEUP_SOURCE_RESET (1 << 0)
+#define TEST_WAKEUP_SOURCE_RESUME (1 << 1)
+#define TEST_WAKEUP_SOURCE_GPIO (1 << 2)
+#define TEST_WAKEUP_SOURCE_READY (1 << 3)
+#define TEST_WAKEUP_SOURCE_CONNECT (1 << 4)
+#define TEST_WAKEUP_SOURCE_DISCONNECT (1 << 5)
+#define TEST_WAKEUP_SOURCE_OTHERS (1 << 6)
+#define TEST_WAKEUP_SOURCE_SLAVE (1 << 7)
 
-#define DEVICE_INACTIVITY				10000 //10 second timeout
+#define DEVICE_INACTIVITY 10000 // 10 second timeout
 /*Minimum 10 seconds needed or would interfere in hibernate/wakeup process in bus powered mode */
-
 
 /* GLOBAL VARIABLES ****************************************************************/
 
 extern TD2XX_DeviceConfiguration __pD2XXDefaultConfiguration[]; // pointer to D2XX Config in flash
 // The test config (in Flash and then PM) is copied to the RAM structure D2XXTEST_FlashConfig on startup
-__attribute__ ((aligned (4))) TD2XX_DeviceConfiguration D2XXTEST_UserD2xxConfig = {0};
+__attribute__((aligned(4))) TD2XX_DeviceConfiguration D2XXTEST_UserD2xxConfig = {0};
 
 /* LOCAL VARIABLES *****************************************************************/
 
 static uint8_t D2XXTest_ReadBuffer[MAX_READBUFFER_SIZE];
 #ifdef DEBUG
 #ifdef DEBUG_EVENT
-static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] = {	"SUSPEND",    	/**< SUSPEND EVENT from USB Host */
-																	"RESUME",	 	/**< RESUME EVENT from USB Host */
-																	"BUS_RESET",	 		/**< USB Bus Reset */
-																	"READY",	 		/**< D2XX enters Ready state where READ/WRITE requests are processed*/
-																	"UNREADY",	 	/**< D2XX exits Ready state*/
-																	"DETACH",		/**< DFU DETACH Class command from DFU application */
-																	"TESTMODE",	 	/**< D2XX enters Test Mode. Exit is via power cycle*/
-																	"INTF_RESET"	/**< Interface RESET Vendor Command from D2XX Application */
-																};
+static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] = {
+    "SUSPEND",   /**< SUSPEND EVENT from USB Host */
+    "RESUME",    /**< RESUME EVENT from USB Host */
+    "BUS_RESET", /**< USB Bus Reset */
+    "READY",     /**< D2XX enters Ready state where READ/WRITE requests are processed*/
+    "UNREADY",   /**< D2XX exits Ready state*/
+    "DETACH",    /**< DFU DETACH Class command from DFU application */
+    "TESTMODE",  /**< D2XX enters Test Mode. Exit is via power cycle*/
+    "INTF_RESET" /**< Interface RESET Vendor Command from D2XX Application */
+};
 #endif // DEBUG_EVENT
 #endif // DEBUG
 
@@ -136,7 +135,7 @@ uint8_t D2XXTEST__DfuDetach = 0;
 uint8_t D2XXTEST__Ready = 0;
 volatile uint8_t SetRemoteWakeup = 0;
 #if defined(__FT930__)
-extern volatile uint8_t RemoteWakeupEnable;  // used in d2xx_api_master.c
+extern volatile uint8_t RemoteWakeupEnable; // used in d2xx_api_master.c
 #else
 volatile uint8_t RemoteWakeupEnable = 0;
 #endif
@@ -154,9 +153,9 @@ volatile uint8_t check_device_status = 0;
 /* LOCAL FUNCTIONS / INLINES *******************************************************/
 
 void setup(void);
-void loop (void);
+void loop(void);
 void debug_uart_init(void);
-void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* param2);
+void d2xx_callback(ED2XX_EventCode eventID, void *ref, void *param1, void *param2);
 void power_management_ISR(void);
 #ifdef GPIO_REMOTE_WAKEUP
 void gpio_ISR();
@@ -166,249 +165,251 @@ void timer_ISR();
 uint16_t xorChecksum(const char str[], uint16_t length);
 #endif
 
-#undef BDFU  /* Undefine for C-DFU */
+#undef BDFU /* Undefine for C-DFU */
 
 #ifdef BDFU
 extern char __PMSIZE;
 typedef void (*__dfumain_t)(unsigned int, unsigned int) __attribute__((noreturn));
-#define GO_BDFU(VID, PID, REL) ((__dfumain_t)(&__PMSIZE - 12))( (PID) << 16 | (VID), REL);
+#define GO_BDFU(VID, PID, REL) ((__dfumain_t)(&__PMSIZE - 12))((PID) << 16 | (VID), REL);
 #endif
 
 /* FUNCTIONS ***********************************************************************/
 int main(void)
 {
 
-	/* Setup UART and D2XX */
-    setup();
+  /* Setup UART and D2XX */
+  setup();
 
-    for(;;){
+  for (;;)
+  {
 
 #if defined(__FT900__)
-    	D2XX_Process();
+    D2XX_Process();
 #endif
 
-    	//Test mode
-		if (D2XXTEST__Testmode)
-		{
-			//interrupt_disable_globally();
-			for (;;);
-			// wait for power cycle after testmode
-		}
-
-		// Application loop
-		if (D2XXTEST__Ready)
-		{
-			loop();
-		}
-
-
-		//DFU mode
-		if (D2XXTEST__DfuDetach)
-		{
-			interrupt_disable_globally();
-			/* DFU detach request had come. Exit D2XX */
-			D2XX_Exit();
-
-#if defined(__FT930__)
-		    *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_D2XX_MODE);    // turn-off D2XX_mode
-		    *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
-#endif
-
-			/* Take the system to DFU Mode. Provide timeout in ms to
-			 * wait for re-enumeration with the host
-			 * */
-#ifndef BDFU
-			STARTUP_DFU(0);
-#else
-			printf("Switching to DFU");
-			if (USBD_DFU_is_runtime()) /* to ward off linkage issue */
-			{
-				GO_BDFU(0x0403, 0x0FDE, 0x2300); // use default VID, PID and REL
-			}
-#endif
-			break;
-		}
-
-		/* System power down handling */
-		if (D2XXTEST__Suspend)
-		{
-
-			wkupSource = 0;
-			dbg("Enter sleep...\r\n");
-#ifdef GPIO_REMOTE_WAKEUP
-			//Configuring GPIO pin to wakeup
-			SetRemoteWakeup = 0;
-			if (RemoteWakeupEnable)
-			{
-				/* Set up the pin */
-				gpio_dir(GPIO_PIN, pad_dir_input);
-				gpio_pull(GPIO_PIN, pad_pull_pullup);
-
-				/* Attach an interrupt */
-				interrupt_attach(interrupt_gpio, (uint8_t)interrupt_gpio, gpio_ISR);
-				gpio_interrupt_enable(GPIO_PIN, gpio_int_edge_falling);
-			}
-#endif
-
-			//Enable d2xx hw engine wakeup events
-#if defined(__FT930__)
-			SYS->PMCFG_L &= ~(MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN);
-			interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
-			SYS->PMCFG_L |= MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN;
-#endif
-
-			// Close UART
-#if 0
-			uart_close(UART0);
-			sys_disable(sys_device_uart0);
-#endif
-
-			CRITICAL_SECTION_BEGIN
-			{
-				/* Power down Mode */
-				D2XXTEST__Sleep = 1;
-				D2XXTEST__Wakeup = 0;
-			}
-			CRITICAL_SECTION_END
-			SYS->PMCFG_L |= MASK_SYS_PMCFG_PM_PWRDN_MODE;
-			SYS->PMCFG_L |= MASK_SYS_PMCFG_PM_PWRDN;
-
-			asm volatile ("nop");
-			asm volatile ("nop");
-			asm volatile ("nop");
-			asm volatile ("nop");
-			asm volatile ("nop");
-
-			//wait for wakeup
-			while(!D2XXTEST__Wakeup);
-
-			//Woken up!!! Disable all wakeup interrupt sources
-			interrupt_disable_globally();
-#if defined(__FT930__)
-			interrupt_detach(interrupt_0);
-			SYS->PMCFG_L &= ~(MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN);
-#endif
-
-			//Remove powerdown mode
-			SYS->PMCFG_L &= ~MASK_SYS_PMCFG_PM_PWRDN_MODE;
-			SYS->PMCFG_L &= ~MASK_SYS_PMCFG_PM_PWRDN;
-
-#ifdef GPIO_REMOTE_WAKEUP
-			gpio_interrupt_disable(GPIO_PIN);
-			interrupt_detach(interrupt_gpio);
-			gpio_is_interrupted(GPIO_PIN);
-#endif
-
-			D2XXTEST__Sleep = 0;
-			D2XXTEST__Suspend = 0;
-			D2XXTEST__Wakeup = 0;
-
-			//Enable back the UART
-#if 0
-			debug_uart_init();
-#endif
-			interrupt_enable_globally();
-			dbg("Exit sleep:%02X... \r\n", wkupSource);
-			if (SetRemoteWakeup)
-			{
-				D2XX_IOCTL(0, D2XX_IOCTL_SYS_REMOTE_WAKEUP, (void *)&SetRemoteWakeup, NULL);
-				SetRemoteWakeup = 0;
-				dbg("Sending remote wakeup to host.. \r\n");
-			}
-		}
+    // Test mode
+    if (D2XXTEST__Testmode)
+    {
+      // interrupt_disable_globally();
+      for (;;)
+        ;
+      // wait for power cycle after testmode
     }
-    return 0;
+
+    // Application loop
+    if (D2XXTEST__Ready)
+    {
+      loop();
+    }
+
+    // DFU mode
+    if (D2XXTEST__DfuDetach)
+    {
+      interrupt_disable_globally();
+      /* DFU detach request had come. Exit D2XX */
+      D2XX_Exit();
+
+#if defined(__FT930__)
+      *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_D2XX_MODE); // turn-off D2XX_mode
+      *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
+#endif
+
+      /* Take the system to DFU Mode. Provide timeout in ms to
+       * wait for re-enumeration with the host
+       * */
+#ifndef BDFU
+      STARTUP_DFU(0);
+#else
+      printf("Switching to DFU");
+      if (USBD_DFU_is_runtime()) /* to ward off linkage issue */
+      {
+        GO_BDFU(0x0403, 0x0FDE, 0x2300); // use default VID, PID and REL
+      }
+#endif
+      break;
+    }
+
+    /* System power down handling */
+    if (D2XXTEST__Suspend)
+    {
+
+      wkupSource = 0;
+      dbg("Enter sleep...\r\n");
+#ifdef GPIO_REMOTE_WAKEUP
+      // Configuring GPIO pin to wakeup
+      SetRemoteWakeup = 0;
+      if (RemoteWakeupEnable)
+      {
+        /* Set up the pin */
+        gpio_dir(GPIO_PIN, pad_dir_input);
+        gpio_pull(GPIO_PIN, pad_pull_pullup);
+
+        /* Attach an interrupt */
+        interrupt_attach(interrupt_gpio, (uint8_t)interrupt_gpio, gpio_ISR);
+        gpio_interrupt_enable(GPIO_PIN, gpio_int_edge_falling);
+      }
+#endif
+
+      // Enable d2xx hw engine wakeup events
+#if defined(__FT930__)
+      SYS->PMCFG_L &= ~(MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN);
+      interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
+      SYS->PMCFG_L |= MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN;
+#endif
+
+      // Close UART
+#if 0
+      uart_close(UART0);
+      sys_disable(sys_device_uart0);
+#endif
+
+      CRITICAL_SECTION_BEGIN
+      {
+        /* Power down Mode */
+        D2XXTEST__Sleep = 1;
+        D2XXTEST__Wakeup = 0;
+      }
+      CRITICAL_SECTION_END
+      SYS->PMCFG_L |= MASK_SYS_PMCFG_PM_PWRDN_MODE;
+      SYS->PMCFG_L |= MASK_SYS_PMCFG_PM_PWRDN;
+
+      asm volatile("nop");
+      asm volatile("nop");
+      asm volatile("nop");
+      asm volatile("nop");
+      asm volatile("nop");
+
+      // wait for wakeup
+      while (!D2XXTEST__Wakeup)
+        ;
+
+      // Woken up!!! Disable all wakeup interrupt sources
+      interrupt_disable_globally();
+#if defined(__FT930__)
+      interrupt_detach(interrupt_0);
+      SYS->PMCFG_L &= ~(MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN);
+#endif
+
+      // Remove powerdown mode
+      SYS->PMCFG_L &= ~MASK_SYS_PMCFG_PM_PWRDN_MODE;
+      SYS->PMCFG_L &= ~MASK_SYS_PMCFG_PM_PWRDN;
+
+#ifdef GPIO_REMOTE_WAKEUP
+      gpio_interrupt_disable(GPIO_PIN);
+      interrupt_detach(interrupt_gpio);
+      gpio_is_interrupted(GPIO_PIN);
+#endif
+
+      D2XXTEST__Sleep = 0;
+      D2XXTEST__Suspend = 0;
+      D2XXTEST__Wakeup = 0;
+
+      // Enable back the UART
+#if 0
+      debug_uart_init();
+#endif
+      interrupt_enable_globally();
+      dbg("Exit sleep:%02X... \r\n", wkupSource);
+      if (SetRemoteWakeup)
+      {
+        D2XX_IOCTL(0, D2XX_IOCTL_SYS_REMOTE_WAKEUP, (void *)&SetRemoteWakeup, NULL);
+        SetRemoteWakeup = 0;
+        dbg("Sending remote wakeup to host.. \r\n");
+      }
+    }
+  }
+  return 0;
 }
 
 /* Test function that does the D2XX loopback functionality */
-void loop (void)
+void loop(void)
 {
-	ED2XX_ErrorCode retVal = 0;
-	int bytesWritten;
+  ED2XX_ErrorCode retVal = 0;
+  int bytesWritten;
 
-		for(int i = 1; i <= D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces; i++)
-		{
-			/*read the bytes out... */
-			retVal = D2XX_Read(i, D2XXTest_ReadBuffer,MAX_READBUFFER_SIZE);
-			/* Write the byte out... */
-			if (retVal > 0)
-			{
-				int	ptr = 0;
-				do
-				{
-					bytesWritten = D2XX_Write(i, &D2XXTest_ReadBuffer[ptr], retVal);
-					if (bytesWritten > 0)
-					{
-						retVal -= bytesWritten;
-						ptr += bytesWritten;
-					}
-				}while (retVal);
-			}
-		}
+  for (int i = 1; i <= D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces; i++)
+  {
+    /*read the bytes out... */
+    retVal = D2XX_Read(i, D2XXTest_ReadBuffer, MAX_READBUFFER_SIZE);
+    /* Write the byte out... */
+    if (retVal > 0)
+    {
+      int ptr = 0;
+      do
+      {
+        bytesWritten = D2XX_Write(i, &D2XXTest_ReadBuffer[ptr], retVal);
+        if (bytesWritten > 0)
+        {
+          retVal -= bytesWritten;
+          ptr += bytesWritten;
+        }
+      } while (retVal);
+    }
+  }
 }
 
 void setup(void)
 {
 
-	ED2XX_ErrorCode retVal;
+  ED2XX_ErrorCode retVal;
 
+  D2XXTEST__Suspend = 0;
+  D2XXTEST__Sleep = 0;
+  D2XXTEST__Wakeup = 0;
 
-	D2XXTEST__Suspend = 0;
-	D2XXTEST__Sleep = 0;
-	D2XXTEST__Wakeup = 0;
-
-	#ifdef BDFU
-	timer_prescaler(1000); /* to ward off linkage issue */
+#ifdef BDFU
+  timer_prescaler(1000); /* to ward off linkage issue */
 #endif
 #if defined(__FT900__)
-	interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
+  interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
 #endif
 
-	// UART initialisation
-	debug_uart_init();
+  // UART initialisation
+  debug_uart_init();
 
-    /* Print out a welcome message... */
-	dbg("(C) Copyright, Bridgetek Pte. Ltd. \r\n"
-			"--------------------------------------------------------------------- \r\n"
-			"Welcome to D2XX Example 1... \r\n"
-			"\r\n"
-			"Enter any text on the D2XX port, the same is echoed back on the same port... \r\n"
-			"--------------------------------------------------------------------- \r\n"
-	);
+  /* Print out a welcome message... */
+  dbg("(C) Copyright, Bridgetek Pte. Ltd. \r\n"
+      "--------------------------------------------------------------------- \r\n"
+      "Welcome to D2XX Example 1... \r\n"
+      "\r\n"
+      "Enter any text on the D2XX port, the same is echoed back on the same port... \r\n"
+      "--------------------------------------------------------------------- \r\n");
 
-	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
-	retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
+  memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
+  retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
 
-	if (retVal != 0)
-	{
-		dbg("Error with configuration file\r\n");
-		while(1) {};
-	}
+  if (retVal != 0)
+  {
+    dbg("Error with configuration file\r\n");
+    while (1)
+    {
+    };
+  }
 #if defined(__FT930__)
-    /*slave sub-system control register setup*/
-    *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
-    *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_D2XX_MODE);    // turn-on D2XX_mode
-    *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_SLV_RESET); // de-assert bit to allow slave CPU to start
+  /*slave sub-system control register setup*/
+  *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
+  *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_D2XX_MODE);  // turn-on D2XX_mode
+  *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_SLV_RESET); // de-assert bit to allow slave CPU to start
 #endif
 
-	sys_enable(sys_device_timer_wdt);
-	/* Register the interrupt... */
-	interrupt_attach(interrupt_timers, 17, timer_ISR);
-	timer_prescaler(timer_select_a, 1000);
-	/* Enable Timers... */
-	timer_init(timer_select_a, 100, timer_direction_down, timer_prescaler_select_on, timer_mode_continuous);
-	timer_enable_interrupt(timer_select_a);
-	timer_start(timer_select_a);
-	interrupt_enable_globally(); //needed for interrupts
-	//dbg("Configuration:- Signature: %08X, Actual Checksum: %04X, Expected Checksum : %04X\r\n", D2XXTEST_UserD2xxConfig.Signature,
-	//		D2XXTEST_UserD2xxConfig.Checksum, xorChecksum((char *)&D2XXTEST_UserD2xxConfig, sizeof(TD2XX_DeviceConfiguration) - 2));
-	dbg("D2XX_Init() returned: %d, No of Interfaces: %d\r\n", retVal, D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces);
+  sys_enable(sys_device_timer_wdt);
+  /* Register the interrupt... */
+  interrupt_attach(interrupt_timers, 17, timer_ISR);
+  timer_prescaler(timer_select_a, 1000);
+  /* Enable Timers... */
+  timer_init(timer_select_a, 100, timer_direction_down, timer_prescaler_select_on, timer_mode_continuous);
+  timer_enable_interrupt(timer_select_a);
+  timer_start(timer_select_a);
+  interrupt_enable_globally(); // needed for interrupts
+  // dbg("Configuration:- Signature: %08X, Actual Checksum: %04X, Expected Checksum : %04X\r\n", D2XXTEST_UserD2xxConfig.Signature,
+  //		D2XXTEST_UserD2xxConfig.Checksum, xorChecksum((char *)&D2XXTEST_UserD2xxConfig, sizeof(TD2XX_DeviceConfiguration) - 2));
+  dbg("D2XX_Init() returned: %d, No of Interfaces: %d\r\n", retVal, D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces);
 
 #if 0
-	if (retVal == D2XX_ERR_NONE)
-	{
-		check_device_status = 1;
-	}
+  if (retVal == D2XX_ERR_NONE)
+  {
+    check_device_status = 1;
+  }
 #endif
 }
 
@@ -417,127 +418,127 @@ void setup(void)
  *  @param
  *  @param
  */
-void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* param2)
+void d2xx_callback(ED2XX_EventCode eventID, void *ref, void *param1, void *param2)
 {
-	/* 0 => Device, 1-3 => Interface*/
-	/* or */
-	/* 0 => Remote Wakeup disabled, 1 => Remote wakeup enabled */
-	uint8_t param = 0;
+  /* 0 => Device, 1-3 => Interface*/
+  /* or */
+  /* 0 => Remote Wakeup disabled, 1 => Remote wakeup enabled */
+  uint8_t param = 0;
 
-	if (param1)
-	{
-		param = (*(uint8_t *)param1);
-	}
+  if (param1)
+  {
+    param = (*(uint8_t *)param1);
+  }
 #ifdef DEBUG_EVENT
-	dbg("~%d ",eventID);
-	if (eventID <= D2XX_EVT_INTF_RESET)
-	{
-		dbg("%s", D2XXTest_EventStrings[eventID]);
-	}
-	dbg("\n");
+  dbg("~%d ", eventID);
+  if (eventID <= D2XX_EVT_INTF_RESET)
+  {
+    dbg("%s", D2XXTest_EventStrings[eventID]);
+  }
+  dbg("\n");
 #endif // DEBUG_EVENT
-	switch(eventID)
-	{
-	case D2XX_EVT_SUSPEND:
-		if (!D2XXTEST__Sleep)
-		{
-			D2XXTEST__Suspend = 1;
-			D2XXTEST__Sleep = 0;
-			RemoteWakeupEnable = param;
+  switch (eventID)
+  {
+  case D2XX_EVT_SUSPEND:
+    if (!D2XXTEST__Sleep)
+    {
+      D2XXTEST__Suspend = 1;
+      D2XXTEST__Sleep = 0;
+      RemoteWakeupEnable = param;
 #ifdef DEBUG_EVENT
-			dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
+      dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
 #endif // DEBUG_EVENT
-		}
-		break;
-	case D2XX_EVT_RESUME:
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_RESUME;
-			D2XXTEST__Wakeup = 1;
-		}
-		else
-		{
-			D2XXTEST__Suspend = 0;
-		}
-		break;
-	case D2XX_EVT_BUS_RESET:
+    }
+    break;
+  case D2XX_EVT_RESUME:
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_RESUME;
+      D2XXTEST__Wakeup = 1;
+    }
+    else
+    {
+      D2XXTEST__Suspend = 0;
+    }
+    break;
+  case D2XX_EVT_BUS_RESET:
 #if 0
-		check_device_status = 0;
+    check_device_status = 0;
 #endif
-		break;
-	case D2XX_EVT_READY: /*Connected */
-		D2XXTEST__Ready = 1;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_READY;
-			D2XXTEST__Wakeup = 1;
-		}
-		else
-		{
-			D2XXTEST__Suspend = 0;
-		}
-		break;
-	case D2XX_EVT_UNREADY: /*Detached */
-		D2XXTEST__Ready = 0;
-		D2XXTEST__Suspend = 1;
-		break;
-	case D2XX_EVT_DFU_DETACH: /* DFU Detach from DFU application */
-		D2XXTEST__DfuDetach = 1;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_OTHERS;
-			D2XXTEST__Wakeup = 1;
-		}
-		else
-		{
-			D2XXTEST__Suspend = 0;
-		}
-		break;
-	case D2XX_EVT_TESTMODE: /* Testmode during electrical tests */
-		D2XXTEST__Testmode = 1;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_OTHERS;
-			D2XXTEST__Wakeup = 1;
-		}
-		else
-		{
-			D2XXTEST__Suspend = 0;
-		}
-		break;
-	default:
-		break;
-	}
+    break;
+  case D2XX_EVT_READY: /*Connected */
+    D2XXTEST__Ready = 1;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_READY;
+      D2XXTEST__Wakeup = 1;
+    }
+    else
+    {
+      D2XXTEST__Suspend = 0;
+    }
+    break;
+  case D2XX_EVT_UNREADY: /*Detached */
+    D2XXTEST__Ready = 0;
+    D2XXTEST__Suspend = 1;
+    break;
+  case D2XX_EVT_DFU_DETACH: /* DFU Detach from DFU application */
+    D2XXTEST__DfuDetach = 1;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_OTHERS;
+      D2XXTEST__Wakeup = 1;
+    }
+    else
+    {
+      D2XXTEST__Suspend = 0;
+    }
+    break;
+  case D2XX_EVT_TESTMODE: /* Testmode during electrical tests */
+    D2XXTEST__Testmode = 1;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_OTHERS;
+      D2XXTEST__Wakeup = 1;
+    }
+    else
+    {
+      D2XXTEST__Suspend = 0;
+    }
+    break;
+  default:
+    break;
+  }
 }
 
 /* Initializes the UART for the testing */
 void debug_uart_init(void)
 {
-	/* Enable the UART Device... */
-	sys_enable(sys_device_uart0);
+  /* Enable the UART Device... */
+  sys_enable(sys_device_uart0);
 #if defined(__FT930__)
-    /* Make GPIO23 function as UART0_TXD and GPIO22 function as UART0_RXD... */
-    gpio_function(23, pad_uart0_txd); /* UART0 TXD */
-    gpio_function(22, pad_uart0_rxd); /* UART0 RXD */
+  /* Make GPIO23 function as UART0_TXD and GPIO22 function as UART0_RXD... */
+  gpio_function(23, pad_uart0_txd); /* UART0 TXD */
+  gpio_function(22, pad_uart0_rxd); /* UART0 RXD */
 #else
-	/* Make GPIO48 function as UART0_TXD and GPIO49 function as UART0_RXD... */
-	gpio_function(48, pad_uart0_txd); /* UART0 TXD */
-	gpio_function(49, pad_uart0_rxd); /* UART0 RXD */
+  /* Make GPIO48 function as UART0_TXD and GPIO49 function as UART0_RXD... */
+  gpio_function(48, pad_uart0_txd); /* UART0 TXD */
+  gpio_function(49, pad_uart0_rxd); /* UART0 RXD */
 #endif
 
-	// Open the UART using the coding required.
-	uart_open(UART0,                    /* Device */
-			1,                        /* Prescaler = 1 */
-			UART_DIVIDER_19200_BAUD,  /* Divider = 1302 */
-			uart_data_bits_8,         /* No. buffer Bits */
-			uart_parity_none,         /* Parity */
-			uart_stop_bits_1);        /* No. Stop Bits */
+  // Open the UART using the coding required.
+  uart_open(UART0,                   /* Device */
+            1,                       /* Prescaler = 1 */
+            UART_DIVIDER_19200_BAUD, /* Divider = 1302 */
+            uart_data_bits_8,        /* No. buffer Bits */
+            uart_parity_none,        /* Parity */
+            uart_stop_bits_1);       /* No. Stop Bits */
 
-	/* Print out a welcome message... */
-	uart_puts(UART0,
-			"\x1B[2J" /* ANSI/VT100 - Clear the Screen */
-			"\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
-	);
+  /* Print out a welcome message... */
+  uart_puts(UART0,
+            "\x1B[2J" /* ANSI/VT100 - Clear the Screen */
+            "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
+  );
 }
 
 #if 0
@@ -560,114 +561,111 @@ void power_management_ISR(void)
 {
 
 #if defined(__FT930__)
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_SLAVE_PERI_IRQ_PEND)
-	{
-		// Clear d2xx hw engine wakeup
-		SYS->PMCFG_H = MASK_SYS_PMCFG_SLAVE_PERI_IRQ_PEND;
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_SLAVE_PERI_IRQ_PEND)
+  {
+    // Clear d2xx hw engine wakeup
+    SYS->PMCFG_H = MASK_SYS_PMCFG_SLAVE_PERI_IRQ_PEND;
 
-		//D2XXTEST__Suspend = 0;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_SLAVE;
-			D2XXTEST__Wakeup = 1;
-		}
-	}
+    // D2XXTEST__Suspend = 0;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_SLAVE;
+      D2XXTEST__Wakeup = 1;
+    }
+  }
 #endif
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_PM_GPIO_IRQ_PEND)
-	{
-		// Clear GPIO wakeup pending
-		SYS->PMCFG_H = MASK_SYS_PMCFG_PM_GPIO_IRQ_PEND;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_GPIO;
-			D2XXTEST__Wakeup = 1;
-		}
-	}
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_PM_GPIO_IRQ_PEND)
+  {
+    // Clear GPIO wakeup pending
+    SYS->PMCFG_H = MASK_SYS_PMCFG_PM_GPIO_IRQ_PEND;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_GPIO;
+      D2XXTEST__Wakeup = 1;
+    }
+  }
 #if defined(__FT900__)
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_DEV_CONN_DEV)
-	{
-		// Clear connection interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_CONN_DEV;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_CONNECT;
-			D2XXTEST__Wakeup = 1;
-		}
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_DEV_CONN_DEV)
+  {
+    // Clear connection interrupt
+    SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_CONN_DEV;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_CONNECT;
+      D2XXTEST__Wakeup = 1;
+    }
+  }
 
-	}
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_DEV_DIS_DEV)
+  {
+    // Clear disconnection interrupt
+    SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_DIS_DEV;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_DISCONNECT;
+      D2XXTEST__Wakeup = 1;
+    }
+  }
 
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_DEV_DIS_DEV)
-	{
-		// Clear disconnection interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_DIS_DEV;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_DISCONNECT;
-			D2XXTEST__Wakeup = 1;
-		}
-	}
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_HOST_RST_DEV)
+  {
+    // Clear Host Reset interrupt
+    SYS->PMCFG_H = MASK_SYS_PMCFG_HOST_RST_DEV;
+    USBD_resume();
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_RESET;
+      D2XXTEST__Wakeup = 1;
+    }
+  }
 
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_HOST_RST_DEV)
-	{
-		// Clear Host Reset interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_HOST_RST_DEV;
-		USBD_resume();
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_RESET;
-			D2XXTEST__Wakeup = 1;
-		}
-	}
-
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_HOST_RESUME_DEV)
-	{
-		// Clear Host Resume interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_HOST_RESUME_DEV;
-		if(! (SYS->MSC0CFG & MASK_SYS_MSC0CFG_DEV_RMWAKEUP))
-		{
-			// If we are driving K-state on Device USB port;
-			// We must maintain the 1ms requirement before resuming the phy
-			USBD_resume();
-		}
-	}
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_HOST_RESUME_DEV)
+  {
+    // Clear Host Resume interrupt
+    SYS->PMCFG_H = MASK_SYS_PMCFG_HOST_RESUME_DEV;
+    if (!(SYS->MSC0CFG & MASK_SYS_MSC0CFG_DEV_RMWAKEUP))
+    {
+      // If we are driving K-state on Device USB port;
+      // We must maintain the 1ms requirement before resuming the phy
+      USBD_resume();
+    }
+  }
 #endif
 }
-
 
 #ifdef GPIO_REMOTE_WAKEUP
 void gpio_ISR()
 {
-    if (gpio_is_interrupted(GPIO_PIN))
+  if (gpio_is_interrupted(GPIO_PIN))
+  {
+    if (D2XXTEST__Sleep)
     {
-		if (D2XXTEST__Sleep)
-		{
-			//Need to perform remote wakeup procedure
-			D2XXTEST__Wakeup = 1;
-			SetRemoteWakeup = 1;
-		}
+      // Need to perform remote wakeup procedure
+      D2XXTEST__Wakeup = 1;
+      SetRemoteWakeup = 1;
     }
+  }
 }
 #endif
 
 void timer_ISR(void)
 {
-	if (timer_is_interrupted(timer_select_a))
-	{
-		D2XX_Timer();
+  if (timer_is_interrupted(timer_select_a))
+  {
+    D2XX_Timer();
 #if 0
-		if (check_device_status)
-		{
-			device_inactive_counter++;
+    if (check_device_status)
+    {
+      device_inactive_counter++;
 
-			if (device_inactive_counter >= DEVICE_INACTIVITY)
-			{
-				dbg("Device inactive !!!\n");
-				USBD_suspend_device();
-				device_inactive_counter = 0;
-				check_device_status = 0;
-			}
-		}
+      if (device_inactive_counter >= DEVICE_INACTIVITY)
+      {
+        dbg("Device inactive !!!\n");
+        USBD_suspend_device();
+        device_inactive_counter = 0;
+        check_device_status = 0;
+      }
+    }
 #endif
-
-	}
+  }
 }

@@ -1,10 +1,7 @@
 /**
     @file ft930_slave_cpu_registers.h
 
-    @brief
-    FT930 Chip Management registers
-
-    
+    @brief FT930 Chip Management registers
 **/
 /*
  * ============================================================================
@@ -49,21 +46,24 @@
 #define FT930_SLAVE_CPU_REGISTERS_H_
 
 /* INCLUDES ************************************************************************/
+
 #include <stdint.h>
 
 /* CONSTANTS ***********************************************************************/
 
 /* Bit masks for the PMCFG register */
 
-/** Write “0” to de-assert this bit so that the Slave CPU will start. Recommend to de-assert this bit after enable D2XX_mode. */
+/** Write '0' to de-assert this bit so that the Slave CPU will start. Recommend to de-assert this
+ *  bit after enable D2XX_mode. */
 #define BIT_SLAVE_CPU_CTRL_SLV_RESET  (24)
 #define MASK_SLAVE_CPU_CTRL_SLV_RESET (0x1 << BIT_SLAVE_CPU_CTRL_SLV_RESET)
 
-/** D2XX mode bit; Set this bit to “1” to enable D2XX mode (enable Slave sub-system).  */
+/** D2XX mode bit; Set this bit to '1' to enable D2XX mode (enable Slave sub-system). */
 #define BIT_SLAVE_CPU_CTRL_D2XX_MODE  (0)
 #define MASK_SLAVE_CPU_CTRL_D2XX_MODE (0x1 << BIT_SLAVE_CPU_CTRL_D2XX_MODE)
 
 /* TYPES ***************************************************************************/
+
 /** @brief Register mappings for System level registers */
 typedef volatile uint32_t ft930_slave_control_regs_t;
 

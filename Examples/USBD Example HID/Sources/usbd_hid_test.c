@@ -1452,38 +1452,8 @@ uint8_t usbd_testing(void)
 
 void powermanagement_ISR(void)
 {
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_DEV_CONN_DEV)
-	{
-		// Clear connection interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_CONN_DEV;
-		USBD_attach();
-	}
-
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_DEV_DIS_DEV)
-	{
-		// Clear disconnection interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_DIS_DEV;
-		USBD_detach();
-	}
-
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_HOST_RST_DEV)
-	{
-		// Clear Host Reset interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_HOST_RST_DEV;
-		USBD_resume();
-	}
-
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_HOST_RESUME_DEV)
-	{
-		// Clear Host Resume interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_HOST_RESUME_DEV;
-		if(! (SYS->MSC0CFG & MASK_SYS_MSC0CFG_DEV_RMWAKEUP))
-		{
-			// If we are driving K-state on Device USB port;
-			// We must maintain the 1ms requirement before resuming the phy
-			USBD_resume();
-		}
-	}
+	// Handle standard UUSB device state changes.
+	USBD_power_change();
 }
 
 /* FUNCTIONS ***********************************************************************/

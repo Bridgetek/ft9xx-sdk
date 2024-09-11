@@ -1,18 +1,22 @@
 /**
-  @file assert.h
-  @brief Assertion helpers
-*/
+  @file ft900_regs_std.h
+
+  @brief FT9xx register common defined
+
+**/
+
 /*
  * ============================================================================
  * History
  * =======
- * DB 14 Nov 2014 : Created
- *
+ */
+
+/*
  * Copyright (C) Bridgetek Pte Ltd
  * ============================================================================
  *
  * This source code ("the Software") is provided by Bridgetek Pte Ltd
- * ("Bridgetek") subject to the licence terms set out
+ *  ("Bridgetek") subject to the licence terms set out
  * http://brtchip.com/BRTSourceCodeLicenseAgreement/ ("the Licence Terms").
  * You must read the Licence Terms before downloading or using the Software.
  * By installing or using the Software you agree to the Licence Terms. If you
@@ -42,23 +46,31 @@
  * ============================================================================
  */
 
-#ifndef __ASSERT_H
-#define __ASSERT_H
+#ifndef __FT900_REGS_STD_H__
+#define __FT900_REGS_STD_H__
 
-#ifndef NO_ASSERT
+/* INCLUDES ************************************************************************/
 
-#define ASSERT_P(a, b, msg)                                    \
-  do                                                           \
-  {                                                            \
-    if ((a) != (b))                                            \
-    {                                                          \
-      printf("Assert Failed:" __FILE__ ":%d: " msg, __LINE__); \
-      \ for (;;);                                              \
-    }                                                          \
-  } while (0)
+#include <stdint.h>
 
-#define ASSERT(a, b) ASSERT_P(a, b, #a " != " #b)
+/* CONSTANTS ***********************************************************************/
 
-#endif
+/* TYPES ***************************************************************************/
 
-#endif /* __ASSERT_H */
+/** \brief Access register type uint8_t */
+typedef uint8_t  REG_ACCESS_U8;
+/** \brief Access register type uint16_t */
+typedef uint16_t REG_ACCESS_U16;
+/** \brief Access register type uint32_t */
+typedef uint32_t REG_ACCESS_U32;
+
+/* GLOBAL VARIABLES ****************************************************************/
+
+/* MACROS **************************************************************************/
+
+/** \brief Shortcut for volatile keyword, mention this is the IO type */
+#define __IO volatile
+
+/* FUNCTION PROTOTYPES *************************************************************/
+
+#endif // __FT900_REGS_STD_H__

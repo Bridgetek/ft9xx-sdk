@@ -24,7 +24,7 @@ SECTIONS
     . = ALIGN(4);
      _etext = . ;
   }  > flash
-  
+
   .tors :
   {
     ___ctors = . ;
@@ -37,47 +37,44 @@ SECTIONS
   } > ram
   .data	  :
   {
-  	. = ALIGN(4);
+    . = ALIGN(4);
     __data = .;
     *(.data)
-	*(.data*)
-	*(.rodata)
+    *(.data*)
+    *(.rodata)
     *(.rodata*)
-  . = ALIGN(4);
+    . = ALIGN(4);
      _edata = . ;
   }  > ram AT>flash
-  
 
-
-    .configs LOADADDR(.text) + SIZEOF(.text) + SIZEOF (.data) : AT (ADDR (.text) + SIZEOF (.text) + SIZEOF(.data))
+  .configs LOADADDR(.text) + SIZEOF(.text) + SIZEOF (.data) : AT (ADDR (.text) + SIZEOF (.text) + SIZEOF(.data))
   {
-  
-  	FILL(0xFF); /* Pad unused regions with 0xFF */
-  	
-  	/* If there's no SDBL/D2XX/LOGGER we don't update the location counter */
-	. += (__sdbl_partition_sizeof ?  (__D2XX_partition_sizeof ? (__dlog_partition_sizeof ? LENGTH(flash)-0x5000 : LENGTH(flash)-0x4000) : (__dlog_partition_sizeof ? LENGTH(flash)-0x4000 : LENGTH(flash)-0x3000)): 
-				(__D2XX_partition_sizeof ? (__dlog_partition_sizeof ? LENGTH(flash)-0x3000 : LENGTH(flash)-0x2000) : (__dlog_partition_sizeof ? LENGTH(flash)-0x2000 : SIZEOF(.text) + SIZEOF (.data)))) 
-					- SIZEOF(.text) - SIZEOF (.data);
-							
-	*(._flash_dlog_partition)
-	*(._flash_d2xx_config)
-	*(._flash_sdbl_partition)
+    FILL(0xFF); /* Pad unused regions with 0xFF */
+
+    /* If there's no SDBL/D2XX/LOGGER we don't update the location counter */
+    . += (__sdbl_partition_sizeof ? (__D2XX_partition_sizeof ? (__dlog_partition_sizeof ? LENGTH(flash)-0x5000 : LENGTH(flash)-0x4000) : (__dlog_partition_sizeof ? LENGTH(flash)-0x4000 : LENGTH(flash)-0x3000)):
+         (__D2XX_partition_sizeof ? (__dlog_partition_sizeof ? LENGTH(flash)-0x3000 : LENGTH(flash)-0x2000) : (__dlog_partition_sizeof ? LENGTH(flash)-0x2000 : SIZEOF(.text) + SIZEOF (.data))))
+          - SIZEOF(.text) - SIZEOF (.data);
+
+  *(._flash_dlog_partition)
+  *(._flash_d2xx_config)
+  *(._flash_sdbl_partition)
     . = ALIGN(4);
-	
+
   }  > flash
-  
-  
+
+
   .bss  SIZEOF(.data) + ADDR(.data) (NOLOAD) :
   {
-     _bss_start = . ;
+    _bss_start = . ;
     *(.bss)
     *(COMMON)
-     _end = . ;
+    _end = . ;
   }  > ram
-   __data_load_start = LOADADDR(.data);
-   __data_load_end = __data_load_start + SIZEOF(.data);
-   
-   
+
+  __data_load_start = LOADADDR(.data);
+  __data_load_end = __data_load_start + SIZEOF(.data);
+
   .stab 0 (NOLOAD) :
   {
     *(.stab)

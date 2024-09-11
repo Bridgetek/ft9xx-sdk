@@ -1,7 +1,6 @@
 /**
-  @file
-  @brief
-  ADC Example 3
+  @file  adc_example3.c
+  @brief ADC Example 3
 
   Use ADC interrupt to capture multiple channels ADC samples and stored in circular buffer,  print 16 samples of different ADC channel in regular interval.
 */
@@ -44,13 +43,14 @@
  * has no liability in relation to those amendments.
  * ============================================================================
  */
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <ft900.h>
 #include <string.h>
+
 void setup(void);
-void myputc(void* p, char c);
 void adcISR(void);
 void loop(void);
 
@@ -60,29 +60,29 @@ void loop(void);
 #define SWITCH_RESOLUTION
 #define ADC_DATA (ADCDAC->DAC_DATA0_ADC_DATA)
 
-#define ADC_INTERRUPT_READ_SAMPLE			64 // Must be 64
-#define ADC_NUMBER_OF_BUFFER_COUNT			32
-#define ADC_TOTAL_SAMPLE_COUNT				(ADC_NUMBER_OF_BUFFER_COUNT*ADC_INTERRUPT_READ_SAMPLE)
-#define ADC_BUFFER_STOP_COUNT				((ADC_NUMBER_OF_BUFFER_COUNT/2)*ADC_INTERRUPT_READ_SAMPLE)
+#define ADC_INTERRUPT_READ_SAMPLE   (64) // Must be 64
+#define ADC_NUMBER_OF_BUFFER_COUNT  (32)
+#define ADC_TOTAL_SAMPLE_COUNT      (ADC_NUMBER_OF_BUFFER_COUNT * ADC_INTERRUPT_READ_SAMPLE)
+#define ADC_BUFFER_STOP_COUNT       ((ADC_NUMBER_OF_BUFFER_COUNT / 2) * ADC_INTERRUPT_READ_SAMPLE)
 
 #if defined(__FT900__)
-#define ADC_CHANNEL_COUNT					7
-#define ADC_CHANNEL_MASK					7
+#define ADC_CHANNEL_COUNT 7
+#define ADC_CHANNEL_MASK 7
 #else
-#define ADC_CHANNEL_COUNT					3
-#define ADC_CHANNEL_MASK					3
+#define ADC_CHANNEL_COUNT 3
+#define ADC_CHANNEL_MASK 3
 #endif
 
-#define SAMPLES_TO_IGNORE					1
-#define ADC_APP_DUMP_SAMPLE_COUNT			16
+#define SAMPLES_TO_IGNORE 1
+#define ADC_APP_DUMP_SAMPLE_COUNT 16
 
 /*
  *  Variables used for ADC buffer
  */
-static uint16_t	g_u16AdcBuffer[ADC_TOTAL_SAMPLE_COUNT];
+static uint16_t g_u16AdcBuffer[ADC_TOTAL_SAMPLE_COUNT];
 static volatile uint32_t g_uAdcIndex;
 
-static uint16_t	 g_u16AdcChannels[ADC_CHANNEL_COUNT][ADC_APP_DUMP_SAMPLE_COUNT];
+static uint16_t g_u16AdcChannels[ADC_CHANNEL_COUNT][ADC_APP_DUMP_SAMPLE_COUNT];
 
 /* Variable uses to store current active ADC channel */
 static int g_nChannel = 1;
@@ -90,167 +90,170 @@ static int g_nChannel = 1;
 /* Return number of samples captured */
 uint32_t adc_sample_count()
 {
-	uint32_t count;
-	CRITICAL_SECTION_BEGIN
-	count = g_uAdcIndex;
-    CRITICAL_SECTION_END
-	return count;
+  uint32_t count;
+  CRITICAL_SECTION_BEGIN
+  count = g_uAdcIndex;
+  CRITICAL_SECTION_END
+  return count;
 }
 
 /* Enable the ADC respective channel */
 void adc_start_channel(int nChannel)
 {
-    /* Start the ADC nChannel... */
-    adc_start(nChannel);
+  /* Start the ADC nChannel... */
+  adc_start(nChannel);
 }
 
 /* Stop the ADC capturing */
 void adc_stop_channel(void)
 {
-	adc_stop();
+  adc_stop();
 }
 
 /* Reset the ADC buffer pointer */
 void buffer_init()
 {
-	g_uAdcIndex = 0;
+  g_uAdcIndex = 0;
 }
-
 
 int main(void)
 {
-    setup();
-    for(;;) loop();
-    return 0;
+  setup();
+  for (;;)
+    loop();
+  return 0;
 }
 
 void setup(void)
 {
-	sys_reset_all();
-    /* Enable the UART Device... */
-    sys_enable(sys_device_uart0);
-    /* Set UART0 GPIO functions to UART0_TXD and UART0_RXD... */
+  sys_reset_all();
+  /* Enable the UART Device... */
+  sys_enable(sys_device_uart0);
+  /* Set UART0 GPIO functions to UART0_TXD and UART0_RXD... */
 #if defined(__FT900__)
-    gpio_function(48, pad_uart0_txd); /* UART0 TXD */
-    gpio_function(49, pad_uart0_rxd); /* UART0 RXD */
+  gpio_function(48, pad_uart0_txd); /* UART0 TXD */
+  gpio_function(49, pad_uart0_rxd); /* UART0 RXD */
 #elif defined(__FT930__)
-    gpio_function(23, pad_uart0_txd); /* UART0 TXD */
-    gpio_function(22, pad_uart0_rxd); /* UART0 RXD */
+  gpio_function(23, pad_uart0_txd); /* UART0 TXD */
+  gpio_function(22, pad_uart0_rxd); /* UART0 RXD */
 #endif
-    uart_open(UART0,                    /* Device */
-              1,                        /* Prescaler = 1 */
-			  UART_DIVIDER_19200_BAUD,  /* Divider = 1302 */
-              uart_data_bits_8,         /* No. Data Bits */
-              uart_parity_none,         /* Parity */
-              uart_stop_bits_1);        /* No. Stop Bits */
+  uart_open(UART0,                   /* Device */
+            1,                       /* Pre-scaler = 1 */
+            UART_DIVIDER_19200_BAUD, /* Divider = 1302 */
+            uart_data_bits_8,        /* No. Data Bits */
+            uart_parity_none,        /* Parity */
+            uart_stop_bits_1);       /* No. Stop Bits */
 
-    /* Print out a welcome message... */
-    printf(
-        "\x1B[2J" /* ANSI/VT100 - Clear the Screen */
-        "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
-        "Copyright (C) Bridgetek Pte Ltd \r\n"
-        "--------------------------------------------------------------------- \r\n"
-        "Welcome to ADC Example 3... \r\n"
-        "\r\n"
-		"Use interrupt to capture samples from multiple ADC channels,  \r\n"
-        " store them in a circular buffer and print %d samples of  \r\n"
-		" different ADC channels at regular interval.  \r\n"
-        "--------------------------------------------------------------------- \r\n", ADC_APP_DUMP_SAMPLE_COUNT
-        );
+  /* Print out a welcome message... */
+  printf(
+      "\x1B[2J" /* ANSI/VT100 - Clear the Screen */
+      "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
+      "Copyright (C) Bridgetek Pte Ltd \r\n"
+      "--------------------------------------------------------------------- \r\n"
+      "Welcome to ADC Example 3... \r\n"
+      "\r\n"
+      "Use interrupt to capture samples from multiple ADC channels,  \r\n"
+      " store them in a circular buffer and print %d samples of  \r\n"
+      " different ADC channels at regular interval.  \r\n"
+      "--------------------------------------------------------------------- \r\n",
+      ADC_APP_DUMP_SAMPLE_COUNT);
 
-    /* Enable the ADCs... */
-    sys_enable(sys_device_adc);
+  /* Enable the ADCs... */
+  sys_enable(sys_device_adc);
 
 #if defined(__FT900__)
-    /* Set GPIO6 to ADC1... */
-    gpio_function(6, pad_adc1);
-    /* Set GPIO7 to ADC2... */
-    gpio_function(7, pad_adc2);
-    /* Set GPIO8 to ADC3... */
-    gpio_function(8, pad_adc3);
-    /* Set GPIO9 to ADC4... */
-    gpio_function(9, pad_adc4);
-    /* Set GPIO10 to ADC5... */
-    gpio_function(10, pad_adc5);
-    /* Set GPIO11 to ADC6... */
-    gpio_function(11, pad_adc6);
-    /* Set GPIO12 to ADC7... */
-    gpio_function(12, pad_adc7);
+  /* Set GPIO6 to ADC1... */
+  gpio_function(6, pad_adc1);
+  /* Set GPIO7 to ADC2... */
+  gpio_function(7, pad_adc2);
+  /* Set GPIO8 to ADC3... */
+  gpio_function(8, pad_adc3);
+  /* Set GPIO9 to ADC4... */
+  gpio_function(9, pad_adc4);
+  /* Set GPIO10 to ADC5... */
+  gpio_function(10, pad_adc5);
+  /* Set GPIO11 to ADC6... */
+  gpio_function(11, pad_adc6);
+  /* Set GPIO12 to ADC7... */
+  gpio_function(12, pad_adc7);
 #endif
 
-    /* Continuously read data... */
-    adc_mode(adc_mode_continuous);
+  /* Continuously read data... */
+  adc_mode(adc_mode_continuous);
 
 #if defined(SWITCH_RESOLUTION)
-	adc_select_resolution(adc_8bit);
+  adc_select_resolution(adc_8bit);
 #endif
 #if defined(SWITCH_FREQUENCY)
-	adc_select_frequency(adc_6_25_MHz);
+  adc_select_frequency(adc_6_25_MHz);
 #endif
-	/* Register the ADC interrupt... */
-	interrupt_attach(interrupt_adc, (uint8_t) interrupt_adc, adcISR);
-	interrupt_enable_globally();
+  /* Register the ADC interrupt... */
+  interrupt_attach(interrupt_adc, (uint8_t)interrupt_adc, adcISR);
+  interrupt_enable_globally();
 
-	/* Initialize ADC buffer pointer */
-	buffer_init();
-	/* Enable the ADC to fire an interrupt... */
-	adc_enable_interrupt();
-    /* Start the ADC ... */
-	adc_start_channel(g_nChannel);
+  /* Initialize ADC buffer pointer */
+  buffer_init();
+  /* Enable the ADC to fire an interrupt... */
+  adc_enable_interrupt();
+  /* Start the ADC ... */
+  adc_start_channel(g_nChannel);
 }
 
 void adcISR()
 {
-    if (adc_is_interrupted())
-    {
-    	/* Get number of available sample available in hardware FIFO */
-    	uint32_t uCount = adc_available();
+  if (adc_is_interrupted())
+  {
+    /* Get number of available sample available in hardware FIFO */
+    uint32_t uCount = adc_available();
 
-    	if (0 < uCount) {
-			/*
-			 * Safe guard prevent overwrite end of buffer
-			 */
-			if (ADC_TOTAL_SAMPLE_COUNT <= (g_uAdcIndex+uCount)) {
-				g_uAdcIndex = 0;
-			}
-			adc_readn(&g_u16AdcBuffer[g_uAdcIndex], uCount);
-			g_uAdcIndex += uCount;
-    	}
+    if (0 < uCount)
+    {
+      /*
+       * Safe guard prevent overwrite end of buffer
+       */
+      if (ADC_TOTAL_SAMPLE_COUNT <= (g_uAdcIndex + uCount))
+      {
+        g_uAdcIndex = 0;
+      }
+      adc_readn(&g_u16AdcBuffer[g_uAdcIndex], uCount);
+      g_uAdcIndex += uCount;
     }
+  }
 }
 
 void loop(void)
 {
-	uint32_t count = adc_sample_count();
-	/* Check whether samples captured has more than ADC_BUFFER_STOP_COUNT */
-	if (ADC_BUFFER_STOP_COUNT <= count) {
+  uint32_t count = adc_sample_count();
+  /* Check whether samples captured has more than ADC_BUFFER_STOP_COUNT */
+  if (ADC_BUFFER_STOP_COUNT <= count)
+  {
 
-		/* Stop the ADC capturing */
-		adc_stop_channel();
+    /* Stop the ADC capturing */
+    adc_stop_channel();
 
-		/* We only copy ADC_APP_DUMP_SAMPLE_COUNT samples from the global ADC buffer */
-		memcpy(&g_u16AdcChannels[g_nChannel-1][0], &g_u16AdcBuffer[SAMPLES_TO_IGNORE], ADC_APP_DUMP_SAMPLE_COUNT*sizeof(uint16_t));
-		
-		/* Output the respective ADC Channel samples */
-		printf("ADC Channel %d\n", g_nChannel);
-		for (int i=0; i<ADC_APP_DUMP_SAMPLE_COUNT; i++) {
-			printf("%04d ", (uint16_t)g_u16AdcChannels[g_nChannel-1][i]);
-		}
-		printf("\n");
+    /* We only copy ADC_APP_DUMP_SAMPLE_COUNT samples from the global ADC buffer */
+    memcpy(&g_u16AdcChannels[g_nChannel - 1][0], &g_u16AdcBuffer[SAMPLES_TO_IGNORE], ADC_APP_DUMP_SAMPLE_COUNT * sizeof(uint16_t));
 
-		/* Re-initialize the global ADC buffer index pointer */
-		buffer_init();
-		/* Switching ADC Channel */
-		g_nChannel++;
-		g_nChannel &= ADC_CHANNEL_MASK;
-		/* Check whether is it wrap around */
-		if (!g_nChannel)
-			g_nChannel++;
+    /* Output the respective ADC Channel samples */
+    printf("ADC Channel %d\n", g_nChannel);
+    for (int i = 0; i < ADC_APP_DUMP_SAMPLE_COUNT; i++)
+    {
+      printf("%04d ", (uint16_t)g_u16AdcChannels[g_nChannel - 1][i]);
+    }
+    printf("\n");
 
-		/* Delay 1 seconds */
-		delayms(1000);
-		/* Restart ADC capturing */
-		adc_start_channel(g_nChannel);
-		
-	}
+    /* Re-initialize the global ADC buffer index pointer */
+    buffer_init();
+    /* Switching ADC Channel */
+    g_nChannel++;
+    g_nChannel &= ADC_CHANNEL_MASK;
+    /* Check whether is it wrap around */
+    if (!g_nChannel)
+      g_nChannel++;
+
+    /* Delay 1 seconds */
+    delayms(1000);
+    /* Restart ADC capturing */
+    adc_start_channel(g_nChannel);
+  }
 }

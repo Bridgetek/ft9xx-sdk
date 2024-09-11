@@ -56,27 +56,27 @@ set(TOOLCHAIN_HARDWARE_LIB_RELEASE "${TOOLCHAIN_HARDWARE_LIB}/Release")
 # --------------------------------------------------------------------------- #
 # Set and test defaults.
 if("${BUILD}" STREQUAL "")
-	set (BUILD "Debug")
-	message(STATUS "Build type has been set to ${BUILD}.")
+    set (BUILD "Debug")
+    message(STATUS "Build type has been set to ${BUILD}.")
 else()
-	set(build_list Debug Release)
-	if(${BUILD} IN_LIST build_list)
-		message(STATUS "Build type is ${BUILD}")
-	else()
-		message(FATAL_ERROR "The BUILD parameter must be Debug or Release. \"${BUILD}\" not allowed.")
-	endif()
+    set(build_list Debug Release)
+    if(${BUILD} IN_LIST build_list)
+        message(STATUS "Build type is ${BUILD}")
+    else()
+        message(FATAL_ERROR "The BUILD parameter must be Debug or Release. \"${BUILD}\" not allowed.")
+    endif()
 endif()
 
 if("${TARGET}" STREQUAL "")
-	set (TARGET "ft90x")
-	message(STATUS "Target has been set to ${TARGET}.")
+    set (TARGET "ft90x")
+    message(STATUS "Target has been set to ${TARGET}.")
 else()
-	set(target_list ft90x ft93x)
-	if(${TARGET} IN_LIST target_list)
-		message(STATUS "Target chipset is ${TARGET}")
-	else()
-		message(FATAL_ERROR "The TARGET must be ft90x or ft93x. \"${TARGET}\" not allowed.")
-	endif()
+    set(target_list ft90x ft93x)
+    if(${TARGET} IN_LIST target_list)
+        message(STATUS "Target chipset is ${TARGET}")
+    else()
+        message(FATAL_ERROR "The TARGET must be ft90x or ft93x. \"${TARGET}\" not allowed.")
+    endif()
 endif()
 
 # --------------------------------------------------------------------------- #
@@ -91,8 +91,8 @@ macro(ft9xx_set_executable executable srcfiles libfiles ldscript)
         ${TOOLCHAIN_HARDWARE_INCLUDE}
     )
 
-	# Build the executable based on the source files.
-	add_executable(${executable} ${srcfiles})
+    # Build the executable based on the source files.
+    add_executable(${executable} ${srcfiles})
 
     # Add default compiler option for project
     target_compile_options(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:
@@ -101,31 +101,31 @@ macro(ft9xx_set_executable executable srcfiles libfiles ldscript)
         -c
         -fmessage-length=0
         -ffunction-sections
-		>
+        >
     )
     # Add default linker option for project
-    target_link_options(${executable} PRIVATE 
+    target_link_options(${executable} PRIVATE
         -Wl,--gc-sections
         -Wl,--entry=_start
     )
 
-	# Reformulate srcfiles as a list.
-	set(_srcfiles ${srcfiles} ${ARGN})
-	# Do not load startup files if crt0 source file exists.
-	foreach (srcfile IN LISTS _srcfiles)
-		if (${srcfile} MATCHES ".*crt0.*\.S$")
-			message(STATUS "crt0 file detected: ${srcfile}")
-			target_link_libraries(${EXECUTABLE} PRIVATE -nostartfiles)
-			break()
-		endif()
-	endforeach()
-	
-	if (${ldscript} MATCHES ".*\.ld$")
-		message(STATUS "Linker script file: ${ldscript}")
-		target_link_libraries(${EXECUTABLE} PRIVATE -Xlinker -dT "${ldscript}" )
-	endif()
+    # Reformulate srcfiles as a list.
+    set(_srcfiles ${srcfiles} ${ARGN})
+    # Do not load startup files if crt0 source file exists.
+    foreach (srcfile IN LISTS _srcfiles)
+        if (${srcfile} MATCHES ".*crt0.*\.S$")
+            message(STATUS "crt0 file detected: ${srcfile}")
+            target_link_libraries(${EXECUTABLE} PRIVATE -nostartfiles)
+            break()
+        endif()
+    endforeach()
 
-	# Set build-specific settings.
+    if (${ldscript} MATCHES ".*\.ld$")
+        message(STATUS "Linker script file: ${ldscript}")
+        target_link_libraries(${EXECUTABLE} PRIVATE -Xlinker -dT "${ldscript}" )
+    endif()
+
+    # Set build-specific settings.
     if (${BUILD} MATCHES Debug)
         target_compile_options(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:-g -Og>)
         target_link_libraries(${executable} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_DEBUG}")
@@ -135,16 +135,16 @@ macro(ft9xx_set_executable executable srcfiles libfiles ldscript)
         target_link_libraries(${executable} PRIVATE -L"${TOOLCHAIN_HARDWARE_LIB_RELEASE}")
         set(ENV{FT9XX_OUTPUT_FOLDER_POST} Release)
     else ()
-		# Double check BUILD
+        # Double check BUILD
         message(FATAL_ERROR "The BUILD type should be Debug or Release.")
     endif()
 
-	# Add optional libraries before toolchain libraries.
-	target_link_libraries(${EXECUTABLE} PRIVATE ${libfiles})
-	
-	# Set target-specific settings.
+    # Add optional libraries before toolchain libraries.
+    target_link_libraries(${EXECUTABLE} PRIVATE ${libfiles})
+
+    # Set target-specific settings.
     if (${TARGET} MATCHES ft90x)
-		target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:__FT900__>)
+        target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:__FT900__>)
         target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:ASM>:__FT900__=1>)
         target_link_options(${executable} PRIVATE -D__FT900__)
         target_link_libraries(${executable} PRIVATE -lft900)
@@ -157,21 +157,21 @@ macro(ft9xx_set_executable executable srcfiles libfiles ldscript)
         target_link_libraries(${executable} PRIVATE -lft930)
         set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT93x)
     else ()
-		# Double check TARGET
+        # Double check TARGET
         message(FATAL_ERROR "The TARGET must me ft90x or ft93x.")
     endif()
 
     # Set the build mode to Debug or Release.
     set(CMAKE_BUILD_MODE ${BUILD})
 
-	if("${OUTDIR}" STREQUAL "")
-		# Set the ouput folder for the elf, bin, map,...
-		set(ENV{FT9XX_OUTPUT_FOLDER_NAME} $ENV{FT9XX_OUTPUT_FOLDER_PRE}_$ENV{FT9XX_OUTPUT_FOLDER_POST})
-		set(ENV{FT9XX_EXECUTABLE_OUTPUT_PATH} ${CMAKE_SOURCE_DIR}/$ENV{FT9XX_OUTPUT_FOLDER_NAME})
-	else()
-		set(ENV{FT9XX_EXECUTABLE_OUTPUT_PATH} ${CMAKE_SOURCE_DIR}/${OUTDIR})
-	endif()
-	message(STATUS "Output directory has been set to $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}.")
+    if("${OUTDIR}" STREQUAL "")
+        # Set the ouput folder for the elf, bin, map,...
+        set(ENV{FT9XX_OUTPUT_FOLDER_NAME} $ENV{FT9XX_OUTPUT_FOLDER_PRE}_$ENV{FT9XX_OUTPUT_FOLDER_POST})
+        set(ENV{FT9XX_EXECUTABLE_OUTPUT_PATH} ${CMAKE_SOURCE_DIR}/$ENV{FT9XX_OUTPUT_FOLDER_NAME})
+    else()
+        set(ENV{FT9XX_EXECUTABLE_OUTPUT_PATH} ${CMAKE_SOURCE_DIR}/${OUTDIR})
+    endif()
+    message(STATUS "Output directory has been set to $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}.")
 
     # Setup the output folder for the build
     set_target_properties(${executable}
@@ -191,7 +191,7 @@ macro(ft9xx_set_executable executable srcfiles libfiles ldscript)
     # Setup library for linker step
     target_link_libraries(${executable} PRIVATE -lc -lstub)
 
-	# Enable printing of the executable program size after compilation.
+    # Enable printing of the executable program size after compilation.
     add_custom_command(TARGET ${executable}
         POST_BUILD
         # Print out size of image
@@ -208,7 +208,7 @@ macro(ft9xx_target_add_library excutable lib_name)
 endmacro()
 
 macro(ft9xx_enable_map_file excutable)
-	set(OUTPUT_MAP_FILE_PATH $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.map)
+    set(OUTPUT_MAP_FILE_PATH $ENV{FT9XX_EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.map)
     target_link_libraries(${excutable} PRIVATE
         # Enable the map file
         -Wl,-Map="${OUTPUT_MAP_FILE_PATH}"
