@@ -3,8 +3,8 @@
   @brief
   UART to USB D2XX BRIDGE.
 
-  Any data on the first 4 of D2XX USB COM ports are bridged to the four 
-  UART peripherals and viceversa. UART peripherals can be looped back to 
+  Any data on the first 4 of D2XX USB COM ports are bridged to the four
+  UART peripherals and vice versa. UART peripherals can be looped back to
   one another or to themselves, to observe the characters sent on the D2XX USB
   COM ports being received on them.
  */
@@ -59,85 +59,86 @@
 #include <ft900_startup_dfu.h>
 #include <ft900.h>
 
-
 /* UART support for printf output. */
 #define DEBUG
 
 #ifdef DEBUG
-#define dbg(s,...)	printf ((s), ##__VA_ARGS__)
+#define dbg(s, ...) printf((s), ##__VA_ARGS__)
 #else
-#define dbg(s,...)
+#define dbg(s, ...)
 #endif
 
 /* MACROS ***********************************************************************/
 #if defined(__FT930__)
 /// FTDI Product ID for FT930 variants
-#define USB_PID_FTDI_FT930_1                      0x6034
-#define USB_PID_FTDI_FT930_2                      0x6035
-#define USB_PID_FTDI_FT930_3                      0x6036
-#define USB_PID_FTDI_FT930_4                      0x6037
-#define USB_PID_FTDI_FT930_5                      0x6038
-#define USB_PID_FTDI_FT930_6                      0x6039
-#define USB_PID_FTDI_FT930_7                      0x603A
+#define USB_PID_FTDI_FT930_1 0x6034
+#define USB_PID_FTDI_FT930_2 0x6035
+#define USB_PID_FTDI_FT930_3 0x6036
+#define USB_PID_FTDI_FT930_4 0x6037
+#define USB_PID_FTDI_FT930_5 0x6038
+#define USB_PID_FTDI_FT930_6 0x6039
+#define USB_PID_FTDI_FT930_7 0x603A
 #else
 /// FTDI Product ID for FT900 variants
-#define USB_PID_FTDI_FT900_1                      0x6031
-#define USB_PID_FTDI_FT900_2                      0x6032
-#define USB_PID_FTDI_FT900_3                      0x6033
+#define USB_PID_FTDI_FT900_1 0x6031
+#define USB_PID_FTDI_FT900_2 0x6032
+#define USB_PID_FTDI_FT900_3 0x6033
 #endif
 
 #define GPIO_REMOTE_WAKEUP
 
 #ifdef GPIO_REMOTE_WAKEUP
 #if defined(__FT930__)
-//GPIO12 in FT930Q mini module board
-#define GPIO_PIN  12
+// GPIO12 in FT930Q mini module board
+#define GPIO_PIN 12
 #else
-#define GPIO_PIN  18
+#define GPIO_PIN 18
 #endif
 #endif
-#define TEST_WAKEUP_SOURCE_RESET 				(1 << 0)
-#define TEST_WAKEUP_SOURCE_RESUME 				(1 << 1)
-#define TEST_WAKEUP_SOURCE_GPIO 				(1 << 2)
-#define TEST_WAKEUP_SOURCE_READY				(1 << 3)
-#define TEST_WAKEUP_SOURCE_CONNECT				(1 << 4)
-#define TEST_WAKEUP_SOURCE_DISCONNECT			(1 << 5)
-#define TEST_WAKEUP_SOURCE_OTHERS				(1 << 6)
-#define TEST_WAKEUP_SOURCE_SLAVE				(1 << 7)
+#define TEST_WAKEUP_SOURCE_RESET (1 << 0)
+#define TEST_WAKEUP_SOURCE_RESUME (1 << 1)
+#define TEST_WAKEUP_SOURCE_GPIO (1 << 2)
+#define TEST_WAKEUP_SOURCE_READY (1 << 3)
+#define TEST_WAKEUP_SOURCE_CONNECT (1 << 4)
+#define TEST_WAKEUP_SOURCE_DISCONNECT (1 << 5)
+#define TEST_WAKEUP_SOURCE_OTHERS (1 << 6)
+#define TEST_WAKEUP_SOURCE_SLAVE (1 << 7)
 
-#define DEVICE_INACTIVITY				10000 //10 second timeout
+#define DEVICE_INACTIVITY 10000 // 10 second timeout
 /*Minimum 10 seconds needed or would interfere in hibernate/wakeup process in bus powered mode */
 
 #if defined(__FT930__)
-#define MAX_UARTS				4
+#define MAX_UARTS 4
 #else
-#define MAX_UARTS				2
+#define MAX_UARTS 2
 #endif
 /* GLOBAL VARIABLES ****************************************************************/
 
 extern TD2XX_DeviceConfiguration __pD2XXDefaultConfiguration[]; // pointer to D2XX Config in flash
 // The test config (in Flash and then PM) is copied to the RAM structure D2XXTEST_FlashConfig on startup
-__attribute__ ((aligned (4))) TD2XX_DeviceConfiguration D2XXTEST_UserD2xxConfig = {0};
+__attribute__((aligned(4))) TD2XX_DeviceConfiguration D2XXTEST_UserD2xxConfig = {0};
 
 /* LOCAL VARIABLES *****************************************************************/
 #ifdef DEBUG
 #ifdef DEBUG_EVENT
-static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] = {	"SUSPEND",    	/**< SUSPEND EVENT from USB Host */
-																	"RESUME",	 	/**< RESUME EVENT from USB Host */
-																	"BUS_RESET",	 		/**< USB Bus Reset */
-																	"READY",	 		/**< D2XX enters Ready state where READ/WRITE requests are processed*/
-																	"UNREADY",	 	/**< D2XX exits Ready state*/
-																	"DETACH",		/**< DFU DETACH Class command from DFU application */
-																	"TESTMODE",	 	/**< D2XX enters Test Mode. Exit is via power cycle*/
-																	"INTF_RESET"	/**< Interface RESET Vendor Command from D2XX Application */
-																};
+static char *D2XXTest_EventStrings[D2XX_EVT_MAX_CODE] =
+{
+  "SUSPEND",   /**< SUSPEND EVENT from USB Host */
+  "RESUME",    /**< RESUME EVENT from USB Host */
+  "BUS_RESET", /**< USB Bus Reset */
+  "READY",     /**< D2XX enters Ready state where READ/WRITE requests are processed*/
+  "UNREADY",   /**< D2XX exits Ready state*/
+  "DETACH",    /**< DFU DETACH Class command from DFU application */
+  "TESTMODE",  /**< D2XX enters Test Mode. Exit is via power cycle*/
+  "INTF_RESET" /**< Interface RESET Vendor Command from D2XX Application */
+};
 #endif // DEBUG_EVENT
 #endif // DEBUG
 uint8_t D2XXTEST__DfuDetach = 0;
 uint8_t D2XXTEST__Ready = 0;
 volatile uint8_t SetRemoteWakeup = 0;
 #if defined(__FT930__)
-extern volatile uint8_t RemoteWakeupEnable;  // used in d2xx_api_master.c
+extern volatile uint8_t RemoteWakeupEnable; // used in d2xx_api_master.c
 #else
 volatile uint8_t RemoteWakeupEnable = 0;
 #endif
@@ -155,7 +156,7 @@ volatile uint8_t check_device_status = 0;
  @brief Change this value in order to modify the size of the Tx and Rx ring buffers
   used to implement UART buffering.
  */
-#define RINGBUFFER_SIZE  (3*512)
+#define RINGBUFFER_SIZE (3 * 512)
 
 /**
  @name UART ring buffer variables.
@@ -165,19 +166,20 @@ volatile uint8_t check_device_status = 0;
 uint8_t uartBufferIn_data[MAX_UARTS][RINGBUFFER_SIZE];
 volatile uint16_t uartBufferIn_wr_idx[MAX_UARTS] = {0};
 volatile uint16_t uartBufferIn_rd_idx[MAX_UARTS] = {0};
-volatile uint16_t uartBufferIn_avail[MAX_UARTS] = {RINGBUFFER_SIZE,RINGBUFFER_SIZE
+volatile uint16_t uartBufferIn_avail[MAX_UARTS] = {
+  RINGBUFFER_SIZE, RINGBUFFER_SIZE
 #if defined(__FT930__)
-		,RINGBUFFER_SIZE, RINGBUFFER_SIZE
+  , RINGBUFFER_SIZE, RINGBUFFER_SIZE
 #endif
-		};
+};
 uint8_t uartBufferOut_data[MAX_UARTS][RINGBUFFER_SIZE];
 volatile uint16_t uartBufferOut_wr_idx[MAX_UARTS] = {0};
 volatile uint16_t uartBufferOut_rd_idx[MAX_UARTS] = {0};
-volatile uint16_t uartBufferOut_avail[MAX_UARTS] = {RINGBUFFER_SIZE,RINGBUFFER_SIZE
+volatile uint16_t uartBufferOut_avail[MAX_UARTS] = {RINGBUFFER_SIZE, RINGBUFFER_SIZE
 #if defined(__FT930__)
-		,RINGBUFFER_SIZE, RINGBUFFER_SIZE
+  ,RINGBUFFER_SIZE, RINGBUFFER_SIZE
 #endif
-		};
+};
 //@}
 
 /* variable to store the number of uarts to be initialized for the bridging */
@@ -186,7 +188,7 @@ int no_of_uarts = MAX_UARTS;
 
 void setup(void);
 void debug_uart_init(void);
-void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* param2);
+void d2xx_callback(ED2XX_EventCode eventID, void *ref, void *param1, void *param2);
 void power_management_ISR(void);
 #ifdef GPIO_REMOTE_WAKEUP
 void gpio_ISR();
@@ -200,14 +202,13 @@ size_t uartRx(int uart_idx, uint8_t *buffer, size_t len);
 void d2xx_uart_bridge(void);
 void uart_ISR(void);
 
-#undef BDFU  /* Undefine for C-DFU */
+#undef BDFU /* Undefine for C-DFU */
 
 #ifdef BDFU
 extern char __PMSIZE;
 typedef void (*__dfumain_t)(unsigned int, unsigned int) __attribute__((noreturn));
-#define GO_BDFU(VID, PID, REL) ((__dfumain_t)(&__PMSIZE - 12))( (PID) << 16 | (VID), REL);
+#define GO_BDFU(VID, PID, REL) ((__dfumain_t)(&__PMSIZE - 12))((PID) << 16 | (VID), REL);
 #endif
-
 
 /**
  @struct uart_config_structure_t
@@ -216,28 +217,29 @@ typedef void (*__dfumain_t)(unsigned int, unsigned int) __attribute__((noreturn)
  **/
 typedef struct uart_config_structure_t
 {
-	ft900_uart_regs_t *uart_id;
-	uint8_t tx_pin_num;
-	pad_func_t tx_pin_func;
-	uint8_t rx_pin_num;
-	pad_func_t rx_pin_func;
-	uint32_t baudrate;
-	interrupt_t interrupt_num;
-	sys_device_t sys_uart_id;
-	/*void (*uart_ISR)(void);*/
+  ft900_uart_regs_t *uart_id;
+  uint8_t tx_pin_num;
+  pad_func_t tx_pin_func;
+  uint8_t rx_pin_num;
+  pad_func_t rx_pin_func;
+  uint32_t baudrate;
+  interrupt_t interrupt_num;
+  sys_device_t sys_uart_id;
+  /*void (*uart_ISR)(void);*/
 } uart_config_structure_t;
 
 uart_config_structure_t uart_configuration[MAX_UARTS] = {
 #if defined(__FT930__)
-		{UART0, 23, pad_uart0_txd, 22, pad_uart0_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart0, sys_device_uart0/*, uart0ISR*/}
-		,{UART1, 27, pad_uart1_txd, 26, pad_uart1_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart1, sys_device_uart1/*, uart1ISR*/}
+    {UART0, 23, pad_uart0_txd, 22, pad_uart0_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart0, sys_device_uart0 /*, uart0ISR*/},
+    {UART1, 27, pad_uart1_txd, 26, pad_uart1_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart1, sys_device_uart1 /*, uart1ISR*/}
 #else
-		{UART0, 48, pad_uart0_txd, 49, pad_uart0_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart0, sys_device_uart0/*, uart0ISR*/}
-		,{UART1, 52, pad_uart1_txd, 53, pad_uart1_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart1, sys_device_uart1/*, uart1ISR*/}
+    {UART0, 48, pad_uart0_txd, 49, pad_uart0_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart0, sys_device_uart0 /*, uart0ISR*/},
+    {UART1, 52, pad_uart1_txd, 53, pad_uart1_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart1, sys_device_uart1 /*, uart1ISR*/}
 #endif
 #if defined(__FT930__)
-		,{UART2, 15, pad_uart2_txd, 14, pad_uart2_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart2, sys_device_uart2/*, uart2ISR*/}
-		,{UART3, 19, pad_uart3_txd, 18, pad_uart3_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart3, sys_device_uart3/*, uart3ISR*/}
+    ,
+    {UART2, 15, pad_uart2_txd, 14, pad_uart2_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart2, sys_device_uart2 /*, uart2ISR*/},
+    {UART3, 19, pad_uart3_txd, 18, pad_uart3_rxd, UART_DIVIDER_19200_BAUD, interrupt_uart3, sys_device_uart3 /*, uart3ISR*/}
 #endif
 };
 
@@ -245,146 +247,149 @@ uart_config_structure_t uart_configuration[MAX_UARTS] = {
 int main(void)
 {
 
-	/* Setup UART and D2XX */
-    setup();
+  /* Setup UART and D2XX */
+  setup();
 
-    for(;;){
+  for (;;)
+  {
 
 #if defined(__FT900__)
-    	D2XX_Process();
+    D2XX_Process();
 #endif
 
-    	//Test mode
-		if (D2XXTEST__Testmode)
-		{
-			//interrupt_disable_globally();
-			for (;;);
-			// wait for power cycle after testmode
-		}
-
-		// UART to D2XX Bridge application
-		if (D2XXTEST__Ready)
-		{
-			d2xx_uart_bridge();
-		}
-
-		//DFU mode
-		if (D2XXTEST__DfuDetach)
-		{
-			interrupt_disable_globally();
-			/* DFU detach request had come. Exit D2XX */
-			D2XX_Exit();
-
-#if defined(__FT930__)
-		    *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_D2XX_MODE);    // turn-off D2XX_mode
-		    *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
-#endif
-
-			/* Take the system to DFU Mode. Provide timeout in ms to
-			 * wait for re-enumeration with the host
-			 * */
-#ifndef BDFU
-			STARTUP_DFU(0);
-#else
-			printf("Switching to DFU");
-			if (USBD_DFU_is_runtime()) /* to ward off linkage issue */
-			{
-				GO_BDFU(0x0403, 0x0FDE, 0x2300); // use default VID, PID and REL
-			}
-#endif
-			break;
-		}
-
-		/* System power down handling */
-		if (D2XXTEST__Suspend)
-		{
-
-			wkupSource = 0;
-			dbg("Enter sleep...\r\n");
-#ifdef GPIO_REMOTE_WAKEUP
-			//Configuring GPIO pin to wakeup
-			SetRemoteWakeup = 0;
-			if (RemoteWakeupEnable)
-			{
-				/* Set up the pin */
-				gpio_dir(GPIO_PIN, pad_dir_input);
-				gpio_pull(GPIO_PIN, pad_pull_pullup);
-
-				/* Attach an interrupt */
-				interrupt_attach(interrupt_gpio, (uint8_t)interrupt_gpio, gpio_ISR);
-				gpio_interrupt_enable(GPIO_PIN, gpio_int_edge_falling);
-			}
-#endif
-
-			//Enable d2xx hw engine wakeup events
-#if defined(__FT930__)
-			SYS->PMCFG_L &= ~(MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN);
-			interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
-			SYS->PMCFG_L |= MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN;
-#endif
-
-			// Close UART
-#if 0
-			uart_close(UART0);
-			sys_disable(sys_device_uart0);
-#endif
-
-			CRITICAL_SECTION_BEGIN
-			{
-				/* Power down Mode */
-				D2XXTEST__Sleep = 1;
-				D2XXTEST__Wakeup = 0;
-			}
-			CRITICAL_SECTION_END
-			SYS->PMCFG_L |= MASK_SYS_PMCFG_PM_PWRDN_MODE;
-			SYS->PMCFG_L |= MASK_SYS_PMCFG_PM_PWRDN;
-
-			asm volatile ("nop");
-			asm volatile ("nop");
-			asm volatile ("nop");
-			asm volatile ("nop");
-			asm volatile ("nop");
-
-			//wait for wakeup
-			while(!D2XXTEST__Wakeup);
-
-			//Woken up!!! Disable all wakeup interrupt sources
-			interrupt_disable_globally();
-#if defined(__FT930__)
-			interrupt_detach(interrupt_0);
-			SYS->PMCFG_L &= ~(MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN);
-#endif
-
-			//Remove powerdown mode
-			SYS->PMCFG_L &= ~MASK_SYS_PMCFG_PM_PWRDN_MODE;
-			SYS->PMCFG_L &= ~MASK_SYS_PMCFG_PM_PWRDN;
-
-#ifdef GPIO_REMOTE_WAKEUP
-			gpio_interrupt_disable(GPIO_PIN);
-			interrupt_detach(interrupt_gpio);
-			gpio_is_interrupted(GPIO_PIN);
-#endif
-
-			D2XXTEST__Sleep = 0;
-			D2XXTEST__Suspend = 0;
-			D2XXTEST__Wakeup = 0;
-
-			//Enable back the UART
-#if 0
-			debug_uart_init();
-#endif
-			interrupt_enable_globally();
-			dbg("Exit sleep:%02X... \r\n", wkupSource);
-			if (SetRemoteWakeup)
-			{
-				uint8_t wake = SetRemoteWakeup;
-				D2XX_IOCTL(0, D2XX_IOCTL_SYS_REMOTE_WAKEUP, &wake, NULL);
-				SetRemoteWakeup = 0;
-				dbg("Sending remote wakeup to host.. \r\n");
-			}
-		}
+    // Test mode
+    if (D2XXTEST__Testmode)
+    {
+      // interrupt_disable_globally();
+      for (;;)
+        ;
+      // wait for power cycle after testmode
     }
-    return 0;
+
+    // UART to D2XX Bridge application
+    if (D2XXTEST__Ready)
+    {
+      d2xx_uart_bridge();
+    }
+
+    // DFU mode
+    if (D2XXTEST__DfuDetach)
+    {
+      interrupt_disable_globally();
+      /* DFU detach request had come. Exit D2XX */
+      D2XX_Exit();
+
+#if defined(__FT930__)
+      *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_D2XX_MODE); // turn-off D2XX_mode
+      *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
+#endif
+
+      /* Take the system to DFU Mode. Provide timeout in ms to
+       * wait for re-enumeration with the host
+       * */
+#ifndef BDFU
+      STARTUP_DFU(0);
+#else
+      printf("Switching to DFU");
+      if (USBD_DFU_is_runtime()) /* to ward off linkage issue */
+      {
+        GO_BDFU(0x0403, 0x0FDE, 0x2300); // use default VID, PID and REL
+      }
+#endif
+      break;
+    }
+
+    /* System power down handling */
+    if (D2XXTEST__Suspend)
+    {
+
+      wkupSource = 0;
+      dbg("Enter sleep...\r\n");
+#ifdef GPIO_REMOTE_WAKEUP
+      // Configuring GPIO pin to wakeup
+      SetRemoteWakeup = 0;
+      if (RemoteWakeupEnable)
+      {
+        /* Set up the pin */
+        gpio_dir(GPIO_PIN, pad_dir_input);
+        gpio_pull(GPIO_PIN, pad_pull_pullup);
+
+        /* Attach an interrupt */
+        interrupt_attach(interrupt_gpio, (uint8_t)interrupt_gpio, gpio_ISR);
+        gpio_interrupt_enable(GPIO_PIN, gpio_int_edge_falling);
+      }
+#endif
+
+      // Enable d2xx hw engine wakeup events
+#if defined(__FT930__)
+      SYS->PMCFG_L &= ~(MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN);
+      interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
+      SYS->PMCFG_L |= MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN;
+#endif
+
+      // Close UART
+#if 0
+      uart_close(UART0);
+      sys_disable(sys_device_uart0);
+#endif
+
+      CRITICAL_SECTION_BEGIN
+      {
+        /* Power down Mode */
+        D2XXTEST__Sleep = 1;
+        D2XXTEST__Wakeup = 0;
+      }
+      CRITICAL_SECTION_END
+      SYS->PMCFG_L |= MASK_SYS_PMCFG_PM_PWRDN_MODE;
+      SYS->PMCFG_L |= MASK_SYS_PMCFG_PM_PWRDN;
+
+      asm volatile("nop");
+      asm volatile("nop");
+      asm volatile("nop");
+      asm volatile("nop");
+      asm volatile("nop");
+
+      // wait for wakeup
+      while (!D2XXTEST__Wakeup)
+        ;
+
+      // Woken up!!! Disable all wakeup interrupt sources
+      interrupt_disable_globally();
+#if defined(__FT930__)
+      interrupt_detach(interrupt_0);
+      SYS->PMCFG_L &= ~(MASK_SYS_PMCFG_SLAVE_PERI_IRQ_EN);
+#endif
+
+      // Remove powerdown mode
+      SYS->PMCFG_L &= ~MASK_SYS_PMCFG_PM_PWRDN_MODE;
+      SYS->PMCFG_L &= ~MASK_SYS_PMCFG_PM_PWRDN;
+
+#ifdef GPIO_REMOTE_WAKEUP
+      gpio_interrupt_disable(GPIO_PIN);
+      interrupt_detach(interrupt_gpio);
+      gpio_is_interrupted(GPIO_PIN);
+#endif
+
+      D2XXTEST__Sleep = 0;
+      D2XXTEST__Suspend = 0;
+      D2XXTEST__Wakeup = 0;
+
+      // Enable back the UART
+#if 0
+      debug_uart_init();
+#endif
+      interrupt_enable_globally();
+      dbg("Exit sleep:%02X... \r\n", wkupSource);
+      if (SetRemoteWakeup)
+      {
+        uint8_t wake = SetRemoteWakeup;
+        D2XX_IOCTL(0, D2XX_IOCTL_SYS_REMOTE_WAKEUP, &wake, NULL);
+        SetRemoteWakeup = 0;
+        dbg("Sending remote wakeup to host.. \r\n");
+      }
+    }
+  }
+  return 0;
 }
 
 /**
@@ -394,64 +399,66 @@ int main(void)
  */
 size_t uartTx(int idx, uint8_t *buffer, size_t len)
 {
-	signed int start;
-	size_t copied = 0;
+  signed int start;
+  size_t copied = 0;
 
-	// Determine if we need to start a transmission or there is one
-	// already in action.
-	CRITICAL_SECTION_BEGIN
-	start = uartBufferOut_wr_idx[idx] - uartBufferOut_rd_idx[idx];
-	CRITICAL_SECTION_END
+  // Determine if we need to start a transmission or there is one
+  // already in action.
+  CRITICAL_SECTION_BEGIN
+  start = uartBufferOut_wr_idx[idx] - uartBufferOut_rd_idx[idx];
+  CRITICAL_SECTION_END
 
-	CRITICAL_SECTION_BEGIN
-	// Copy in as much data from the producer as there is space for
-	// in the out buffer.
-	while (len--)
-	{
-		// Check there is space there to receive the data from the producer.
-		if (uartBufferOut_avail[idx] > 0)
-		{
-			// Reduce the number of available bytes.
-			uartBufferOut_avail[idx]--;
+  CRITICAL_SECTION_BEGIN
+  // Copy in as much data from the producer as there is space for
+  // in the out buffer.
+  while (len--)
+  {
+    // Check there is space there to receive the data from the producer.
+    if (uartBufferOut_avail[idx] > 0)
+    {
+      // Reduce the number of available bytes.
+      uartBufferOut_avail[idx]--;
 
-			// Add byte of data to the buffer.
-			uartBufferOut_data[idx][uartBufferOut_wr_idx[idx]] = *buffer++;
+      // Add byte of data to the buffer.
+      uartBufferOut_data[idx][uartBufferOut_wr_idx[idx]] = *buffer++;
 
-			// Increment the pointer and wrap around.
-			uartBufferOut_wr_idx[idx]++;
-			if (uartBufferOut_wr_idx[idx] == RINGBUFFER_SIZE) uartBufferOut_wr_idx[idx] = 0;
+      // Increment the pointer and wrap around.
+      uartBufferOut_wr_idx[idx]++;
+      if (uartBufferOut_wr_idx[idx] == RINGBUFFER_SIZE)
+        uartBufferOut_wr_idx[idx] = 0;
 
-			// Tally up number of bytes actually transmitted.
-			copied++;
-		}
-	}
-	CRITICAL_SECTION_END
+      // Tally up number of bytes actually transmitted.
+      copied++;
+    }
+  }
+  CRITICAL_SECTION_END
 
-	// Start new a transmission if nothing is being transmitted.
-	if (start == 0)
-	{
-		uint8_t c;
+  // Start new a transmission if nothing is being transmitted.
+  if (start == 0)
+  {
+    uint8_t c;
 
-		CRITICAL_SECTION_BEGIN
+    CRITICAL_SECTION_BEGIN
 
-		// Get data from the out buffer.
-		c = uartBufferOut_data[idx][uartBufferOut_rd_idx[idx]];
+    // Get data from the out buffer.
+    c = uartBufferOut_data[idx][uartBufferOut_rd_idx[idx]];
 
-		// Increment the consumer pointer and wrap around.
-		uartBufferOut_rd_idx[idx]++;
-		if (uartBufferOut_rd_idx[idx] == RINGBUFFER_SIZE) uartBufferOut_rd_idx[idx] = 0;
+    // Increment the consumer pointer and wrap around.
+    uartBufferOut_rd_idx[idx]++;
+    if (uartBufferOut_rd_idx[idx] == RINGBUFFER_SIZE)
+      uartBufferOut_rd_idx[idx] = 0;
 
-		// Byte has been sent, update available bytes value.
-		uartBufferOut_avail[idx]++;
+    // Byte has been sent, update available bytes value.
+    uartBufferOut_avail[idx]++;
 
-		CRITICAL_SECTION_END
-		//dbg("wr[%d]:%c\n",idx,c);
-		// Send data to the UART. This will result in a TX interrupt when
-		// it completes.
-		uart_write(uart_configuration[idx].uart_id, c);
-	}
+    CRITICAL_SECTION_END
+    // dbg("wr[%d]:%c\n",idx,c);
+    //  Send data to the UART. This will result in a TX interrupt when
+    //  it completes.
+    uart_write(uart_configuration[idx].uart_id, c);
+  }
 
-	return copied;
+  return copied;
 }
 
 /**
@@ -461,36 +468,37 @@ size_t uartTx(int idx, uint8_t *buffer, size_t len)
  */
 size_t uartRx(int idx, uint8_t *buffer, size_t len)
 {
-	size_t copied = 0;
+  size_t copied = 0;
 
-	// Copy in as much data as we can ...
-	//   This can be either the maximum size of the buffer being given
-	//   or the maximum number of bytes available in the Serial Port
-	//   buffer.
-	while(len--)
-	{
-		CRITICAL_SECTION_BEGIN
-		if (uartBufferIn_avail[idx] < RINGBUFFER_SIZE)
-		{
-			uartBufferIn_avail[idx]++;
+  // Copy in as much data as we can ...
+  //   This can be either the maximum size of the buffer being given
+  //   or the maximum number of bytes available in the Serial Port
+  //   buffer.
+  while (len--)
+  {
+    CRITICAL_SECTION_BEGIN
+    if (uartBufferIn_avail[idx] < RINGBUFFER_SIZE)
+    {
+      uartBufferIn_avail[idx]++;
 
-			*buffer = uartBufferIn_data[idx][uartBufferIn_rd_idx[idx]];
+      *buffer = uartBufferIn_data[idx][uartBufferIn_rd_idx[idx]];
 
-			//dbg("rd[%d]:%c\n",idx,*buffer);
+      // dbg("rd[%d]:%c\n",idx,*buffer);
 
-			buffer++;
+      buffer++;
 
-			// Increment the pointer and wrap around.
-			uartBufferIn_rd_idx[idx]++;
-			if (uartBufferIn_rd_idx[idx] == RINGBUFFER_SIZE) uartBufferIn_rd_idx[idx] = 0;
+      // Increment the pointer and wrap around.
+      uartBufferIn_rd_idx[idx]++;
+      if (uartBufferIn_rd_idx[idx] == RINGBUFFER_SIZE)
+        uartBufferIn_rd_idx[idx] = 0;
 
-			copied++;
-		}
-		CRITICAL_SECTION_END
-	}
+      copied++;
+    }
+    CRITICAL_SECTION_END
+  }
 
-	// Report back how many bytes have been copied into the buffer...
-	return copied;
+  // Report back how many bytes have been copied into the buffer...
+  return copied;
 }
 
 /**
@@ -499,53 +507,55 @@ size_t uartRx(int idx, uint8_t *buffer, size_t len)
  */
 void uart_ISR(void)
 {
-	static uint8_t c;
-	//int i = 0;
-	for (int i = 0; i < no_of_uarts; i++)
-	{
-		// Transmit interrupt...
-		if (uart_is_interrupted(uart_configuration[i].uart_id, uart_interrupt_tx))
-		{
-			// Check to see how much data we have to transmit...
-			//avail = uartBufferOut_rd_idx - uartBufferOut_wr_idx;
+  static uint8_t c;
+  // int i = 0;
+  for (int i = 0; i < no_of_uarts; i++)
+  {
+    // Transmit interrupt...
+    if (uart_is_interrupted(uart_configuration[i].uart_id, uart_interrupt_tx))
+    {
+      // Check to see how much data we have to transmit...
+      // avail = uartBufferOut_rd_idx - uartBufferOut_wr_idx;
 
-			if (uartBufferOut_avail[i] < RINGBUFFER_SIZE)
-			{
-				uartBufferOut_avail[i]++;
+      if (uartBufferOut_avail[i] < RINGBUFFER_SIZE)
+      {
+        uartBufferOut_avail[i]++;
 
-				// Copy out the byte to be transmitted so that the uart_write is
-				// the last thing we do...
-				c = uartBufferOut_data[i][uartBufferOut_rd_idx[i]];
+        // Copy out the byte to be transmitted so that the uart_write is
+        // the last thing we do...
+        c = uartBufferOut_data[i][uartBufferOut_rd_idx[i]];
 
-				// Increment the pointer and wrap around.
-				uartBufferOut_rd_idx[i]++;
-				if (uartBufferOut_rd_idx[i] == RINGBUFFER_SIZE) uartBufferOut_rd_idx[i] = 0;
+        // Increment the pointer and wrap around.
+        uartBufferOut_rd_idx[i]++;
+        if (uartBufferOut_rd_idx[i] == RINGBUFFER_SIZE)
+          uartBufferOut_rd_idx[i] = 0;
 
-				// Write out a new byte, the following Transmit interrupt should handle
-				// the remaning bytes...
-				uart_write(uart_configuration[i].uart_id, c);
-			}
-		}
+        // Write out a new byte, the following Transmit interrupt should handle
+        // the remaining bytes...
+        uart_write(uart_configuration[i].uart_id, c);
+      }
+    }
 
-		// Receive interrupt...
-		if (uart_is_interrupted(uart_configuration[i].uart_id, uart_interrupt_rx))
-		{
-			// Read a byte into the Ring Buffer...
-			uart_read(uart_configuration[i].uart_id, &c);
+    // Receive interrupt...
+    if (uart_is_interrupted(uart_configuration[i].uart_id, uart_interrupt_rx))
+    {
+      // Read a byte into the Ring Buffer...
+      uart_read(uart_configuration[i].uart_id, &c);
 
-			// Do not overwrite data already in the buffer.
-			if (uartBufferIn_avail[i] > 0)
-			{
-				uartBufferIn_avail[i]--;
+      // Do not overwrite data already in the buffer.
+      if (uartBufferIn_avail[i] > 0)
+      {
+        uartBufferIn_avail[i]--;
 
-				uartBufferIn_data[i][uartBufferIn_wr_idx[i]] = c;
+        uartBufferIn_data[i][uartBufferIn_wr_idx[i]] = c;
 
-				// Increment the pointer and wrap around.
-				uartBufferIn_wr_idx[i]++;
-				if (uartBufferIn_wr_idx[i] == RINGBUFFER_SIZE) uartBufferIn_wr_idx[i] = 0;
-			}
-		}
-	}
+        // Increment the pointer and wrap around.
+        uartBufferIn_wr_idx[i]++;
+        if (uartBufferIn_wr_idx[i] == RINGBUFFER_SIZE)
+          uartBufferIn_wr_idx[i] = 0;
+      }
+    }
+  }
 }
 /**
  The initialization function for an UART.
@@ -553,147 +563,151 @@ void uart_ISR(void)
 void uart_init(int i)
 {
 
-	/* Enable the UART Device... */
-	sys_enable(uart_configuration[i].sys_uart_id);
-	gpio_function(uart_configuration[i].tx_pin_num, uart_configuration[i].tx_pin_func); /* UART0 TXD */
-	gpio_function(uart_configuration[i].rx_pin_num, uart_configuration[i].rx_pin_func); /* UART0 RXD */
+  /* Enable the UART Device... */
+  sys_enable(uart_configuration[i].sys_uart_id);
+  gpio_function(uart_configuration[i].tx_pin_num, uart_configuration[i].tx_pin_func); /* UART0 TXD */
+  gpio_function(uart_configuration[i].rx_pin_num, uart_configuration[i].rx_pin_func); /* UART0 RXD */
 
-	// Open the UART using the coding required.
-	uart_open(uart_configuration[i].uart_id,                    /* Device */
-			1,                        /* Prescaler = 1 */
-			uart_configuration[i].baudrate,  /* Divider = 1302 */
-			uart_data_bits_8,         /* No. buffer Bits */
-			uart_parity_none,         /* Parity */
-			uart_stop_bits_1);        /* No. Stop Bits */
+  // Open the UART using the coding required.
+  uart_open(uart_configuration[i].uart_id,  /* Device */
+            1,                              /* Prescaler = 1 */
+            uart_configuration[i].baudrate, /* Divider = 1302 */
+            uart_data_bits_8,               /* No. buffer Bits */
+            uart_parity_none,               /* Parity */
+            uart_stop_bits_1);              /* No. Stop Bits */
 
-
-	CRITICAL_SECTION_BEGIN
-	{
-		/* Attach the interrupt so it can be called... */
-		interrupt_attach(uart_configuration[i].interrupt_num, (uint8_t) uart_configuration[i].interrupt_num, uart_ISR/*uart_configuration[i].uart_ISR*/);
-		/* Enable the UART to fire interrupts when receiving data... */
-		uart_enable_interrupt(uart_configuration[i].uart_id, uart_interrupt_rx);
-		/* Enable the UART to fire interrupts when transmitting data... */
-		uart_enable_interrupt(uart_configuration[i].uart_id, uart_interrupt_tx);
-		/* Enable interrupts to be fired... */
-		uart_enable_interrupts_globally(uart_configuration[i].uart_id);
-
-	}
-	CRITICAL_SECTION_END
+  CRITICAL_SECTION_BEGIN
+  {
+    /* Attach the interrupt so it can be called... */
+    interrupt_attach(uart_configuration[i].interrupt_num,
+                     (uint8_t)uart_configuration[i].interrupt_num,
+                     uart_ISR /*uart_configuration[i].uart_ISR*/);
+    /* Enable the UART to fire interrupts when receiving data... */
+    uart_enable_interrupt(uart_configuration[i].uart_id, uart_interrupt_rx);
+    /* Enable the UART to fire interrupts when transmitting data... */
+    uart_enable_interrupt(uart_configuration[i].uart_id, uart_interrupt_tx);
+    /* Enable interrupts to be fired... */
+    uart_enable_interrupts_globally(uart_configuration[i].uart_id);
+  }
+  CRITICAL_SECTION_END
 }
 
 uint8_t bufUart2Usb[MAX_UARTS][RINGBUFFER_SIZE] = {0};
 uint8_t bufUsb2Uart[MAX_UARTS][RINGBUFFER_SIZE] = {0};
-/* Test function that does the D2XX to UART and viceversa bridging functionality */
-void d2xx_uart_bridge (void)
+/* Test function that does the D2XX to UART and vice versa bridging functionality */
+void d2xx_uart_bridge(void)
 {
-	size_t read_bytes;
-	int bytesWritten;
+  size_t read_bytes;
+  int bytesWritten;
 
-	for (int i = 0; i < no_of_uarts; i++)
-	{
-			/*read the bytes out... */
-			read_bytes = D2XX_Read(i+1, &bufUsb2Uart[i][0],RINGBUFFER_SIZE);
+  for (int i = 0; i < no_of_uarts; i++)
+  {
+    /*read the bytes out... */
+    read_bytes = D2XX_Read(i + 1, &bufUsb2Uart[i][0], RINGBUFFER_SIZE);
 
-			if (read_bytes)
-			{
-				// Write it out to the UART.
-				//dbg("dr[%d]: %d\n",i,read_bytes);
-				uartTx(i, &bufUsb2Uart[i][0], read_bytes);
-			}
+    if (read_bytes)
+    {
+      // Write it out to the UART.
+      // dbg("dr[%d]: %d\n",i,read_bytes);
+      uartTx(i, &bufUsb2Uart[i][0], read_bytes);
+    }
 #if 1 // FIXME: Workaround to get DFU detach to work
-			delayms(100);
-			if (D2XXTEST__DfuDetach)
-			{
-				return;
-			}
+    delayms(100);
+    if (D2XXTEST__DfuDetach)
+    {
+      return;
+    }
 #endif
 
-			// Read in a packet of data from the UART.
-			// (up to the size of the ring buffer)
-			read_bytes = uartRx(i, &bufUart2Usb[i][0], RINGBUFFER_SIZE);
+    // Read in a packet of data from the UART.
+    // (up to the size of the ring buffer)
+    read_bytes = uartRx(i, &bufUart2Usb[i][0], RINGBUFFER_SIZE);
 
-			/* Write the byte out... */
-			if (read_bytes > 0)
-			{
-					int	ptr = 0;
-					do
-					{
-						bytesWritten = D2XX_Write(i+1, &bufUart2Usb[i][ptr], read_bytes);
-						if (bytesWritten > 0)
-						{
-							//dbg("dw[%d]: %d\n",i,bytesWritten);
-							read_bytes -= bytesWritten;
-							ptr += bytesWritten;
-						};
-					}while (read_bytes);
-			}
-	}
+    /* Write the byte out... */
+    if (read_bytes > 0)
+    {
+      int ptr = 0;
+      do
+      {
+        bytesWritten = D2XX_Write(i + 1, &bufUart2Usb[i][ptr], read_bytes);
+        if (bytesWritten > 0)
+        {
+          // dbg("dw[%d]: %d\n",i,bytesWritten);
+          read_bytes -= bytesWritten;
+          ptr += bytesWritten;
+        };
+      } while (read_bytes);
+    }
+  }
 }
 
 void setup(void)
 {
-	ED2XX_ErrorCode retVal;
+  ED2XX_ErrorCode retVal;
 
-	D2XXTEST__Suspend = 0;
-	D2XXTEST__Sleep = 0;
-	D2XXTEST__Wakeup = 0;
+  D2XXTEST__Suspend = 0;
+  D2XXTEST__Sleep = 0;
+  D2XXTEST__Wakeup = 0;
 
 #ifdef BDFU
-	timer_prescaler(1000); /* to ward off linkage issue */
+  timer_prescaler(1000); /* to ward off linkage issue */
 #endif
 #if defined(__FT900__)
-	interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
+  interrupt_attach(interrupt_0, (int8_t)interrupt_0, power_management_ISR);
 #endif
 
-	memcpy_pm2dat(&D2XXTEST_UserD2xxConfig, (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration, sizeof(TD2XX_DeviceConfiguration));
-	retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
+  memcpy_pm2dat(&D2XXTEST_UserD2xxConfig,
+                (__flash__ void *)(uint32_t)&__pD2XXDefaultConfiguration,
+                sizeof(TD2XX_DeviceConfiguration));
+  retVal = D2XX_Init(&D2XXTEST_UserD2xxConfig, d2xx_callback, NULL);
 
-	if (retVal != 0)
-	{
-		dbg("Error with configuration file\r\n");
-		while(1) {};
-	}
+  if (retVal != 0)
+  {
+    dbg("Error with configuration file\r\n");
+    while (1)
+    {
+    };
+  }
 #if defined(__FT930__)
-    /*slave sub-system control register setup*/
-    *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
-    *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_D2XX_MODE);    // turn-on D2XX_mode
-    *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_SLV_RESET); // de-assert bit to allow slave CPU to start
+  /*slave sub-system control register setup*/
+  *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_SLV_RESET);  // assert bit to keep slave CPU in reset
+  *(SLAVECPU) |= (MASK_SLAVE_CPU_CTRL_D2XX_MODE);  // turn-on D2XX_mode
+  *(SLAVECPU) &= ~(MASK_SLAVE_CPU_CTRL_SLV_RESET); // de-assert bit to allow slave CPU to start
 #endif
 
-	sys_enable(sys_device_timer_wdt);
-	/* Register the interrupt... */
-	interrupt_attach(interrupt_timers, 17, timer_ISR);
-	timer_prescaler(timer_select_a, 1000);
-	/* Enable Timers... */
-	timer_init(timer_select_a, 100, timer_direction_down, timer_prescaler_select_on, timer_mode_continuous);
-	timer_enable_interrupt(timer_select_a);
-	timer_start(timer_select_a);
-	interrupt_enable_globally(); //needed for interrupts
+  sys_enable(sys_device_timer_wdt);
+  /* Register the interrupt... */
+  interrupt_attach(interrupt_timers, 17, timer_ISR);
+  timer_prescaler(timer_select_a, 1000);
+  /* Enable Timers... */
+  timer_init(timer_select_a, 100, timer_direction_down, timer_prescaler_select_on, timer_mode_continuous);
+  timer_enable_interrupt(timer_select_a);
+  timer_start(timer_select_a);
+  interrupt_enable_globally(); // needed for interrupts
 #if 0
-	if (retVal == D2XX_ERR_NONE)
-	{
-		check_device_status = 1;
-	}
+  if (retVal == D2XX_ERR_NONE)
+  {
+    check_device_status = 1;
+  }
 #endif
 
-	no_of_uarts = (D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces > MAX_UARTS)?MAX_UARTS:D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces;
-	for (int i = 0; i < no_of_uarts; i++)
-	{
-		uart_init(i);
-	}
+  no_of_uarts = (D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces > MAX_UARTS) ?
+                  MAX_UARTS : D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces;
+  for (int i = 0; i < no_of_uarts; i++)
+  {
+    uart_init(i);
+  }
 
-    /* Print out a welcome message... */
-	dbg("(C) Copyright, Bridgetek Pte. Ltd. \r\n"
-			"--------------------------------------------------------------------- \r\n"
-			"Welcome to D2XX UART Bridge Example... \r\n"
-			"\r\n"
-			"Enter any text on the D2XX[1,2..4] port, the same is echoed on \r\n"
-			"the UART[0,1,..3]... \r\n"
-			"--------------------------------------------------------------------- \r\n"
-	);
-	dbg("D2XX_Init() called, Result: %d Interfaces: %d\r\n", retVal, D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces);
-
+  /* Print out a welcome message... */
+  dbg("(C) Copyright, Bridgetek Pte. Ltd. \r\n"
+      "--------------------------------------------------------------------- \r\n"
+      "Welcome to D2XX UART Bridge Example... \r\n"
+      "\r\n"
+      "Enter any text on the D2XX[1,2..4] port, the same is echoed on \r\n"
+      "the UART[0,1,..3]... \r\n"
+      "--------------------------------------------------------------------- \r\n");
+  dbg("D2XX_Init() called, Result: %d Interfaces: %d\r\n", retVal,
+      D2XXTEST_UserD2xxConfig.ConfigDesc.NumOfD2XXInterfaces);
 }
 
 /** @name d2xx_callback
@@ -701,128 +715,128 @@ void setup(void)
  *  @param
  *  @param
  */
-void d2xx_callback(ED2XX_EventCode  eventID, void *ref, void* param1, void* param2)
+void d2xx_callback(ED2XX_EventCode eventID, void *ref, void *param1, void *param2)
 {
-	/* 0 => Device, 1-3 => Interface*/
-	/* or */
-	/* 0 => Remote Wakeup disabled, 1 => Remote wakeup enabled */
-	uint8_t param = 0;
+  /* 0 => Device, 1-3 => Interface*/
+  /* or */
+  /* 0 => Remote Wakeup disabled, 1 => Remote wakeup enabled */
+  uint8_t param = 0;
 
-	if (param1)
-	{
-		param = (*(uint8_t *)param1);
-	}
+  if (param1)
+  {
+    param = (*(uint8_t *)param1);
+  }
 #ifdef DEBUG_EVENT
-	dbg("~%d ",eventID);
-	if (eventID <= D2XX_EVT_INTF_RESET)
-	{
-		dbg("%s", D2XXTest_EventStrings[eventID]);
-	}
-	dbg("\n");
+  dbg("~%d ", eventID);
+  if (eventID <= D2XX_EVT_INTF_RESET)
+  {
+    dbg("%s", D2XXTest_EventStrings[eventID]);
+  }
+  dbg("\n");
 #endif // DEBUG_EVENT
-	switch(eventID)
-	{
-	case D2XX_EVT_SUSPEND:
-		if (!D2XXTEST__Sleep)
-		{
-			D2XXTEST__Suspend = 1;
-			D2XXTEST__Sleep = 0;
-			RemoteWakeupEnable = param;
+  switch (eventID)
+  {
+  case D2XX_EVT_SUSPEND:
+    if (!D2XXTEST__Sleep)
+    {
+      D2XXTEST__Suspend = 1;
+      D2XXTEST__Sleep = 0;
+      RemoteWakeupEnable = param;
 #ifdef DEBUG_EVENT
-			dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
+      dbg("RemoteWakeup Enabled :%d \r\n", RemoteWakeupEnable);
 #endif // DEBUG_EVENT
-		}
-		break;
-	case D2XX_EVT_RESUME:
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_RESUME;
-			D2XXTEST__Wakeup = 1;
-		}
-		else
-		{
-			D2XXTEST__Suspend = 0;
-		}
-		break;
-	case D2XX_EVT_BUS_RESET:
+    }
+    break;
+  case D2XX_EVT_RESUME:
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_RESUME;
+      D2XXTEST__Wakeup = 1;
+    }
+    else
+    {
+      D2XXTEST__Suspend = 0;
+    }
+    break;
+  case D2XX_EVT_BUS_RESET:
 #if 0
-		check_device_status = 0;
+    check_device_status = 0;
 #endif
-		break;
-	case D2XX_EVT_READY: /*Connected */
-		D2XXTEST__Ready = 1;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_READY;
-			D2XXTEST__Wakeup = 1;
-		}
-		else
-		{
-			D2XXTEST__Suspend = 0;
-		}
-		break;
-	case D2XX_EVT_UNREADY: /*Detached */
-		D2XXTEST__Ready = 0;
-		D2XXTEST__Suspend = 1;
-		break;
-	case D2XX_EVT_DFU_DETACH: /* DFU Detach from DFU application */
-		D2XXTEST__DfuDetach = 1;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_OTHERS;
-			D2XXTEST__Wakeup = 1;
-		}
-		else
-		{
-			D2XXTEST__Suspend = 0;
-		}
-		break;
-	case D2XX_EVT_TESTMODE: /* Testmode during electrical tests */
-		D2XXTEST__Testmode = 1;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_OTHERS;
-			D2XXTEST__Wakeup = 1;
-		}
-		else
-		{
-			D2XXTEST__Suspend = 0;
-		}
-		break;
-	default:
-		break;
-	}
+    break;
+  case D2XX_EVT_READY: /*Connected */
+    D2XXTEST__Ready = 1;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_READY;
+      D2XXTEST__Wakeup = 1;
+    }
+    else
+    {
+      D2XXTEST__Suspend = 0;
+    }
+    break;
+  case D2XX_EVT_UNREADY: /*Detached */
+    D2XXTEST__Ready = 0;
+    D2XXTEST__Suspend = 1;
+    break;
+  case D2XX_EVT_DFU_DETACH: /* DFU Detach from DFU application */
+    D2XXTEST__DfuDetach = 1;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_OTHERS;
+      D2XXTEST__Wakeup = 1;
+    }
+    else
+    {
+      D2XXTEST__Suspend = 0;
+    }
+    break;
+  case D2XX_EVT_TESTMODE: /* Testmode during electrical tests */
+    D2XXTEST__Testmode = 1;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_OTHERS;
+      D2XXTEST__Wakeup = 1;
+    }
+    else
+    {
+      D2XXTEST__Suspend = 0;
+    }
+    break;
+  default:
+    break;
+  }
 }
 
 /* Initializes the UART for the testing */
 void debug_uart_init(void)
 {
 
-	/* Enable the UART Device... */
-	sys_enable(sys_device_uart0);
+  /* Enable the UART Device... */
+  sys_enable(sys_device_uart0);
 #if defined(__FT930__)
-    /* Make GPIO23 function as UART0_TXD and GPIO22 function as UART0_RXD... */
-    gpio_function(23, pad_uart0_txd); /* UART0 TXD */
-    gpio_function(22, pad_uart0_rxd); /* UART0 RXD */
+  /* Make GPIO23 function as UART0_TXD and GPIO22 function as UART0_RXD... */
+  gpio_function(23, pad_uart0_txd); /* UART0 TXD */
+  gpio_function(22, pad_uart0_rxd); /* UART0 RXD */
 #else
-	/* Make GPIO48 function as UART0_TXD and GPIO49 function as UART0_RXD... */
-	gpio_function(48, pad_uart0_txd); /* UART0 TXD */
-	gpio_function(49, pad_uart0_rxd); /* UART0 RXD */
+  /* Make GPIO48 function as UART0_TXD and GPIO49 function as UART0_RXD... */
+  gpio_function(48, pad_uart0_txd); /* UART0 TXD */
+  gpio_function(49, pad_uart0_rxd); /* UART0 RXD */
 #endif
 
-	// Open the UART using the coding required.
-	uart_open(UART0,                    /* Device */
-			1,                        /* Prescaler = 1 */
-			UART_DIVIDER_19200_BAUD,  /* Divider = 1302 */
-			uart_data_bits_8,         /* No. buffer Bits */
-			uart_parity_none,         /* Parity */
-			uart_stop_bits_1);        /* No. Stop Bits */
+  // Open the UART using the coding required.
+  uart_open(UART0,                   /* Device */
+            1,                       /* Prescaler = 1 */
+            UART_DIVIDER_19200_BAUD, /* Divider = 1302 */
+            uart_data_bits_8,        /* No. buffer Bits */
+            uart_parity_none,        /* Parity */
+            uart_stop_bits_1);       /* No. Stop Bits */
 
-	/* Print out a welcome message... */
-	uart_puts(UART0,
-			"\x1B[2J" /* ANSI/VT100 - Clear the Screen */
-			"\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
-	);
+  /* Print out a welcome message... */
+  uart_puts(UART0,
+            "\x1B[2J" /* ANSI/VT100 - Clear the Screen */
+            "\x1B[H"  /* ANSI/VT100 - Move Cursor to Home */
+  );
 }
 
 #if 0
@@ -845,114 +859,111 @@ void power_management_ISR(void)
 {
 
 #if defined(__FT930__)
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_SLAVE_PERI_IRQ_PEND)
-	{
-		// Clear d2xx hw engine wakeup
-		SYS->PMCFG_H = MASK_SYS_PMCFG_SLAVE_PERI_IRQ_PEND;
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_SLAVE_PERI_IRQ_PEND)
+  {
+    // Clear d2xx hw engine wakeup
+    SYS->PMCFG_H = MASK_SYS_PMCFG_SLAVE_PERI_IRQ_PEND;
 
-		//D2XXTEST__Suspend = 0;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_SLAVE;
-			D2XXTEST__Wakeup = 1;
-		}
-	}
+    // D2XXTEST__Suspend = 0;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_SLAVE;
+      D2XXTEST__Wakeup = 1;
+    }
+  }
 #endif
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_PM_GPIO_IRQ_PEND)
-	{
-		// Clear GPIO wakeup pending
-		SYS->PMCFG_H = MASK_SYS_PMCFG_PM_GPIO_IRQ_PEND;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_GPIO;
-			D2XXTEST__Wakeup = 1;
-		}
-	}
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_PM_GPIO_IRQ_PEND)
+  {
+    // Clear GPIO wakeup pending
+    SYS->PMCFG_H = MASK_SYS_PMCFG_PM_GPIO_IRQ_PEND;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_GPIO;
+      D2XXTEST__Wakeup = 1;
+    }
+  }
 #if defined(__FT900__)
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_DEV_CONN_DEV)
-	{
-		// Clear connection interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_CONN_DEV;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_CONNECT;
-			D2XXTEST__Wakeup = 1;
-		}
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_DEV_CONN_DEV)
+  {
+    // Clear connection interrupt
+    SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_CONN_DEV;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_CONNECT;
+      D2XXTEST__Wakeup = 1;
+    }
+  }
 
-	}
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_DEV_DIS_DEV)
+  {
+    // Clear disconnection interrupt
+    SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_DIS_DEV;
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_DISCONNECT;
+      D2XXTEST__Wakeup = 1;
+    }
+  }
 
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_DEV_DIS_DEV)
-	{
-		// Clear disconnection interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_DEV_DIS_DEV;
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_DISCONNECT;
-			D2XXTEST__Wakeup = 1;
-		}
-	}
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_HOST_RST_DEV)
+  {
+    // Clear Host Reset interrupt
+    SYS->PMCFG_H = MASK_SYS_PMCFG_HOST_RST_DEV;
+    USBD_resume();
+    if (D2XXTEST__Sleep)
+    {
+      wkupSource |= TEST_WAKEUP_SOURCE_RESET;
+      D2XXTEST__Wakeup = 1;
+    }
+  }
 
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_HOST_RST_DEV)
-	{
-		// Clear Host Reset interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_HOST_RST_DEV;
-		USBD_resume();
-		if (D2XXTEST__Sleep)
-		{
-			wkupSource |= TEST_WAKEUP_SOURCE_RESET;
-			D2XXTEST__Wakeup = 1;
-		}
-	}
-
-	if (SYS->PMCFG_H & MASK_SYS_PMCFG_HOST_RESUME_DEV)
-	{
-		// Clear Host Resume interrupt
-		SYS->PMCFG_H = MASK_SYS_PMCFG_HOST_RESUME_DEV;
-		if(! (SYS->MSC0CFG & MASK_SYS_MSC0CFG_DEV_RMWAKEUP))
-		{
-			// If we are driving K-state on Device USB port;
-			// We must maintain the 1ms requirement before resuming the phy
-			USBD_resume();
-		}
-	}
+  if (SYS->PMCFG_H & MASK_SYS_PMCFG_HOST_RESUME_DEV)
+  {
+    // Clear Host Resume interrupt
+    SYS->PMCFG_H = MASK_SYS_PMCFG_HOST_RESUME_DEV;
+    if (!(SYS->MSC0CFG & MASK_SYS_MSC0CFG_DEV_RMWAKEUP))
+    {
+      // If we are driving K-state on Device USB port;
+      // We must maintain the 1ms requirement before resuming the phy
+      USBD_resume();
+    }
+  }
 #endif
 }
-
 
 #ifdef GPIO_REMOTE_WAKEUP
 void gpio_ISR()
 {
-    if (gpio_is_interrupted(GPIO_PIN))
+  if (gpio_is_interrupted(GPIO_PIN))
+  {
+    if (D2XXTEST__Sleep)
     {
-		if (D2XXTEST__Sleep)
-		{
-			//Need to perform remote wakeup procedure
-			D2XXTEST__Wakeup = 1;
-			SetRemoteWakeup = 1;
-		}
+      // Need to perform remote wakeup procedure
+      D2XXTEST__Wakeup = 1;
+      SetRemoteWakeup = 1;
     }
+  }
 }
 #endif
 
 void timer_ISR(void)
 {
-	if (timer_is_interrupted(timer_select_a))
-	{
-		D2XX_Timer();
+  if (timer_is_interrupted(timer_select_a))
+  {
+    D2XX_Timer();
 #if 0
-		if (check_device_status)
-		{
-			device_inactive_counter++;
+    if (check_device_status)
+    {
+      device_inactive_counter++;
 
-			if (device_inactive_counter >= DEVICE_INACTIVITY)
-			{
-				dbg("Device inactive !!!\n");
-				USBD_suspend_device();
-				device_inactive_counter = 0;
-				check_device_status = 0;
-			}
-		}
+      if (device_inactive_counter >= DEVICE_INACTIVITY)
+      {
+        dbg("Device inactive !!!\n");
+        USBD_suspend_device();
+        device_inactive_counter = 0;
+        check_device_status = 0;
+      }
+    }
 #endif
-
-	}
+  }
 }
