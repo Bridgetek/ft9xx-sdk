@@ -152,8 +152,12 @@ macro(ft9xx_set_executable executable srcfiles libfiles ldscript)
     elseif (${TARGET} MATCHES ft93x)
         target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:C>:__FT930__>)
         target_compile_definitions(${executable} PRIVATE $<$<COMPILE_LANGUAGE:ASM>:__FT930__=1>)
-        target_link_options(${executable} PRIVATE -D__FT930__)
-        target_link_options(${executable} PRIVATE -mft32b -mcompress)
+        target_link_options(${executable} PRIVATE
+            -D__FT930__
+            -mft32b
+            -mcompress
+            -Wl,--defsym=__PMSIZE=128K -Wl,--defsym=__RAMSIZE=32K
+        )
         target_link_libraries(${executable} PRIVATE -lft930)
         set(ENV{FT9XX_OUTPUT_FOLDER_PRE} FT93x)
     else ()
@@ -165,7 +169,7 @@ macro(ft9xx_set_executable executable srcfiles libfiles ldscript)
     set(CMAKE_BUILD_MODE ${BUILD})
 
     if("${OUTDIR}" STREQUAL "")
-        # Set the ouput folder for the elf, bin, map,...
+        # Set the output folder for the elf, bin, map,...
         set(ENV{FT9XX_OUTPUT_FOLDER_NAME} $ENV{FT9XX_OUTPUT_FOLDER_PRE}_$ENV{FT9XX_OUTPUT_FOLDER_POST})
         set(ENV{FT9XX_EXECUTABLE_OUTPUT_PATH} ${CMAKE_SOURCE_DIR}/$ENV{FT9XX_OUTPUT_FOLDER_NAME})
     else()
