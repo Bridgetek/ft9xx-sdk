@@ -23,7 +23,7 @@
 							<builder buildPath="${workspace_loc:/Free RTOS D2XX Example}/FT90x_Debug" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.811059680" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool id="com.brtchip.compiler.ft900.debug.d2xx.983964594" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.debug.d2xx">
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags.1940305580" name="Other optimization flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-Og" valueType="string"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.934078555" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.934078555" name="Debug level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false"/>
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other.294786200" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.compiler.ft900.debug.d2xx.option.include.paths.708154937" name="Include paths (-I)" superClass="com.brtchip.compiler.ft900.debug.d2xx.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
@@ -41,10 +41,10 @@
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.382788294" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1971773383" name="FT9xx G++ Compiler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler">
-								<option id="gnu.cpp.compiler.option.optimization.level.591507442" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.62258770" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.1992523975" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.none" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.1623710270" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false"/>
+								<option id="gnu.cpp.compiler.option.optimization.level.591507442" name="Optimization level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.62258770" name="Debug level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.1992523975" name="Optimization level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.none" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.1623710270" name="Debug level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false"/>
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.other.63652907" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
 							</tool>
 							<tool id="com.brtchip.linker.ft900.debug.d2xx.1258830380" name="FT9xx GCC Linker" superClass="com.brtchip.linker.ft900.debug.d2xx">
@@ -96,8 +96,8 @@
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x.915525174" isAbstract="false" osList="all" superClass="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
 							<builder buildPath="${workspace_loc:/Free RTOS D2XX Example}/FT90x_Release" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.1302037302" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool id="com.brtchip.compiler.ft900.release.d2xx.344807476" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.release.d2xx">
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level.373466499" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.1752657532" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level.373466499" name="Optimization level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.1752657532" name="Debug level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.compiler.ft900.release.d2xx.option.include.paths.688553676" name="Include paths (-I)" superClass="com.brtchip.compiler.ft900.release.d2xx.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Includes}&quot;"/>
@@ -113,10 +113,10 @@
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1596900779" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1905254661" name="FT9xx G++ Compiler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler">
-								<option id="gnu.cpp.compiler.option.optimization.level.492509011" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.2059073239" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.1021128860" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.1438551468" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.optimization.level.492509011" name="Optimization level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.2059073239" name="Debug level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.1021128860" name="Optimization level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.1438551468" name="Debug level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 							</tool>
 							<tool id="com.brtchip.linker.ft900.release.d2xx.637079559" name="FT9xx GCC Linker" superClass="com.brtchip.linker.ft900.release.d2xx">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.linker.option.ldOther.ft900.release.d2xx.1272682368" name="Other options (-Xlinker [option])" superClass="com.brtchip.linker.option.ldOther.ft900.release.d2xx" useByScannerDiscovery="false" valueType="stringList">
@@ -169,7 +169,7 @@
 							<builder buildPath="${workspace_loc:/Free RTOS D2XX Example}/FT93x_Debug" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.783789637" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool id="com.brtchip.compiler.ft930.cust.debug.d2xx.8627101" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft930.cust.debug.d2xx">
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags.538547006" name="Other optimization flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-Og" valueType="string"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.1970175655" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.1970175655" name="Debug level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false"/>
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other.1282451845" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.compiler.ft930.debug.d2xx.option.include.paths.325881854" name="Include paths (-I)" superClass="com.brtchip.compiler.ft930.debug.d2xx.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
@@ -186,10 +186,10 @@
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1933988121" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1009630366" name="FT9xx G++ Compiler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler">
-								<option id="gnu.cpp.compiler.option.optimization.level.542288146" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.1952323238" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.1921575012" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.none" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.1057321776" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false"/>
+								<option id="gnu.cpp.compiler.option.optimization.level.542288146" name="Optimization level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.1952323238" name="Debug level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.1921575012" name="Optimization level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.none" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.1057321776" name="Debug level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false"/>
 								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.other.1810410343" name="Other debugging flags" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.other" useByScannerDiscovery="false" value="-fvar-tracking -fvar-tracking-assignments" valueType="string"/>
 							</tool>
 							<tool id="com.brtchip.linker.ft930.debug.d2xx.2065623480" name="FT9xx GCC Linker" superClass="com.brtchip.linker.ft930.debug.d2xx">
@@ -206,7 +206,7 @@
 							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.1376907055" name="FT9xx G++ Linker" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker"/>
 							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver.2031889754" name="FT9xx GCC Archiver" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver"/>
 							<tool id="com.brtchip.assembler.ft930.cust.debug.d2xx.1689075796" name="FT9xx GCC Assembler" superClass="com.brtchip.assembler.ft930.cust.debug.d2xx">
-								<option id="com.brtchip.assembler.ft930.cust.debug.d2xx.flags.1406102989" superClass="com.brtchip.assembler.ft930.cust.debug.d2xx.flags" value="--def __FT930__=1" valueType="string"/>
+								<option id="com.brtchip.assembler.ft930.cust.debug.d2xx.flags.1406102989" name="Assembler flags" superClass="com.brtchip.assembler.ft930.cust.debug.d2xx.flags" value="--def __FT930__=1" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.2076132741" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash.798947254" name="FT9xx Flash File Generator" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash"/>
@@ -238,8 +238,8 @@
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x.262158885" isAbstract="false" osList="all" superClass="com.brtchip.managedbuild.targetPlatform.gnu.cross.ft90x"/>
 							<builder buildPath="${workspace_loc:/Free RTOS D2XX Example}/FT93x_Release" id="com.brtchip.managedbuild.gnu.cross.ft90x.builder.972751272" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.builder"/>
 							<tool id="com.brtchip.compiler.ft900.cust.release.d2xx.597219205" name="FT9xx GCC Compiler" superClass="com.brtchip.compiler.ft900.cust.release.d2xx">
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level.1590393223" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.271923940" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level.1590393223" name="Optimization level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level.271923940" name="Debug level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.compiler.ft930.release.d2xx.option.include.paths.306032735" name="Include paths (-I)" superClass="com.brtchip.compiler.ft930.release.d2xx.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${FT9XX_TOOLCHAIN}/hardware/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Includes}&quot;"/>
@@ -255,10 +255,10 @@
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1564217803" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler.1444758962" name="FT9xx G++ Compiler" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.compiler">
-								<option id="gnu.cpp.compiler.option.optimization.level.1854300063" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.1583642688" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.1336892362" name="Optimization Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
-								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.924413464" name="Debug Level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.optimization.level.1854300063" name="Optimization level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.1583642688" name="Debug level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level.1336892362" name="Optimization level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.size" valueType="enumerated"/>
+								<option id="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level.924413464" name="Debug level" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.build.gcc.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 							</tool>
 							<tool id="com.brtchip.linker.ft930.release.d2xx.461092319" name="FT9xx GCC Linker" superClass="com.brtchip.linker.ft930.release.d2xx">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.brtchip.linker.option.ldOther.ft930.release.d2xx.1377677314" name="Other options (-Xlinker [option])" superClass="com.brtchip.linker.option.ldOther.ft930.release.d2xx" useByScannerDiscovery="false" valueType="stringList">
@@ -274,7 +274,7 @@
 							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker.847473735" name="FT9xx G++ Linker" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.cpp.linker"/>
 							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver.889014125" name="FT9xx GCC Archiver" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.archiver"/>
 							<tool id="com.brtchip.assembler.ft930.cust.release.d2xx.1277993003" name="FT9xx GCC Assembler" superClass="com.brtchip.assembler.ft930.cust.release.d2xx">
-								<option id="com.brtchip.assembler.ft930.cust.release.d2xx.flags.1113671985" superClass="com.brtchip.assembler.ft930.cust.release.d2xx.flags" value="--def __FT930__=1" valueType="string"/>
+								<option id="com.brtchip.assembler.ft930.cust.release.d2xx.flags.1113671985" name="Assembler flags" superClass="com.brtchip.assembler.ft930.cust.release.d2xx.flags" value="--def __FT930__=1" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.414040689" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool id="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash.335933188" name="FT9xx Flash File Generator" superClass="com.brtchip.managedbuild.gnu.cross.ft90x.tool.createflash"/>
@@ -305,5 +305,19 @@
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
-	<storageModule moduleId="scannerConfiguration"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft900.release.d2xx.1376161851;com.brtchip.build.config.ft900.release.d2xx.1376161851.;com.brtchip.compiler.ft900.release.d2xx.344807476;cdt.managedbuild.tool.gnu.c.compiler.input.1596900779">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.d2xx.ft900.debug.base.692404863;com.brtchip.build.config.d2xx.ft900.debug.base.692404863.;com.brtchip.compiler.ft900.debug.d2xx.983964594;cdt.managedbuild.tool.gnu.c.compiler.input.382788294">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft930.release.d2xx.1771276815;com.brtchip.build.config.ft930.release.d2xx.1771276815.;com.brtchip.compiler.ft900.cust.release.d2xx.597219205;cdt.managedbuild.tool.gnu.c.compiler.input.1564217803">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.brtchip.build.config.ft930.debug.d2xx.302436148;com.brtchip.build.config.ft930.debug.d2xx.302436148.;com.brtchip.compiler.ft930.cust.debug.d2xx.8627101;cdt.managedbuild.tool.gnu.c.compiler.input.1933988121">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 </cproject>
